@@ -15,7 +15,7 @@ services:
       - key: ANTHROPIC_API_KEY
         sync: false # set manually in the dashboard (secret)
       - key: CLAUDE_MODEL
-        value: claude-sonnet-4-6
+        value: claude-haiku-4-5  # faster/cheaper than sonnet-4-6 for the extraction step
       - key: DATABASE_URL
         fromDatabase:
           name: orchestrator-db
