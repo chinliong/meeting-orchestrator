@@ -79,8 +79,9 @@ async def submit_audio(
         raise HTTPException(
             status_code=503,
             detail=(
-                "Audio transcription is unavailable: openai-whisper is not installed. "
-                "Install it with `pip install -r requirements-audio.txt`."
+                "Audio transcription is not configured. Set TRANSCRIPTION_API_KEY to use a "
+                "hosted Whisper API, or install local Whisper with "
+                "`pip install -r requirements-audio.txt`."
             ),
         )
 

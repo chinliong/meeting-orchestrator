@@ -3,6 +3,7 @@ uvicorn[standard]==0.30.6
 sqlalchemy==2.0.35
 pydantic==2.9.2
 anthropic==0.109.2
+openai>=1.40,<2.0  # OpenAI-compatible client for hosted Whisper transcription (OpenAI or Groq)
 python-dotenv==1.0.1
 python-multipart==0.0.9
 psycopg2-binary==2.9.9  # PostgreSQL driver (used in deployment; SQLite needs no driver)

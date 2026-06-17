@@ -1,12 +1,24 @@
-"""Optional speech-to-text layer using OpenAI Whisper (run locally).
+"""Speech-to-text layer (Objective 4).
 
-Whisper (and its heavy PyTorch dependency) is intentionally *not* part of the core
-requirements. Install it with:
+Two interchangeable backends, selected automatically:
 
-    pip install -r requirements-audio.txt
+1. **Hosted Whisper API** (default in the cloud). If TRANSCRIPTION_API_KEY is set, audio is
+   sent to an OpenAI-compatible transcription endpoint. This works on memory-constrained
+   hosts (e.g. Render free tier) because no model runs locally. It targets OpenAI's Whisper
+   by default, and Groq's OpenAI-compatible Whisper endpoint by setting TRANSCRIPTION_BASE_URL.
 
-The import is lazy so the rest of the backend runs even when Whisper is absent; the
-audio endpoint then returns a clear 503 instead of crashing on startup.
+2. **Local Whisper model** (dev convenience). If no API key is set but the `openai-whisper`
+   package is installed (`pip install -r requirements-audio.txt`, pulls in PyTorch + needs
+   ffmpeg), transcription runs locally on CPU.
+
+If neither is available the audio endpoint returns a clear 503 rather than crashing.
+
+Environment variables:
+    TRANSCRIPTION_API_KEY    API key for the hosted endpoint (enables backend #1).
+    TRANSCRIPTION_BASE_URL   Override the API base URL. Unset = OpenAI. Groq example:
+                             https://api.groq.com/openai/v1
+    TRANSCRIPTION_MODEL      Model name. Default "whisper-1" (OpenAI); Groq: "whisper-large-v3".
+    WHISPER_MODEL_SIZE       Local model size for backend #2 (default "base").
 """
 from __future__ import annotations
 
@@ -14,28 +26,19 @@ import os
 import tempfile
 from functools import lru_cache
 
-# Model size is configurable; "base" is a good accuracy/speed trade-off on CPU.
+# Local-model size (backend #2); "base" is a good accuracy/speed trade-off on CPU.
 WHISPER_MODEL_SIZE = os.getenv("WHISPER_MODEL_SIZE", "base")
 
 
 class WhisperUnavailableError(RuntimeError):
-    """Raised when audio transcription is requested but Whisper isn't installed."""
+    """Raised when audio transcription is requested but no backend is configured."""
 
 
-@lru_cache(maxsize=1)
-def _load_model():
-    try:
-        import whisper  # type: ignore
-    except ImportError as exc:  # pragma: no cover - exercised only without the extra
-        raise WhisperUnavailableError(
-            "openai-whisper is not installed. Run `pip install -r requirements-audio.txt` "
-            "to enable audio/video transcription."
-        ) from exc
-    return whisper.load_model(WHISPER_MODEL_SIZE)
+def _api_key() -> str | None:
+    return os.getenv("TRANSCRIPTION_API_KEY") or None
 
 
-def is_available() -> bool:
-    """True if the openai-whisper package can be imported."""
+def _local_whisper_installed() -> bool:
     try:
         import whisper  # type: ignore  # noqa: F401
     except ImportError:
@@ -43,18 +46,58 @@ def is_available() -> bool:
     return True
 
 
+def is_available() -> bool:
+    """True if either a hosted API key is set or the local Whisper package is importable."""
+    return _api_key() is not None or _local_whisper_installed()
+
+
+def _transcribe_via_api(tmp_path: str) -> str:
+    """Backend #1: OpenAI-compatible hosted transcription endpoint."""
+    from openai import OpenAI  # lightweight; part of core requirements
+
+    client = OpenAI(api_key=_api_key(), base_url=os.getenv("TRANSCRIPTION_BASE_URL") or None)
+    model = os.getenv("TRANSCRIPTION_MODEL", "whisper-1")
+    with open(tmp_path, "rb") as audio:
+        result = client.audio.transcriptions.create(model=model, file=audio)
+    return result.text.strip()
+
+
+@lru_cache(maxsize=1)
+def _load_local_model():
+    """Backend #2: load the local Whisper model once."""
+    try:
+        import whisper  # type: ignore
+    except ImportError as exc:  # pragma: no cover - exercised only without the extra
+        raise WhisperUnavailableError(
+            "Local Whisper is not installed. Either set TRANSCRIPTION_API_KEY to use a hosted "
+            "Whisper API, or run `pip install -r requirements-audio.txt`."
+        ) from exc
+    return whisper.load_model(WHISPER_MODEL_SIZE)
+
+
+def _transcribe_locally(tmp_path: str) -> str:
+    return _load_local_model().transcribe(tmp_path)["text"].strip()
+
+
 def transcribe_audio(data: bytes, suffix: str = ".wav") -> str:
     """Transcribe raw audio/video bytes into text.
 
-    Whisper reads from a file path (it shells out to ffmpeg), so the upload is written
-    to a temporary file that is cleaned up afterwards.
+    Prefers the hosted API when TRANSCRIPTION_API_KEY is set; otherwise falls back to a
+    local Whisper model. Both read from a file path, so the upload is written to a temp
+    file that is cleaned up afterwards.
     """
-    model = _load_model()
+    if not is_available():
+        raise WhisperUnavailableError(
+            "Audio transcription is not configured. Set TRANSCRIPTION_API_KEY to use a hosted "
+            "Whisper API, or run `pip install -r requirements-audio.txt` for local Whisper."
+        )
+
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
         tmp.write(data)
         tmp_path = tmp.name
     try:
-        result = model.transcribe(tmp_path)
-        return result["text"].strip()
+        if _api_key() is not None:
+            return _transcribe_via_api(tmp_path)
+        return _transcribe_locally(tmp_path)
     finally:
         os.unlink(tmp_path)
