@@ -82,7 +82,7 @@ export default function EditTaskModal({ task, onClose, onSave }: Props) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
             />
           </div>
 
@@ -93,7 +93,7 @@ export default function EditTaskModal({ task, onClose, onSave }: Props) {
                 value={owner}
                 onChange={(e) => setOwner(e.target.value)}
                 placeholder="Unassigned"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
               />
             </div>
             <div>
@@ -102,7 +102,7 @@ export default function EditTaskModal({ task, onClose, onSave }: Props) {
                 type="date"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
               />
             </div>
           </div>
@@ -112,7 +112,7 @@ export default function EditTaskModal({ task, onClose, onSave }: Props) {
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as TaskStatus)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
             >
               {STATUSES.map((s) => (
                 <option key={s.value} value={s.value}>
@@ -135,7 +135,7 @@ export default function EditTaskModal({ task, onClose, onSave }: Props) {
             <button
               type="submit"
               disabled={saving || !description.trim()}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 disabled:opacity-50"
+              className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-50"
             >
               {saving ? "Saving..." : "Save changes"}
             </button>

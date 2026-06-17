@@ -222,7 +222,7 @@ export default function DashboardPage() {
 function EmptyProjects({ onCreate, hasError }: { onCreate: () => void; hasError: boolean }) {
   return (
     <div className="mx-auto mt-16 max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-card">
-      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-900">
         <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor">
           <path d="M3 6a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V6z" />
         </svg>
@@ -235,7 +235,7 @@ function EmptyProjects({ onCreate, hasError }: { onCreate: () => void; hasError:
       </p>
       <button
         onClick={onCreate}
-        className="mt-5 inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700"
+        className="mt-5 inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
       >
         <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
           <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" />

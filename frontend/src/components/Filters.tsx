@@ -41,7 +41,7 @@ export default function Filters({
             onClick={() => onOwnerChange(active ? "" : owner)}
             className={`inline-flex items-center gap-1.5 rounded-full py-1 pl-1 pr-3 text-sm font-medium transition ${
               active
-                ? "bg-indigo-600 text-white"
+                ? "bg-slate-900 text-white"
                 : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
             }`}
           >
@@ -61,7 +61,7 @@ export default function Filters({
         onClick={onSortToggle}
         className={`ml-auto inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
           sortByDeadline
-            ? "bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200"
+            ? "bg-slate-900 text-white"
             : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
         }`}
       >

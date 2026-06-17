@@ -48,7 +48,7 @@ export default function KanbanBoard({ tasks, onStatusChange, onEdit, onDelete }:
             onDrop={(e) => handleDrop(e, column.status)}
             className={`flex min-h-[240px] flex-col rounded-xl border p-3 transition-colors ${
               isDropTarget
-                ? "border-indigo-300 bg-indigo-50"
+                ? "border-slate-400 bg-slate-200/70"
                 : "border-slate-200 bg-slate-100/70"
             }`}
           >

@@ -22,7 +22,7 @@ export default function TaskCard({ task, onDragStart, onEdit, onDelete }: Props)
       <div className="absolute right-1.5 top-1.5 flex gap-0.5 opacity-0 transition group-hover:opacity-100">
         <button
           onClick={() => onEdit(task)}
-          className="rounded p-0.5 text-slate-300 transition hover:bg-slate-100 hover:text-indigo-600"
+          className="rounded p-0.5 text-slate-300 transition hover:bg-slate-100 hover:text-slate-900"
           aria-label="Edit task"
         >
           <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">

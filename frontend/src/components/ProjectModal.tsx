@@ -82,7 +82,7 @@ export default function ProjectModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. SAP S/4HANA Go-Live Programme"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
             />
           </div>
           <div>
@@ -94,7 +94,7 @@ export default function ProjectModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="What this workstream is about..."
               rows={3}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
             />
           </div>
 
@@ -111,7 +111,7 @@ export default function ProjectModal({
             <button
               type="submit"
               disabled={submitting || !name.trim()}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 disabled:opacity-50"
+              className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-50"
             >
               {submitting ? "Saving..." : isEdit ? "Save changes" : "Create project"}
             </button>

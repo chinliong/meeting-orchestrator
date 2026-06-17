@@ -41,40 +41,39 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
     }
   };
 
-  const segBtn = (m: Mode, label: string) =>
-    `flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition ${
+  const segBtn = (m: Mode) =>
+    `flex-1 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition ${
       mode === m ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
     }`;
 
   return (
     <form onSubmit={handleSubmit} className="rounded-xl border border-slate-200 bg-white p-5 shadow-card">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div>
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-            <svg viewBox="0 0 24 24" className="h-4 w-4 text-indigo-500" fill="currentColor">
-              <path d="M12 2l1.9 5.1L19 9l-5.1 1.9L12 16l-1.9-5.1L5 9l5.1-1.9L12 2z" />
-            </svg>
-            New meeting
-          </h2>
-          <p className="mt-0.5 text-xs text-slate-500">
-            AI extracts decisions, action items, owners &amp; deadlines.
-          </p>
-        </div>
-        <div className="flex rounded-lg bg-slate-100 p-1">
-          <button type="button" className={segBtn("text", "Paste text")} onClick={() => setMode("text")}>
-            Paste text
-          </button>
-          <button type="button" className={segBtn("audio", "Audio")} onClick={() => setMode("audio")}>
-            Audio / video
-          </button>
-        </div>
+      <div className="mb-3">
+        <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+          <svg viewBox="0 0 24 24" className="h-4 w-4 text-slate-900" fill="currentColor">
+            <path d="M12 2l1.9 5.1L19 9l-5.1 1.9L12 16l-1.9-5.1L5 9l5.1-1.9L12 2z" />
+          </svg>
+          New meeting
+        </h2>
+        <p className="mt-0.5 text-xs text-slate-500">
+          AI extracts decisions, action items, owners &amp; deadlines.
+        </p>
+      </div>
+
+      <div className="mb-3 flex rounded-lg bg-slate-100 p-1">
+        <button type="button" className={segBtn("text")} onClick={() => setMode("text")}>
+          Paste text
+        </button>
+        <button type="button" className={segBtn("audio")} onClick={() => setMode("audio")}>
+          Audio / video
+        </button>
       </div>
 
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Meeting title"
-        className="mb-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+        className="mb-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
       />
 
       {mode === "text" ? (
@@ -83,10 +82,10 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
           onChange={(e) => setText(e.target.value)}
           placeholder="Paste the raw meeting transcript here — messy is fine."
           rows={6}
-          className="w-full resize-y rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+          className="w-full resize-y rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
         />
       ) : (
-        <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center transition hover:border-indigo-300 hover:bg-indigo-50/40">
+        <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center transition hover:border-slate-400 hover:bg-slate-100">
           <svg viewBox="0 0 24 24" className="h-7 w-7 text-slate-400" fill="none" stroke="currentColor" strokeWidth="1.8">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
           </svg>
@@ -110,7 +109,7 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
       <button
         type="submit"
         disabled={submitting}
-        className="mt-4 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 disabled:opacity-50"
+        className="mt-4 inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-50"
       >
         {submitting && (
           <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
