@@ -67,27 +67,26 @@ def is_available() -> bool:
     return _api_key() is not None or _local_whisper_installed()
 
 
-def _compress_for_api(src_path: str) -> str | None:
-    """Transcode audio/video to a compact, speech-optimised file for upload.
+# Stay under the hosted API's upload cap (Groq free tier is ~25 MB) with margin.
+_MAX_UPLOAD_BYTES = 24 * 1024 * 1024
 
-    Hosted Whisper endpoints cap the upload size (Groq's free tier is ~25 MB), and raw WAV
-    or video easily exceeds it. Re-encoding to mono 16 kHz Opus (what Whisper consumes anyway)
-    shrinks even long meetings to a few MB and drops any video track, so video files work too.
+# Mono 16 kHz is what Whisper consumes anyway; -vn drops any video track.
+_BASE_FFMPEG_ARGS = ["-vn", "-ac", "1", "-ar", "16000"]
+# FLAC has no psychoacoustic model, so it encodes ~4x cheaper on CPU than Opus — the encode
+# dominates transcode time on Render's throttled free core. It's larger than Opus but stays
+# under the cap for typical recordings (~38 min); longer audio falls back to Opus below.
+_FLAC_ARGS = ["-c:a", "flac"]
+# Opus 16 kbps is tiny (covers hours) but CPU-heavy to encode; used only as the size fallback.
+_OPUS_ARGS = ["-c:a", "libopus", "-b:a", "16k", "-application", "voip", "-compression_level", "0"]
 
-    Returns the path to a new temp file (the caller must delete it), or None when ffmpeg is
-    unavailable (e.g. local dev) so the caller can fall back to uploading the original.
-    """
-    if not shutil.which("ffmpeg"):
-        return None
-    out = tempfile.NamedTemporaryFile(suffix=".ogg", delete=False)
+
+def _run_ffmpeg(src_path: str, codec_args: list[str], suffix: str) -> str:
+    """Transcode src_path with the given codec args. Returns a temp path the caller deletes."""
+    out = tempfile.NamedTemporaryFile(suffix=suffix, delete=False)
     out.close()
     started = time.perf_counter()
     proc = subprocess.run(
-        # -application voip + -compression_level 0 trade a hair of (speech-irrelevant) quality
-        # for much faster encoding, which matters on Render's throttled free-tier CPU.
-        ["ffmpeg", "-y", "-i", src_path, "-vn",
-         "-ac", "1", "-ar", "16000", "-c:a", "libopus", "-b:a", "16k",
-         "-application", "voip", "-compression_level", "0", out.name],
+        ["ffmpeg", "-y", "-i", src_path, *_BASE_FFMPEG_ARGS, *codec_args, out.name],
         capture_output=True,
     )
     if proc.returncode != 0:
@@ -95,10 +94,29 @@ def _compress_for_api(src_path: str) -> str | None:
         detail = proc.stderr.decode("utf-8", "replace").strip().splitlines()[-1:] or [""]
         raise TranscriptionError(f"Could not process the audio/video file: {detail[0]}")
     log.info(
-        "transcription: ffmpeg compress %.1fs (%d -> %d bytes)",
-        time.perf_counter() - started, os.path.getsize(src_path), os.path.getsize(out.name),
+        "transcription: ffmpeg %s %.1fs (%d -> %d bytes)",
+        codec_args[1], time.perf_counter() - started,
+        os.path.getsize(src_path), os.path.getsize(out.name),
     )
     return out.name
+
+
+def _compress_for_api(src_path: str) -> str | None:
+    """Transcode audio/video to a compact file the hosted Whisper endpoint will accept.
+
+    Prefers FLAC because it encodes far cheaper on a weak CPU; if the result would exceed the
+    upload cap (very long recordings), re-encodes to the much smaller Opus instead.
+
+    Returns a temp file path (the caller deletes it), or None when ffmpeg is unavailable
+    (e.g. local dev) so the caller can fall back to uploading the original.
+    """
+    if not shutil.which("ffmpeg"):
+        return None
+    flac = _run_ffmpeg(src_path, _FLAC_ARGS, ".flac")
+    if os.path.getsize(flac) <= _MAX_UPLOAD_BYTES:
+        return flac
+    os.unlink(flac)  # too long for FLAC to fit — fall back to Opus
+    return _run_ffmpeg(src_path, _OPUS_ARGS, ".ogg")
 
 
 def _transcribe_via_api(tmp_path: str) -> str:
