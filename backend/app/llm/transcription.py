@@ -23,6 +23,8 @@ Environment variables:
 from __future__ import annotations
 
 import os
+import shutil
+import subprocess
 import tempfile
 from functools import lru_cache
 
@@ -32,6 +34,15 @@ WHISPER_MODEL_SIZE = os.getenv("WHISPER_MODEL_SIZE", "base")
 
 class WhisperUnavailableError(RuntimeError):
     """Raised when audio transcription is requested but no backend is configured."""
+
+
+class TranscriptionError(RuntimeError):
+    """Raised when a configured backend fails (e.g. upstream API error, file too large).
+
+    Distinct from WhisperUnavailableError: the backend exists but the request failed. The
+    endpoint surfaces this as a normal HTTP error (with CORS headers) instead of letting it
+    bubble up as an unhandled 500, which would reach the browser as an opaque "Failed to fetch".
+    """
 
 
 def _api_key() -> str | None:
@@ -51,14 +62,58 @@ def is_available() -> bool:
     return _api_key() is not None or _local_whisper_installed()
 
 
+def _compress_for_api(src_path: str) -> str | None:
+    """Transcode audio/video to a compact, speech-optimised file for upload.
+
+    Hosted Whisper endpoints cap the upload size (Groq's free tier is ~25 MB), and raw WAV
+    or video easily exceeds it. Re-encoding to mono 16 kHz Opus (what Whisper consumes anyway)
+    shrinks even long meetings to a few MB and drops any video track, so video files work too.
+
+    Returns the path to a new temp file (the caller must delete it), or None when ffmpeg is
+    unavailable (e.g. local dev) so the caller can fall back to uploading the original.
+    """
+    if not shutil.which("ffmpeg"):
+        return None
+    out = tempfile.NamedTemporaryFile(suffix=".ogg", delete=False)
+    out.close()
+    proc = subprocess.run(
+        ["ffmpeg", "-y", "-i", src_path, "-vn",
+         "-ac", "1", "-ar", "16000", "-c:a", "libopus", "-b:a", "16k", out.name],
+        capture_output=True,
+    )
+    if proc.returncode != 0:
+        os.unlink(out.name)
+        detail = proc.stderr.decode("utf-8", "replace").strip().splitlines()[-1:] or [""]
+        raise TranscriptionError(f"Could not process the audio/video file: {detail[0]}")
+    return out.name
+
+
 def _transcribe_via_api(tmp_path: str) -> str:
     """Backend #1: OpenAI-compatible hosted transcription endpoint."""
-    from openai import OpenAI  # lightweight; part of core requirements
+    import openai  # lightweight; part of core requirements
+    from openai import OpenAI
 
+    compressed = _compress_for_api(tmp_path)
+    upload_path = compressed or tmp_path
     client = OpenAI(api_key=_api_key(), base_url=os.getenv("TRANSCRIPTION_BASE_URL") or None)
     model = os.getenv("TRANSCRIPTION_MODEL", "whisper-1")
-    with open(tmp_path, "rb") as audio:
-        result = client.audio.transcriptions.create(model=model, file=audio)
+    try:
+        with open(upload_path, "rb") as audio:
+            result = client.audio.transcriptions.create(model=model, file=audio)
+    except openai.APIStatusError as exc:
+        if exc.status_code == 413:
+            raise TranscriptionError(
+                "The audio/video file is too large for the transcription service even after "
+                "compression. Please upload a shorter recording."
+            ) from exc
+        raise TranscriptionError(
+            f"The transcription service rejected the request (HTTP {exc.status_code})."
+        ) from exc
+    except openai.APIError as exc:  # network/timeout/connection issues
+        raise TranscriptionError(f"Could not reach the transcription service: {exc}") from exc
+    finally:
+        if compressed:
+            os.unlink(compressed)
     return result.text.strip()
 
 

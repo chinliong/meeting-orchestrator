@@ -94,6 +94,12 @@ async def submit_audio(
         transcript_text = transcription.transcribe_audio(data, suffix=suffix)
     except transcription.WhisperUnavailableError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
+    except transcription.TranscriptionError as exc:
+        # Configured backend failed (upstream API error, file too large, ffmpeg, ...).
+        raise HTTPException(status_code=502, detail=str(exc))
+    except Exception as exc:  # never let an unhandled 500 escape — it loses CORS headers and
+        # reaches the browser as an opaque "Failed to fetch" instead of a readable message.
+        raise HTTPException(status_code=500, detail=f"Audio transcription failed: {exc}")
 
     return _process_transcript(project, title, transcript_text, db)
 
