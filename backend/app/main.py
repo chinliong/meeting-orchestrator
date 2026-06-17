@@ -15,18 +15,20 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="AI-Powered Meeting and Workflow Orchestrator")
 
-# Comma-separated list of allowed frontend origins. Defaults to local dev; set
-# CORS_ORIGINS to the deployed frontend URL in production.
+# Comma-separated list of allowed frontend origins. Defaults to "*" (allow any origin),
+# which is fine for this public, cookie-less demo API. Set CORS_ORIGINS to lock it down.
 CORS_ORIGINS = [
     origin.strip()
-    for origin in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+    for origin in os.getenv("CORS_ORIGINS", "*").split(",")
     if origin.strip()
 ]
+allow_all = CORS_ORIGINS == ["*"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
-    allow_credentials=True,
+    # Credentials can't be combined with a wildcard origin; this API uses neither.
+    allow_credentials=not allow_all,
     allow_methods=["*"],
     allow_headers=["*"],
 )
