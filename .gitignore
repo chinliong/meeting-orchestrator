@@ -1,14 +1,21 @@
 .DS_Store
 *.pyc
 __pycache__/
+.pytest_cache/
+
+# root env (docker-compose)
+.env
 
 # backend
 backend/.venv/
 backend/.env
+backend/*.db
 backend/**/__pycache__/
 
 # frontend
 frontend/node_modules/
 frontend/dist/
 frontend/build/
+frontend/.next/
 frontend/.env
+frontend/.env.local

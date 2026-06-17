@@ -1,0 +1,32 @@
+# Local one-command startup: `docker compose up --build`
+# Frontend on http://localhost:3000, backend on http://localhost:8000.
+# Set ANTHROPIC_API_KEY in a root .env file (see .env.example) before running.
+services:
+  backend:
+    build:
+      context: ./backend
+      # Set INSTALL_AUDIO=true to bake the Whisper STT layer into the image.
+      args:
+        INSTALL_AUDIO: "false"
+    ports:
+      - "8000:8000"
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?set ANTHROPIC_API_KEY in .env}
+      CLAUDE_MODEL: ${CLAUDE_MODEL:-claude-sonnet-4-6}
+      DATABASE_URL: ${DATABASE_URL:-sqlite:////data/orchestrator.db}
+    volumes:
+      - backend_data:/data
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Baked into the client bundle; must be the URL the browser can reach.
+        NEXT_PUBLIC_API_BASE: http://localhost:8000/api/v1
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  backend_data:

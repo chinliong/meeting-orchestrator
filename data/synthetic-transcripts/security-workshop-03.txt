@@ -1,0 +1,26 @@
+Meeting: SAP Security & Authorizations Review #2
+Date: 2026-06-17
+Attendees: Priya Nair (Security Lead), Marcus Wong (Basis), Daniel Tan (SAP Consultant)
+
+Priya: First item, the role redesign for the finance module. Marcus, did the SoD conflict
+analysis complete?
+
+Marcus: It ran overnight. There are 14 segregation-of-duties conflicts flagged. I'll
+circulate the conflict report to the team by tomorrow.
+
+Priya: Good. Daniel, can you map each conflict to a mitigating control? We need that before
+the external audit on the 25th.
+
+Daniel: Yes, I'll prepare the mitigating controls document before the audit on the 25th.
+
+Priya: We also agreed last week, and I'm confirming it now as a decision, that all
+firefighter access will go through the emergency access management workflow, no exceptions.
+
+Marcus: One open issue — the production authorization trace is generating too much log
+volume and filling the disk. Someone needs to tune the trace settings, but we haven't
+decided who owns that yet.
+
+Priya: Let's park that for now. Marcus, please also schedule a penetration test with the
+vendor, ideally kicked off by end of next week.
+
+Marcus: Will do, I'll get the pen test scheduled by end of next week.

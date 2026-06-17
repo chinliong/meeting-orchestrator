@@ -1,0 +1,41 @@
+# Render Blueprint — deploys backend + frontend from this repo.
+# In the Render dashboard: New → Blueprint → point at this repo. After the first deploy,
+# set ANTHROPIC_API_KEY (marked sync:false) in the backend service's Environment tab.
+#
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: orchestrator-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false # set manually in the dashboard (secret)
+      - key: CLAUDE_MODEL
+        value: claude-sonnet-4-6
+      - key: DATABASE_URL
+        value: sqlite:////data/orchestrator.db
+      # Set to the deployed frontend origin after its first deploy,
+      # e.g. https://orchestrator-frontend.onrender.com
+      - key: CORS_ORIGINS
+        sync: false
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
+
+  - type: web
+    name: orchestrator-frontend
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    plan: free
+    envVars:
+      # Baked into the client bundle at BUILD time, so it needs the full backend URL
+      # including scheme and the /api/v1 path. Set this after the backend's first deploy,
+      # e.g. https://orchestrator-backend.onrender.com/api/v1, then trigger a frontend rebuild.
+      - key: NEXT_PUBLIC_API_BASE
+        sync: false

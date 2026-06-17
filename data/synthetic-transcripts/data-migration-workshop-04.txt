@@ -1,0 +1,26 @@
+Meeting: SAP Data Migration Cutover Planning
+Date: 2026-06-18
+Attendees: Aisha Rahman (PM), Daniel Tan (SAP Consultant), Priya Nair (Data Lead), Marcus Wong (Basis)
+
+Aisha: Let's lock down the cutover sequence. Priya, where are we on the material master
+load?
+
+Priya: The first validation run had a 3% error rate, mostly missing units of measure. I'll
+clean the source data and rerun the validation by Monday.
+
+Aisha: Okay. Daniel, the customer master — any blockers?
+
+Daniel: No blockers. I'll finalize the customer master mapping by this Friday.
+
+Marcus: Heads up, we need a longer downtime window than planned. I'd estimate 18 hours, not
+12. Aisha, can you get sign-off on the extended downtime window from the business?
+
+Aisha: I'll request business sign-off for the 18-hour downtime window by next Wednesday.
+
+Daniel: Decision for the record: we are going with a big-bang cutover rather than phased,
+based on the steering committee's direction.
+
+Priya: Also, we still need someone to prepare the data reconciliation report template for
+post-load validation. Not sure who has bandwidth.
+
+Aisha: Let's assign that next week once we know capacity.

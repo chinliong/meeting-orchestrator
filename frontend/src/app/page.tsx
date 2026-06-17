@@ -70,6 +70,12 @@ export default function DashboardPage() {
     refreshTasks(selectedProjectId);
   };
 
+  const handleAudioSubmit = async (title: string, file: File) => {
+    if (!selectedProjectId) return;
+    await api.submitAudio(selectedProjectId, title, file);
+    refreshTasks(selectedProjectId);
+  };
+
   return (
     <main className="mx-auto max-w-6xl px-6 py-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -95,7 +101,7 @@ export default function DashboardPage() {
         </p>
       )}
 
-      <TranscriptUpload onSubmit={handleTranscriptSubmit} />
+      <TranscriptUpload onSubmitText={handleTranscriptSubmit} onSubmitAudio={handleAudioSubmit} />
 
       <Filters
         owners={owners}

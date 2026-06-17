@@ -1,0 +1,78 @@
+[
+  {
+    "variant": "baseline",
+    "expected_items": 15,
+    "predicted_items": 16,
+    "matched_items": 15,
+    "precision": 0.938,
+    "recall": 1.0,
+    "f1": 0.968,
+    "owner_accuracy": 0.933,
+    "deadline_exact_accuracy": 0.636,
+    "deadline_within_3d_accuracy": 1.0,
+    "per_transcript": [
+      {
+        "transcript": "finance-workshop-01.txt",
+        "expected": 4,
+        "predicted": 5,
+        "matched": 4
+      },
+      {
+        "transcript": "logistics-workshop-02.txt",
+        "expected": 3,
+        "predicted": 3,
+        "matched": 3
+      },
+      {
+        "transcript": "security-workshop-03.txt",
+        "expected": 4,
+        "predicted": 4,
+        "matched": 4
+      },
+      {
+        "transcript": "data-migration-workshop-04.txt",
+        "expected": 4,
+        "predicted": 4,
+        "matched": 4
+      }
+    ]
+  },
+  {
+    "variant": "prod",
+    "expected_items": 15,
+    "predicted_items": 16,
+    "matched_items": 15,
+    "precision": 0.938,
+    "recall": 1.0,
+    "f1": 0.968,
+    "owner_accuracy": 1.0,
+    "deadline_exact_accuracy": 0.909,
+    "deadline_within_3d_accuracy": 1.0,
+    "per_transcript": [
+      {
+        "transcript": "finance-workshop-01.txt",
+        "expected": 4,
+        "predicted": 5,
+        "matched": 4
+      },
+      {
+        "transcript": "logistics-workshop-02.txt",
+        "expected": 3,
+        "predicted": 3,
+        "matched": 3
+      },
+      {
+        "transcript": "security-workshop-03.txt",
+        "expected": 4,
+        "predicted": 4,
+        "matched": 4
+      },
+      {
+        "transcript": "data-migration-workshop-04.txt",
+        "expected": 4,
+        "predicted": 4,
+        "matched": 4
+      }
+    ]
+  }
+]

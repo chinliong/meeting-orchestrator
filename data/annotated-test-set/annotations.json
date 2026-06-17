@@ -1,0 +1,53 @@
+[
+  {
+    "transcript_file": "finance-workshop-01.txt",
+    "meeting_date": "2026-06-15",
+    "expected_decisions": [
+      "Parallel ledger cutover will align with APAC mapping completion instead of being done separately."
+    ],
+    "expected_action_items": [
+      { "description": "finish the APAC cost center hierarchy mapping", "owner": "Daniel", "deadline": "2026-06-19" },
+      { "description": "confirm the new cost center codes", "owner": "Priya", "deadline": "2026-06-17" },
+      { "description": "loop in the banking team for next week's session", "owner": "Aisha", "deadline": null },
+      { "description": "review the open items report and flag duplicates", "owner": "Priya", "deadline": "2026-06-18" }
+    ]
+  },
+  {
+    "transcript_file": "logistics-workshop-02.txt",
+    "meeting_date": "2026-06-16",
+    "expected_decisions": [
+      "Run the warehouse readiness test in degraded mode without barcode scanning, and retest once the firmware patch lands."
+    ],
+    "expected_action_items": [
+      { "description": "chase the vendor for a firm barcode firmware patch date", "owner": "Marcus", "deadline": "2026-06-19" },
+      { "description": "draft a one-page risk note on the scanner delay for the steering committee", "owner": "Marcus", "deadline": "2026-06-23" },
+      { "description": "update the cutover runbook to reflect the degraded-mode plan", "owner": null, "deadline": null }
+    ]
+  },
+  {
+    "transcript_file": "security-workshop-03.txt",
+    "meeting_date": "2026-06-17",
+    "expected_decisions": [
+      "All firefighter access will go through the emergency access management workflow with no exceptions."
+    ],
+    "expected_action_items": [
+      { "description": "circulate the segregation-of-duties conflict report to the team", "owner": "Marcus", "deadline": "2026-06-18" },
+      { "description": "prepare the mitigating controls document for the external audit", "owner": "Daniel", "deadline": "2026-06-25" },
+      { "description": "tune the production authorization trace settings to reduce log volume", "owner": null, "deadline": null },
+      { "description": "schedule a penetration test with the vendor", "owner": "Marcus", "deadline": "2026-06-26" }
+    ]
+  },
+  {
+    "transcript_file": "data-migration-workshop-04.txt",
+    "meeting_date": "2026-06-18",
+    "expected_decisions": [
+      "Proceed with a big-bang cutover rather than a phased approach, per steering committee direction."
+    ],
+    "expected_action_items": [
+      { "description": "clean the source data and rerun the material master validation", "owner": "Priya", "deadline": "2026-06-22" },
+      { "description": "finalize the customer master mapping", "owner": "Daniel", "deadline": "2026-06-19" },
+      { "description": "request business sign-off for the 18-hour extended downtime window", "owner": "Aisha", "deadline": "2026-06-24" },
+      { "description": "prepare the data reconciliation report template for post-load validation", "owner": null, "deadline": null }
+    ]
+  }
+]

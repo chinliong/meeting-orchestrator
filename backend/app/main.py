@@ -1,3 +1,5 @@
+import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,9 +15,17 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="AI-Powered Meeting and Workflow Orchestrator")
 
+# Comma-separated list of allowed frontend origins. Defaults to local dev; set
+# CORS_ORIGINS to the deployed frontend URL in production.
+CORS_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

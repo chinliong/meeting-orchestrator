@@ -69,16 +69,23 @@ Always respond by calling the record_extraction tool."""
 
 
 class TranscriptParser:
-    def __init__(self, api_key: str | None = None, model: str | None = None):
+    def __init__(
+        self,
+        api_key: str | None = None,
+        model: str | None = None,
+        system_prompt: str | None = None,
+    ):
         self.client = anthropic.Anthropic(api_key=api_key or os.getenv("ANTHROPIC_API_KEY"))
         self.model = model or os.getenv("CLAUDE_MODEL", "claude-sonnet-4-6")
+        # Overridable so the evaluation harness can compare prompt variants.
+        self.system_prompt = system_prompt or SYSTEM_PROMPT
 
     def parse(self, transcript_text: str, meeting_date: date | None = None) -> ExtractionResult:
         meeting_date = meeting_date or date.today()
         message = self.client.messages.create(
             model=self.model,
             max_tokens=4096,
-            system=SYSTEM_PROMPT,
+            system=self.system_prompt,
             tools=[EXTRACTION_TOOL],
             tool_choice={"type": "tool", "name": "record_extraction"},
             messages=[

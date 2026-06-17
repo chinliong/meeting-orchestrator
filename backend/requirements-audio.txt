@@ -1,0 +1,7 @@
+# Optional speech-to-text layer (Objective 4).
+# Heavy dependency (pulls in PyTorch); install only if you need audio/video input.
+# Also requires the ffmpeg binary on the host (e.g. `brew install ffmpeg`).
+#
+#   pip install -r requirements-audio.txt
+#
+openai-whisper==20250625

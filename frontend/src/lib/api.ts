@@ -42,4 +42,18 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ project_id: projectId, title, transcript_text: transcriptText }),
     }),
+
+  submitAudio: async (projectId: number, title: string, file: File): Promise<Meeting> => {
+    const form = new FormData();
+    form.set("project_id", String(projectId));
+    form.set("title", title);
+    form.set("file", file);
+    // Note: no Content-Type header — the browser sets the multipart boundary itself.
+    const res = await fetch(`${API_BASE}/transcripts/audio`, { method: "POST", body: form });
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`POST /transcripts/audio failed (${res.status}): ${body}`);
+    }
+    return res.json();
+  },
 };
