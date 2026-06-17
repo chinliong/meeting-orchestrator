@@ -1,0 +1,23 @@
+Meeting: SAP MM/WM Logistics Integration Sync
+Date: 2026-06-16
+Attendees: Marcus Wong (Warehouse Ops), Daniel Tan (SAP Consultant), Aisha Rahman (PM, dial-in)
+
+Marcus: We hit a blocker — the barcode scanner firmware isn't compatible with the new
+warehouse management transactions. Vendor says a patch is two weeks out.
+
+Daniel: That's going to push our warehouse go-live readiness test. Can we get a firm
+date from the vendor by end of this week?
+
+Marcus: I'll chase the vendor and get a firm patch date by Friday.
+
+Daniel: In the meantime, decision from this call: we'll run the readiness test in a
+degraded mode without barcode scanning for now, and retest once the patch lands.
+
+Aisha: Noted. Marcus, can you also draft a one-page risk note on the scanner delay for
+the steering committee? Would be good to have that before next Tuesday's steering
+committee meeting.
+
+Marcus: Will do, I'll send the risk note before Tuesday.
+
+Daniel: Lastly, no clear owner yet, but someone needs to update the cutover runbook to
+reflect the degraded-mode plan. We didn't assign that today.

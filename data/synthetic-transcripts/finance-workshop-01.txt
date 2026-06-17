@@ -1,0 +1,27 @@
+Meeting: SAP FI/CO Finance Workshop #4
+Date: 2026-06-15
+Attendees: Aisha Rahman (Finance Lead), Daniel Tan (SAP FICO Consultant), Priya Nair (Controller)
+
+Aisha: Okay let's pick up from last week. Daniel, where are we with the cost center
+hierarchy migration?
+
+Daniel: Mapping is done for EMEA, still pending APAC. I think I can get the APAC mapping
+finished by this Friday if Priya can confirm the new cost center codes by Wednesday.
+
+Priya: I'll get the cost center codes to you by Wednesday, no problem.
+
+Aisha: Great. Also, we decided in the steering committee that we're moving the parallel
+ledger cutover to align with the APAC mapping completion instead of doing it separately.
+That's now a confirmed decision.
+
+Daniel: Understood. One more thing — the bank statement upload test failed twice in
+QA. I need someone from the banking team to join the next session, otherwise we can't
+sign off the integration test before go-live.
+
+Aisha: I'll loop in the banking team and get them on next week's call. Priya, can you also
+review the open items report and flag any duplicates before the dress rehearsal next
+Thursday?
+
+Priya: Sure, I'll have that reviewed before Thursday's dress rehearsal.
+
+Aisha: Perfect, let's reconvene Friday to confirm APAC mapping status.
