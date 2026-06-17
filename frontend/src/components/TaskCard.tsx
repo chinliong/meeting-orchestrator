@@ -1,6 +1,7 @@
 "use client";
 
 import type { Task } from "@/lib/types";
+import { avatarColor, confidenceTone, formatDate, initials, isOverdue } from "@/lib/format";
 
 interface Props {
   task: Task;
@@ -9,33 +10,63 @@ interface Props {
 }
 
 export default function TaskCard({ task, onDragStart, onDelete }: Props) {
+  const overdue = task.deadline && task.status !== "done" && isOverdue(task.deadline);
+
   return (
     <div
       draggable
       onDragStart={(e) => onDragStart(e, task)}
-      className="mb-3 cursor-grab rounded-lg border border-gray-200 bg-white p-3 shadow-sm active:cursor-grabbing"
+      className="group relative mb-2.5 cursor-grab rounded-lg border border-slate-200 bg-white p-3 shadow-card transition hover:border-slate-300 hover:shadow-card-hover active:cursor-grabbing"
     >
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-sm font-medium text-gray-800">{task.description}</p>
-        <button
-          onClick={() => onDelete(task.id)}
-          className="text-xs text-gray-400 hover:text-red-500"
-          aria-label="Delete task"
-        >
-          ✕
-        </button>
-      </div>
-      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-500">
-        {task.owner && (
-          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-blue-700">{task.owner}</span>
+      <button
+        onClick={() => onDelete(task.id)}
+        className="absolute right-2 top-2 rounded p-0.5 text-slate-300 opacity-0 transition hover:bg-slate-100 hover:text-rose-500 group-hover:opacity-100"
+        aria-label="Delete task"
+      >
+        <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
+          <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+        </svg>
+      </button>
+
+      <p className="pr-5 text-sm font-medium leading-snug text-slate-800">{task.description}</p>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {task.owner ? (
+          <span className="inline-flex items-center gap-1.5">
+            <span
+              className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-semibold text-white ${avatarColor(
+                task.owner
+              )}`}
+            >
+              {initials(task.owner)}
+            </span>
+            <span className="text-xs font-medium text-slate-600">{task.owner}</span>
+          </span>
+        ) : (
+          <span className="text-xs italic text-slate-400">Unassigned</span>
         )}
+
         {task.deadline && (
-          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-700">
-            Due {task.deadline}
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+              overdue ? "bg-rose-50 text-rose-600" : "bg-slate-100 text-slate-600"
+            }`}
+          >
+            <svg viewBox="0 0 20 20" className="h-3 w-3" fill="currentColor">
+              <path d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v9a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zM4 7h12v8H4V7z" />
+            </svg>
+            {formatDate(task.deadline)}
+            {overdue && " · overdue"}
           </span>
         )}
-        <span className="rounded-full bg-gray-100 px-2 py-0.5">
-          {Math.round(task.confidence * 100)}% confidence
+
+        <span
+          className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-medium ${confidenceTone(
+            task.confidence
+          )}`}
+          title="Extraction confidence"
+        >
+          {Math.round(task.confidence * 100)}%
         </span>
       </div>
     </div>

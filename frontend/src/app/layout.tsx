@@ -2,14 +2,15 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Meeting & Workflow Orchestrator",
-  description: "AI-powered meeting transcript parsing and task tracking",
+  title: "Meeting Orchestrator — AI action items from transcripts",
+  description:
+    "AI-powered meeting transcript parsing that extracts decisions, action items, owners, and deadlines onto a Kanban board.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="min-h-screen bg-slate-50 text-slate-900 antialiased">{children}</body>
     </html>
   );
 }

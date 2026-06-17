@@ -5,10 +5,10 @@ import { useState } from "react";
 import type { Task, TaskStatus } from "@/lib/types";
 import TaskCard from "./TaskCard";
 
-const COLUMNS: { status: TaskStatus; title: string }[] = [
-  { status: "todo", title: "To Do" },
-  { status: "in_progress", title: "In Progress" },
-  { status: "done", title: "Done" },
+const COLUMNS: { status: TaskStatus; title: string; dot: string }[] = [
+  { status: "todo", title: "To Do", dot: "bg-slate-400" },
+  { status: "in_progress", title: "In Progress", dot: "bg-amber-400" },
+  { status: "done", title: "Done", dot: "bg-emerald-500" },
 ];
 
 interface Props {
@@ -35,6 +35,7 @@ export default function KanbanBoard({ tasks, onStatusChange, onDelete }: Props) 
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
       {COLUMNS.map((column) => {
         const columnTasks = tasks.filter((t) => t.status === column.status);
+        const isDropTarget = dragOverColumn === column.status;
         return (
           <div
             key={column.status}
@@ -44,19 +45,34 @@ export default function KanbanBoard({ tasks, onStatusChange, onDelete }: Props) 
             }}
             onDragLeave={() => setDragOverColumn(null)}
             onDrop={(e) => handleDrop(e, column.status)}
-            className={`min-h-[200px] rounded-xl p-3 transition-colors ${
-              dragOverColumn === column.status ? "bg-blue-50" : "bg-gray-100"
+            className={`flex min-h-[240px] flex-col rounded-xl border p-3 transition-colors ${
+              isDropTarget
+                ? "border-indigo-300 bg-indigo-50"
+                : "border-slate-200 bg-slate-100/70"
             }`}
           >
-            <h2 className="mb-3 flex items-center justify-between text-sm font-semibold text-gray-600">
-              {column.title}
-              <span className="rounded-full bg-white px-2 py-0.5 text-xs text-gray-500 shadow-sm">
+            <div className="mb-3 flex items-center gap-2 px-1">
+              <span className={`h-2 w-2 rounded-full ${column.dot}`} />
+              <h2 className="text-sm font-semibold text-slate-700">{column.title}</h2>
+              <span className="ml-auto rounded-full bg-white px-2 py-0.5 text-xs font-medium text-slate-500 shadow-sm">
                 {columnTasks.length}
               </span>
-            </h2>
-            {columnTasks.map((task) => (
-              <TaskCard key={task.id} task={task} onDragStart={handleDragStart} onDelete={onDelete} />
-            ))}
+            </div>
+
+            {columnTasks.length === 0 ? (
+              <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-slate-200 text-xs text-slate-400">
+                {isDropTarget ? "Drop here" : "No tasks"}
+              </div>
+            ) : (
+              columnTasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onDragStart={handleDragStart}
+                  onDelete={onDelete}
+                />
+              ))
+            )}
           </div>
         );
       })}
