@@ -26,7 +26,8 @@ services:
         sync: false
       # Hosted Whisper transcription (Objective 4). Set the key in the dashboard.
       # Leave BASE_URL/MODEL unset for OpenAI; for Groq set BASE_URL to
-      # https://api.groq.com/openai/v1 and MODEL to whisper-large-v3.
+      # https://api.groq.com/openai/v1 and MODEL to whisper-large-v3-turbo
+      # (turbo is faster than whisper-large-v3 at near-identical accuracy).
       - key: TRANSCRIPTION_API_KEY
         sync: false
       - key: TRANSCRIPTION_BASE_URL
