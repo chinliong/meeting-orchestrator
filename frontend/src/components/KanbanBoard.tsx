@@ -14,10 +14,11 @@ const COLUMNS: { status: TaskStatus; title: string; dot: string }[] = [
 interface Props {
   tasks: Task[];
   onStatusChange: (taskId: number, status: TaskStatus) => void;
+  onEdit: (task: Task) => void;
   onDelete: (taskId: number) => void;
 }
 
-export default function KanbanBoard({ tasks, onStatusChange, onDelete }: Props) {
+export default function KanbanBoard({ tasks, onStatusChange, onEdit, onDelete }: Props) {
   const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
 
   const handleDragStart = (e: React.DragEvent, task: Task) => {
@@ -69,6 +70,7 @@ export default function KanbanBoard({ tasks, onStatusChange, onDelete }: Props) 
                   key={task.id}
                   task={task}
                   onDragStart={handleDragStart}
+                  onEdit={onEdit}
                   onDelete={onDelete}
                 />
               ))

@@ -11,6 +11,11 @@ class ProjectCreate(BaseModel):
     description: str = ""
 
 
+class ProjectUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+
+
 class ProjectOut(ProjectCreate):
     model_config = ConfigDict(from_attributes=True)
 

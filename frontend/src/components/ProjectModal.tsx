@@ -4,29 +4,42 @@ import { useEffect, useState } from "react";
 
 interface Props {
   open: boolean;
+  mode: "create" | "edit";
+  initialName?: string;
+  initialDescription?: string;
   onClose: () => void;
-  onCreate: (name: string, description: string) => Promise<void>;
+  onSubmit: (name: string, description: string) => Promise<void>;
 }
 
-export default function NewProjectModal({ open, onClose, onCreate }: Props) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+export default function ProjectModal({
+  open,
+  mode,
+  initialName = "",
+  initialDescription = "",
+  onClose,
+  onSubmit,
+}: Props) {
+  const [name, setName] = useState(initialName);
+  const [description, setDescription] = useState(initialDescription);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Reset fields whenever the modal is opened, and close on Escape.
+  // Seed fields from the current values each time the modal opens, and close on Escape.
   useEffect(() => {
     if (open) {
-      setName("");
-      setDescription("");
+      setName(initialName);
+      setDescription(initialDescription);
       setError(null);
     }
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     if (open) window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   if (!open) return null;
+
+  const isEdit = mode === "edit";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,10 +47,10 @@ export default function NewProjectModal({ open, onClose, onCreate }: Props) {
     setSubmitting(true);
     setError(null);
     try {
-      await onCreate(name.trim(), description.trim());
+      await onSubmit(name.trim(), description.trim());
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create project");
+      setError(err instanceof Error ? err.message : "Failed to save project");
     } finally {
       setSubmitting(false);
     }
@@ -52,9 +65,13 @@ export default function NewProjectModal({ open, onClose, onCreate }: Props) {
         className="w-full max-w-md animate-fade-in rounded-2xl bg-white p-6 shadow-xl"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-semibold text-slate-900">New project</h2>
+        <h2 className="text-lg font-semibold text-slate-900">
+          {isEdit ? "Edit project" : "New project"}
+        </h2>
         <p className="mt-1 text-sm text-slate-500">
-          Group meetings and their action items under a project.
+          {isEdit
+            ? "Rename this project or update its description."
+            : "Group meetings and their action items under a project."}
         </p>
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
@@ -81,9 +98,7 @@ export default function NewProjectModal({ open, onClose, onCreate }: Props) {
             />
           </div>
 
-          {error && (
-            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
-          )}
+          {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
 
           <div className="flex justify-end gap-2 pt-1">
             <button
@@ -98,7 +113,7 @@ export default function NewProjectModal({ open, onClose, onCreate }: Props) {
               disabled={submitting || !name.trim()}
               className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 disabled:opacity-50"
             >
-              {submitting ? "Creating..." : "Create project"}
+              {submitting ? "Saving..." : isEdit ? "Save changes" : "Create project"}
             </button>
           </div>
         </form>

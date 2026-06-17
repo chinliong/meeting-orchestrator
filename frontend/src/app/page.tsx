@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import EditTaskModal from "@/components/EditTaskModal";
 import Filters from "@/components/Filters";
 import KanbanBoard from "@/components/KanbanBoard";
-import NewProjectModal from "@/components/NewProjectModal";
+import ProjectModal from "@/components/ProjectModal";
 import StatsBar from "@/components/StatsBar";
 import TopBar from "@/components/TopBar";
 import TranscriptUpload from "@/components/TranscriptUpload";
@@ -18,7 +19,8 @@ export default function DashboardPage() {
   const [selectedOwner, setSelectedOwner] = useState("");
   const [sortByDeadline, setSortByDeadline] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [projectModal, setProjectModal] = useState<"create" | "edit" | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   useEffect(() => {
     api
@@ -65,6 +67,14 @@ export default function DashboardPage() {
     await api.updateTask(taskId, { status });
   };
 
+  const handleEditTask = async (
+    taskId: number,
+    patch: { description?: string; owner?: string | null; deadline?: string | null; status?: TaskStatus }
+  ) => {
+    const updated = await api.updateTask(taskId, patch);
+    setTasks((prev) => prev.map((t) => (t.id === taskId ? updated : t)));
+  };
+
   const handleDelete = async (taskId: number) => {
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
     await api.deleteTask(taskId);
@@ -89,13 +99,34 @@ export default function DashboardPage() {
     setTasks([]);
   };
 
+  const handleUpdateProject = async (name: string, description: string) => {
+    if (!selectedProjectId) return;
+    const updated = await api.updateProject(selectedProjectId, { name, description });
+    setProjects((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+  };
+
+  const handleDeleteProject = async () => {
+    if (!selectedProjectId) return;
+    if (
+      !window.confirm(
+        "Delete this project and all its meetings and tasks? This cannot be undone."
+      )
+    )
+      return;
+    await api.deleteProject(selectedProjectId);
+    const remaining = projects.filter((p) => p.id !== selectedProjectId);
+    setProjects(remaining);
+    setSelectedProjectId(remaining[0]?.id ?? null);
+    setTasks([]);
+  };
+
   return (
     <div className="min-h-screen">
       <TopBar
         projects={projects}
         selectedProjectId={selectedProjectId}
         onSelectProject={setSelectedProjectId}
-        onNewProject={() => setModalOpen(true)}
+        onNewProject={() => setProjectModal("create")}
       />
 
       <main className="mx-auto max-w-7xl px-6 py-6">
@@ -106,14 +137,38 @@ export default function DashboardPage() {
         )}
 
         {projects.length === 0 ? (
-          <EmptyProjects onCreate={() => setModalOpen(true)} hasError={!!loadError} />
+          <EmptyProjects onCreate={() => setProjectModal("create")} hasError={!!loadError} />
         ) : (
           <>
-            <div className="mb-5">
-              <h2 className="text-xl font-bold text-slate-900">{selectedProject?.name}</h2>
-              {selectedProject?.description && (
-                <p className="mt-0.5 text-sm text-slate-500">{selectedProject.description}</p>
-              )}
+            <div className="mb-5 flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">{selectedProject?.name}</h2>
+                {selectedProject?.description && (
+                  <p className="mt-0.5 text-sm text-slate-500">{selectedProject.description}</p>
+                )}
+              </div>
+              <div className="flex shrink-0 gap-1">
+                <button
+                  onClick={() => setProjectModal("edit")}
+                  className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-500 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-700"
+                  title="Rename project"
+                >
+                  <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
+                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-8.5 8.5a2 2 0 01-.879.506l-3.012.86a.5.5 0 01-.617-.617l.86-3.012a2 2 0 01.506-.879l8.5-8.5z" />
+                  </svg>
+                  Rename
+                </button>
+                <button
+                  onClick={handleDeleteProject}
+                  className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-500 ring-1 ring-slate-200 transition hover:bg-rose-50 hover:text-rose-600 hover:ring-rose-200"
+                  title="Delete project"
+                >
+                  <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
+                    <path d="M8 2a1 1 0 00-1 1v1H4.5a.5.5 0 000 1H5v10a2 2 0 002 2h6a2 2 0 002-2V5h.5a.5.5 0 000-1H13V3a1 1 0 00-1-1H8zm1 2V3h2v1H9zM8 7a.75.75 0 01.75.75v6a.75.75 0 01-1.5 0v-6A.75.75 0 018 7zm4.75.75a.75.75 0 00-1.5 0v6a.75.75 0 001.5 0v-6z" />
+                  </svg>
+                  Delete
+                </button>
+              </div>
             </div>
 
             <div className="mb-6">
@@ -141,6 +196,7 @@ export default function DashboardPage() {
                 <KanbanBoard
                   tasks={visibleTasks}
                   onStatusChange={handleStatusChange}
+                  onEdit={setEditingTask}
                   onDelete={handleDelete}
                 />
               </div>
@@ -149,11 +205,16 @@ export default function DashboardPage() {
         )}
       </main>
 
-      <NewProjectModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onCreate={handleCreateProject}
+      <ProjectModal
+        open={projectModal !== null}
+        mode={projectModal ?? "create"}
+        initialName={projectModal === "edit" ? selectedProject?.name ?? "" : ""}
+        initialDescription={projectModal === "edit" ? selectedProject?.description ?? "" : ""}
+        onClose={() => setProjectModal(null)}
+        onSubmit={projectModal === "edit" ? handleUpdateProject : handleCreateProject}
       />
+
+      <EditTaskModal task={editingTask} onClose={() => setEditingTask(null)} onSave={handleEditTask} />
     </div>
   );
 }

@@ -38,6 +38,39 @@ def test_create_and_list_project(client):
     assert "Alpha" in names
 
 
+def test_update_project(client, project):
+    resp = client.patch(
+        f"/api/v1/projects/{project['id']}",
+        json={"name": "Renamed", "description": "new desc"},
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["name"] == "Renamed"
+    assert body["description"] == "new desc"
+
+
+def test_update_project_not_found(client):
+    assert client.patch("/api/v1/projects/9999", json={"name": "x"}).status_code == 404
+
+
+def test_delete_project_cascades_tasks(client, project, stub_parser):
+    # Create tasks under the project, then delete the project.
+    client.post(
+        "/api/v1/transcripts",
+        json={"project_id": project["id"], "title": "w", "transcript_text": "..."},
+    )
+    assert len(client.get(f"/api/v1/tasks?project_id={project['id']}").json()) == 2
+
+    assert client.delete(f"/api/v1/projects/{project['id']}").status_code == 204
+    assert client.get("/api/v1/projects").json() == []
+    # Tasks were cascade-deleted with the project.
+    assert client.get(f"/api/v1/tasks?project_id={project['id']}").json() == []
+
+
+def test_delete_project_not_found(client):
+    assert client.delete("/api/v1/projects/9999").status_code == 404
+
+
 def test_submit_transcript_creates_tasks(client, project, stub_parser):
     resp = client.post(
         "/api/v1/transcripts",

@@ -23,6 +23,11 @@ export const api = {
       body: JSON.stringify({ name, description }),
     }),
 
+  updateProject: (id: number, patch: { name?: string; description?: string }) =>
+    request<Project>(`/projects/${id}`, { method: "PATCH", body: JSON.stringify(patch) }),
+
+  deleteProject: (id: number) => request<void>(`/projects/${id}`, { method: "DELETE" }),
+
   listTasks: (params: { projectId?: number; owner?: string; status?: TaskStatus } = {}) => {
     const qs = new URLSearchParams();
     if (params.projectId) qs.set("project_id", String(params.projectId));
