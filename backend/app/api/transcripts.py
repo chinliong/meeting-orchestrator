@@ -1,3 +1,6 @@
+import logging
+import time
+
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
@@ -9,6 +12,8 @@ from app.schemas.schemas import MeetingOut, TranscriptSubmit
 
 router = APIRouter(prefix="/transcripts", tags=["transcripts"])
 
+log = logging.getLogger("uvicorn.error")
+
 
 def _extract_and_store_tasks(meeting: Meeting, db: Session) -> None:
     """Run the LLM parser on the meeting's transcript and persist the extracted tasks.
@@ -16,8 +21,10 @@ def _extract_and_store_tasks(meeting: Meeting, db: Session) -> None:
     On LLM/API failure the meeting is marked FAILED with the error recorded rather than
     raising, so callers (sync request or background job) always leave a coherent meeting row.
     """
+    started = time.perf_counter()
     try:
         extraction = TranscriptParser().parse(meeting.transcript_text)
+        log.info("transcription: LLM parse %.1fs", time.perf_counter() - started)
     except Exception as exc:  # LLM/API failure: record it on the meeting, don't crash
         meeting.status = MeetingStatus.FAILED
         meeting.error_message = str(exc)

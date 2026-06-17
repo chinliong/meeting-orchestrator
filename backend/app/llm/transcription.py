@@ -22,11 +22,16 @@ Environment variables:
 """
 from __future__ import annotations
 
+import logging
 import os
 import shutil
 import subprocess
 import tempfile
+import time
 from functools import lru_cache
+
+# uvicorn configures this logger at INFO, so these lines show up in the Render logs.
+log = logging.getLogger("uvicorn.error")
 
 # Local-model size (backend #2); "base" is a good accuracy/speed trade-off on CPU.
 WHISPER_MODEL_SIZE = os.getenv("WHISPER_MODEL_SIZE", "base")
@@ -76,15 +81,23 @@ def _compress_for_api(src_path: str) -> str | None:
         return None
     out = tempfile.NamedTemporaryFile(suffix=".ogg", delete=False)
     out.close()
+    started = time.perf_counter()
     proc = subprocess.run(
+        # -application voip + -compression_level 0 trade a hair of (speech-irrelevant) quality
+        # for much faster encoding, which matters on Render's throttled free-tier CPU.
         ["ffmpeg", "-y", "-i", src_path, "-vn",
-         "-ac", "1", "-ar", "16000", "-c:a", "libopus", "-b:a", "16k", out.name],
+         "-ac", "1", "-ar", "16000", "-c:a", "libopus", "-b:a", "16k",
+         "-application", "voip", "-compression_level", "0", out.name],
         capture_output=True,
     )
     if proc.returncode != 0:
         os.unlink(out.name)
         detail = proc.stderr.decode("utf-8", "replace").strip().splitlines()[-1:] or [""]
         raise TranscriptionError(f"Could not process the audio/video file: {detail[0]}")
+    log.info(
+        "transcription: ffmpeg compress %.1fs (%d -> %d bytes)",
+        time.perf_counter() - started, os.path.getsize(src_path), os.path.getsize(out.name),
+    )
     return out.name
 
 
@@ -97,9 +110,11 @@ def _transcribe_via_api(tmp_path: str) -> str:
     upload_path = compressed or tmp_path
     client = OpenAI(api_key=_api_key(), base_url=os.getenv("TRANSCRIPTION_BASE_URL") or None)
     model = os.getenv("TRANSCRIPTION_MODEL", "whisper-1")
+    started = time.perf_counter()
     try:
         with open(upload_path, "rb") as audio:
             result = client.audio.transcriptions.create(model=model, file=audio)
+        log.info("transcription: %s API call %.1fs", model, time.perf_counter() - started)
     except openai.APIStatusError as exc:
         if exc.status_code == 413:
             raise TranscriptionError(
