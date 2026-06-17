@@ -17,15 +17,13 @@ services:
       - key: CLAUDE_MODEL
         value: claude-sonnet-4-6
       - key: DATABASE_URL
-        value: sqlite:////data/orchestrator.db
+        fromDatabase:
+          name: orchestrator-db
+          property: connectionString
       # Set to the deployed frontend origin after its first deploy,
       # e.g. https://orchestrator-frontend.onrender.com
       - key: CORS_ORIGINS
         sync: false
-    disk:
-      name: data
-      mountPath: /data
-      sizeGB: 1
 
   - type: web
     name: orchestrator-frontend
@@ -39,3 +37,9 @@ services:
       # e.g. https://orchestrator-backend.onrender.com/api/v1, then trigger a frontend rebuild.
       - key: NEXT_PUBLIC_API_BASE
         sync: false
+
+databases:
+  - name: orchestrator-db
+    plan: free
+    databaseName: orchestrator
+    user: orchestrator

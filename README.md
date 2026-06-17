@@ -107,13 +107,24 @@ the default image; build with `--build-arg INSTALL_AUDIO=true` to include Whispe
 
 ## Deploy to Render
 
+The blueprint provisions a backend web service, a frontend web service, and a managed
+PostgreSQL database — all on the free tier.
+
 1. Push the repo to GitHub.
-2. In Render: **New → Blueprint**, point at the repo. It reads [render.yaml](render.yaml) and
-   provisions the backend and frontend web services.
-3. After the first deploy, set these in the dashboard:
-   - backend `ANTHROPIC_API_KEY` (secret) and `CORS_ORIGINS` = the frontend URL.
-   - frontend `NEXT_PUBLIC_API_BASE` = `https://<backend>.onrender.com/api/v1`, then redeploy
-     the frontend (this value is baked in at build time).
+2. In Render: **New → Blueprint**, point at the repo. It reads [render.yaml](render.yaml).
+3. Render prompts for the three `sync: false` env vars. Render names services predictably
+   (`https://<name>.onrender.com`), so you can fill them in up front:
+   - backend `ANTHROPIC_API_KEY` = your key
+   - backend `CORS_ORIGINS` = `https://orchestrator-frontend.onrender.com`
+   - frontend `NEXT_PUBLIC_API_BASE` = `https://orchestrator-backend.onrender.com/api/v1`
+4. Apply. If Render assigns different URLs than the predicted ones, update the two URL vars
+   afterwards and redeploy. `NEXT_PUBLIC_API_BASE` is baked in at build time, so changing it
+   requires a frontend redeploy.
+
+Notes on the free tier: web services spin down after ~15 min idle and cold-start in ~50s; the
+free PostgreSQL instance expires after a fixed period (upgrade or recreate if it lapses). The
+schema is created automatically on startup; run `python -m app.seed` from the backend's Render
+shell if you want the sample data.
 
 ## Tests
 
