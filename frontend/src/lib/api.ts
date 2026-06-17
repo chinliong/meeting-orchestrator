@@ -48,6 +48,8 @@ export const api = {
       body: JSON.stringify({ project_id: projectId, title, transcript_text: transcriptText }),
     }),
 
+  getMeeting: (id: number) => request<Meeting>(`/transcripts/${id}`),
+
   submitAudio: async (projectId: number, title: string, file: File): Promise<Meeting> => {
     const form = new FormData();
     form.set("project_id", String(projectId));

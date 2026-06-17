@@ -88,7 +88,21 @@ export default function DashboardPage() {
 
   const handleAudioSubmit = async (title: string, file: File) => {
     if (!selectedProjectId) return;
-    await api.submitAudio(selectedProjectId, title, file);
+    // Audio is transcribed in the background, so the upload returns a PROCESSING meeting
+    // immediately. Poll until it finishes (or fails) instead of holding one long request.
+    const meeting = await api.submitAudio(selectedProjectId, title, file);
+    const deadline = Date.now() + 5 * 60 * 1000; // give long recordings time to transcribe
+    let current = meeting;
+    while (current.status === "processing" || current.status === "pending") {
+      if (Date.now() > deadline) {
+        throw new Error("Transcription is taking too long. Please try again or use a shorter file.");
+      }
+      await new Promise((resolve) => setTimeout(resolve, 2500));
+      current = await api.getMeeting(meeting.id);
+    }
+    if (current.status === "failed") {
+      throw new Error(current.error_message || "Transcription failed.");
+    }
     refreshTasks(selectedProjectId);
   };
 

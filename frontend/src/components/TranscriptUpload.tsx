@@ -93,7 +93,7 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
             {file ? file.name : "Click to choose an audio or video file"}
           </span>
           <span className="text-xs text-slate-400">
-            Transcribed locally with Whisper before parsing.
+            Transcribed with Whisper before parsing. Large files may take a minute.
           </span>
           <input
             type="file"
