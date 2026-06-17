@@ -1,27 +1,57 @@
+================================================================
+SESSION 2
 Meeting: SAP FI/CO Finance Workshop #4
 Date: 2026-06-15
+Duration: ~30 min
 Attendees: Aisha Rahman (Finance Lead), Daniel Tan (SAP FICO Consultant), Priya Nair (Controller)
+================================================================
 
-Aisha: Okay let's pick up from last week. Daniel, where are we with the cost center
-hierarchy migration?
+Aisha: Okay, I think we're all here — Priya, you're on mute, no rush, we'll get to you. Let's pick up from last week. Tight agenda: cost center hierarchy, the bank statement integration, and a few open items I want closed before the dress rehearsal. Daniel, start us off — cost center hierarchy migration.
 
-Daniel: Mapping is done for EMEA, still pending APAC. I think I can get the APAC mapping
-finished by this Friday if Priya can confirm the new cost center codes by Wednesday.
+Daniel: Sure. So you'll remember the hierarchy splits into two regions, EMEA and APAC. EMEA — that's behind us. I closed it out Tuesday, validated the whole thing against the org chart, signed it off, it's clean. APAC is the one still in motion. I'm working through it right now, I'd say I'm about two-thirds of the way through the APAC cost centers.
 
-Priya: I'll get the cost center codes to you by Wednesday, no problem.
+Aisha: Two-thirds. And the finish line is —
 
-Aisha: Great. Also, we decided in the steering committee that we're moving the parallel
-ledger cutover to align with the APAC mapping completion instead of doing it separately.
-That's now a confirmed decision.
+Daniel: I can have APAC mapping wrapped by Friday. With one big caveat — I need the new cost center codes from Priya by Wednesday, otherwise Friday slips. The last third is literally blocked on those codes.
 
-Daniel: Understood. One more thing — the bank statement upload test failed twice in
-QA. I need someone from the banking team to join the next session, otherwise we can't
-sign off the integration test before go-live.
+Priya: Yeah, sorry, I'm here now. Codes — I can do that. I'll get the cost center codes over to you by Wednesday, Daniel. Full disclosure, I haven't actually compiled them yet, they're scattered across a couple of spreadsheets. I'll pull them together tomorrow and send them, so that's a fresh one on my plate.
 
-Aisha: I'll loop in the banking team and get them on next week's call. Priya, can you also
-review the open items report and flag any duplicates before the dress rehearsal next
-Thursday?
+Aisha: Wednesday for the codes, Friday for APAC. And just to capture a decision while it's fresh — steering confirmed this, it's not a proposal anymore — we're moving the parallel ledger cutover to line up with the APAC mapping completion, instead of running it as its own separate event. That's settled, done deal.
 
-Priya: Sure, I'll have that reviewed before Thursday's dress rehearsal.
+Daniel: Understood. That actually simplifies my life. Okay, next item, and this one's a headache. The bank statement upload test. We ran it twice in QA and it failed both times — both times. The format parser is choking on the multi-currency statements.
 
-Aisha: Perfect, let's reconvene Friday to confirm APAC mapping status.
+Priya: Both runs failed completely, or partially?
+
+Daniel: Hard fail, both. But — the good news is I already chased down why. That diagnosis is finished, I know exactly what it is: it's a delimiter issue in the MT940 file, the multi-currency lines use a separator the parser doesn't expect. So root cause, that investigation's done and dusted.
+
+Aisha: Okay so if you know the cause, what's the holdup on fixing it?
+
+Daniel: The holdup is I can't fix it in a vacuum. To do it properly I need someone from the banking team actually in the room, because we have to confirm the real statement format with the bank itself. We genuinely cannot sign off the integration test before go-live without the banking team confirming that format.
+
+Aisha: Right. So diagnosis behind us, the fix is blocked on the banking team. I'll take that — I'll loop the banking team in and get them onto next week's call. I haven't reached out to them yet, so chalk that up as new on me.
+
+Daniel: And separately — the actual parser config fix. I want to be clear it's not at zero. I've started tinkering, I've got a candidate fix half-built in the dev system already. But I can't finish it or test it until the banking team confirms the format, so it's mid-flight but stalled on that dependency. Don't write it down as not-started, I've put real hours in.
+
+Aisha: Noted — parser fix, in motion but stuck pending the bank. Under your name. Priya — the open items report?
+
+Priya: Right. So I went through it this morning — and I mean properly, I did the full review of the open items report and flagged all the duplicates. That review's finished. There were eleven duplicate postings, I've got them listed out with document numbers.
+
+Aisha: Eleven, wow.
+
+Priya: Eleven. What I have not done yet is the second pass to actually clear them out of the system. That's still ahead of me. I'll do the clearing before the dress rehearsal — that's next Thursday, right? Yeah, before Thursday. So review's done, the clearing is the new to-do.
+
+Aisha: Got it. Did you ever hear back from Wei Lin's office about the month-end timetable, by the way? That's been hanging.
+
+Priya: Not a peep. I'll chase it but it's not urgent this week.
+
+Aisha: Okay, park it. Daniel, anything that ties back to budget? Wei Lin's going to ask me.
+
+Daniel: Yes, briefly. The bank integration rework is honestly the main reason I'm putting in a change request for additional consulting days. I've drafted that request — the draft is finished, it's written up with the justification. I just need to actually send it over to Wei Lin's office for approval. I'll send it Thursday. So the drafting's done, the sending's the pending bit.
+
+Aisha: Good, I'll flag that dependency when I follow up with the banking team — that the delay's driving cost. Okay, let me try to summarize, tell me if I butcher it. Finished: EMEA mapping, the bank test root cause diagnosis, Priya's open items review, and Daniel's change request draft. In motion: APAC mapping at two-thirds, and the parser config fix that's stalled on the bank. And the to-dos: Priya's cost center codes by Wednesday, Priya clearing the eleven duplicates before Thursday, me looping in the banking team for next week, and Daniel sending the change request Thursday. That it?
+
+Priya: That all matches what I've got.
+
+Daniel: One thing — you said EMEA "mapping," just make sure it's not confused with the parallel ledger move. EMEA cost center mapping is the done one.
+
+Aisha: Yes — EMEA cost center mapping, done. Parallel ledger's the decision, not a task. Good. Let's reconvene Friday to confirm APAC's actually landed. Thanks both.

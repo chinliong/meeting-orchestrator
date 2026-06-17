@@ -1,23 +1,61 @@
+================================================================
+SESSION 3
 Meeting: SAP MM/WM Logistics Integration Sync
 Date: 2026-06-16
+Duration: ~30 min
 Attendees: Marcus Wong (Warehouse Ops), Daniel Tan (SAP Consultant), Aisha Rahman (PM, dial-in)
+================================================================
 
-Marcus: We hit a blocker — the barcode scanner firmware isn't compatible with the new
-warehouse management transactions. Vendor says a patch is two weeks out.
+Marcus: Thanks for dialing in, Aisha, I know you're between sites. Can you hear me okay? The warehouse line's a bit echoey.
 
-Daniel: That's going to push our warehouse go-live readiness test. Can we get a firm
-date from the vendor by end of this week?
+Aisha: I can hear you, you're a little echoey but it's fine, go ahead.
 
-Marcus: I'll chase the vendor and get a firm patch date by Friday.
+Marcus: Cool. Let's get into it, big one first. We hit a blocker on the barcode scanner firmware. Basically the current firmware just isn't compatible with the new warehouse management transactions — the handheld units literally hang on goods receipt, they freeze, you have to power-cycle them. Not workable.
 
-Daniel: In the meantime, decision from this call: we'll run the readiness test in a
-degraded mode without barcode scanning for now, and retest once the patch lands.
+Daniel: Is it definitely firmware and not a config thing on our side? Because we chased a ghost like this before.
 
-Aisha: Noted. Marcus, can you also draft a one-page risk note on the scanner delay for
-the steering committee? Would be good to have that before next Tuesday's steering
-committee meeting.
+Marcus: No, it's firmware, I'm certain. I ran the full compatibility test matrix — finished that yesterday — tested every transaction type against the current firmware build, and it's the firmware, full stop. So the diagnosis is nailed down. The actual problem is the vendor's telling me a patch is "roughly two weeks out," which, you know, vendor-speak.
 
-Marcus: Will do, I'll send the risk note before Tuesday.
+Daniel: "Roughly two weeks" is going to wreck our warehouse go-live readiness test. We can't plan around roughly. We need a firm date.
 
-Daniel: Lastly, no clear owner yet, but someone needs to update the cutover runbook to
-reflect the degraded-mode plan. We didn't assign that today.
+Marcus: Agreed. I'll chase the vendor and get a firm patch date — I'll aim to have that by Friday. I haven't called them today yet, so that's a new one on me.
+
+Daniel: Okay. And let's make a decision here and put it on the record, because I don't want to be sitting idle for two weeks waiting on a patch. We run the readiness test in degraded mode — manual entry, no barcode scanning — for now, and we retest once the patch actually lands. Everyone good with that?
+
+Marcus: Works for me, better than waiting. And actually — on the degraded-mode setup — I've already started. I'm reconfiguring the test environment to do manual entry instead of scanning. It's underway, I'm maybe a third of the way in, and I should have the environment ready by tomorrow.
+
+Aisha: That's agreed then, degraded mode for the readiness test, retest after the patch. Marcus — separate ask while I've got you — can you draft a one-page risk note on the scanner delay for the steering committee? They'll want it before Tuesday's meeting.
+
+Marcus: Sorry, you cut out for a second — risk note for steering, before Tuesday?
+
+Aisha: Yeah, one-pager, scanner delay risk, before next Tuesday.
+
+Marcus: Will do. I'll write the risk note and send it before Tuesday. Haven't touched it yet — I'll get to it after I finish the environment rebuild, so it's not started but it's on the list.
+
+Daniel: Couple from my side. First — the WM interface to the transport management system. During load testing yesterday we got intermittent timeout errors, roughly one in every forty transactions failed. Not a hard fail, just flaky. I pulled the logs this morning — so the log extraction's done, I've got them — but I haven't actually gone through them yet. I'll dig in, figure out whether it's a timeout config on our side or something on the TMS side, and report back by Monday.
+
+Aisha: Let's make sure that's actually on Monday's agenda and not buried at the bottom like last time.
+
+Daniel: Fair, yeah. Put it near the top. Second thing — the goods movement mapping. That one's fully done, off the list. I finished mapping all the movement types last week, tested them in QA, signed off, the whole thing. So you can take that one off entirely.
+
+Marcus: Oh — one open item, and nobody owns it. The cutover runbook needs updating to reflect this degraded-mode plan we just agreed. Somebody's got to do it, and it honestly can't be me, I'm completely buried in the environment rebuild this week.
+
+Daniel: Don't look at me, I've got the timeout investigation.
+
+Aisha: Fine, I'll take the runbook update myself. I'll fold in the degraded-mode steps. New one on me. Was there — did we ever decide on the cycle count freeze, or is that next week?
+
+Daniel: That's next week's topic, leave it.
+
+Aisha: Okay, leaving it. Anything else?
+
+Daniel: Last thing, actually — the label printer integration. I want to be honest about where it is. I started it, but when the scanner issue blew up I had to drop it mid-stream. So it's partially configured, sitting at maybe forty percent, definitely in motion but paused. I'll resume it once the timeout investigation is closed out, not before.
+
+Aisha: Okay, let me read it all back, the line's bad so correct me if I get one wrong. Done: Marcus's compatibility test matrix, Daniel's log extraction, and the goods movement mapping. In motion: Marcus's degraded-mode environment rebuild, and Daniel's label printer integration at forty percent. To do: Marcus chasing the vendor for a firm date by Friday, Marcus's risk note before Tuesday, Daniel's timeout analysis by Monday, and my runbook update for the degraded-mode plan. Did I get the label printer right — that's in motion, not done?
+
+Daniel: Correct, in motion, forty percent. The goods movement mapping is the done one. Easy to mix those two up.
+
+Aisha: Right, thanks. Okay that covers it.
+
+Marcus: That's everything from the warehouse.
+
+Aisha: Great. Talk Monday — and Marcus, get that firm date out of the vendor, lean on them.

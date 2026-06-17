@@ -1,26 +1,45 @@
+================================================================
+SESSION 4
 Meeting: SAP Security & Authorizations Review #2
 Date: 2026-06-17
+Duration: ~30 min
 Attendees: Priya Nair (Security Lead), Marcus Wong (Basis), Daniel Tan (SAP Consultant)
+================================================================
 
-Priya: First item, the role redesign for the finance module. Marcus, did the SoD conflict
-analysis complete?
+Priya: Okay, half an hour, let's actually be efficient today, last week we ran over by twenty minutes. First item — the role redesign for the finance module. Marcus, did the SoD conflict analysis complete?
 
-Marcus: It ran overnight. There are 14 segregation-of-duties conflicts flagged. I'll
-circulate the conflict report to the team by tomorrow.
+Marcus: It did, yeah. The analysis ran overnight, finished clean — I mean the run itself completed without errors, so the SoD conflict run is done. It flagged fourteen segregation-of-duties conflicts.
 
-Priya: Good. Daniel, can you map each conflict to a mitigating control? We need that before
-the external audit on the 25th.
+Priya: Fourteen. Is that more or less than we expected?
 
-Daniel: Yes, I'll prepare the mitigating controls document before the audit on the 25th.
+Marcus: About what I expected, honestly, given the finance roles are the messiest. So the run's behind us. What I haven't done yet — I need to package those fourteen into a readable conflict report, because right now it's just raw tool output, nobody can action that. I'll write that up and circulate it to the team by tomorrow. So the analysis is done, the report write-up is the new piece on me.
 
-Priya: We also agreed last week, and I'm confirming it now as a decision, that all
-firefighter access will go through the emergency access management workflow, no exceptions.
+Priya: Good. And Daniel — once Marcus circulates that report, can you map each of the fourteen conflicts to a mitigating control? We absolutely need that before the external audit, which is on the twenty-fifth.
 
-Marcus: One open issue — the production authorization trace is generating too much log
-volume and filling the disk. Someone needs to tune the trace settings, but we haven't
-decided who owns that yet.
+Daniel: Yes, I'll prepare the mitigating controls document before the audit on the twenty-fifth. I do want to flag the dependency though, loudly — I can't really start in earnest until Marcus's report actually lands tomorrow. So as of right now it's not started, and it's sitting square on the critical path. If his report slips, mine slips, and then the audit's exposed.
 
-Priya: Let's park that for now. Marcus, please also schedule a penetration test with the
-vendor, ideally kicked off by end of next week.
+Priya: Understood. Let's all treat Marcus's report as the critical item this week. Marcus, no pressure. While I'm thinking of it — a decision I'm formally confirming as of today: all firefighter access goes through the emergency access management workflow, no exceptions, none. We kicked it around last week, it's now decided, it's policy.
 
-Marcus: Will do, I'll get the pen test scheduled by end of next week.
+Marcus: Good, because — funny timing — on that exact workflow, I've actually been building out the EAM workflow configuration. That's in motion. I've got the approval routing done and the logging set up, I'm maybe seventy percent there, I just need to finish the notification step and test it. Should wrap it next week.
+
+Priya: Great, so log the EAM config as in motion under you, seventy percent. And the role redesign itself — where's the finance role build sitting?
+
+Daniel: The finance composite roles are done. Finished building and unit-testing all twelve composite roles on Monday, they're sitting in QA right now, ready for the conflict mapping once we get there. So that whole piece is complete, you can close it.
+
+Marcus: Oh — one issue that's still floating, nobody owns it. The production authorization trace is generating way too much log volume, it's actually starting to fill the disk. Somebody needs to tune the trace settings down. But we never decided who. It's not screaming-urgent yet, but it's also just... unassigned, sitting there.
+
+Priya: Hmm. Let's park the ownership question for now but keep it on the board as an unassigned to-do, so it doesn't vanish. We'll find an owner if the disk gets tight. Marcus — different thing — can you schedule a penetration test with the external vendor? Ideally kicked off by end of next week.
+
+Marcus: Yeah, will do, I'll get the pen test scheduled by end of next week. Haven't contacted the vendor yet, so fresh action. Do we have budget sign-off for that, by the way, or —
+
+Priya: Budget's approved, Wei Lin cleared it, just book it. And — the user access review for the legacy system decommission. I want to confirm where that landed, because someone asked me yesterday and I blanked.
+
+Daniel: That one's finished. You and I closed the legacy access review out two weeks ago — we disabled all the dormant accounts and documented every one of them. It's done, it's been done for a while.
+
+Priya: Right, yes, of course, that was the big afternoon of clicking. Okay, off the list. Let me recap before we close. Done: the SoD conflict analysis run, the twelve finance composite roles, and the legacy access review. In motion: Marcus's EAM workflow config at around seventy percent. To do: Marcus circulating the conflict report tomorrow, Daniel's mitigating controls document before the twenty-fifth, Marcus scheduling the pen test by end of next week, and the unowned trace-tuning task that's sitting unassigned. Anybody want to grab the trace tuning before we wrap?
+
+Marcus: Leave it unassigned for now, I'll flag it the moment the disk gets tight.
+
+Daniel: And just to be crystal clear for whoever reads the notes — my mitigating controls doc has not started, it's genuinely blocked on Marcus's report, I don't want it logged as in progress when I haven't touched it.
+
+Priya: Noted, not started, blocked on Marcus. Fine. That's us — thanks both, and Marcus, that report tomorrow, please, the whole audit hangs off it.

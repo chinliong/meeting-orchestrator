@@ -43,6 +43,7 @@ def _process_transcript(project: Project, title: str, transcript_text: str, db: 
                 description=item.description,
                 owner=item.owner,
                 deadline=item.deadline,
+                status=item.status,
                 confidence=item.confidence,
                 source_decision=item.source_decision,
             )

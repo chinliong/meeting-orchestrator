@@ -38,6 +38,17 @@ EXTRACTION_TOOL = {
                                 "(e.g. 'by next Friday'). Null if no deadline is implied."
                             ),
                         },
+                        "status": {
+                            "type": "string",
+                            "enum": ["todo", "in_progress", "done"],
+                            "description": (
+                                "Current status inferred from the transcript. Use 'done' if the "
+                                "work is described as finished/completed/confirmed; 'in_progress' "
+                                "if it is being worked on, partially complete, or currently "
+                                "running; 'todo' if it is not started yet. Default to 'todo' "
+                                "when no status cue is present."
+                            ),
+                        },
                         "confidence": {
                             "type": "number",
                             "description": "0-1 confidence that this is a genuine action item.",
@@ -47,7 +58,7 @@ EXTRACTION_TOOL = {
                             "description": "The decision or context this action item stems from, if any.",
                         },
                     },
-                    "required": ["description", "confidence"],
+                    "required": ["description", "status", "confidence"],
                 },
             },
         },
@@ -62,6 +73,9 @@ For each action item:
 - Assign an owner only if a named person is clearly responsible; otherwise leave it null.
 - Infer a deadline from contextual cues (e.g. "by Friday", "before go-live", "next week") \
 relative to the meeting date provided. If no cue exists, leave the deadline null.
+- Determine the status from the transcript: "done" if the work is described as finished, \
+completed, or confirmed; "in_progress" if it is being worked on, partially complete, or \
+currently running; "todo" if it has not been started. Default to "todo" when there is no cue.
 - Do not invent action items that are not implied by the transcript.
 - Give a confidence score reflecting how explicit the transcript was about this item.
 

@@ -78,6 +78,7 @@ class ExtractedActionItem(BaseModel):
     description: str
     owner: Optional[str] = None
     deadline: Optional[date] = None
+    status: TaskStatus = TaskStatus.TODO
     confidence: float = 1.0
     source_decision: Optional[str] = None
 

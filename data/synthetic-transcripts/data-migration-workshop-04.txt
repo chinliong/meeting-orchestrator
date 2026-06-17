@@ -1,26 +1,89 @@
+================================================================
+SESSION 1
 Meeting: SAP Data Migration Cutover Planning
 Date: 2026-06-18
+Duration: ~30 min
 Attendees: Aisha Rahman (PM), Daniel Tan (SAP Consultant), Priya Nair (Data Lead), Marcus Wong (Basis)
+================================================================
 
-Aisha: Let's lock down the cutover sequence. Priya, where are we on the material master
-load?
+Aisha: Morning everyone. Can you — Marcus, you're a bit frozen, can you turn your camera... there we go. Okay. So we've only got the half hour because I've got the steering pre-brief right after, so let's please keep it tight. Agenda's basically the cutover sequence and clearing the open data items before the dress rehearsal. Did everyone get the deck I sent? Daniel?
 
-Priya: The first validation run had a 3% error rate, mostly missing units of measure. I'll
-clean the source data and rerun the validation by Monday.
+Daniel: Got it, yeah. Didn't read past slide three but I got it.
 
-Aisha: Okay. Daniel, the customer master — any blockers?
+Aisha: Ha, that's fair, nobody does. Okay. Priya, can you kick us off — material master, where are we?
 
-Daniel: No blockers. I'll finalize the customer master mapping by this Friday.
+Priya: Sure, so. The first validation run, that finished over the weekend, ran Saturday night into Sunday. Out of — it's roughly forty-two thousand records, and we came back with about a three percent error rate. Which sounds bad but it's almost entirely one thing, it's missing units of measure on the legacy side. Like ninety percent of the errors are that.
 
-Marcus: Heads up, we need a longer downtime window than planned. I'd estimate 18 hours, not
-12. Aisha, can you get sign-off on the extended downtime window from the business?
+Marcus: Is that the same UoM thing we saw in the dev load back in, what, April?
 
-Aisha: I'll request business sign-off for the 18-hour downtime window by next Wednesday.
+Priya: Same family of problem, yeah, but worse in production because the older records just don't have it populated at all. Anyway — the point is I went in and cleaned the source extract. That's behind me now, I finished scrubbing it yesterday afternoon, late, like six-ish. So the source is good.
 
-Daniel: Decision for the record: we are going with a big-bang cutover rather than phased,
-based on the steering committee's direction.
+Aisha: Okay good, so the cleanup —
 
-Priya: Also, we still need someone to prepare the data reconciliation report template for
-post-load validation. Not sure who has bandwidth.
+Priya: The cleanup's behind us. What's left is I need to rerun the validation against the cleaned file, and that — honestly that's chugging away right now as we speak, the job's running in the background. It'll land Monday, probably Monday morning.
 
-Aisha: Let's assign that next week once we know capacity.
+Aisha: Right, so for my notes, cleanup wrapped, the rerun's churning. Don't want to write down "done" if it's not done.
+
+Priya: No, the rerun's mid-flight. The cleanup's the done part.
+
+Aisha: Perfect. Daniel — customer master. Where's that sitting?
+
+Daniel: Yeah so, customer master mapping. I'll be honest, I haven't put the final pass in yet. And the reason — it wasn't me dragging my feet, I was genuinely blocked, I was waiting on the dedup results from the data quality folks. Those only came in this morning, like right before this call actually, Hassan dropped them in the channel around eight.
+
+Aisha: Oh good, so you're unblocked now.
+
+Daniel: I'm unblocked now, exactly. So I'll get on the final mapping today and I'm confident I can have it finalized by Friday. So it hasn't started, but Friday, put my name on it.
+
+Aisha: Friday, you, customer master. Got it. Oh — before I forget, did anyone sort out the parking passes for the rehearsal day? People kept messaging me about it.
+
+Marcus: I think Facilities is handling that, not us.
+
+Aisha: Okay, not our problem, moving on. Marcus — the downtime window. This is the one I'm nervous about.
+
+Marcus: Yeah, this is the one that moved on us. So originally we scoped a twelve-hour downtime window for the big-bang load, that was the number everyone's been anchored on. But we did the timed trial load — that's done, we ran the full timed trial Saturday, end to end, real volumes. And the numbers came back ugly, honestly. It's closer to sixteen hours of actual processing, and that's before you add any contingency.
+
+Daniel: Sixteen, oof.
+
+Marcus: Sixteen real, so I want to pad it. I'd revise the official estimate up to eighteen hours to be safe. The trial itself is in the bag, that part's finished. What's not done is — somebody's got to get business to sign off on the longer window, because eighteen hours is a very different conversation than twelve.
+
+Aisha: Yeah, that lands on me. I'll own the sign-off. I'll go request business approval for the eighteen-hour window — and I want that by, let's say next Wednesday, before we reconvene. I haven't even opened that conversation yet though, so that's a brand new one for me.
+
+Daniel: While we're on cutover — let me just get this on the record so there's no ambiguity later. We are confirmed big-bang, not phased. That came down from steering, it's decided, it's not a "let's discuss it" thing — it's locked.
+
+Aisha: Yep, that's settled, I don't want to reopen it. Big-bang, confirmed. Priya — you'd mentioned a reconciliation report thing last week?
+
+Priya: Yeah, the data reconciliation report template, for the post-load validation. So... this one's awkward. I started it, I got maybe halfway, and then the material master cleanup ate my whole week and I had to drop it.
+
+Aisha: Halfway being —
+
+Priya: Call it fifty percent. The structure's there, the logic's half-built. It's not abandoned, it's just parked. I'll pick it back up the second the validation rerun clears, so probably Monday afternoon.
+
+Aisha: Okay, so that stays with you, mid-flight, fifty percent — I don't want to reassign it just because it stalled.
+
+Priya: No, leave it with me, I know where I left it.
+
+Aisha: Marcus, anything technical I'm missing before I run to the next thing?
+
+Marcus: Two things, quick. One — the fallback rollback script. That's done, I wrote it and I tested it on QA this week, ran the full rollback against the QA system and it behaved itself, so I'm calling that one finished and validated. Two — and this is the gap — somebody needs to actually write the rollback steps up into the cutover runbook. In plain English, for the on-call team, because right now the only documentation is the script itself and a script is not a runbook.
+
+Aisha: And who owns that right now?
+
+Marcus: Nobody. It's floating.
+
+Daniel: I'll take it. I'll write up the rollback section into the runbook. I can have that by Thursday.
+
+Aisha: Great, so that goes from nobody to Daniel, Thursday. Oh — Marcus, unrelated, did the QA box get more disk? You were complaining about it last week.
+
+Marcus: Provisioned more last night, it's fine now, don't worry about it.
+
+Aisha: Good. Priya — last one, the legacy freeze date. Business will not stop asking me about it.
+
+Priya: It's locked. I confirmed it with the application owners on Monday — July twentieth, no movement. And I sent the note round, so it's not just confirmed, it's communicated. People have it.
+
+Aisha: Oh thank god. Okay. Let me read back fast because I've got to jump. In flight: Priya's validation rerun, and the recon template at fifty. Not started but owned: Daniel's customer master Friday, my downtime sign-off Wednesday, Daniel's runbook rollback section Thursday. And finished this week — source cleanup, the timed trial, the rollback script, freeze date confirmed. Did I miss anything?
+
+Marcus: Nope. That's the lot.
+
+Daniel: One correction — earlier you said the trial was the twelve-hour thing, but it's the timed trial that gave us the eighteen. Just so the note's not confusing.
+
+Aisha: Right, yes, eighteen comes from the trial. Good catch. Okay — dress rehearsal's next Thursday, we reconvene Wednesday to check where the sign-off's at. Thanks all, I'm running.

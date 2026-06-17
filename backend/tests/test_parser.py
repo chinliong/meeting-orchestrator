@@ -3,6 +3,7 @@ from datetime import date
 from types import SimpleNamespace
 
 from app.llm.parser import TranscriptParser
+from app.models.models import TaskStatus
 
 
 def test_parse_extracts_tool_use(monkeypatch):
@@ -11,7 +12,7 @@ def test_parse_extracts_tool_use(monkeypatch):
         input={
             "decisions": ["Go big-bang."],
             "action_items": [
-                {"description": "Finalize mapping", "owner": "Daniel", "deadline": "2026-06-19", "confidence": 0.9},
+                {"description": "Finalize mapping", "owner": "Daniel", "deadline": "2026-06-19", "status": "in_progress", "confidence": 0.9},
                 {"description": "Unowned cleanup", "confidence": 0.4},
             ],
         },
@@ -28,6 +29,8 @@ def test_parse_extracts_tool_use(monkeypatch):
     first = result.action_items[0]
     assert first.owner == "Daniel"
     assert first.deadline == date(2026, 6, 19)
+    assert first.status == TaskStatus.IN_PROGRESS
     # Defaults applied for the minimal second item.
     assert result.action_items[1].owner is None
     assert result.action_items[1].confidence == 0.4
+    assert result.action_items[1].status == TaskStatus.TODO
