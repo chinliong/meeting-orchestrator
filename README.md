@@ -15,9 +15,18 @@ recordings for end-to-end processing.
 - **Owner & deadline inference** — owners assigned only when explicitly stated; deadlines
   inferred from contextual cues ("by this Friday") relative to the meeting date.
 - **Kanban dashboard** — auto-generated cards in To Do / In Progress / Done, drag-and-drop
-  status changes, filter by owner, sort by deadline, confidence shown per card.
-- **Optional audio/video input** — upload a recording; it is transcribed locally with
-  OpenAI Whisper before parsing.
+  status changes, filter by owner, sort by deadline, confidence shown per card, and a search
+  across task text, owners, and source meetings.
+- **Manual & sourced tasks** — tasks are usually extracted from a meeting (the source meeting
+  title shows on each card and can be renamed inline), but you can also add tasks by hand for
+  work raised outside a captured meeting.
+- **Accounts & guest mode** — sign up to keep your boards under an account, or continue as a
+  guest (guest boards are kept on the device and can be carried into an account on sign-up).
+- **Shareable boards** — every board has a permanent **view link** and **edit link**; anyone
+  with a link can open it (no account needed). View links are read-only; the UI hides every
+  editing affordance on a view-only board.
+- **Optional audio/video input** — upload a recording; it is transcribed with Whisper (a hosted
+  Whisper API by default, or a local model) before parsing.
 - **Evaluation harness** — scores extraction quality against an annotated test set and
   compares prompt variants (see [docs/evaluation-report.md](docs/evaluation-report.md)).
 
@@ -25,13 +34,14 @@ recordings for end-to-end processing.
 
 ```
 Next.js / React frontend  ──HTTP──>  FastAPI backend  ──>  Claude API (structured output)
-   Kanban board, filters                REST API              decisions + action items
-   transcript / audio upload            SQLAlchemy ORM
-                                         Whisper (optional)
+   Kanban board, filters,             REST API,             decisions + action items
+   search, share UI                   JWT auth + share
+   transcript / audio upload          tokens, SQLAlchemy
+                                       Whisper (optional)
                                               │
                                               v
-                                     SQLite / PostgreSQL
-                                  projects · meetings · tasks · stakeholders
+                                     SQLite (dev) / PostgreSQL (prod)
+                          users · projects · meetings · tasks · stakeholders
 ```
 
 See [docs/architecture.md](docs/architecture.md) for detail and [docs/api-spec.md](docs/api-spec.md)
@@ -43,10 +53,22 @@ for the full API.
 |-------|------------|
 | Frontend | Next.js 14, React 18, TypeScript, Tailwind CSS |
 | Backend | FastAPI, Pydantic v2, SQLAlchemy 2 |
+| Auth | Email/password (bcrypt via passlib), JWT access tokens, capability-link sharing |
 | LLM | Claude (Anthropic) via `anthropic` SDK, tool-use structured output |
-| Speech-to-text | OpenAI Whisper (optional, local) |
-| Database | SQLite (dev) / PostgreSQL (prod) |
-| Deployment | Docker, Render blueprint |
+| Speech-to-text | Whisper — hosted API (OpenAI/Groq) by default, optional local model |
+| Database | SQLite (dev) / PostgreSQL (prod; e.g. Neon) |
+| Deployment | Docker, Render blueprint (frontend + backend) + external Postgres |
+
+## Access model (accounts, guests, sharing)
+
+- **Accounts** identify an owner. `GET /projects` returns the signed-in user's own boards.
+- **Capability links** are the sharing mechanism: each project carries a permanent `view_token`
+  and `edit_token`. The frontend sends a board's token in an `X-Workspace-Token` header; an edit
+  token grants read/write, a view token grants read-only.
+- **Guests** have no account — they reach boards purely by capability link, and their boards are
+  remembered in the browser. On sign-up, guest boards are claimed into the new account.
+- Links are **permanent and not revocable** by design (documented in the share dialog); treat
+  them like passwords.
 
 ## Quick start (local)
 
@@ -60,12 +82,13 @@ for the full API.
 cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env          # then paste your ANTHROPIC_API_KEY into .env
-python -m app.seed            # create tables + seed sample project/stakeholders
+cp .env.example .env          # paste your ANTHROPIC_API_KEY; set AUTH_SECRET for production
+python -m app.seed            # create tables + seed sample data and a demo account
 uvicorn app.main:app --reload --port 8000
 ```
 
-API docs are served at http://localhost:8000/docs.
+`python -m app.seed` prints a demo login (`demo@example.com` / `demo1234`) that owns the sample
+boards. API docs are served at http://localhost:8000/docs.
 
 ### 2. Frontend
 
@@ -76,11 +99,14 @@ cp .env.local.example .env.local
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open http://localhost:3000. You'll land on the **Sign in / Create account / Continue as guest**
+screen.
 
 ### 3. (Optional) Audio/video transcription
 
-Whisper is heavy (pulls in PyTorch) and needs the `ffmpeg` binary, so it is opt-in:
+Audio is transcribed by a hosted Whisper API by default — set `TRANSCRIPTION_API_KEY` (OpenAI, or
+Groq with `TRANSCRIPTION_BASE_URL`/`TRANSCRIPTION_MODEL`) in `.env`. This works on memory-limited
+hosts. Alternatively, run Whisper locally (heavier — pulls in PyTorch and needs `ffmpeg`):
 
 ```bash
 # in backend/, with the venv active
@@ -88,43 +114,51 @@ pip install -r requirements-audio.txt
 # macOS: brew install ffmpeg   |   Debian/Ubuntu: apt-get install ffmpeg
 ```
 
-The "Upload audio/video" tab then transcribes the file before parsing. Without it, that
-endpoint returns a clear 503 and the text path works as normal.
+With neither configured, the audio endpoint returns a clear `503` and the text path works as normal.
 
 ## Run with Docker
 
 ```bash
-cp .env.example .env          # set ANTHROPIC_API_KEY
+cp .env.example .env          # set ANTHROPIC_API_KEY (and AUTH_SECRET)
 docker compose up --build
 ```
 
 Frontend on http://localhost:3000, backend on http://localhost:8000. Audio is excluded from
-the default image; build with `--build-arg INSTALL_AUDIO=true` to include Whisper.
+the default image; build with `--build-arg INSTALL_AUDIO=true` to include local Whisper.
 
-> Note: the Docker/compose setup is configured but was not built in the development
-> environment (no Docker daemon available there); the standalone Next.js build it relies on
-> is verified.
+## Deploy to Render + external Postgres
 
-## Deploy to Render
-
-The blueprint provisions a backend web service, a frontend web service, and a managed
-PostgreSQL database — all on the free tier.
+The blueprint provisions a backend web service and a frontend web service on the free tier. The
+database is an **external Postgres** (e.g. a free [Neon](https://neon.tech) project) referenced by
+`DATABASE_URL`, so it isn't subject to a managed-DB expiry window.
 
 1. Push the repo to GitHub.
 2. In Render: **New → Blueprint**, point at the repo. It reads [render.yaml](render.yaml).
-3. Render prompts for the three `sync: false` env vars. Render names services predictably
-   (`https://<name>.onrender.com`), so you can fill them in up front:
+3. Fill in the `sync: false` env vars (Render names services predictably as
+   `https://<name>.onrender.com`):
    - backend `ANTHROPIC_API_KEY` = your key
+   - backend `DATABASE_URL` = your Postgres connection string
+     (`postgresql://…/<db>?sslmode=require`; `db.py` normalises `postgres://` URLs)
    - backend `CORS_ORIGINS` = `https://orchestrator-frontend.onrender.com`
    - frontend `NEXT_PUBLIC_API_BASE` = `https://orchestrator-backend.onrender.com/api/v1`
-4. Apply. If Render assigns different URLs than the predicted ones, update the two URL vars
-   afterwards and redeploy. `NEXT_PUBLIC_API_BASE` is baked in at build time, so changing it
-   requires a frontend redeploy.
 
-Notes on the free tier: web services spin down after ~15 min idle and cold-start in ~50s; the
-free PostgreSQL instance expires after a fixed period (upgrade or recreate if it lapses). The
-schema is created automatically on startup; run `python -m app.seed` from the backend's Render
-shell if you want the sample data.
+   `AUTH_SECRET` is generated automatically by the blueprint. `NEXT_PUBLIC_API_BASE` is baked in
+   at build time, so changing it requires a frontend redeploy.
+4. Apply. The schema is created automatically on first startup against an empty database.
+
+Seeding sample data: Render's web shell is a paid feature, so run the seed from your own machine
+pointed at the deployed database:
+
+```bash
+cd backend
+DATABASE_URL="<your Postgres connection string>" python -m app.seed
+```
+
+If you change the schema later, the startup `create_all` does **not** alter existing tables — run
+`python -m app.reset_db` (drops, recreates, and re-seeds — **destructive**) against that
+`DATABASE_URL` to rebuild it.
+
+Note on the free tier: web services spin down after ~15 min idle and cold-start in ~50s.
 
 ## Tests
 
@@ -151,7 +185,7 @@ accuracy, compares prompt variants, writes `eval/results.json`, and refreshes
 ## Project layout
 
 ```
-backend/      FastAPI app (api/, llm/, models/, schemas/), tests, Dockerfile
+backend/      FastAPI app (api/, llm/, models/, schemas/, auth.py), tests, Dockerfile
 frontend/     Next.js app (src/app, src/components, src/lib), Dockerfile
 data/         synthetic-transcripts/ (inputs) + annotated-test-set/ (ground truth)
 eval/         evaluation harness + matcher tests
@@ -161,6 +195,8 @@ render.yaml   Render deployment blueprint
 
 ## Scope notes
 
-Out of scope for this iteration (per the project brief): live enterprise integrations
-(SAP/Jira/Outlook), real-time multi-user collaboration, and a mobile app. Test data is
-synthetic meeting transcripts representing realistic enterprise project scenarios.
+Per the project brief, **real-time** multi-user collaboration (live presence / simultaneous
+co-editing) is out of scope, as are live enterprise integrations (SAP/Jira/Outlook) and a mobile
+app. The accounts and capability-link sharing added here are **asynchronous** — others see changes
+on reload, with last-write-wins and no live conflict resolution. Test data is synthetic meeting
+transcripts representing realistic enterprise project scenarios.
