@@ -11,6 +11,7 @@ export interface Task {
   id: number;
   project_id: number;
   meeting_id: number | null;
+  meeting_title: string | null;
   description: string;
   owner: string | null;
   deadline: string | null;

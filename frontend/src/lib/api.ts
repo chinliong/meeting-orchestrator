@@ -37,6 +37,24 @@ export const api = {
     return request<Task[]>(`/tasks${query ? `?${query}` : ""}`);
   },
 
+  createTask: (input: {
+    projectId: number;
+    description: string;
+    owner?: string | null;
+    deadline?: string | null;
+    status?: TaskStatus;
+  }) =>
+    request<Task>("/tasks", {
+      method: "POST",
+      body: JSON.stringify({
+        project_id: input.projectId,
+        description: input.description,
+        owner: input.owner ?? null,
+        deadline: input.deadline ?? null,
+        status: input.status ?? "todo",
+      }),
+    }),
+
   updateTask: (id: number, patch: Partial<Pick<Task, "status" | "owner" | "deadline" | "description">>) =>
     request<Task>(`/tasks/${id}`, { method: "PATCH", body: JSON.stringify(patch) }),
 

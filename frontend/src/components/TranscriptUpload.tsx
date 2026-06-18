@@ -19,7 +19,6 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
     if (mode === "text" && !text.trim()) return;
     if (mode === "audio" && !file) return;
 
@@ -72,7 +71,7 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="Meeting title"
+        placeholder="Meeting title (optional)"
         className="mb-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
       />
 

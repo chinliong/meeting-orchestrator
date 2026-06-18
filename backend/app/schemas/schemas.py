@@ -36,7 +36,7 @@ class StakeholderOut(StakeholderCreate):
 
 class TranscriptSubmit(BaseModel):
     project_id: int
-    title: str
+    title: str = ""
     transcript_text: str
 
 
@@ -46,6 +46,7 @@ class TaskOut(BaseModel):
     id: int
     project_id: int
     meeting_id: Optional[int]
+    meeting_title: Optional[str] = None
     description: str
     owner: Optional[str]
     deadline: Optional[date]
@@ -53,6 +54,14 @@ class TaskOut(BaseModel):
     confidence: float
     source_decision: Optional[str]
     created_at: datetime
+
+
+class TaskCreate(BaseModel):
+    project_id: int
+    description: str
+    owner: Optional[str] = None
+    deadline: Optional[date] = None
+    status: TaskStatus = TaskStatus.TODO
 
 
 class TaskUpdate(BaseModel):

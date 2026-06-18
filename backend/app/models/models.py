@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import enum
 
 from sqlalchemy import Column, Date, DateTime, Enum, Float, ForeignKey, Integer, String, Text
@@ -71,3 +73,8 @@ class Task(Base):
 
     project = relationship("Project", back_populates="tasks")
     meeting = relationship("Meeting", back_populates="tasks")
+
+    @property
+    def meeting_title(self) -> str | None:
+        """Title of the source meeting, or None for manually-added tasks."""
+        return self.meeting.title if self.meeting else None

@@ -18,9 +18,11 @@ export default function DashboardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedOwner, setSelectedOwner] = useState("");
   const [sortByDeadline, setSortByDeadline] = useState(false);
+  const [search, setSearch] = useState("");
   const [loadError, setLoadError] = useState<string | null>(null);
   const [projectModal, setProjectModal] = useState<"create" | "edit" | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [creatingTask, setCreatingTask] = useState(false);
 
   useEffect(() => {
     api
@@ -52,6 +54,14 @@ export default function DashboardPage() {
 
   const visibleTasks = useMemo(() => {
     let result = selectedOwner ? tasks.filter((t) => t.owner === selectedOwner) : tasks;
+    const q = search.trim().toLowerCase();
+    if (q) {
+      result = result.filter((t) =>
+        [t.description, t.owner, t.meeting_title]
+          .filter(Boolean)
+          .some((field) => (field as string).toLowerCase().includes(q))
+      );
+    }
     if (sortByDeadline) {
       result = [...result].sort((a, b) => {
         if (!a.deadline) return 1;
@@ -60,7 +70,7 @@ export default function DashboardPage() {
       });
     }
     return result;
-  }, [tasks, selectedOwner, sortByDeadline]);
+  }, [tasks, selectedOwner, sortByDeadline, search]);
 
   const handleStatusChange = async (taskId: number, status: TaskStatus) => {
     setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status } : t)));
@@ -73,6 +83,17 @@ export default function DashboardPage() {
   ) => {
     const updated = await api.updateTask(taskId, patch);
     setTasks((prev) => prev.map((t) => (t.id === taskId ? updated : t)));
+  };
+
+  const handleCreateTask = async (values: {
+    description: string;
+    owner: string | null;
+    deadline: string | null;
+    status: TaskStatus;
+  }) => {
+    if (!selectedProjectId) return;
+    const created = await api.createTask({ projectId: selectedProjectId, ...values });
+    setTasks((prev) => [created, ...prev]);
   };
 
   const handleDelete = async (taskId: number) => {
@@ -198,6 +219,48 @@ export default function DashboardPage() {
               </div>
 
               <div className="space-y-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="relative min-w-[200px] flex-1">
+                    <svg
+                      viewBox="0 0 20 20"
+                      className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <input
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Search tasks, owners, meetings..."
+                      className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-9 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+                    />
+                    {search && (
+                      <button
+                        onClick={() => setSearch("")}
+                        aria-label="Clear search"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                      >
+                        <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
+                          <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setCreatingTask(true)}
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
+                  >
+                    <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
+                      <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" />
+                    </svg>
+                    Add task
+                  </button>
+                </div>
+
                 {owners.length > 0 && (
                   <Filters
                     owners={owners}
@@ -207,12 +270,19 @@ export default function DashboardPage() {
                     onSortToggle={() => setSortByDeadline((v) => !v)}
                   />
                 )}
-                <KanbanBoard
-                  tasks={visibleTasks}
-                  onStatusChange={handleStatusChange}
-                  onEdit={setEditingTask}
-                  onDelete={handleDelete}
-                />
+
+                {search.trim() && visibleTasks.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-slate-200 bg-white/60 px-4 py-12 text-center text-sm text-slate-500">
+                    No tasks match <span className="font-medium text-slate-700">“{search.trim()}”</span>.
+                  </div>
+                ) : (
+                  <KanbanBoard
+                    tasks={visibleTasks}
+                    onStatusChange={handleStatusChange}
+                    onEdit={setEditingTask}
+                    onDelete={handleDelete}
+                  />
+                )}
               </div>
             </div>
           </>
@@ -228,7 +298,16 @@ export default function DashboardPage() {
         onSubmit={projectModal === "edit" ? handleUpdateProject : handleCreateProject}
       />
 
-      <EditTaskModal task={editingTask} onClose={() => setEditingTask(null)} onSave={handleEditTask} />
+      <EditTaskModal
+        task={editingTask}
+        createMode={creatingTask}
+        onClose={() => {
+          setEditingTask(null);
+          setCreatingTask(false);
+        }}
+        onSave={handleEditTask}
+        onCreate={handleCreateTask}
+      />
     </div>
   );
 }

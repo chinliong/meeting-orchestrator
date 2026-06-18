@@ -40,6 +40,25 @@ export default function TaskCard({ task, onDragStart, onEdit, onDelete }: Props)
         </button>
       </div>
 
+      {task.meeting_title ? (
+        <div
+          className="mb-1.5 flex items-center gap-1 pr-12 text-[11px] font-medium text-slate-400"
+          title={`From meeting: ${task.meeting_title}`}
+        >
+          <svg viewBox="0 0 20 20" className="h-3 w-3 shrink-0" fill="currentColor">
+            <path d="M4 4a2 2 0 012-2h5.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 5a.75.75 0 000 1.5h6a.75.75 0 000-1.5H7zm0 3a.75.75 0 000 1.5h4a.75.75 0 000-1.5H7z" />
+          </svg>
+          <span className="truncate">{task.meeting_title}</span>
+        </div>
+      ) : (
+        <div className="mb-1.5 flex items-center gap-1 pr-12 text-[11px] font-medium text-slate-400">
+          <svg viewBox="0 0 20 20" className="h-3 w-3 shrink-0" fill="currentColor">
+            <path d="M13.586 3.586a2 2 0 112.828 2.828l-8.5 8.5a2 2 0 01-.879.506l-3.012.86a.5.5 0 01-.617-.617l.86-3.012a2 2 0 01.506-.879l8.5-8.5z" />
+          </svg>
+          <span className="truncate">Added manually</span>
+        </div>
+      )}
+
       <p className="pr-12 text-sm font-medium leading-snug text-slate-800">{task.description}</p>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -72,14 +91,21 @@ export default function TaskCard({ task, onDragStart, onEdit, onDelete }: Props)
           </span>
         )}
 
-        <span
-          className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-medium ${confidenceTone(
-            task.confidence
-          )}`}
-          title="Extraction confidence"
-        >
-          {Math.round(task.confidence * 100)}%
-        </span>
+        {task.meeting_id !== null && (
+          <span
+            className={`ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${confidenceTone(
+              task.confidence
+            )}`}
+            title={`AI confidence: ${Math.round(
+              task.confidence * 100
+            )}% sure this is a real action item. Lower means double-check it.`}
+          >
+            <svg viewBox="0 0 20 20" className="h-3 w-3" fill="currentColor">
+              <path d="M2 12a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1H3a1 1 0 01-1-1v-4zm6-4a1 1 0 011-1h2a1 1 0 011 1v8a1 1 0 01-1 1H9a1 1 0 01-1-1V8zm6-4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+            </svg>
+            {Math.round(task.confidence * 100)}% conf.
+          </span>
+        )}
       </div>
     </div>
   );

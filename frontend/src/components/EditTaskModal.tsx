@@ -4,13 +4,21 @@ import { useEffect, useState } from "react";
 
 import type { Task, TaskStatus } from "@/lib/types";
 
+interface TaskValues {
+  description: string;
+  owner: string | null;
+  deadline: string | null;
+  status: TaskStatus;
+}
+
 interface Props {
+  /** The task being edited. Null while creating a new one. */
   task: Task | null;
+  /** Open the modal in "add a new task" mode (task stays null). */
+  createMode: boolean;
   onClose: () => void;
-  onSave: (
-    id: number,
-    patch: { description?: string; owner?: string | null; deadline?: string | null; status?: TaskStatus }
-  ) => Promise<void>;
+  onSave: (id: number, patch: Partial<TaskValues>) => Promise<void>;
+  onCreate: (values: TaskValues) => Promise<void>;
 }
 
 const STATUSES: { value: TaskStatus; label: string }[] = [
@@ -19,7 +27,9 @@ const STATUSES: { value: TaskStatus; label: string }[] = [
   { value: "done", label: "Done" },
 ];
 
-export default function EditTaskModal({ task, onClose, onSave }: Props) {
+export default function EditTaskModal({ task, createMode, onClose, onSave, onCreate }: Props) {
+  const open = task !== null || createMode;
+
   const [description, setDescription] = useState("");
   const [owner, setOwner] = useState("");
   const [deadline, setDeadline] = useState("");
@@ -28,19 +38,19 @@ export default function EditTaskModal({ task, onClose, onSave }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (task) {
-      setDescription(task.description);
-      setOwner(task.owner ?? "");
-      setDeadline(task.deadline ?? "");
-      setStatus(task.status);
+    if (open) {
+      setDescription(task?.description ?? "");
+      setOwner(task?.owner ?? "");
+      setDeadline(task?.deadline ?? "");
+      setStatus(task?.status ?? "todo");
       setError(null);
     }
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    if (task) window.addEventListener("keydown", onKey);
+    if (open) window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [task, onClose]);
+  }, [open, task, onClose]);
 
-  if (!task) return null;
+  if (!open) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,12 +58,17 @@ export default function EditTaskModal({ task, onClose, onSave }: Props) {
     setSaving(true);
     setError(null);
     try {
-      await onSave(task.id, {
+      const values: TaskValues = {
         description: description.trim(),
         owner: owner.trim() || null,
         deadline: deadline || null,
         status,
-      });
+      };
+      if (task) {
+        await onSave(task.id, values);
+      } else {
+        await onCreate(values);
+      }
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save task");
@@ -71,8 +86,14 @@ export default function EditTaskModal({ task, onClose, onSave }: Props) {
         className="w-full max-w-md animate-fade-in rounded-2xl bg-white p-6 shadow-xl"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-semibold text-slate-900">Edit task</h2>
-        <p className="mt-1 text-sm text-slate-500">Correct anything the AI got wrong.</p>
+        <h2 className="text-lg font-semibold text-slate-900">
+          {createMode ? "Add task" : "Edit task"}
+        </h2>
+        <p className="mt-1 text-sm text-slate-500">
+          {createMode
+            ? "Track something that wasn't captured in a meeting."
+            : "Correct anything the AI got wrong."}
+        </p>
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           <div>
@@ -82,6 +103,7 @@ export default function EditTaskModal({ task, onClose, onSave }: Props) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
+              placeholder={createMode ? "What needs to be done?" : undefined}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
             />
           </div>
@@ -137,7 +159,7 @@ export default function EditTaskModal({ task, onClose, onSave }: Props) {
               disabled={saving || !description.trim()}
               className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-50"
             >
-              {saving ? "Saving..." : "Save changes"}
+              {saving ? "Saving..." : createMode ? "Add task" : "Save changes"}
             </button>
           </div>
         </form>

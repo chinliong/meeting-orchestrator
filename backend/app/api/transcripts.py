@@ -1,5 +1,6 @@
 import logging
 import time
+from datetime import date
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy.orm import Session
@@ -13,6 +14,11 @@ from app.schemas.schemas import MeetingOut, TranscriptSubmit
 router = APIRouter(prefix="/transcripts", tags=["transcripts"])
 
 log = logging.getLogger("uvicorn.error")
+
+
+def _meeting_title(title: str) -> str:
+    """Fall back to a dated label when the user leaves the title blank."""
+    return title.strip() or f"Meeting · {date.today():%b %d, %Y}"
 
 
 def _extract_and_store_tasks(meeting: Meeting, db: Session) -> None:
@@ -104,14 +110,14 @@ def submit_transcript(payload: TranscriptSubmit, db: Session = Depends(get_db)):
     project = db.get(Project, payload.project_id)
     if project is None:
         raise HTTPException(status_code=404, detail="Project not found")
-    return _process_transcript(project, payload.title, payload.transcript_text, db)
+    return _process_transcript(project, _meeting_title(payload.title), payload.transcript_text, db)
 
 
 @router.post("/audio", response_model=MeetingOut, status_code=201)
 async def submit_audio(
     background_tasks: BackgroundTasks,
     project_id: int = Form(...),
-    title: str = Form(...),
+    title: str = Form(""),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
 ):
@@ -143,7 +149,7 @@ async def submit_audio(
     suffix = "." + file.filename.rsplit(".", 1)[-1] if file.filename and "." in file.filename else ".wav"
     meeting = Meeting(
         project_id=project.id,
-        title=title,
+        title=_meeting_title(title),
         transcript_text="",
         status=MeetingStatus.PROCESSING,
     )

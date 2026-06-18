@@ -87,6 +87,44 @@ def test_submit_transcript_creates_tasks(client, project, stub_parser):
     assert all(t["status"] == "todo" for t in tasks)
 
 
+def test_submitted_tasks_carry_meeting_title(client, project, stub_parser):
+    client.post(
+        "/api/v1/transcripts",
+        json={"project_id": project["id"], "title": "Sprint Planning", "transcript_text": "..."},
+    )
+    tasks = client.get(f"/api/v1/tasks?project_id={project['id']}").json()
+    assert all(t["meeting_title"] == "Sprint Planning" for t in tasks)
+
+
+def test_blank_title_gets_dated_default(client, project, stub_parser):
+    body = client.post(
+        "/api/v1/transcripts",
+        json={"project_id": project["id"], "transcript_text": "..."},
+    ).json()
+    assert body["title"].startswith("Meeting ·")
+
+
+def test_create_task_manually(client, project):
+    resp = client.post(
+        "/api/v1/tasks",
+        json={"project_id": project["id"], "description": "Renew TLS cert", "owner": "Sam"},
+    )
+    assert resp.status_code == 201
+    body = resp.json()
+    assert body["description"] == "Renew TLS cert"
+    assert body["owner"] == "Sam"
+    assert body["status"] == "todo"
+    assert body["confidence"] == 1.0
+    # No source meeting, so the UI shows no extraction-confidence badge.
+    assert body["meeting_id"] is None
+    assert body["meeting_title"] is None
+
+
+def test_create_task_unknown_project(client):
+    resp = client.post("/api/v1/tasks", json={"project_id": 9999, "description": "x"})
+    assert resp.status_code == 404
+
+
 def test_submit_transcript_unknown_project(client, stub_parser):
     resp = client.post(
         "/api/v1/transcripts",
