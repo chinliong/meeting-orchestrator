@@ -1,10 +1,27 @@
 export type TaskStatus = "todo" | "in_progress" | "done";
 
+export type AccessLevel = "edit" | "view";
+
 export interface Project {
   id: number;
   name: string;
   description: string;
   created_at: string;
+  owner_user_id: number | null;
+  access_level: AccessLevel;
+  view_token: string;
+  edit_token: string | null; // present only when you have edit access
+}
+
+export interface User {
+  id: number;
+  email: string;
+  created_at: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: User;
 }
 
 export interface Task {

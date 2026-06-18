@@ -47,6 +47,20 @@ def client(db_session):
 
 @pytest.fixture()
 def project(client):
+    """A guest-created board. The client then carries its edit token, so the rest of the
+    test acts as an editor of this board (the common case for task/transcript tests)."""
     resp = client.post("/api/v1/projects", json={"name": "Test Programme", "description": "x"})
     assert resp.status_code == 201
-    return resp.json()
+    data = resp.json()
+    client.headers["X-Workspace-Token"] = data["edit_token"]
+    return data
+
+
+@pytest.fixture()
+def account(client):
+    """A registered user; returns the signup body plus a ready-to-use auth header."""
+    resp = client.post("/api/v1/auth/signup", json={"email": "owner@example.com", "password": "pw12345"})
+    assert resp.status_code == 201
+    body = resp.json()
+    body["headers"] = {"Authorization": f"Bearer {body['token']}"}
+    return body

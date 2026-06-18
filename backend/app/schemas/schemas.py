@@ -16,11 +16,41 @@ class ProjectUpdate(BaseModel):
     description: Optional[str] = None
 
 
-class ProjectOut(ProjectCreate):
+class ProjectOut(BaseModel):
+    id: int
+    name: str
+    description: str
+    created_at: datetime
+    owner_user_id: Optional[int] = None
+    # The caller's access to this board, and the tokens they're allowed to see.
+    access_level: str  # "edit" | "view"
+    view_token: str
+    edit_token: Optional[str] = None  # omitted for view-only callers
+
+
+class SignupRequest(BaseModel):
+    email: str
+    password: str
+    # Edit tokens of guest boards to adopt into the new account (carry-over on signup).
+    claim_tokens: list[str] = []
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class UserOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    email: str
     created_at: datetime
+
+
+class AuthResponse(BaseModel):
+    token: str
+    user: UserOut
 
 
 class StakeholderCreate(BaseModel):

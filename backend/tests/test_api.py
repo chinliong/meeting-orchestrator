@@ -32,10 +32,49 @@ def test_health(client):
     assert client.get("/api/v1/health").json() == {"status": "ok"}
 
 
-def test_create_and_list_project(client):
-    client.post("/api/v1/projects", json={"name": "Alpha"})
-    names = [p["name"] for p in client.get("/api/v1/projects").json()]
-    assert "Alpha" in names
+# --- accounts ---
+
+def test_signup_login_and_me(client):
+    signup = client.post("/api/v1/auth/signup", json={"email": "a@b.com", "password": "secret1"})
+    assert signup.status_code == 201
+    token = signup.json()["token"]
+
+    # Wrong password rejected; correct one works.
+    assert client.post("/api/v1/auth/login", json={"email": "a@b.com", "password": "nope"}).status_code == 401
+    login = client.post("/api/v1/auth/login", json={"email": "A@B.com", "password": "secret1"})
+    assert login.status_code == 200
+
+    me = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert me.status_code == 200 and me.json()["email"] == "a@b.com"
+
+
+def test_duplicate_email_rejected(client):
+    client.post("/api/v1/auth/signup", json={"email": "dup@b.com", "password": "x"})
+    again = client.post("/api/v1/auth/signup", json={"email": "dup@b.com", "password": "y"})
+    assert again.status_code == 409
+
+
+def test_me_requires_auth(client):
+    assert client.get("/api/v1/auth/me").status_code == 401
+
+
+# --- projects & ownership ---
+
+def test_list_projects_is_scoped_to_owner(client, account):
+    client.post("/api/v1/projects", json={"name": "Mine"}, headers=account["headers"])
+    # A different user sees none of the first user's projects.
+    other = client.post("/api/v1/auth/signup", json={"email": "other@b.com", "password": "pw"}).json()
+    mine = client.get("/api/v1/projects", headers=account["headers"]).json()
+    theirs = client.get("/api/v1/projects", headers={"Authorization": f"Bearer {other['token']}"}).json()
+    assert [p["name"] for p in mine] == ["Mine"]
+    assert theirs == []
+
+
+def test_create_project_exposes_tokens(client):
+    body = client.post("/api/v1/projects", json={"name": "Board"}).json()
+    assert body["access_level"] == "edit"
+    assert body["view_token"] and body["edit_token"]
+    assert body["owner_user_id"] is None  # guest-created
 
 
 def test_update_project(client, project):
@@ -54,7 +93,6 @@ def test_update_project_not_found(client):
 
 
 def test_delete_project_cascades_tasks(client, project, stub_parser):
-    # Create tasks under the project, then delete the project.
     client.post(
         "/api/v1/transcripts",
         json={"project_id": project["id"], "title": "w", "transcript_text": "..."},
@@ -62,14 +100,64 @@ def test_delete_project_cascades_tasks(client, project, stub_parser):
     assert len(client.get(f"/api/v1/tasks?project_id={project['id']}").json()) == 2
 
     assert client.delete(f"/api/v1/projects/{project['id']}").status_code == 204
-    assert client.get("/api/v1/projects").json() == []
-    # Tasks were cascade-deleted with the project.
-    assert client.get(f"/api/v1/tasks?project_id={project['id']}").json() == []
+    # Project and its tasks are gone.
+    assert client.get(f"/api/v1/projects/{project['id']}").status_code == 404
+    assert client.get(f"/api/v1/tasks?project_id={project['id']}").status_code == 404
 
 
 def test_delete_project_not_found(client):
     assert client.delete("/api/v1/projects/9999").status_code == 404
 
+
+# --- share links / access control ---
+
+def test_open_by_token_returns_level(client, project):
+    edit = client.get(f"/api/v1/projects/by-token/{project['edit_token']}").json()
+    assert edit["access_level"] == "edit" and edit["edit_token"]
+
+    view = client.get(f"/api/v1/projects/by-token/{project['view_token']}").json()
+    assert view["access_level"] == "view"
+    assert view["edit_token"] is None  # view callers never receive the edit token
+
+
+def test_view_token_is_read_only(client, project, stub_parser):
+    client.post(
+        "/api/v1/transcripts",
+        json={"project_id": project["id"], "title": "w", "transcript_text": "..."},
+    )
+    task_id = client.get(f"/api/v1/tasks?project_id={project['id']}").json()[0]["id"]
+
+    view_headers = {"X-Workspace-Token": project["view_token"]}
+    # Reads allowed with a view token...
+    assert client.get(f"/api/v1/tasks?project_id={project['id']}", headers=view_headers).status_code == 200
+    # ...writes are not.
+    blocked = client.patch(f"/api/v1/tasks/{task_id}", json={"status": "done"}, headers=view_headers)
+    assert blocked.status_code == 403
+
+
+def test_no_token_no_access(client):
+    # A second, token-less client cannot reach a board it doesn't own.
+    pid = client.post("/api/v1/projects", json={"name": "Private"}).json()["id"]
+    fresh = {"X-Workspace-Token": "", "Authorization": ""}  # no credentials
+    resp = client.post(
+        "/api/v1/transcripts",
+        json={"project_id": pid, "title": "w", "transcript_text": "..."},
+        headers=fresh,
+    )
+    assert resp.status_code == 403
+
+
+def test_guest_board_claimed_on_signup(client):
+    guest = client.post("/api/v1/projects", json={"name": "Guest board"}).json()
+    auth = client.post(
+        "/api/v1/auth/signup",
+        json={"email": "claim@b.com", "password": "pw", "claim_tokens": [guest["edit_token"]]},
+    ).json()
+    owned = client.get("/api/v1/projects", headers={"Authorization": f"Bearer {auth['token']}"}).json()
+    assert [p["id"] for p in owned] == [guest["id"]]
+
+
+# --- transcripts & tasks ---
 
 def test_submit_transcript_creates_tasks(client, project, stub_parser):
     resp = client.post(
@@ -115,7 +203,6 @@ def test_create_task_manually(client, project):
     assert body["owner"] == "Sam"
     assert body["status"] == "todo"
     assert body["confidence"] == 1.0
-    # No source meeting, so the UI shows no extraction-confidence badge.
     assert body["meeting_id"] is None
     assert body["meeting_title"] is None
 
@@ -143,17 +230,23 @@ def test_rename_meeting_not_found(client):
     assert client.patch("/api/v1/transcripts/9999", json={"title": "x"}).status_code == 404
 
 
-def test_list_tasks_across_all_projects(client, stub_parser):
-    a = client.post("/api/v1/projects", json={"name": "A"}).json()
-    b = client.post("/api/v1/projects", json={"name": "B"}).json()
+def test_list_tasks_across_owned_projects(client, account, stub_parser):
+    h = account["headers"]
+    a = client.post("/api/v1/projects", json={"name": "A"}, headers=h).json()
+    b = client.post("/api/v1/projects", json={"name": "B"}, headers=h).json()
     for p in (a, b):
         client.post(
             "/api/v1/transcripts",
             json={"project_id": p["id"], "title": "w", "transcript_text": "..."},
+            headers=h,
         )
-    # No project_id filter returns every project's tasks (powers the "All projects" view).
-    all_tasks = client.get("/api/v1/tasks").json()
+    # No project_id, authenticated: tasks across every board the user owns.
+    all_tasks = client.get("/api/v1/tasks", headers=h).json()
     assert {t["project_id"] for t in all_tasks} == {a["id"], b["id"]}
+
+
+def test_cross_board_listing_requires_auth(client):
+    assert client.get("/api/v1/tasks").status_code == 401
 
 
 def test_submit_transcript_unknown_project(client, stub_parser):

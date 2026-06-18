@@ -1,11 +1,12 @@
 from datetime import date
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
+from app.auth import get_optional_user, require_project_edit, require_project_view
 from app.db import get_db
-from app.models.models import Project, Task, TaskStatus
+from app.models.models import Project, Task, TaskStatus, User
 from app.schemas.schemas import TaskCreate, TaskOut, TaskUpdate
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
@@ -18,12 +19,22 @@ def list_tasks(
     status: Optional[TaskStatus] = None,
     due_before: Optional[date] = None,
     due_after: Optional[date] = None,
+    user: Optional[User] = Depends(get_optional_user),
+    x_workspace_token: Optional[str] = Header(None),
     db: Session = Depends(get_db),
 ):
     # Eager-load the meeting so serialising `meeting_title` doesn't fire a query per task.
     query = db.query(Task).options(joinedload(Task.meeting))
     if project_id is not None:
+        require_project_view(db, project_id, user, x_workspace_token)
         query = query.filter(Task.project_id == project_id)
+    else:
+        # No specific board: only signed-in users get a cross-board ("All projects") view,
+        # scoped to the boards they own.
+        if user is None:
+            raise HTTPException(status_code=401, detail="Sign in to view tasks across boards")
+        owned_ids = [pid for (pid,) in db.query(Project.id).filter(Project.owner_user_id == user.id)]
+        query = query.filter(Task.project_id.in_(owned_ids))
     if owner is not None:
         query = query.filter(Task.owner == owner)
     if status is not None:
@@ -36,15 +47,18 @@ def list_tasks(
 
 
 @router.post("", response_model=TaskOut, status_code=201)
-def create_task(payload: TaskCreate, db: Session = Depends(get_db)):
+def create_task(
+    payload: TaskCreate,
+    user: Optional[User] = Depends(get_optional_user),
+    x_workspace_token: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+):
     """Add a task by hand — for work that wasn't captured in any meeting transcript.
 
     Manually-added tasks have no source meeting and carry full confidence (confidence=1.0,
     the model default), so the UI knows not to show an extraction-confidence badge for them.
     """
-    if db.get(Project, payload.project_id) is None:
-        raise HTTPException(status_code=404, detail="Project not found")
-
+    require_project_edit(db, payload.project_id, user, x_workspace_token)
     task = Task(**payload.model_dump())
     db.add(task)
     db.commit()
@@ -52,24 +66,37 @@ def create_task(payload: TaskCreate, db: Session = Depends(get_db)):
     return task
 
 
-@router.patch("/{task_id}", response_model=TaskOut)
-def update_task(task_id: int, payload: TaskUpdate, db: Session = Depends(get_db)):
+def _editable_task(db: Session, task_id: int, user, ws_token) -> Task:
     task = db.get(Task, task_id)
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
+    require_project_edit(db, task.project_id, user, ws_token)
+    return task
 
+
+@router.patch("/{task_id}", response_model=TaskOut)
+def update_task(
+    task_id: int,
+    payload: TaskUpdate,
+    user: Optional[User] = Depends(get_optional_user),
+    x_workspace_token: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+):
+    task = _editable_task(db, task_id, user, x_workspace_token)
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(task, field, value)
-
     db.commit()
     db.refresh(task)
     return task
 
 
 @router.delete("/{task_id}", status_code=204)
-def delete_task(task_id: int, db: Session = Depends(get_db)):
-    task = db.get(Task, task_id)
-    if task is None:
-        raise HTTPException(status_code=404, detail="Task not found")
+def delete_task(
+    task_id: int,
+    user: Optional[User] = Depends(get_optional_user),
+    x_workspace_token: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+):
+    task = _editable_task(db, task_id, user, x_workspace_token)
     db.delete(task)
     db.commit()

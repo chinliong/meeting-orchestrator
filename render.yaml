@@ -16,6 +16,9 @@ services:
         sync: false # set manually in the dashboard (secret)
       - key: CLAUDE_MODEL
         value: claude-sonnet-4-6
+      # Signing secret for account auth tokens — Render generates a strong random value.
+      - key: AUTH_SECRET
+        generateValue: true
       - key: DATABASE_URL
         fromDatabase:
           name: orchestrator-db

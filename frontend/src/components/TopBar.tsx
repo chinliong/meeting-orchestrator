@@ -1,12 +1,15 @@
 "use client";
 
-import type { Project } from "@/lib/types";
+import type { Project, User } from "@/lib/types";
 
 interface Props {
   projects: Project[];
   selectedProjectId: number | null;
   onSelectProject: (id: number) => void;
   onNewProject: () => void;
+  user: User | null;
+  onLogin: () => void;
+  onLogout: () => void;
 }
 
 export default function TopBar({
@@ -14,6 +17,9 @@ export default function TopBar({
   selectedProjectId,
   onSelectProject,
   onNewProject,
+  user,
+  onLogin,
+  onLogout,
 }: Props) {
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur">
@@ -67,6 +73,32 @@ export default function TopBar({
             </svg>
             New project
           </button>
+
+          <div className="ml-1 flex items-center gap-2 border-l border-slate-200 pl-3">
+            {user ? (
+              <>
+                <span className="hidden text-sm text-slate-500 sm:inline" title={user.email}>
+                  {user.email}
+                </span>
+                <button
+                  onClick={onLogout}
+                  className="rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50"
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <span className="hidden text-sm text-slate-400 sm:inline">Guest</span>
+                <button
+                  onClick={onLogin}
+                  className="rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-50"
+                >
+                  Sign in / Save
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </header>

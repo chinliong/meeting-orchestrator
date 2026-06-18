@@ -9,6 +9,8 @@ interface Props {
   task: Task;
   /** Project name, shown only when browsing tasks across all projects. */
   projectName?: string | null;
+  /** False for view-only (shared) boards: editing affordances are hidden. */
+  canEdit: boolean;
   onDragStart: (e: React.DragEvent, task: Task) => void;
   onEdit: (task: Task) => void;
   onDelete: (id: number) => void;
@@ -18,6 +20,7 @@ interface Props {
 export default function TaskCard({
   task,
   projectName,
+  canEdit,
   onDragStart,
   onEdit,
   onDelete,
@@ -52,11 +55,17 @@ export default function TaskCard({
 
   return (
     <div
-      draggable={!renaming}
+      draggable={canEdit && !renaming}
       onDragStart={(e) => onDragStart(e, task)}
-      className="group relative mb-2.5 cursor-grab rounded-lg border border-slate-200 bg-white p-3 shadow-card transition hover:border-slate-300 hover:shadow-card-hover active:cursor-grabbing"
+      className={`group relative mb-2.5 rounded-lg border border-slate-200 bg-white p-3 shadow-card transition hover:border-slate-300 hover:shadow-card-hover ${
+        canEdit ? "cursor-grab active:cursor-grabbing" : ""
+      }`}
     >
-      <div className="absolute right-1.5 top-1.5 flex gap-0.5 opacity-0 transition group-hover:opacity-100">
+      <div
+        className={`absolute right-1.5 top-1.5 flex gap-0.5 opacity-0 transition group-hover:opacity-100 ${
+          canEdit ? "" : "hidden"
+        }`}
+      >
         <button
           onClick={() => onEdit(task)}
           className="rounded p-0.5 text-slate-300 transition hover:bg-slate-100 hover:text-slate-900"
@@ -88,7 +97,17 @@ export default function TaskCard({
 
       {/* Eyebrow: source meeting (editable) or "Added manually" for hand-created tasks. */}
       {task.meeting_id !== null ? (
-        renaming ? (
+        !canEdit ? (
+          <div
+            className="mb-1.5 flex items-center gap-1 pr-12 text-[11px] font-medium text-slate-400"
+            title={`From meeting: ${task.meeting_title}`}
+          >
+            <svg viewBox="0 0 20 20" className="h-3 w-3 shrink-0" fill="currentColor">
+              <path d="M4 4a2 2 0 012-2h5.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 5a.75.75 0 000 1.5h6a.75.75 0 000-1.5H7zm0 3a.75.75 0 000 1.5h4a.75.75 0 000-1.5H7z" />
+            </svg>
+            <span className="truncate">{task.meeting_title}</span>
+          </div>
+        ) : renaming ? (
           <div className="mb-1.5 flex items-center gap-1 pr-1">
             <input
               autoFocus

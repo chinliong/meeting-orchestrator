@@ -1,14 +1,25 @@
 import logging
 import time
 from datetime import date
+from typing import Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Form,
+    Header,
+    HTTPException,
+    UploadFile,
+)
 from sqlalchemy.orm import Session
 
+from app.auth import get_optional_user, require_project_edit, require_project_view
 from app.db import SessionLocal, get_db
 from app.llm import transcription
 from app.llm.parser import TranscriptParser
-from app.models.models import Meeting, MeetingStatus, Project, Task
+from app.models.models import Meeting, MeetingStatus, Project, Task, User
 from app.schemas.schemas import MeetingOut, MeetingUpdate, TranscriptSubmit
 
 router = APIRouter(prefix="/transcripts", tags=["transcripts"])
@@ -106,10 +117,13 @@ def _transcribe_and_extract(meeting_id: int, data: bytes, suffix: str) -> None:
 
 
 @router.post("", response_model=MeetingOut, status_code=201)
-def submit_transcript(payload: TranscriptSubmit, db: Session = Depends(get_db)):
-    project = db.get(Project, payload.project_id)
-    if project is None:
-        raise HTTPException(status_code=404, detail="Project not found")
+def submit_transcript(
+    payload: TranscriptSubmit,
+    user: Optional[User] = Depends(get_optional_user),
+    x_workspace_token: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+):
+    project = require_project_edit(db, payload.project_id, user, x_workspace_token)
     return _process_transcript(project, _meeting_title(payload.title), payload.transcript_text, db)
 
 
@@ -119,6 +133,8 @@ async def submit_audio(
     project_id: int = Form(...),
     title: str = Form(""),
     file: UploadFile = File(...),
+    user: Optional[User] = Depends(get_optional_user),
+    x_workspace_token: Optional[str] = Header(None),
     db: Session = Depends(get_db),
 ):
     """Accept an audio/video upload and transcribe it in the background.
@@ -128,9 +144,7 @@ async def submit_audio(
     request so a slow Whisper call can't time out the connection (which the browser reported
     as an opaque "Failed to fetch").
     """
-    project = db.get(Project, project_id)
-    if project is None:
-        raise HTTPException(status_code=404, detail="Project not found")
+    project = require_project_edit(db, project_id, user, x_workspace_token)
 
     if not transcription.is_available():
         raise HTTPException(
@@ -162,19 +176,32 @@ async def submit_audio(
 
 
 @router.get("/{meeting_id}", response_model=MeetingOut)
-def get_meeting(meeting_id: int, db: Session = Depends(get_db)):
+def get_meeting(
+    meeting_id: int,
+    user: Optional[User] = Depends(get_optional_user),
+    x_workspace_token: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+):
     meeting = db.get(Meeting, meeting_id)
     if meeting is None:
         raise HTTPException(status_code=404, detail="Meeting not found")
+    require_project_view(db, meeting.project_id, user, x_workspace_token)
     return meeting
 
 
 @router.patch("/{meeting_id}", response_model=MeetingOut)
-def rename_meeting(meeting_id: int, payload: MeetingUpdate, db: Session = Depends(get_db)):
+def rename_meeting(
+    meeting_id: int,
+    payload: MeetingUpdate,
+    user: Optional[User] = Depends(get_optional_user),
+    x_workspace_token: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+):
     """Rename a meeting. The new title is reflected on every task extracted from it."""
     meeting = db.get(Meeting, meeting_id)
     if meeting is None:
         raise HTTPException(status_code=404, detail="Meeting not found")
+    require_project_edit(db, meeting.project_id, user, x_workspace_token)
     meeting.title = _meeting_title(payload.title)
     db.commit()
     db.refresh(meeting)

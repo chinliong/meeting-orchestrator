@@ -15,6 +15,8 @@ interface Props {
   tasks: Task[];
   /** When set, each card shows which project it belongs to (cross-project view). */
   projectNames?: Map<number, string>;
+  /** False for view-only (shared) boards: drag and card editing are disabled. */
+  canEdit: boolean;
   onStatusChange: (taskId: number, status: TaskStatus) => void;
   onEdit: (task: Task) => void;
   onDelete: (taskId: number) => void;
@@ -24,6 +26,7 @@ interface Props {
 export default function KanbanBoard({
   tasks,
   projectNames,
+  canEdit,
   onStatusChange,
   onEdit,
   onDelete,
@@ -38,6 +41,7 @@ export default function KanbanBoard({
   const handleDrop = (e: React.DragEvent, status: TaskStatus) => {
     e.preventDefault();
     setDragOverColumn(null);
+    if (!canEdit) return;
     const taskId = Number(e.dataTransfer.getData("taskId"));
     if (taskId) onStatusChange(taskId, status);
   };
@@ -89,6 +93,7 @@ export default function KanbanBoard({
                   key={task.id}
                   task={task}
                   projectName={projectNames?.get(task.project_id) ?? null}
+                  canEdit={canEdit}
                   onDragStart={handleDragStart}
                   onEdit={onEdit}
                   onDelete={onDelete}

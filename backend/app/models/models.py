@@ -1,12 +1,29 @@
 from __future__ import annotations
 
 import enum
+import secrets
 
 from sqlalchemy import Column, Date, DateTime, Enum, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.db import Base
+
+
+def _new_token() -> str:
+    """An unguessable, permanent capability token for a share link."""
+    return secrets.token_urlsafe(32)
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, nullable=False, unique=True, index=True)
+    password_hash = Column(String, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+    projects = relationship("Project", back_populates="owner")
 
 
 class TaskStatus(str, enum.Enum):
@@ -30,6 +47,13 @@ class Project(Base):
     description = Column(Text, default="")
     created_at = Column(DateTime, server_default=func.now())
 
+    # Null owner = a guest-created board, reachable only via its share links.
+    owner_user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
+    # Permanent capability tokens: holding the link is the credential.
+    view_token = Column(String, nullable=False, unique=True, index=True, default=_new_token)
+    edit_token = Column(String, nullable=False, unique=True, index=True, default=_new_token)
+
+    owner = relationship("User", back_populates="projects")
     meetings = relationship("Meeting", back_populates="project", cascade="all, delete-orphan")
     tasks = relationship("Task", back_populates="project", cascade="all, delete-orphan")
 
