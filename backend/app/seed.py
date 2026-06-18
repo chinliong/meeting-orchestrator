@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from app.auth import hash_password
 from app.db import Base, SessionLocal, engine
 from app.models.models import (
     Meeting,
@@ -19,7 +20,12 @@ from app.models.models import (
     Stakeholder,
     Task,
     TaskStatus,
+    User,
 )
+
+# A demo account that owns the sample boards, so they're visible after a fresh seed.
+DEMO_EMAIL = "demo@example.com"
+DEMO_PASSWORD = "demo1234"
 
 SAMPLE_STAKEHOLDERS = [
     ("Aisha Rahman", "aisha.rahman@example.com"),
@@ -53,13 +59,21 @@ def seed():
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
+        demo = db.query(User).filter_by(email=DEMO_EMAIL).first()
+        if demo is None:
+            demo = User(email=DEMO_EMAIL, password_hash=hash_password(DEMO_PASSWORD))
+            db.add(demo)
+            db.flush()
+
         projects = {}
         for name, description in SAMPLE_PROJECTS:
             project = db.query(Project).filter_by(name=name).first()
             if project is None:
-                project = Project(name=name, description=description)
+                project = Project(name=name, description=description, owner_user_id=demo.id)
                 db.add(project)
                 db.flush()
+            elif project.owner_user_id is None:
+                project.owner_user_id = demo.id
             projects[name] = project
 
         for name, email in SAMPLE_STAKEHOLDERS:
@@ -92,6 +106,7 @@ def seed():
 
         db.commit()
         print("Seed complete.")
+        print(f"Demo login: {DEMO_EMAIL} / {DEMO_PASSWORD}")
     finally:
         db.close()
 
