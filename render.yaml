@@ -19,10 +19,10 @@ services:
       # Signing secret for account auth tokens — Render generates a strong random value.
       - key: AUTH_SECRET
         generateValue: true
+      # External Postgres (e.g. Neon). Paste the connection string in the dashboard —
+      # postgresql://...neon.tech/<db>?sslmode=require. db.py normalises postgres:// URLs.
       - key: DATABASE_URL
-        fromDatabase:
-          name: orchestrator-db
-          property: connectionString
+        sync: false
       # Set to the deployed frontend origin after its first deploy,
       # e.g. https://orchestrator-frontend.onrender.com
       - key: CORS_ORIGINS
@@ -50,9 +50,3 @@ services:
       # e.g. https://orchestrator-backend.onrender.com/api/v1, then trigger a frontend rebuild.
       - key: NEXT_PUBLIC_API_BASE
         sync: false
-
-databases:
-  - name: orchestrator-db
-    plan: free
-    databaseName: orchestrator
-    user: orchestrator
