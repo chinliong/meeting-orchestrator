@@ -39,7 +39,7 @@ services:
         sync: false
 
   - type: web
-    name: orchestrator-frontend
+    name: meeting-orchestrator
     runtime: docker
     dockerfilePath: ./frontend/Dockerfile
     dockerContext: ./frontend
