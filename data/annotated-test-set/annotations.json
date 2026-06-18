@@ -6,10 +6,15 @@
       "Parallel ledger cutover will align with APAC mapping completion instead of being done separately."
     ],
     "expected_action_items": [
-      { "description": "finish the APAC cost center hierarchy mapping", "owner": "Daniel", "deadline": "2026-06-19" },
-      { "description": "confirm the new cost center codes", "owner": "Priya", "deadline": "2026-06-17" },
-      { "description": "loop in the banking team for next week's session", "owner": "Aisha", "deadline": null },
-      { "description": "review the open items report and flag duplicates", "owner": "Priya", "deadline": "2026-06-18" }
+      { "description": "finish the APAC cost center hierarchy mapping", "owner": "Daniel", "deadline": "2026-06-19", "status": "in_progress" },
+      { "description": "send the new cost center codes to Daniel", "owner": "Priya", "deadline": "2026-06-17", "status": "todo" },
+      { "description": "loop in the banking team for next week's integration session", "owner": "Aisha", "deadline": null, "status": "todo" },
+      { "description": "review the open items report and flag duplicate postings", "owner": "Priya", "deadline": null, "status": "done" },
+      { "description": "clear the eleven duplicate postings from the system", "owner": "Priya", "deadline": "2026-06-25", "status": "todo" },
+      { "description": "send the change request for additional consulting days to Wei Lin", "owner": "Daniel", "deadline": "2026-06-18", "status": "todo" },
+      { "description": "complete the EMEA cost center mapping", "owner": "Daniel", "deadline": null, "status": "done" },
+      { "description": "diagnose the root cause of the bank statement upload test failure", "owner": "Daniel", "deadline": null, "status": "done" },
+      { "description": "fix the MT940 parser config for multi-currency statements", "owner": "Daniel", "deadline": null, "status": "in_progress" }
     ]
   },
   {
@@ -19,9 +24,14 @@
       "Run the warehouse readiness test in degraded mode without barcode scanning, and retest once the firmware patch lands."
     ],
     "expected_action_items": [
-      { "description": "chase the vendor for a firm barcode firmware patch date", "owner": "Marcus", "deadline": "2026-06-19" },
-      { "description": "draft a one-page risk note on the scanner delay for the steering committee", "owner": "Marcus", "deadline": "2026-06-23" },
-      { "description": "update the cutover runbook to reflect the degraded-mode plan", "owner": null, "deadline": null }
+      { "description": "chase the vendor for a firm barcode firmware patch date", "owner": "Marcus", "deadline": "2026-06-19", "status": "todo" },
+      { "description": "draft a one-page risk note on the scanner delay for the steering committee", "owner": "Marcus", "deadline": "2026-06-23", "status": "todo" },
+      { "description": "update the cutover runbook to reflect the degraded-mode plan", "owner": "Aisha", "deadline": null, "status": "todo" },
+      { "description": "investigate the WM to TMS interface timeout errors", "owner": "Daniel", "deadline": "2026-06-22", "status": "todo" },
+      { "description": "run the firmware compatibility test matrix", "owner": "Marcus", "deadline": null, "status": "done" },
+      { "description": "complete the goods movement type mapping", "owner": "Daniel", "deadline": null, "status": "done" },
+      { "description": "rebuild the test environment for degraded-mode manual entry", "owner": "Marcus", "deadline": "2026-06-17", "status": "in_progress" },
+      { "description": "configure the label printer integration", "owner": "Daniel", "deadline": null, "status": "in_progress" }
     ]
   },
   {
@@ -31,10 +41,14 @@
       "All firefighter access will go through the emergency access management workflow with no exceptions."
     ],
     "expected_action_items": [
-      { "description": "circulate the segregation-of-duties conflict report to the team", "owner": "Marcus", "deadline": "2026-06-18" },
-      { "description": "prepare the mitigating controls document for the external audit", "owner": "Daniel", "deadline": "2026-06-25" },
-      { "description": "tune the production authorization trace settings to reduce log volume", "owner": null, "deadline": null },
-      { "description": "schedule a penetration test with the vendor", "owner": "Marcus", "deadline": "2026-06-26" }
+      { "description": "circulate the segregation-of-duties conflict report to the team", "owner": "Marcus", "deadline": "2026-06-18", "status": "todo" },
+      { "description": "prepare the mitigating controls document for the external audit", "owner": "Daniel", "deadline": "2026-06-25", "status": "todo" },
+      { "description": "tune the production authorization trace settings to reduce log volume", "owner": null, "deadline": null, "status": "todo" },
+      { "description": "schedule a penetration test with the external vendor", "owner": "Marcus", "deadline": "2026-06-26", "status": "todo" },
+      { "description": "run the segregation-of-duties conflict analysis", "owner": "Marcus", "deadline": null, "status": "done" },
+      { "description": "build and unit-test the twelve finance composite roles", "owner": "Daniel", "deadline": null, "status": "done" },
+      { "description": "complete the legacy system user access review", "owner": "Priya", "deadline": null, "status": "done" },
+      { "description": "build out the emergency access management workflow configuration", "owner": "Marcus", "deadline": null, "status": "in_progress" }
     ]
   },
   {
@@ -44,10 +58,14 @@
       "Proceed with a big-bang cutover rather than a phased approach, per steering committee direction."
     ],
     "expected_action_items": [
-      { "description": "clean the source data and rerun the material master validation", "owner": "Priya", "deadline": "2026-06-22" },
-      { "description": "finalize the customer master mapping", "owner": "Daniel", "deadline": "2026-06-19" },
-      { "description": "request business sign-off for the 18-hour extended downtime window", "owner": "Aisha", "deadline": "2026-06-24" },
-      { "description": "prepare the data reconciliation report template for post-load validation", "owner": null, "deadline": null }
+      { "description": "rerun the material master validation against the cleaned data", "owner": "Priya", "deadline": "2026-06-22", "status": "in_progress" },
+      { "description": "finalize the customer master mapping", "owner": "Daniel", "deadline": "2026-06-19", "status": "todo" },
+      { "description": "request business sign-off for the eighteen-hour extended downtime window", "owner": "Aisha", "deadline": "2026-06-24", "status": "todo" },
+      { "description": "prepare the data reconciliation report template for post-load validation", "owner": "Priya", "deadline": null, "status": "in_progress" },
+      { "description": "run the timed trial load at production volumes", "owner": "Marcus", "deadline": null, "status": "done" },
+      { "description": "write and test the fallback rollback script", "owner": "Marcus", "deadline": null, "status": "done" },
+      { "description": "write the rollback steps into the cutover runbook", "owner": "Daniel", "deadline": "2026-06-25", "status": "todo" },
+      { "description": "clean the material master source data extract", "owner": "Priya", "deadline": null, "status": "done" }
     ]
   }
 ]

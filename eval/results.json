@@ -1,77 +1,79 @@
 [
   {
     "variant": "baseline",
-    "expected_items": 15,
-    "predicted_items": 16,
-    "matched_items": 15,
-    "precision": 0.938,
-    "recall": 1.0,
-    "f1": 0.968,
-    "owner_accuracy": 0.933,
-    "deadline_exact_accuracy": 0.636,
-    "deadline_within_3d_accuracy": 1.0,
+    "expected_items": 33,
+    "predicted_items": 30,
+    "matched_items": 25,
+    "precision": 0.833,
+    "recall": 0.758,
+    "f1": 0.794,
+    "owner_accuracy": 1.0,
+    "status_accuracy": 0.88,
+    "deadline_exact_accuracy": 0.667,
+    "deadline_within_3d_accuracy": 0.8,
     "per_transcript": [
       {
         "transcript": "finance-workshop-01.txt",
-        "expected": 4,
-        "predicted": 5,
-        "matched": 4
+        "expected": 9,
+        "predicted": 7,
+        "matched": 5
       },
       {
         "transcript": "logistics-workshop-02.txt",
-        "expected": 3,
-        "predicted": 3,
-        "matched": 3
+        "expected": 8,
+        "predicted": 9,
+        "matched": 7
       },
       {
         "transcript": "security-workshop-03.txt",
-        "expected": 4,
-        "predicted": 4,
-        "matched": 4
+        "expected": 8,
+        "predicted": 5,
+        "matched": 5
       },
       {
         "transcript": "data-migration-workshop-04.txt",
-        "expected": 4,
-        "predicted": 4,
-        "matched": 4
+        "expected": 8,
+        "predicted": 9,
+        "matched": 8
       }
     ]
   },
   {
     "variant": "prod",
-    "expected_items": 15,
-    "predicted_items": 16,
-    "matched_items": 15,
-    "precision": 0.938,
-    "recall": 1.0,
-    "f1": 0.968,
+    "expected_items": 33,
+    "predicted_items": 37,
+    "matched_items": 30,
+    "precision": 0.811,
+    "recall": 0.909,
+    "f1": 0.857,
     "owner_accuracy": 1.0,
-    "deadline_exact_accuracy": 0.909,
-    "deadline_within_3d_accuracy": 1.0,
+    "status_accuracy": 0.933,
+    "deadline_exact_accuracy": 0.8,
+    "deadline_within_3d_accuracy": 0.867,
     "per_transcript": [
       {
         "transcript": "finance-workshop-01.txt",
-        "expected": 4,
-        "predicted": 5,
-        "matched": 4
+        "expected": 9,
+        "predicted": 11,
+        "matched": 8
       },
       {
         "transcript": "logistics-workshop-02.txt",
-        "expected": 3,
-        "predicted": 3,
-        "matched": 3
+        "expected": 8,
+        "predicted": 9,
+        "matched": 7
       },
       {
         "transcript": "security-workshop-03.txt",
-        "expected": 4,
-        "predicted": 4,
-        "matched": 4
+        "expected": 8,
+        "predicted": 8,
+        "matched": 7
       },
       {
         "transcript": "data-migration-workshop-04.txt",
-        "expected": 4,
-        "predicted": 4,
-        "matched": 4
+        "expected": 8,
+        "predicted": 9,
+        "matched": 8
       }
     ]
   }

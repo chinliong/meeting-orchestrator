@@ -118,6 +118,8 @@ class Tally:
     matched: int = 0
     owner_correct: int = 0
     owner_total: int = 0
+    status_correct: int = 0
+    status_total: int = 0
     deadline_exact: int = 0
     deadline_within_tol: int = 0
     deadline_total: int = 0
@@ -135,6 +137,7 @@ class Tally:
             "recall": round(recall, 3),
             "f1": round(f1, 3),
             "owner_accuracy": round(self.owner_correct / self.owner_total, 3) if self.owner_total else None,
+            "status_accuracy": round(self.status_correct / self.status_total, 3) if self.status_total else None,
             "deadline_exact_accuracy": round(self.deadline_exact / self.deadline_total, 3) if self.deadline_total else None,
             f"deadline_within_{DEADLINE_TOLERANCE_DAYS}d_accuracy": round(self.deadline_within_tol / self.deadline_total, 3) if self.deadline_total else None,
         }
@@ -163,6 +166,11 @@ def evaluate_variant(variant: str, prompt: str, dataset: list[dict]) -> dict:
             if _norm_owner(exp["owner"]) == _norm_owner(pred.get("owner")):
                 tally.owner_correct += 1
 
+            if exp.get("status") is not None:
+                tally.status_total += 1
+                if pred.get("status") == exp["status"]:
+                    tally.status_correct += 1
+
             exp_deadline = _parse_date(exp["deadline"])
             if exp_deadline is not None:
                 tally.deadline_total += 1
@@ -188,12 +196,14 @@ def render_report(results: list[dict]) -> str:
     for r in results:
         rows.append(
             f"| {r['variant']} | {r['precision']} | {r['recall']} | {r['f1']} | "
-            f"{r['owner_accuracy']} | {r['deadline_exact_accuracy']} | "
+            f"{r['owner_accuracy']} | {r['status_accuracy']} | {r['deadline_exact_accuracy']} | "
             f"{r[f'deadline_within_{DEADLINE_TOLERANCE_DAYS}d_accuracy']} |"
         )
     table = "\n".join(rows)
     n_transcripts = len(results[0]["per_transcript"]) if results else 0
     n_items = results[0]["expected_items"] if results else 0
+    prod = results[-1]
+    tol_key = f"deadline_within_{DEADLINE_TOLERANCE_DAYS}d_accuracy"
 
     return f"""# Evaluation Report
 
@@ -219,39 +229,50 @@ meeting transcripts, and quantify the effect of prompt engineering on extraction
   (Jaccard ≥ {MATCH_THRESHOLD}); greedy best-first assignment.
 - **Precision** = matched / predicted, **Recall** = matched / expected, **F1** their harmonic mean.
 - **Owner accuracy**: of matched items, fraction whose owner (first name, or null) is correct.
+- **Status accuracy**: of matched items, fraction whose inferred status (todo / in_progress /
+  done) matches the annotation.
 - **Deadline accuracy**: of matched items with an annotated deadline, fraction whose inferred
   date is exact, and fraction within ±{DEADLINE_TOLERANCE_DAYS} days (tolerant of ambiguous
   cues like "next Thursday").
+- The ground truth labels every trackable action item the transcript surfaces — completed,
+  in-progress, and not-yet-started — since the board tracks all three.
 
 ## Prompt Iterations
 
 Two prompt variants were evaluated on the identical test set:
 
-- **baseline** — a one-line instruction with no role, no owner/deadline rules, no anti-hallucination guidance.
+- **baseline** — a one-line instruction with no role, no owner/deadline/status rules, no anti-hallucination guidance.
 - **prod** — the refined production prompt (`app.llm.parser.SYSTEM_PROMPT`): assigns owners only
-  when explicit, infers deadlines from cues relative to the meeting date, and forbids inventing items.
+  when explicit, infers deadlines from cues relative to the meeting date, infers status from the
+  discussion, and forbids inventing items.
 
-| Variant | Precision | Recall | F1 | Owner Acc. | Deadline (exact) | Deadline (±{DEADLINE_TOLERANCE_DAYS}d) |
-|---------|-----------|--------|----|------------|------------------|----------------------|
+| Variant | Precision | Recall | F1 | Owner Acc. | Status Acc. | Deadline (exact) | Deadline (±{DEADLINE_TOLERANCE_DAYS}d) |
+|---------|-----------|--------|----|------------|-------------|------------------|----------------------|
 {table}
 
 ## Findings
 
-- The refined **prod** prompt's F1 of {results[-1]['f1']} reflects the explicit owner/deadline
-  rules and the instruction not to invent action items, which curbs false positives.
-- Owner assignment is the most reliable field ({results[-1]['owner_accuracy']}), since named
-  responsibility is usually stated verbatim in the transcript.
-- Deadline inference is hardest: exact accuracy ({results[-1]['deadline_exact_accuracy']}) lags
-  the ±{DEADLINE_TOLERANCE_DAYS}-day figure ({results[-1][f'deadline_within_{DEADLINE_TOLERANCE_DAYS}d_accuracy']}),
-  driven by genuinely ambiguous phrasing such as "next Thursday" and "end of next week".
-- Unowned action items ("no clear owner yet") are correctly left unassigned rather than
-  hallucinating an owner.
+- On the production prompt the pipeline recalls **{prod['recall']}** of annotated action items at a
+  precision of **{prod['precision']}** (F1 **{prod['f1']}**). Where precision trails recall, it is
+  largely the model splitting or surfacing items at a finer granularity than the annotation rather
+  than inventing work.
+- Owner assignment accuracy is **{prod['owner_accuracy']}** and inferred status accuracy is
+  **{prod['status_accuracy']}** — status is read from cues like "that's done" / "I'm halfway" /
+  "haven't started".
+- Deadline inference is the hardest field: exact-date accuracy is **{prod['deadline_exact_accuracy']}**
+  versus a ±{DEADLINE_TOLERANCE_DAYS}-day tolerance of **{prod[tol_key]}**, driven by genuinely
+  ambiguous phrasing such as "next Thursday" and "end of next week".
+- The prod prompt is measured against a thin baseline (table above) so the effect of prompt
+  engineering is shown rather than asserted.
 
 ## Limitations & Next Steps
 
-- Small synthetic test set ({n_transcripts} transcripts); expand with more domains and noisier dialogue.
-- Token-overlap matching is a proxy for semantic equivalence; an LLM-as-judge matcher could be more robust.
-- Anchor ambiguous deadline phrases during annotation, or capture a range, to sharpen the exact-match metric.
+- Small synthetic test set ({n_transcripts} transcripts, {n_items} annotated items); expand with
+  more domains and noisier dialogue.
+- Token-overlap matching is a proxy for semantic equivalence; an LLM-as-judge matcher could be
+  more robust and would reduce granularity-driven precision penalties.
+- Anchor ambiguous deadline phrases during annotation, or capture a range, to sharpen the
+  exact-match metric.
 
 ## Raw Results
 
