@@ -69,7 +69,7 @@ export default function ProjectPicker({ projects, selectedProjectId, onSelect }:
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex min-w-[160px] max-w-[260px] items-center gap-2 rounded-lg border border-slate-300 bg-white py-2 pl-3 pr-2 text-sm font-medium text-slate-700 outline-none transition hover:bg-slate-50 focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+        className="flex min-w-[120px] max-w-[160px] items-center gap-2 rounded-lg border border-slate-300 bg-white py-2 pl-3 pr-2 text-sm font-medium text-slate-700 outline-none transition hover:bg-slate-50 focus:border-slate-900 focus:ring-2 focus:ring-slate-200 sm:max-w-[260px]"
       >
         <span className="flex-1 truncate text-left">{selected?.name ?? "Select project"}</span>
         <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0 text-slate-400" fill="currentColor">
@@ -82,7 +82,7 @@ export default function ProjectPicker({ projects, selectedProjectId, onSelect }:
       </button>
 
       {open && (
-        <div className="absolute right-0 z-40 mt-1 w-72 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+        <div className="absolute left-0 z-40 mt-1 w-72 max-w-[calc(100vw_-_2rem)] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg sm:left-auto sm:right-0">
           <div className="border-b border-slate-100 p-2">
             <input
               ref={inputRef}

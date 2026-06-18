@@ -48,12 +48,13 @@ export default function TopBar({
           )}
           <button
             onClick={onNewProject}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
+            className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
           >
-            <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
+            <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0" fill="currentColor">
               <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" />
             </svg>
-            New project
+            <span className="hidden sm:inline">New project</span>
+            <span className="sm:hidden">New</span>
           </button>
 
           <div className="ml-1 flex items-center gap-2 border-l border-slate-200 pl-3">
@@ -64,7 +65,7 @@ export default function TopBar({
                 </span>
                 <button
                   onClick={onLogout}
-                  className="rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50"
+                  className="shrink-0 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50"
                 >
                   Sign out
                 </button>
@@ -74,7 +75,7 @@ export default function TopBar({
                 <span className="hidden text-sm text-slate-400 sm:inline">Guest</span>
                 <button
                   onClick={onLogin}
-                  className="rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-50"
+                  className="shrink-0 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-50"
                 >
                   Sign in / Save
                 </button>
