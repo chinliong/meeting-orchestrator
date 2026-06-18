@@ -1,5 +1,6 @@
 "use client";
 
+import ProjectPicker from "@/components/ProjectPicker";
 import type { Project, User } from "@/lib/types";
 
 interface Props {
@@ -39,30 +40,11 @@ export default function TopBar({
 
         <div className="flex items-center gap-2">
           {projects.length > 0 && (
-            <div className="relative">
-              <select
-                value={selectedProjectId ?? ""}
-                onChange={(e) => onSelectProject(Number(e.target.value))}
-                className="appearance-none rounded-lg border border-slate-300 bg-white py-2 pl-3 pr-9 text-sm font-medium text-slate-700 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
-              >
-                {projects.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-              <svg
-                viewBox="0 0 20 20"
-                className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
+            <ProjectPicker
+              projects={projects}
+              selectedProjectId={selectedProjectId}
+              onSelect={onSelectProject}
+            />
           )}
           <button
             onClick={onNewProject}
