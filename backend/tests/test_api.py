@@ -125,6 +125,37 @@ def test_create_task_unknown_project(client):
     assert resp.status_code == 404
 
 
+def test_rename_meeting_updates_task_titles(client, project, stub_parser):
+    meeting = client.post(
+        "/api/v1/transcripts",
+        json={"project_id": project["id"], "title": "Draft", "transcript_text": "..."},
+    ).json()
+
+    resp = client.patch(f"/api/v1/transcripts/{meeting['id']}", json={"title": "Kickoff"})
+    assert resp.status_code == 200
+    assert resp.json()["title"] == "Kickoff"
+
+    tasks = client.get(f"/api/v1/tasks?project_id={project['id']}").json()
+    assert all(t["meeting_title"] == "Kickoff" for t in tasks)
+
+
+def test_rename_meeting_not_found(client):
+    assert client.patch("/api/v1/transcripts/9999", json={"title": "x"}).status_code == 404
+
+
+def test_list_tasks_across_all_projects(client, stub_parser):
+    a = client.post("/api/v1/projects", json={"name": "A"}).json()
+    b = client.post("/api/v1/projects", json={"name": "B"}).json()
+    for p in (a, b):
+        client.post(
+            "/api/v1/transcripts",
+            json={"project_id": p["id"], "title": "w", "transcript_text": "..."},
+        )
+    # No project_id filter returns every project's tasks (powers the "All projects" view).
+    all_tasks = client.get("/api/v1/tasks").json()
+    assert {t["project_id"] for t in all_tasks} == {a["id"], b["id"]}
+
+
 def test_submit_transcript_unknown_project(client, stub_parser):
     resp = client.post(
         "/api/v1/transcripts",

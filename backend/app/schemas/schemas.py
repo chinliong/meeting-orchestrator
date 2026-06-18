@@ -71,6 +71,10 @@ class TaskUpdate(BaseModel):
     status: Optional[TaskStatus] = None
 
 
+class MeetingUpdate(BaseModel):
+    title: str
+
+
 class MeetingOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

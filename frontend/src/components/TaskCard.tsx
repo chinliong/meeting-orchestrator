@@ -1,21 +1,58 @@
 "use client";
 
+import { useState } from "react";
+
 import type { Task } from "@/lib/types";
 import { avatarColor, confidenceTone, formatDate, initials, isOverdue } from "@/lib/format";
 
 interface Props {
   task: Task;
+  /** Project name, shown only when browsing tasks across all projects. */
+  projectName?: string | null;
   onDragStart: (e: React.DragEvent, task: Task) => void;
   onEdit: (task: Task) => void;
   onDelete: (id: number) => void;
+  onRenameMeeting: (meetingId: number, title: string) => Promise<void>;
 }
 
-export default function TaskCard({ task, onDragStart, onEdit, onDelete }: Props) {
+export default function TaskCard({
+  task,
+  projectName,
+  onDragStart,
+  onEdit,
+  onDelete,
+  onRenameMeeting,
+}: Props) {
   const overdue = task.deadline && task.status !== "done" && isOverdue(task.deadline);
+
+  const [expanded, setExpanded] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const [draftTitle, setDraftTitle] = useState("");
+  const [savingTitle, setSavingTitle] = useState(false);
+
+  const startRename = () => {
+    setDraftTitle(task.meeting_title ?? "");
+    setRenaming(true);
+  };
+
+  const commitRename = async () => {
+    const next = draftTitle.trim();
+    if (task.meeting_id === null || !next || next === task.meeting_title) {
+      setRenaming(false);
+      return;
+    }
+    setSavingTitle(true);
+    try {
+      await onRenameMeeting(task.meeting_id, next);
+      setRenaming(false);
+    } finally {
+      setSavingTitle(false);
+    }
+  };
 
   return (
     <div
-      draggable
+      draggable={!renaming}
       onDragStart={(e) => onDragStart(e, task)}
       className="group relative mb-2.5 cursor-grab rounded-lg border border-slate-200 bg-white p-3 shadow-card transition hover:border-slate-300 hover:shadow-card-hover active:cursor-grabbing"
     >
@@ -40,16 +77,51 @@ export default function TaskCard({ task, onDragStart, onEdit, onDelete }: Props)
         </button>
       </div>
 
-      {task.meeting_title ? (
-        <div
-          className="mb-1.5 flex items-center gap-1 pr-12 text-[11px] font-medium text-slate-400"
-          title={`From meeting: ${task.meeting_title}`}
-        >
+      {projectName && (
+        <div className="mb-1 flex items-center gap-1 pr-12 text-[11px] font-medium text-slate-500">
           <svg viewBox="0 0 20 20" className="h-3 w-3 shrink-0" fill="currentColor">
-            <path d="M4 4a2 2 0 012-2h5.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 5a.75.75 0 000 1.5h6a.75.75 0 000-1.5H7zm0 3a.75.75 0 000 1.5h4a.75.75 0 000-1.5H7z" />
+            <path d="M3 5a2 2 0 012-2h3.5l1.5 1.5H15a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" />
           </svg>
-          <span className="truncate">{task.meeting_title}</span>
+          <span className="truncate">{projectName}</span>
         </div>
+      )}
+
+      {/* Eyebrow: source meeting (editable) or "Added manually" for hand-created tasks. */}
+      {task.meeting_id !== null ? (
+        renaming ? (
+          <div className="mb-1.5 flex items-center gap-1 pr-1">
+            <input
+              autoFocus
+              value={draftTitle}
+              onChange={(e) => setDraftTitle(e.target.value)}
+              onBlur={commitRename}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitRename();
+                if (e.key === "Escape") setRenaming(false);
+              }}
+              disabled={savingTitle}
+              className="w-full rounded border border-slate-300 px-1.5 py-0.5 text-[11px] font-medium text-slate-700 outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-200"
+            />
+          </div>
+        ) : (
+          <button
+            onClick={startRename}
+            title={`From meeting: ${task.meeting_title}\nClick to rename (updates all its tasks)`}
+            className="group/title mb-1.5 flex max-w-full items-center gap-1 rounded pr-12 text-[11px] font-medium text-slate-400 transition hover:text-slate-600"
+          >
+            <svg viewBox="0 0 20 20" className="h-3 w-3 shrink-0" fill="currentColor">
+              <path d="M4 4a2 2 0 012-2h5.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 5a.75.75 0 000 1.5h6a.75.75 0 000-1.5H7zm0 3a.75.75 0 000 1.5h4a.75.75 0 000-1.5H7z" />
+            </svg>
+            <span className="truncate">{task.meeting_title}</span>
+            <svg
+              viewBox="0 0 20 20"
+              className="h-3 w-3 shrink-0 opacity-0 transition group-hover/title:opacity-100"
+              fill="currentColor"
+            >
+              <path d="M13.586 3.586a2 2 0 112.828 2.828l-8.5 8.5a2 2 0 01-.879.506l-3.012.86a.5.5 0 01-.617-.617l.86-3.012a2 2 0 01.506-.879l8.5-8.5z" />
+            </svg>
+          </button>
+        )
       ) : (
         <div className="mb-1.5 flex items-center gap-1 pr-12 text-[11px] font-medium text-slate-400">
           <svg viewBox="0 0 20 20" className="h-3 w-3 shrink-0" fill="currentColor">
@@ -59,7 +131,14 @@ export default function TaskCard({ task, onDragStart, onEdit, onDelete }: Props)
         </div>
       )}
 
-      <p className="pr-12 text-sm font-medium leading-snug text-slate-800">{task.description}</p>
+      <p
+        onClick={() => setExpanded((v) => !v)}
+        className={`pr-12 text-sm font-medium leading-snug text-slate-800 ${
+          expanded ? "" : "line-clamp-3"
+        }`}
+      >
+        {task.description}
+      </p>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         {task.owner ? (

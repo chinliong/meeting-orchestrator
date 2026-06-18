@@ -9,7 +9,7 @@ from app.db import SessionLocal, get_db
 from app.llm import transcription
 from app.llm.parser import TranscriptParser
 from app.models.models import Meeting, MeetingStatus, Project, Task
-from app.schemas.schemas import MeetingOut, TranscriptSubmit
+from app.schemas.schemas import MeetingOut, MeetingUpdate, TranscriptSubmit
 
 router = APIRouter(prefix="/transcripts", tags=["transcripts"])
 
@@ -166,4 +166,16 @@ def get_meeting(meeting_id: int, db: Session = Depends(get_db)):
     meeting = db.get(Meeting, meeting_id)
     if meeting is None:
         raise HTTPException(status_code=404, detail="Meeting not found")
+    return meeting
+
+
+@router.patch("/{meeting_id}", response_model=MeetingOut)
+def rename_meeting(meeting_id: int, payload: MeetingUpdate, db: Session = Depends(get_db)):
+    """Rename a meeting. The new title is reflected on every task extracted from it."""
+    meeting = db.get(Meeting, meeting_id)
+    if meeting is None:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+    meeting.title = _meeting_title(payload.title)
+    db.commit()
+    db.refresh(meeting)
     return meeting

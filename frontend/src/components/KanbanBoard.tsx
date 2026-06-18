@@ -5,20 +5,30 @@ import { useState } from "react";
 import type { Task, TaskStatus } from "@/lib/types";
 import TaskCard from "./TaskCard";
 
-const COLUMNS: { status: TaskStatus; title: string; dot: string }[] = [
-  { status: "todo", title: "To Do", dot: "bg-slate-400" },
-  { status: "in_progress", title: "In Progress", dot: "bg-amber-400" },
-  { status: "done", title: "Done", dot: "bg-emerald-500" },
+const COLUMNS: { status: TaskStatus; title: string; dot: string; empty: string }[] = [
+  { status: "todo", title: "To Do", dot: "bg-slate-400", empty: "Nothing to do yet" },
+  { status: "in_progress", title: "In Progress", dot: "bg-amber-400", empty: "Nothing in progress" },
+  { status: "done", title: "Done", dot: "bg-emerald-500", empty: "Nothing done yet" },
 ];
 
 interface Props {
   tasks: Task[];
+  /** When set, each card shows which project it belongs to (cross-project view). */
+  projectNames?: Map<number, string>;
   onStatusChange: (taskId: number, status: TaskStatus) => void;
   onEdit: (task: Task) => void;
   onDelete: (taskId: number) => void;
+  onRenameMeeting: (meetingId: number, title: string) => Promise<void>;
 }
 
-export default function KanbanBoard({ tasks, onStatusChange, onEdit, onDelete }: Props) {
+export default function KanbanBoard({
+  tasks,
+  projectNames,
+  onStatusChange,
+  onEdit,
+  onDelete,
+  onRenameMeeting,
+}: Props) {
   const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
 
   const handleDragStart = (e: React.DragEvent, task: Task) => {
@@ -61,17 +71,28 @@ export default function KanbanBoard({ tasks, onStatusChange, onEdit, onDelete }:
             </div>
 
             {columnTasks.length === 0 ? (
-              <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-slate-200 text-xs text-slate-400">
-                {isDropTarget ? "Drop here" : "No tasks"}
+              <div className="flex flex-1 flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-200 py-8 text-slate-300">
+                {isDropTarget ? (
+                  <span className="text-xs font-medium text-slate-500">Drop here</span>
+                ) : (
+                  <>
+                    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-7 8h8a2 2 0 002-2V7.5L14.5 3H7a2 2 0 00-2 2v13a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-xs">{column.empty}</span>
+                  </>
+                )}
               </div>
             ) : (
               columnTasks.map((task) => (
                 <TaskCard
                   key={task.id}
                   task={task}
+                  projectName={projectNames?.get(task.project_id) ?? null}
                   onDragStart={handleDragStart}
                   onEdit={onEdit}
                   onDelete={onDelete}
+                  onRenameMeeting={onRenameMeeting}
                 />
               ))
             )}

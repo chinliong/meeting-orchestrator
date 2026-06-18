@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import EditTaskModal from "@/components/EditTaskModal";
 import Filters from "@/components/Filters";
@@ -19,6 +19,7 @@ export default function DashboardPage() {
   const [selectedOwner, setSelectedOwner] = useState("");
   const [sortByDeadline, setSortByDeadline] = useState(false);
   const [search, setSearch] = useState("");
+  const [searchAllProjects, setSearchAllProjects] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [projectModal, setProjectModal] = useState<"create" | "edit" | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -34,18 +35,29 @@ export default function DashboardPage() {
       .catch((err) => setLoadError(err.message));
   }, []);
 
-  const refreshTasks = (projectId: number) => {
-    api
-      .listTasks({ projectId })
-      .then(setTasks)
-      .catch((err) => setLoadError(err.message));
-  };
+  // Load either the selected project's tasks, or every project's tasks when the
+  // "All projects" scope is on (so search can reach across folders).
+  const reloadTasks = useCallback(() => {
+    if (searchAllProjects) {
+      api.listTasks({}).then(setTasks).catch((err) => setLoadError(err.message));
+    } else if (selectedProjectId) {
+      api
+        .listTasks({ projectId: selectedProjectId })
+        .then(setTasks)
+        .catch((err) => setLoadError(err.message));
+    }
+  }, [searchAllProjects, selectedProjectId]);
 
   useEffect(() => {
-    if (selectedProjectId) refreshTasks(selectedProjectId);
-  }, [selectedProjectId]);
+    reloadTasks();
+  }, [reloadTasks]);
 
   const selectedProject = projects.find((p) => p.id === selectedProjectId) ?? null;
+
+  const projectNames = useMemo(
+    () => new Map(projects.map((p) => [p.id, p.name])),
+    [projects]
+  );
 
   const owners = useMemo(
     () => Array.from(new Set(tasks.map((t) => t.owner).filter(Boolean))) as string[],
@@ -101,10 +113,18 @@ export default function DashboardPage() {
     await api.deleteTask(taskId);
   };
 
+  const handleRenameMeeting = async (meetingId: number, title: string) => {
+    const updated = await api.updateMeeting(meetingId, title);
+    // The title is denormalised onto every task from this meeting — update them all.
+    setTasks((prev) =>
+      prev.map((t) => (t.meeting_id === meetingId ? { ...t, meeting_title: updated.title } : t))
+    );
+  };
+
   const handleTranscriptSubmit = async (title: string, transcriptText: string) => {
     if (!selectedProjectId) return;
     await api.submitTranscript(selectedProjectId, title, transcriptText);
-    refreshTasks(selectedProjectId);
+    reloadTasks();
   };
 
   const handleAudioSubmit = async (title: string, file: File) => {
@@ -124,7 +144,7 @@ export default function DashboardPage() {
     if (current.status === "failed") {
       throw new Error(current.error_message || "Transcription failed.");
     }
-    refreshTasks(selectedProjectId);
+    reloadTasks();
   };
 
   const handleCreateProject = async (name: string, description: string) => {
@@ -250,6 +270,30 @@ export default function DashboardPage() {
                       </button>
                     )}
                   </div>
+                  {projects.length > 1 && (
+                    <div className="flex shrink-0 rounded-lg bg-slate-100 p-1 text-sm font-medium">
+                      <button
+                        onClick={() => setSearchAllProjects(false)}
+                        className={`rounded-md px-3 py-1 transition ${
+                          searchAllProjects
+                            ? "text-slate-500 hover:text-slate-700"
+                            : "bg-white text-slate-900 shadow-sm"
+                        }`}
+                      >
+                        This project
+                      </button>
+                      <button
+                        onClick={() => setSearchAllProjects(true)}
+                        className={`rounded-md px-3 py-1 transition ${
+                          searchAllProjects
+                            ? "bg-white text-slate-900 shadow-sm"
+                            : "text-slate-500 hover:text-slate-700"
+                        }`}
+                      >
+                        All projects
+                      </button>
+                    </div>
+                  )}
                   <button
                     onClick={() => setCreatingTask(true)}
                     className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
@@ -278,9 +322,11 @@ export default function DashboardPage() {
                 ) : (
                   <KanbanBoard
                     tasks={visibleTasks}
+                    projectNames={searchAllProjects ? projectNames : undefined}
                     onStatusChange={handleStatusChange}
                     onEdit={setEditingTask}
                     onDelete={handleDelete}
+                    onRenameMeeting={handleRenameMeeting}
                   />
                 )}
               </div>
