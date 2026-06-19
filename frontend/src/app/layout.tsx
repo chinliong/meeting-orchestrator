@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "Meeting Orchestrator — AI action items from transcripts",
   description:
     "AI-powered meeting transcript parsing that extracts decisions, action items, owners, and deadlines onto a Kanban board.",
+  icons: { icon: "/logo.png" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

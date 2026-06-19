@@ -28,12 +28,8 @@ export default function TopBar({
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm">
-            {/* sparkle / AI mark */}
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-              <path d="M12 2l1.9 5.1L19 9l-5.1 1.9L12 16l-1.9-5.1L5 9l5.1-1.9L12 2z" />
-            </svg>
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Meeting Orchestrator logo" className="h-10 w-10 rounded-full object-cover" />
           <div className="leading-tight">
             <h1 className="text-base font-semibold text-slate-900">Meeting Orchestrator</h1>
             <p className="text-xs text-slate-500">AI action items from meeting transcripts</p>

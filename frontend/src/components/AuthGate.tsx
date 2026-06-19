@@ -128,11 +128,8 @@ export default function AuthGate({ claimTokens, onAuthed, onGuest, allowGuest = 
   const shell = (children: React.ReactNode) => (
     <div className="mx-auto mt-16 max-w-sm rounded-2xl border border-slate-200 bg-white p-7 shadow-card">
       <div className="mb-5 flex flex-col items-center text-center">
-        <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm">
-          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor">
-            <path d="M12 2l1.9 5.1L19 9l-5.1 1.9L12 16l-1.9-5.1L5 9l5.1-1.9L12 2z" />
-          </svg>
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.png" alt="Meeting Orchestrator logo" className="mb-3 h-14 w-14 rounded-full object-cover" />
         <h1 className="text-lg font-semibold text-slate-900">Meeting Orchestrator</h1>
       </div>
       {children}
