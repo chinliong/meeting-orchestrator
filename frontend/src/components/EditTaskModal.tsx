@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { Task, TaskStatus } from "@/lib/types";
 
@@ -32,16 +32,17 @@ export default function EditTaskModal({ task, createMode, onClose, onSave, onCre
 
   const [description, setDescription] = useState("");
   const [owner, setOwner] = useState("");
-  const [deadline, setDeadline] = useState("");
   const [status, setStatus] = useState<TaskStatus>("todo");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // The deadline is uncontrolled: a controlled <input type="date"> reports an incomplete
+  // value as "" mid-typing, which would wipe what the user is typing. We read it on submit.
+  const deadlineRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) {
       setDescription(task?.description ?? "");
       setOwner(task?.owner ?? "");
-      setDeadline(task?.deadline ?? "");
       setStatus(task?.status ?? "todo");
       setError(null);
     }
@@ -61,7 +62,7 @@ export default function EditTaskModal({ task, createMode, onClose, onSave, onCre
       const values: TaskValues = {
         description: description.trim(),
         owner: owner.trim() || null,
-        deadline: deadline || null,
+        deadline: deadlineRef.current?.value || null,
         status,
       };
       if (task) {
@@ -122,8 +123,8 @@ export default function EditTaskModal({ task, createMode, onClose, onSave, onCre
               <label className="mb-1 block text-sm font-medium text-slate-700">Deadline</label>
               <input
                 type="date"
-                value={deadline}
-                onChange={(e) => setDeadline(e.target.value)}
+                ref={deadlineRef}
+                defaultValue={task?.deadline ?? ""}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
               />
             </div>
