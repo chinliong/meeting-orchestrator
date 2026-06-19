@@ -90,10 +90,10 @@ flowchart LR
     free tier), falls back to SMTP, and otherwise logs the message. Reset emails are dispatched via
     FastAPI background tasks so a slow send never holds the request open.
   - **Deadline reminders** (`app/notifications.py`) — opt-in (off by default) per account, with a
-    per-project mute and a configurable "days before" threshold. `python -m app.notify_due_tasks`
-    runs the daily check; intended to be triggered by an external scheduler (e.g. a Render Cron
-    Job), since the web service itself only runs it on demand via the test-send endpoint. See
-    "Deadline reminders" below.
+    per-project mute and a configurable "days before" threshold. `GET /internal/notify-due-tasks`
+    (shared-secret protected) runs the daily check over HTTP, for a free external scheduler to
+    call once a day — Render has no built-in free scheduler and Render Cron Jobs are a paid
+    add-on. See "Deadline reminders" below.
   - **LLM parser** (`app/llm/parser.py`) — a reusable, framework-agnostic module: raw text in,
     validated `ExtractionResult` out, via Claude tool-use.
   - **Whisper module** (`app/llm/transcription.py`) — optional, lazily imported; prefers a hosted
@@ -123,10 +123,13 @@ flowchart LR
 - Idempotency: `Task.last_notified_for` records the deadline last notified for, so re-running the
   same day, or after the deadline, never double-sends. Rescheduling a task's deadline clears the
   match, re-opening the window.
-- `python -m app.notify_due_tasks` runs one pass; nothing inside the web service calls it on a
-  schedule, so it needs an external trigger (e.g. a Render Cron Job once a day) to run in
-  production. `POST /auth/notifications/test` runs the same logic on demand for one user, useful
-  for confirming the email channel works without waiting for the daily job.
+- Two ways to trigger a pass: `python -m app.notify_due_tasks` (a CLI script, useful for a local
+  cron entry or manual runs) and `GET /internal/notify-due-tasks` (the same logic over HTTP,
+  guarded by a shared secret `CRON_SECRET` instead of a user session). The latter is meant for a
+  free external scheduler (e.g. cron-job.org) hitting it once a day — Render has no built-in free
+  scheduler and Render Cron Jobs are a paid add-on, so this avoids that cost entirely.
+- `POST /auth/notifications/test` runs the same logic on demand for one signed-in user, useful for
+  confirming the email channel works without waiting for the daily trigger.
 
 ## Data model
 

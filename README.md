@@ -141,11 +141,19 @@ See `backend/.env.example` for the full list.
 
 Deadline reminders are opt-in per account (off by default — toggle in Account settings), with a
 per-project mute and a configurable "remind me N days before". Turning the toggle on doesn't send
-anything by itself; something has to run `python -m app.notify_due_tasks` once a day (a cron entry
-locally, or a Render Cron Job in production) to actually check for due tasks and send. Use the
-"Send test email" button in Account settings to confirm the email channel works without waiting
-for that. See [docs/architecture.md](docs/architecture.md#deadline-reminders) for how the
-reminder window and digest are built.
+anything by itself; something has to trigger a check once a day:
+
+- **Locally**: a cron entry running `python -m app.notify_due_tasks`, or just run it by hand.
+- **On Render**: there's no free built-in scheduler and Render Cron Jobs are a paid add-on, so
+  instead point a free external scheduler (e.g. [cron-job.org](https://cron-job.org)) at
+  `GET https://<your-backend>.onrender.com/api/v1/internal/notify-due-tasks?secret=<CRON_SECRET>`
+  once a day. `CRON_SECRET` is generated automatically by the Render blueprint — copy it from
+  the backend service's Environment tab.
+
+Use the "Send test email" button in Account settings to confirm the email channel works without
+waiting for the daily trigger. See
+[docs/architecture.md](docs/architecture.md#deadline-reminders) for how the reminder window and
+digest are built.
 
 ## Run with Docker
 
@@ -172,13 +180,18 @@ database is an **external Postgres** (e.g. a free [Neon](https://neon.tech) proj
      (`postgresql://…/<db>?sslmode=require`; `db.py` normalises `postgres://` URLs)
    - backend `CORS_ORIGINS` = `https://orchestrator-frontend.onrender.com`
    - frontend `NEXT_PUBLIC_API_BASE` = `https://orchestrator-backend.onrender.com/api/v1`
-   - backend `BREVO_API_KEY` + `SMTP_FROM` (optional) = enable password-reset emails — see
-     "Password-reset email" below. **Render's free tier blocks outbound SMTP**, so the Brevo
-     HTTPS API is required there; the `SMTP_*` host/port/user/password vars won't work.
+   - backend `BREVO_API_KEY` + `SMTP_FROM` (optional) = enable password-reset and deadline-reminder
+     emails — see "Email delivery" above. **Render's free tier blocks outbound SMTP**, so the
+     Brevo HTTPS API is required there; the `SMTP_*` host/port/user/password vars won't work.
 
-   `AUTH_SECRET` is generated automatically by the blueprint. `NEXT_PUBLIC_API_BASE` is baked in
-   at build time, so changing it requires a frontend redeploy.
+   `AUTH_SECRET` and `CRON_SECRET` are generated automatically by the blueprint. `NEXT_PUBLIC_API_BASE`
+   is baked in at build time, so changing it requires a frontend redeploy.
 4. Apply. The schema is created automatically on first startup against an empty database.
+5. (Optional) To enable automatic deadline reminders, copy the generated `CRON_SECRET` from the
+   backend service's Environment tab, then set up a free scheduler like
+   [cron-job.org](https://cron-job.org) to hit
+   `https://<your-backend>.onrender.com/api/v1/internal/notify-due-tasks?secret=<CRON_SECRET>`
+   once a day.
 
 Seeding sample data: Render's web shell is a paid feature, so run the seed from your own machine
 pointed at the deployed database:

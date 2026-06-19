@@ -200,6 +200,16 @@ List stakeholders (alphabetical).
 ### `POST /stakeholders`
 Body `{ "name": "string", "email": "string (optional)" }` → `201` stakeholder object.
 
+## Internal
+
+### `GET /internal/notify-due-tasks`
+Runs one deadline-reminder pass (see [architecture.md](architecture.md#deadline-reminders)).
+Meant to be called once a day by an external scheduler rather than a logged-in client — there's
+no bearer/workspace token, so it's protected by a shared secret (`CRON_SECRET`) instead, passed
+as either an `X-Cron-Secret` header or a `?secret=` query param. `503` if `CRON_SECRET` isn't
+configured on the server; `403` if the secret is missing or wrong. `200` `{ "sent": <int> }` on
+success — the number of digest emails sent.
+
 ## LLM extraction schema
 
 The parser forces Claude to call a `record_extraction` tool with this shape (validated by Pydantic):

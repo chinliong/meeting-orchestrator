@@ -19,6 +19,11 @@ services:
       # Signing secret for account auth tokens — Render generates a strong random value.
       - key: AUTH_SECRET
         generateValue: true
+      # Shared secret for GET /internal/notify-due-tasks (the daily deadline-reminder check).
+      # Render has no free scheduler and Render Cron Jobs are paid, so point a free external
+      # one (e.g. cron-job.org) at that URL once a day with ?secret=<this value>.
+      - key: CRON_SECRET
+        generateValue: true
       # External Postgres (e.g. Neon). Paste the connection string in the dashboard —
       # postgresql://...neon.tech/<db>?sslmode=require. db.py normalises postgres:// URLs.
       - key: DATABASE_URL

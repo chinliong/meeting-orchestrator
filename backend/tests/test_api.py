@@ -488,3 +488,29 @@ def test_project_notify_mute_toggle(client, project):
     resp = client.patch(f"/api/v1/projects/{project['id']}", json={"notify_muted": True})
     assert resp.status_code == 200
     assert resp.json()["notify_muted"] is True
+
+
+# --- internal cron-trigger endpoint -------------------------------------------------
+
+def test_notify_due_tasks_requires_secret_configured(client, monkeypatch):
+    monkeypatch.delenv("CRON_SECRET", raising=False)
+    resp = client.get("/api/v1/internal/notify-due-tasks")
+    assert resp.status_code == 503
+
+
+def test_notify_due_tasks_rejects_wrong_secret(client, monkeypatch):
+    monkeypatch.setenv("CRON_SECRET", "the-real-secret")
+    assert client.get("/api/v1/internal/notify-due-tasks").status_code == 403
+    assert client.get("/api/v1/internal/notify-due-tasks?secret=wrong").status_code == 403
+
+
+def test_notify_due_tasks_accepts_query_or_header_secret(client, monkeypatch):
+    monkeypatch.setenv("CRON_SECRET", "the-real-secret")
+    via_query = client.get("/api/v1/internal/notify-due-tasks?secret=the-real-secret")
+    assert via_query.status_code == 200
+    assert via_query.json() == {"sent": 0}
+
+    via_header = client.get(
+        "/api/v1/internal/notify-due-tasks", headers={"X-Cron-Secret": "the-real-secret"}
+    )
+    assert via_header.status_code == 200
