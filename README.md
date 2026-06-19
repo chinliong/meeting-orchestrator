@@ -125,35 +125,22 @@ pip install -r requirements-audio.txt
 
 With neither configured, the audio endpoint returns a clear `503` and the text path works as normal.
 
-### 4. (Optional) Email delivery — password resets & deadline reminders
+### 4. (Optional) Email delivery
 
-Both the "forgot password" code and deadline reminder emails go through `app/email.py`. Email
-delivery is optional — **if no provider is configured, the message is written to the backend log**
-instead, which is enough for local testing. Two ways to send for real:
+Password-reset codes and deadline reminders both go through `app/email.py`. **If no provider is
+configured, the message is logged instead** — enough for local testing. To send for real:
 
-- **Brevo HTTPS API** (recommended; the only option on hosts that block SMTP, like Render's free
-  tier). Create a free [Brevo](https://www.brevo.com) account, verify a sender address, generate
-  an API key, then set `BREVO_API_KEY` and `SMTP_FROM` (the verified sender).
-- **SMTP** (local dev or hosts that allow it). Set `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/
-  `SMTP_PASSWORD`/`SMTP_FROM` — e.g. Gmail with an App Password.
+- **Brevo HTTPS API** (recommended; required on hosts that block SMTP, like Render's free tier):
+  create a free [Brevo](https://www.brevo.com) account, verify a sender, generate an API key, then
+  set `BREVO_API_KEY` and `SMTP_FROM` (the verified sender).
+- **SMTP**: set `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASSWORD`/`SMTP_FROM` — e.g. Gmail with
+  an App Password.
 
-See `backend/.env.example` for the full list.
-
-Deadline reminders are opt-in per account (off by default — toggle in Account settings), with a
-per-project mute and a configurable "remind me N days before". Turning the toggle on doesn't send
-anything by itself; something has to trigger a check once a day:
-
-- **Locally**: a cron entry running `python -m app.notify_due_tasks`, or just run it by hand.
-- **On Render**: there's no free built-in scheduler and Render Cron Jobs are a paid add-on, so
-  instead point a free external scheduler (e.g. [cron-job.org](https://cron-job.org)) at
-  `GET https://<your-backend>.onrender.com/api/v1/internal/notify-due-tasks?secret=<CRON_SECRET>`
-  once a day. `CRON_SECRET` is generated automatically by the Render blueprint — copy it from
-  the backend service's Environment tab.
-
-Use the "Send test email" button in Account settings to confirm the email channel works without
-waiting for the daily trigger. See
-[docs/architecture.md](docs/architecture.md#deadline-reminders) for how the reminder window and
-digest are built.
+Deadline reminders are opt-in per account (off by default — toggle in Account settings) and only
+send when a daily check runs: locally, run `python -m app.notify_due_tasks` (or schedule it via
+cron); on Render, see step 5 of the deploy steps below. Use the "Send test email" button in Account
+settings to verify delivery. See `backend/.env.example` for all email vars and
+[docs/architecture.md](docs/architecture.md#deadline-reminders) for how reminders work.
 
 ## Run with Docker
 
