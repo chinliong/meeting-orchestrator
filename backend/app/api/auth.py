@@ -9,7 +9,7 @@ from app.auth import create_access_token, get_current_user, hash_password, verif
 from app.db import get_db
 from app.email import send_email
 from app.models.models import PasswordReset, Project, User
-from app.notifications import send_test_notification
+from app.notifications import NotificationSendError, send_test_notification
 from app.schemas.schemas import (
     AuthResponse,
     ChangePasswordRequest,
@@ -109,7 +109,10 @@ def send_test_notification_email(
 ):
     if not user.notify_email:
         raise HTTPException(status_code=400, detail="Enable email notifications first")
-    sent_tasks = send_test_notification(db, user)
+    try:
+        sent_tasks = send_test_notification(db, user)
+    except NotificationSendError as exc:
+        raise HTTPException(status_code=502, detail=f"Could not send the test email: {exc}") from exc
     return {"sent_tasks": sent_tasks}
 
 

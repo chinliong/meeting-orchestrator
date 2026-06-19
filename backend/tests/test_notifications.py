@@ -9,7 +9,7 @@ import pytest
 
 from app.auth import hash_password
 from app.models.models import Project, Task, TaskStatus, User
-from app.notifications import send_due_date_notifications
+from app.notifications import NotificationSendError, send_due_date_notifications, send_test_notification
 
 TODAY = date(2026, 6, 20)
 
@@ -137,6 +137,49 @@ def test_digests_multiple_tasks_into_one_email(db_session, sent_emails):
     assert "2 tasks" in sent_emails[0]["subject"]  # ...covering both tasks
 
 
+def test_one_users_send_failure_does_not_block_others(db_session, monkeypatch):
+    """A transient email-provider failure for one user must not crash the whole batch or
+    swallow other users' reminders — see the cron-job.org 500-then-200 retry incident."""
+    failing_user = _make_user(db_session, email="fails@example.com")
+    failing_project = _make_project(db_session, failing_user)
+    _make_task(db_session, failing_project, deadline=TODAY)
+
+    ok_user = _make_user(db_session, email="ok@example.com")
+    ok_project = _make_project(db_session, ok_user)
+    ok_task = _make_task(db_session, ok_project, deadline=TODAY)
+    db_session.commit()
+
+    sent_to = []
+
+    def flaky_send(to, **kwargs):
+        if to == "fails@example.com":
+            raise RuntimeError("simulated transient provider failure")
+        sent_to.append(to)
+
+    monkeypatch.setattr("app.notifications.send_email", flaky_send)
+
+    sent = send_due_date_notifications(db_session, today=TODAY)
+    assert sent == 1
+    assert sent_to == ["ok@example.com"]
+    # The failed user's task is left unmarked so the next run retries it.
+    assert ok_task.last_notified_for == TODAY
+
+
+def test_send_due_date_notifications_never_raises_on_provider_failure(db_session, monkeypatch):
+    user = _make_user(db_session)
+    project = _make_project(db_session, user)
+    _make_task(db_session, project, deadline=TODAY)
+    db_session.commit()
+
+    monkeypatch.setattr(
+        "app.notifications.send_email",
+        lambda **kwargs: (_ for _ in ()).throw(RuntimeError("boom")),
+    )
+
+    # Must not raise — a daily unattended job can't crash on a provider hiccup.
+    assert send_due_date_notifications(db_session, today=TODAY) == 0
+
+
 def test_rescheduled_task_reopens_window(db_session, sent_emails):
     user = _make_user(db_session)
     project = _make_project(db_session, user)
@@ -150,3 +193,18 @@ def test_rescheduled_task_reopens_window(db_session, sent_emails):
     task.deadline = TODAY + timedelta(days=1)
     db_session.commit()
     assert send_due_date_notifications(db_session, today=TODAY) == 1
+
+
+def test_test_notification_surfaces_provider_failure_as_clean_error(db_session, monkeypatch):
+    """A manual 'send test email' click has someone watching, so unlike the daily batch job,
+    a provider failure here should raise a clear error instead of being swallowed."""
+    user = _make_user(db_session)
+    db_session.commit()
+
+    monkeypatch.setattr(
+        "app.notifications.send_email",
+        lambda **kwargs: (_ for _ in ()).throw(RuntimeError("boom")),
+    )
+
+    with pytest.raises(NotificationSendError):
+        send_test_notification(db_session, user)

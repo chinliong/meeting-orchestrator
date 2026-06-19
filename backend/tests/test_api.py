@@ -484,6 +484,20 @@ def test_test_notification_sends_when_opted_in(client, account):
     assert resp.json() == {"sent_tasks": 0}  # opted in, but no tasks exist yet
 
 
+def test_test_notification_provider_failure_returns_clean_502(client, account, monkeypatch):
+    client.patch(
+        "/api/v1/auth/notifications",
+        json={"notify_email": True, "notify_days_before": 1},
+        headers=account["headers"],
+    )
+    monkeypatch.setattr(
+        "app.notifications.send_email",
+        lambda **kwargs: (_ for _ in ()).throw(RuntimeError("boom")),
+    )
+    resp = client.post("/api/v1/auth/notifications/test", headers=account["headers"])
+    assert resp.status_code == 502
+
+
 def test_project_notify_mute_toggle(client, project):
     resp = client.patch(f"/api/v1/projects/{project['id']}", json={"notify_muted": True})
     assert resp.status_code == 200

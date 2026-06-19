@@ -11,12 +11,20 @@ a task's deadline clears that match, so a rescheduled task gets a fresh reminder
 """
 from __future__ import annotations
 
+import logging
 from datetime import date, timedelta
 
 from sqlalchemy.orm import Session
 
 from app.email import send_email
 from app.models.models import Project, Task, TaskStatus, User
+
+# uvicorn configures this logger at INFO, so failures show up in the Render logs.
+log = logging.getLogger("uvicorn.error")
+
+
+class NotificationSendError(RuntimeError):
+    """Raised when the email provider itself fails (e.g. Brevo rejects or times out)."""
 
 
 def _in_notify_window(today: date, deadline: date, days_before: int) -> bool:
@@ -64,8 +72,11 @@ def _format_digest(tasks: list[Task], today: date) -> tuple[str, str]:
 def send_due_date_notifications(db: Session, today: date | None = None) -> int:
     """Send one digest email per account holder who has newly-due or newly-overdue tasks.
 
-    Returns the number of emails sent. Intended to run once a day (e.g. a Render Cron Job
-    running `python -m app.notify_due_tasks`).
+    Returns the number of emails actually sent. Runs once a day via an external trigger (see
+    `app/notify_due_tasks.py` and `GET /internal/notify-due-tasks`) with nobody watching, so a
+    transient failure sending to one user (e.g. the email provider hiccups) is caught and
+    logged rather than raised — it must not block every other user's reminder, or look like the
+    whole job failed. That user's tasks are simply left unmarked and picked up on the next run.
     """
     today = today or date.today()
 
@@ -78,14 +89,20 @@ def send_due_date_notifications(db: Session, today: date | None = None) -> int:
             continue
         by_user.setdefault(user.id, []).append(task)
 
+    sent = 0
     for tasks in by_user.values():
         user = tasks[0].project.owner
         subject, body = _format_digest(tasks, today)
-        send_email(to=user.email, subject=subject, body=body)
+        try:
+            send_email(to=user.email, subject=subject, body=body)
+        except Exception:
+            log.exception("notifications: failed to send digest to %s", user.email)
+            continue
         for task in tasks:
             task.last_notified_for = task.deadline
-    db.commit()
-    return len(by_user)
+        db.commit()  # commit per user, so one later failure can't lose an earlier success
+        sent += 1
+    return sent
 
 
 def send_test_notification(db: Session, user: User) -> int:
@@ -108,5 +125,10 @@ def send_test_notification(db: Session, user: User) -> int:
             "You don't have any tasks currently due or overdue, but notifications are "
             "working."
         )
-    send_email(to=user.email, subject=subject, body=body)
+    try:
+        send_email(to=user.email, subject=subject, body=body)
+    except Exception as exc:
+        # A button click has someone actually watching, so surface this as a clean error
+        # instead of letting the email provider's raw exception become an opaque 500.
+        raise NotificationSendError(str(exc)) from exc
     return len(tasks)
