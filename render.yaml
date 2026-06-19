@@ -37,9 +37,14 @@ services:
         sync: false
       - key: TRANSCRIPTION_MODEL
         sync: false
-      # Outbound email for password-reset codes. Leave SMTP_HOST unset to disable sending
-      # (codes are logged instead). For Gmail: host=smtp.gmail.com, port=587, user=your
-      # address, password=a Google App Password (requires 2FA). Brevo/SendGrid also work.
+      # Outbound email for password-reset codes. Render's free tier BLOCKS outbound SMTP,
+      # so use Brevo's HTTPS API: set BREVO_API_KEY (brevo.com, free) and SMTP_FROM to a
+      # Brevo-verified sender address. The SMTP_* keys below are only for hosts that allow
+      # SMTP (e.g. local dev); leave them unset on Render.
+      - key: BREVO_API_KEY
+        sync: false
+      - key: SMTP_FROM
+        sync: false
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT
@@ -47,8 +52,6 @@ services:
       - key: SMTP_USER
         sync: false
       - key: SMTP_PASSWORD
-        sync: false
-      - key: SMTP_FROM
         sync: false
 
   - type: web
