@@ -8,7 +8,11 @@ interface Props {
   initialName?: string;
   initialDescription?: string;
   onClose: () => void;
-  onSubmit: (name: string, description: string) => Promise<void>;
+  onSubmit: (name: string, description: string, notifyMuted: boolean) => Promise<void>;
+  /** Only a signed-in account can ever receive deadline reminders, so the mute toggle is
+   * hidden entirely for guest sessions — there'd be nothing for it to control. */
+  showNotifyMute?: boolean;
+  initialNotifyMuted?: boolean;
 }
 
 export default function ProjectModal({
@@ -18,9 +22,12 @@ export default function ProjectModal({
   initialDescription = "",
   onClose,
   onSubmit,
+  showNotifyMute = false,
+  initialNotifyMuted = false,
 }: Props) {
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState(initialDescription);
+  const [notifyMuted, setNotifyMuted] = useState(initialNotifyMuted);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,6 +36,7 @@ export default function ProjectModal({
     if (open) {
       setName(initialName);
       setDescription(initialDescription);
+      setNotifyMuted(initialNotifyMuted);
       setError(null);
     }
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -47,7 +55,7 @@ export default function ProjectModal({
     setSubmitting(true);
     setError(null);
     try {
-      await onSubmit(name.trim(), description.trim());
+      await onSubmit(name.trim(), description.trim(), notifyMuted);
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save project");
@@ -97,6 +105,23 @@ export default function ProjectModal({
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
             />
           </div>
+
+          {isEdit && showNotifyMute && (
+            <label className="flex items-start gap-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                checked={notifyMuted}
+                onChange={(e) => setNotifyMuted(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400"
+              />
+              <span>
+                Mute deadline email reminders for this project
+                <span className="block text-xs text-slate-400">
+                  Your account-wide reminder setting stays on for other projects.
+                </span>
+              </span>
+            </label>
+          )}
 
           {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
 

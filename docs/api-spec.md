@@ -26,8 +26,8 @@ Returns `{ "status": "ok" }`.
 ### `POST /auth/signup`
 Body `{ "email": "string", "password": "string", "claim_tokens": ["edit_token", ...] }`.
 `claim_tokens` is optional — edit tokens of guest boards to adopt into the new account.
-Returns `201` `{ "token": "<jwt>", "user": { "id", "email", "created_at" } }`. `409` if the email
-already exists.
+Returns `201` `{ "token": "<jwt>", "user": { "id", "email", "created_at", "notify_email", "notify_days_before" } }`.
+`409` if the email already exists.
 
 ### `POST /auth/login`
 Body `{ "email": "string", "password": "string" }` → `200` `{ "token", "user" }`; `401` on bad
@@ -40,6 +40,16 @@ Returns the current user (requires bearer). `401` if unauthenticated.
 Change the signed-in user's password. Requires bearer. Body
 `{ "current_password": "string", "new_password": "string" }`. `204` on success; `401` if the
 current password is wrong; `400` if the new password is empty.
+
+### `PATCH /auth/notifications`
+Update the signed-in user's deadline-reminder preferences. Requires bearer. Body
+`{ "notify_email": bool, "notify_days_before": int }` (0–14). Returns the updated user object.
+Off (`notify_email: false`) by default for every new account.
+
+### `POST /auth/notifications/test`
+Send a one-off preview digest to the signed-in user's own email — whatever tasks would currently
+trigger a reminder, or a "nothing due" confirmation if none do. Requires bearer and
+`notify_email` already enabled (`400` otherwise).
 
 ### `DELETE /auth/me`
 Delete the signed-in user's account. Requires bearer. The user's owned boards are **orphaned**
@@ -66,12 +76,14 @@ A project object:
   "id": 1, "name": "string", "description": "string",
   "created_at": "2026-06-17T09:30:00",
   "owner_user_id": 1,
+  "notify_muted": false,
   "access_level": "edit",
   "view_token": "string",
   "edit_token": "string | null"
 }
 ```
-`edit_token` is returned only to edit-level callers.
+`edit_token` is returned only to edit-level callers. `notify_muted` opts this project out of
+deadline reminders even if the owner has them enabled account-wide.
 
 ### `GET /projects`
 Lists the signed-in user's own boards (newest first). Requires bearer (`401` otherwise). Guests
@@ -86,7 +98,8 @@ Resolves a share link to its board at the level the token grants (`edit` or `vie
 token matches nothing.
 
 ### `PATCH /projects/{project_id}`
-Update `name` / `description`. Requires edit access. Returns the project; `404`/`403` as above.
+Update `name` / `description` / `notify_muted`. Requires edit access. Returns the project;
+`404`/`403` as above.
 
 ### `DELETE /projects/{project_id}`
 Removes the project and cascades to its meetings and tasks. Requires edit access. `204`.

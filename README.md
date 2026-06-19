@@ -28,6 +28,8 @@ recordings for end-to-end processing.
 - **Account self-service** — change your password, reset a forgotten one with a 6-digit code
   emailed to you, or delete your account (owned boards are released as guest boards rather than
   destroyed, so existing share links keep working).
+- **Deadline email reminders** — opt-in (off by default) digest emails for tasks about to be due
+  or just gone overdue, with a configurable "remind me N days before" and a per-project mute.
 - **Shareable boards** — every board has a permanent **view link** and **edit link**; anyone
   with a link can open it (no account needed). View links are read-only; the UI hides every
   editing affordance on a view-only board.
@@ -60,7 +62,7 @@ for the full API.
 | Frontend | Next.js 14, React 18, TypeScript, Tailwind CSS |
 | Backend | FastAPI, Pydantic v2, SQLAlchemy 2 |
 | Auth | Email/password (bcrypt via passlib), JWT access tokens, capability-link sharing |
-| Email | Brevo transactional API (HTTPS) for password-reset codes; SMTP fallback for local dev |
+| Email | Brevo transactional API (HTTPS) for password resets and deadline reminders; SMTP fallback for local dev |
 | LLM | Claude (Anthropic) via `anthropic` SDK, tool-use structured output |
 | Speech-to-text | Whisper — hosted API (OpenAI/Groq) by default, optional local model |
 | Database | SQLite (dev) / PostgreSQL (prod; e.g. Neon) |
@@ -123,11 +125,11 @@ pip install -r requirements-audio.txt
 
 With neither configured, the audio endpoint returns a clear `503` and the text path works as normal.
 
-### 4. (Optional) Password-reset email
+### 4. (Optional) Email delivery — password resets & deadline reminders
 
-The "forgot password" flow emails a 6-digit code. Email delivery is optional — **if no provider
-is configured, the code is written to the backend log** instead, which is enough for local testing.
-Two ways to send for real:
+Both the "forgot password" code and deadline reminder emails go through `app/email.py`. Email
+delivery is optional — **if no provider is configured, the message is written to the backend log**
+instead, which is enough for local testing. Two ways to send for real:
 
 - **Brevo HTTPS API** (recommended; the only option on hosts that block SMTP, like Render's free
   tier). Create a free [Brevo](https://www.brevo.com) account, verify a sender address, generate
@@ -136,6 +138,14 @@ Two ways to send for real:
   `SMTP_PASSWORD`/`SMTP_FROM` — e.g. Gmail with an App Password.
 
 See `backend/.env.example` for the full list.
+
+Deadline reminders are opt-in per account (off by default — toggle in Account settings), with a
+per-project mute and a configurable "remind me N days before". Turning the toggle on doesn't send
+anything by itself; something has to run `python -m app.notify_due_tasks` once a day (a cron entry
+locally, or a Render Cron Job in production) to actually check for due tasks and send. Use the
+"Send test email" button in Account settings to confirm the email channel works without waiting
+for that. See [docs/architecture.md](docs/architecture.md#deadline-reminders) for how the
+reminder window and digest are built.
 
 ## Run with Docker
 
@@ -209,7 +219,7 @@ accuracy, compares prompt variants, writes `eval/results.json`, and refreshes
 ## Project layout
 
 ```
-backend/      FastAPI app (api/, llm/, models/, schemas/, auth.py, email.py), tests, Dockerfile
+backend/      FastAPI app (api/, llm/, models/, schemas/, auth.py, email.py, notifications.py), tests, Dockerfile
 frontend/     Next.js app (src/app, src/components, src/lib), Dockerfile
 data/         synthetic-transcripts/ (inputs) + annotated-test-set/ (ground truth)
 eval/         evaluation harness + matcher tests

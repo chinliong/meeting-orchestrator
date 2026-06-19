@@ -9,11 +9,13 @@ from app.auth import create_access_token, get_current_user, hash_password, verif
 from app.db import get_db
 from app.email import send_email
 from app.models.models import PasswordReset, Project, User
+from app.notifications import send_test_notification
 from app.schemas.schemas import (
     AuthResponse,
     ChangePasswordRequest,
     ForgotPasswordRequest,
     LoginRequest,
+    NotificationSettingsUpdate,
     ResetPasswordRequest,
     SignupRequest,
     UserOut,
@@ -85,6 +87,30 @@ def change_password(
     user.password_hash = hash_password(payload.new_password)
     db.commit()
     return Response(status_code=204)
+
+
+@router.patch("/notifications", response_model=UserOut)
+def update_notifications(
+    payload: NotificationSettingsUpdate,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    user.notify_email = payload.notify_email
+    user.notify_days_before = payload.notify_days_before
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@router.post("/notifications/test", status_code=200)
+def send_test_notification_email(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if not user.notify_email:
+        raise HTTPException(status_code=400, detail="Enable email notifications first")
+    sent_tasks = send_test_notification(db, user)
+    return {"sent_tasks": sent_tasks}
 
 
 @router.delete("/me", status_code=204)

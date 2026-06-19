@@ -72,6 +72,13 @@ export const api = {
       body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
     }),
   deleteAccount: () => request<void>("/auth/me", { method: "DELETE" }),
+  updateNotificationSettings: (notifyEmail: boolean, notifyDaysBefore: number) =>
+    request<User>("/auth/notifications", {
+      method: "PATCH",
+      body: JSON.stringify({ notify_email: notifyEmail, notify_days_before: notifyDaysBefore }),
+    }),
+  sendTestNotification: () =>
+    request<{ sent_tasks: number }>("/auth/notifications/test", { method: "POST" }),
   forgotPassword: (email: string) =>
     request<void>("/auth/forgot-password", {
       method: "POST",
@@ -93,7 +100,7 @@ export const api = {
   getProjectByToken: (token: string) =>
     request<Project>(`/projects/by-token/${encodeURIComponent(token)}`),
 
-  updateProject: (id: number, patch: { name?: string; description?: string }) =>
+  updateProject: (id: number, patch: { name?: string; description?: string; notify_muted?: boolean }) =>
     request<Project>(`/projects/${id}`, { method: "PATCH", body: JSON.stringify(patch) }),
 
   deleteProject: (id: number) => request<void>(`/projects/${id}`, { method: "DELETE" }),

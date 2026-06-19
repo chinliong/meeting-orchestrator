@@ -24,6 +24,7 @@ import {
   removeGuestWorkspace,
   saveAuth,
   setGuestChosen,
+  updateStoredUser,
   upsertGuestWorkspace,
   workspaceTokenFor,
 } from "@/lib/session";
@@ -333,9 +334,9 @@ export default function DashboardPage() {
     setTasks([]);
   };
 
-  const handleUpdateProject = async (name: string, description: string) => {
+  const handleUpdateProject = async (name: string, description: string, notifyMuted: boolean) => {
     if (!selectedProjectId) return;
-    const updated = await api.updateProject(selectedProjectId, { name, description });
+    const updated = await api.updateProject(selectedProjectId, { name, description, notify_muted: notifyMuted });
     setProjects((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
     if (!user) upsertGuestWorkspace(updated);
   };
@@ -394,6 +395,17 @@ export default function DashboardPage() {
 
   const handleChangePassword = async (currentPassword: string, newPassword: string) => {
     await api.changePassword(currentPassword, newPassword);
+  };
+
+  const handleUpdateNotifications = async (notifyEmail: boolean, notifyDaysBefore: number) => {
+    const updated = await api.updateNotificationSettings(notifyEmail, notifyDaysBefore);
+    updateStoredUser(updated);
+    setSession((cur) => (cur?.mode === "user" ? { mode: "user", user: updated } : cur));
+  };
+
+  const handleSendTestNotification = async () => {
+    const { sent_tasks } = await api.sendTestNotification();
+    return sent_tasks;
   };
 
   const handleDeleteAccount = async () => {
@@ -664,6 +676,8 @@ export default function DashboardPage() {
         mode={projectModal ?? "create"}
         initialName={projectModal === "edit" ? selectedProject?.name ?? "" : ""}
         initialDescription={projectModal === "edit" ? selectedProject?.description ?? "" : ""}
+        showNotifyMute={!!user}
+        initialNotifyMuted={projectModal === "edit" ? selectedProject?.notify_muted ?? false : false}
         onClose={() => setProjectModal(null)}
         onSubmit={projectModal === "edit" ? handleUpdateProject : handleCreateProject}
       />
@@ -688,6 +702,8 @@ export default function DashboardPage() {
           onClose={() => setShowAccount(false)}
           onChangePassword={handleChangePassword}
           onDeleteAccount={handleDeleteAccount}
+          onUpdateNotifications={handleUpdateNotifications}
+          onSendTestNotification={handleSendTestNotification}
         />
       )}
     </div>

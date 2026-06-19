@@ -80,13 +80,20 @@ flowchart LR
     `project_id`, `owner`, `status`, `due_before`, `due_after`; with no `project_id` an
     authenticated user gets tasks across all boards they own.
   - `GET|POST /stakeholders`.
+  - `PATCH /auth/notifications` (set deadline-reminder preferences), `POST /auth/notifications/test`
+    (send a one-off preview digest).
   - **Auth & access control** (`app/auth.py`) — bcrypt password hashing, JWT issue/verify, and
     `project_access_level()` which resolves a request to `edit` / `view` / no-access from the
     bearer user (owner) or the `X-Workspace-Token` (edit/view token).
-  - **Email sender** (`app/email.py`) — sends password-reset codes. Prefers Brevo's HTTPS API
-    (`BREVO_API_KEY`) so it works on hosts that block outbound SMTP (e.g. Render's free tier),
-    falls back to SMTP, and otherwise logs the code. Reset emails are dispatched via FastAPI
-    background tasks so a slow send never holds the request open.
+  - **Email sender** (`app/email.py`) — sends password-reset codes and deadline reminders. Prefers
+    Brevo's HTTPS API (`BREVO_API_KEY`) so it works on hosts that block outbound SMTP (e.g. Render's
+    free tier), falls back to SMTP, and otherwise logs the message. Reset emails are dispatched via
+    FastAPI background tasks so a slow send never holds the request open.
+  - **Deadline reminders** (`app/notifications.py`) — opt-in (off by default) per account, with a
+    per-project mute and a configurable "days before" threshold. `python -m app.notify_due_tasks`
+    runs the daily check; intended to be triggered by an external scheduler (e.g. a Render Cron
+    Job), since the web service itself only runs it on demand via the test-send endpoint. See
+    "Deadline reminders" below.
   - **LLM parser** (`app/llm/parser.py`) — a reusable, framework-agnostic module: raw text in,
     validated `ExtractionResult` out, via Claude tool-use.
   - **Whisper module** (`app/llm/transcription.py`) — optional, lazily imported; prefers a hosted
@@ -104,6 +111,23 @@ flowchart LR
   write access. On sign-up, a guest's `edit_token`s can be supplied to claim those boards.
 - Sharing is asynchronous (no live sync); concurrent edits are last-write-wins.
 
+## Deadline reminders
+
+- Opt-in per account (`User.notify_email`, default off) with a configurable
+  `notify_days_before`, plus a per-project mute (`Project.notify_muted`) that overrides the
+  account setting for one board.
+- `app/notifications.py` finds tasks inside their reminder window — from `notify_days_before`
+  days out through one day past the deadline (a one-time overdue nudge, not a repeat) — and
+  emails each affected account holder a single digest covering every newly-due task across their
+  (unmuted) projects.
+- Idempotency: `Task.last_notified_for` records the deadline last notified for, so re-running the
+  same day, or after the deadline, never double-sends. Rescheduling a task's deadline clears the
+  match, re-opening the window.
+- `python -m app.notify_due_tasks` runs one pass; nothing inside the web service calls it on a
+  schedule, so it needs an external trigger (e.g. a Render Cron Job once a day) to run in
+  production. `POST /auth/notifications/test` runs the same logic on demand for one user, useful
+  for confirming the email channel works without waiting for the daily job.
+
 ## Data model
 
 ```mermaid
@@ -117,6 +141,8 @@ erDiagram
         int id PK
         string email
         string password_hash
+        bool notify_email
+        int notify_days_before
     }
     PASSWORD_RESET {
         int id PK
@@ -133,6 +159,7 @@ erDiagram
         text description
         string view_token
         string edit_token
+        bool notify_muted
     }
     MEETING {
         int id PK
@@ -152,6 +179,7 @@ erDiagram
         enum status
         float confidence
         text source_decision
+        date last_notified_for
     }
     STAKEHOLDER {
         int id PK

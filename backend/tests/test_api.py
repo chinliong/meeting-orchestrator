@@ -436,3 +436,55 @@ def test_restore_requires_edit_access(client, project):
     view_headers = {"X-Workspace-Token": project["view_token"]}
     blocked = client.post("/api/v1/tasks/restore", json=snapshot, headers=view_headers)
     assert blocked.status_code == 403
+
+
+# --- deadline email notifications -----------------------------------------------------
+
+
+def test_notifications_default_off(client, account):
+    me = client.get("/api/v1/auth/me", headers=account["headers"]).json()
+    assert me["notify_email"] is False
+    assert me["notify_days_before"] == 1
+
+
+def test_update_notification_settings(client, account):
+    resp = client.patch(
+        "/api/v1/auth/notifications",
+        json={"notify_email": True, "notify_days_before": 3},
+        headers=account["headers"],
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["notify_email"] is True
+    assert body["notify_days_before"] == 3
+
+
+def test_update_notification_settings_rejects_out_of_range_days(client, account):
+    resp = client.patch(
+        "/api/v1/auth/notifications",
+        json={"notify_email": True, "notify_days_before": 99},
+        headers=account["headers"],
+    )
+    assert resp.status_code == 422
+
+
+def test_test_notification_requires_opt_in(client, account):
+    resp = client.post("/api/v1/auth/notifications/test", headers=account["headers"])
+    assert resp.status_code == 400
+
+
+def test_test_notification_sends_when_opted_in(client, account):
+    client.patch(
+        "/api/v1/auth/notifications",
+        json={"notify_email": True, "notify_days_before": 1},
+        headers=account["headers"],
+    )
+    resp = client.post("/api/v1/auth/notifications/test", headers=account["headers"])
+    assert resp.status_code == 200
+    assert resp.json() == {"sent_tasks": 0}  # opted in, but no tasks exist yet
+
+
+def test_project_notify_mute_toggle(client, project):
+    resp = client.patch(f"/api/v1/projects/{project['id']}", json={"notify_muted": True})
+    assert resp.status_code == 200
+    assert resp.json()["notify_muted"] is True

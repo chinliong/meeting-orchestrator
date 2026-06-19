@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.models import MeetingStatus, TaskStatus
 
@@ -14,6 +14,7 @@ class ProjectCreate(BaseModel):
 class ProjectUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
+    notify_muted: Optional[bool] = None
 
 
 class ProjectOut(BaseModel):
@@ -22,6 +23,7 @@ class ProjectOut(BaseModel):
     description: str
     created_at: datetime
     owner_user_id: Optional[int] = None
+    notify_muted: bool
     # The caller's access to this board, and the tokens they're allowed to see.
     access_level: str  # "edit" | "view"
     view_token: str
@@ -61,11 +63,18 @@ class UserOut(BaseModel):
     id: int
     email: str
     created_at: datetime
+    notify_email: bool
+    notify_days_before: int
 
 
 class AuthResponse(BaseModel):
     token: str
     user: UserOut
+
+
+class NotificationSettingsUpdate(BaseModel):
+    notify_email: bool
+    notify_days_before: int = Field(default=1, ge=0, le=14)
 
 
 class StakeholderCreate(BaseModel):

@@ -23,6 +23,10 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
 
+    # Deadline email reminders are opt-in (default off) — see app/notifications.py.
+    notify_email = Column(Boolean, nullable=False, default=False)
+    notify_days_before = Column(Integer, nullable=False, default=1)
+
     projects = relationship("Project", back_populates="owner")
 
 
@@ -70,6 +74,9 @@ class Project(Base):
     # Permanent capability tokens: holding the link is the credential.
     view_token = Column(String, nullable=False, unique=True, index=True, default=_new_token)
     edit_token = Column(String, nullable=False, unique=True, index=True, default=_new_token)
+    # Per-project override: skip deadline reminders for this board even if the owner has
+    # them enabled account-wide.
+    notify_muted = Column(Boolean, nullable=False, default=False)
 
     owner = relationship("User", back_populates="projects")
     meetings = relationship("Meeting", back_populates="project", cascade="all, delete-orphan")
@@ -112,6 +119,9 @@ class Task(Base):
     confidence = Column(Float, default=1.0)
     source_decision = Column(Text, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
+    # The deadline (if any) this task last sent an email reminder for — keeps the daily
+    # notification job from re-sending for a deadline it already warned about.
+    last_notified_for = Column(Date, nullable=True)
 
     project = relationship("Project", back_populates="tasks")
     meeting = relationship("Meeting", back_populates="tasks")

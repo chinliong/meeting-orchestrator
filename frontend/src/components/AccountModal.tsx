@@ -10,6 +10,8 @@ interface Props {
   onClose: () => void;
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   onDeleteAccount: () => Promise<void>;
+  onUpdateNotifications: (notifyEmail: boolean, notifyDaysBefore: number) => Promise<void>;
+  onSendTestNotification: () => Promise<number>;
 }
 
 // Pull the server's human-readable detail out of the api.ts error wrapper.
@@ -19,7 +21,15 @@ function readableError(err: unknown, fallback: string): string {
   return match ? match[1] : raw;
 }
 
-export default function AccountModal({ open, user, onClose, onChangePassword, onDeleteAccount }: Props) {
+export default function AccountModal({
+  open,
+  user,
+  onClose,
+  onChangePassword,
+  onDeleteAccount,
+  onUpdateNotifications,
+  onSendTestNotification,
+}: Props) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -31,6 +41,14 @@ export default function AccountModal({ open, user, onClose, onChangePassword, on
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
+  // --- notification settings ---
+  const [notifyEmail, setNotifyEmail] = useState(user.notify_email);
+  const [notifyDaysBefore, setNotifyDaysBefore] = useState(user.notify_days_before);
+  const [notifySaving, setNotifySaving] = useState(false);
+  const [notifyError, setNotifyError] = useState<string | null>(null);
+  const [testSending, setTestSending] = useState(false);
+  const [testResult, setTestResult] = useState<string | null>(null);
+
   // Reset the form each time the modal opens, and close on Escape.
   useEffect(() => {
     if (open) {
@@ -41,6 +59,10 @@ export default function AccountModal({ open, user, onClose, onChangePassword, on
       setSuccess(false);
       setConfirmingDelete(false);
       setDeleteError(null);
+      setNotifyEmail(user.notify_email);
+      setNotifyDaysBefore(user.notify_days_before);
+      setNotifyError(null);
+      setTestResult(null);
     }
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     if (open) window.addEventListener("keydown", onKey);
@@ -82,6 +104,53 @@ export default function AccountModal({ open, user, onClose, onChangePassword, on
     } catch (err) {
       setDeleteError(readableError(err, "Failed to delete account"));
       setDeleting(false);
+    }
+  };
+
+  // Persist a notification setting immediately on change, rather than behind a save button —
+  // a toggle/select pair reads as "live settings," not a form that needs submitting.
+  const saveNotifications = async (nextEmail: boolean, nextDays: number) => {
+    setNotifySaving(true);
+    setNotifyError(null);
+    setTestResult(null);
+    try {
+      await onUpdateNotifications(nextEmail, nextDays);
+    } catch (err) {
+      setNotifyError(readableError(err, "Failed to update notification settings"));
+      // Roll back the optimistic UI change.
+      setNotifyEmail(user.notify_email);
+      setNotifyDaysBefore(user.notify_days_before);
+    } finally {
+      setNotifySaving(false);
+    }
+  };
+
+  const handleToggleNotify = () => {
+    const next = !notifyEmail;
+    setNotifyEmail(next);
+    saveNotifications(next, notifyDaysBefore);
+  };
+
+  const handleDaysBeforeChange = (days: number) => {
+    setNotifyDaysBefore(days);
+    saveNotifications(notifyEmail, days);
+  };
+
+  const handleSendTest = async () => {
+    setTestSending(true);
+    setTestResult(null);
+    setNotifyError(null);
+    try {
+      const count = await onSendTestNotification();
+      setTestResult(
+        count > 0
+          ? `Sent — ${count} task${count === 1 ? "" : "s"} included.`
+          : "Sent — you have no tasks due right now, so it's just a confirmation email."
+      );
+    } catch (err) {
+      setNotifyError(readableError(err, "Failed to send test email"));
+    } finally {
+      setTestSending(false);
     }
   };
 
@@ -142,6 +211,70 @@ export default function AccountModal({ open, user, onClose, onChangePassword, on
             {submitting ? "Updating..." : "Update password"}
           </button>
         </form>
+
+        {/* --- deadline email notifications --- */}
+        <div className="mt-6 border-t border-slate-200 pt-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">Deadline reminders</h3>
+              <p className="mt-0.5 text-xs text-slate-500">
+                Get a digest email when a task is about to be due or has gone overdue.
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={notifyEmail}
+              onClick={handleToggleNotify}
+              disabled={notifySaving}
+              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition disabled:opacity-50 ${
+                notifyEmail ? "bg-slate-900" : "bg-slate-200"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition ${
+                  notifyEmail ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
+
+          {notifyEmail && (
+            <div className="mt-3 space-y-3">
+              <label className="flex items-center gap-2 text-sm text-slate-700">
+                Remind me
+                <select
+                  value={notifyDaysBefore}
+                  onChange={(e) => handleDaysBeforeChange(Number(e.target.value))}
+                  disabled={notifySaving}
+                  className="rounded-lg border border-slate-300 px-2 py-1 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+                >
+                  <option value={0}>on the due date</option>
+                  <option value={1}>1 day before</option>
+                  <option value={2}>2 days before</option>
+                  <option value={3}>3 days before</option>
+                  <option value={7}>1 week before</option>
+                </select>
+              </label>
+
+              <div>
+                <button
+                  type="button"
+                  onClick={handleSendTest}
+                  disabled={testSending}
+                  className="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 disabled:opacity-50"
+                >
+                  {testSending ? "Sending..." : "Send test email"}
+                </button>
+                {testResult && <p className="mt-2 text-xs text-emerald-700">{testResult}</p>}
+              </div>
+            </div>
+          )}
+
+          {notifyError && (
+            <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{notifyError}</p>
+          )}
+        </div>
 
         {/* --- danger zone --- */}
         <div className="mt-6 border-t border-slate-200 pt-5">

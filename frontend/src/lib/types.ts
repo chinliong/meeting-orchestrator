@@ -8,6 +8,7 @@ export interface Project {
   description: string;
   created_at: string;
   owner_user_id: number | null;
+  notify_muted: boolean;
   access_level: AccessLevel;
   view_token: string;
   edit_token: string | null; // present only when you have edit access
@@ -17,6 +18,8 @@ export interface User {
   id: number;
   email: string;
   created_at: string;
+  notify_email: boolean;
+  notify_days_before: number;
 }
 
 export interface AuthResponse {

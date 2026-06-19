@@ -2,7 +2,7 @@
 // they hold share links to. Guests have no server-side account, so their list of reachable
 // workspaces lives here — losing it means losing access unless they saved the links.
 
-import type { AuthResponse, Project } from "./types";
+import type { AuthResponse, Project, User } from "./types";
 
 const AUTH_KEY = "mo.auth";
 const MODE_KEY = "mo.mode"; // "guest" once a guest session is chosen
@@ -28,6 +28,12 @@ function write(key: string, value: unknown) {
 export const loadAuth = () => read<AuthResponse>(AUTH_KEY);
 export const saveAuth = (auth: AuthResponse) => write(AUTH_KEY, auth);
 export const clearAuth = () => window.localStorage.removeItem(AUTH_KEY);
+
+/** Refresh just the user portion of stored auth (e.g. after changing notification settings). */
+export function updateStoredUser(user: User) {
+  const stored = loadAuth();
+  if (stored) write(AUTH_KEY, { ...stored, user });
+}
 
 // --- guest mode flag ---
 export const isGuestChosen = () => read<string>(MODE_KEY) === "guest";
