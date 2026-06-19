@@ -1,18 +1,30 @@
+import logging
+import secrets
+from datetime import datetime, timedelta, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 
 from app.auth import create_access_token, get_current_user, hash_password, verify_password
 from app.db import get_db
-from app.models.models import Project, User
+from app.email import send_email
+from app.models.models import PasswordReset, Project, User
 from app.schemas.schemas import (
     AuthResponse,
     ChangePasswordRequest,
+    ForgotPasswordRequest,
     LoginRequest,
+    ResetPasswordRequest,
     SignupRequest,
     UserOut,
 )
 
+logger = logging.getLogger("app.auth")
+
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+RESET_CODE_TTL = timedelta(minutes=15)
+RESET_MAX_ATTEMPTS = 5
 
 
 def _claim_guest_projects(db: Session, user: User, edit_tokens: list[str]) -> None:
@@ -89,5 +101,79 @@ def delete_account(
     for project in db.query(Project).filter(Project.owner_user_id == user.id).all():
         project.owner_user_id = None
     db.delete(user)
+    db.commit()
+    return Response(status_code=204)
+
+
+@router.post("/forgot-password", status_code=204)
+def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    """Email a 6-digit reset code.
+
+    Always returns 204 regardless of whether the email exists, so the endpoint can't be
+    used to discover which addresses have accounts.
+    """
+    email = payload.email.strip().lower()
+    user = db.query(User).filter(User.email == email).first()
+    if user is not None:
+        # Invalidate any earlier outstanding codes so only the newest one works.
+        db.query(PasswordReset).filter(
+            PasswordReset.user_id == user.id, PasswordReset.used.is_(False)
+        ).update({PasswordReset.used: True})
+
+        code = f"{secrets.randbelow(1_000_000):06d}"
+        db.add(
+            PasswordReset(
+                user_id=user.id,
+                code_hash=hash_password(code),
+                expires_at=datetime.now(timezone.utc) + RESET_CODE_TTL,
+            )
+        )
+        db.commit()
+
+        try:
+            send_email(
+                to=user.email,
+                subject="Your password reset code",
+                body=(
+                    f"Your password reset code is {code}\n\n"
+                    "It expires in 15 minutes. If you didn't request this, you can ignore this email."
+                ),
+            )
+        except Exception:  # don't leak send failures (or that the account exists)
+            logger.exception("Failed to send password reset email")
+
+    return Response(status_code=204)
+
+
+@router.post("/reset-password", status_code=204)
+def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db)):
+    email = payload.email.strip().lower()
+    if not payload.new_password:
+        raise HTTPException(status_code=400, detail="New password is required")
+
+    invalid = HTTPException(status_code=400, detail="Invalid or expired code")
+    user = db.query(User).filter(User.email == email).first()
+    if user is None:
+        raise invalid
+
+    reset = (
+        db.query(PasswordReset)
+        .filter(PasswordReset.user_id == user.id, PasswordReset.used.is_(False))
+        .order_by(PasswordReset.created_at.desc())
+        .first()
+    )
+    # Stored datetimes are naive UTC; compare against a naive now.
+    if reset is None or reset.expires_at < datetime.now(timezone.utc).replace(tzinfo=None):
+        raise invalid
+
+    if not verify_password(payload.code, reset.code_hash):
+        reset.attempts += 1
+        if reset.attempts >= RESET_MAX_ATTEMPTS:
+            reset.used = True  # too many guesses — burn the code
+        db.commit()
+        raise invalid
+
+    user.password_hash = hash_password(payload.new_password)
+    reset.used = True
     db.commit()
     return Response(status_code=204)

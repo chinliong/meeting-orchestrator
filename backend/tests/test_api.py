@@ -98,6 +98,50 @@ def test_delete_account_orphans_projects(client, account):
     assert by_token.status_code == 200 and by_token.json()["name"] == "Keep me"
 
 
+def test_forgot_and_reset_password(client, account, monkeypatch):
+    import re
+
+    sent = {}
+    monkeypatch.setattr("app.api.auth.send_email", lambda to, subject, body: sent.update(to=to, body=body))
+
+    # Requesting a code always returns 204 and emails the user.
+    assert client.post("/api/v1/auth/forgot-password", json={"email": "owner@example.com"}).status_code == 204
+    assert sent["to"] == "owner@example.com"
+    code = re.search(r"\b(\d{6})\b", sent["body"]).group(1)
+
+    # A wrong code is rejected without resetting anything.
+    wrong = "654321" if code != "654321" else "123456"
+    bad = client.post(
+        "/api/v1/auth/reset-password",
+        json={"email": "owner@example.com", "code": wrong, "new_password": "fresh123"},
+    )
+    assert bad.status_code == 400
+
+    # The correct code sets the new password.
+    ok = client.post(
+        "/api/v1/auth/reset-password",
+        json={"email": "owner@example.com", "code": code, "new_password": "fresh123"},
+    )
+    assert ok.status_code == 204
+    assert client.post("/api/v1/auth/login", json={"email": "owner@example.com", "password": "fresh123"}).status_code == 200
+    assert client.post("/api/v1/auth/login", json={"email": "owner@example.com", "password": "pw12345"}).status_code == 401
+
+    # The code is single-use.
+    reuse = client.post(
+        "/api/v1/auth/reset-password",
+        json={"email": "owner@example.com", "code": code, "new_password": "again123"},
+    )
+    assert reuse.status_code == 400
+
+
+def test_forgot_password_unknown_email_is_silent(client, monkeypatch):
+    calls = []
+    monkeypatch.setattr("app.api.auth.send_email", lambda **kw: calls.append(kw))
+    # No account, but the response is identical (204) so existence can't be probed — and no email is sent.
+    assert client.post("/api/v1/auth/forgot-password", json={"email": "nobody@nowhere.com"}).status_code == 204
+    assert calls == []
+
+
 # --- projects & ownership ---
 
 def test_list_projects_is_scoped_to_owner(client, account):

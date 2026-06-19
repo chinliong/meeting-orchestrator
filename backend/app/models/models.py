@@ -3,7 +3,7 @@ from __future__ import annotations
 import enum
 import secrets
 
-from sqlalchemy import Column, Date, DateTime, Enum, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, Date, DateTime, Enum, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -24,6 +24,24 @@ class User(Base):
     created_at = Column(DateTime, server_default=func.now())
 
     projects = relationship("Project", back_populates="owner")
+
+
+class PasswordReset(Base):
+    """A short-lived 6-digit code emailed to a user to reset their password.
+
+    Only the bcrypt hash of the code is stored. A code is single-use (`used`) and
+    expires; `attempts` caps brute-force guesses.
+    """
+
+    __tablename__ = "password_resets"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    code_hash = Column(String, nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    attempts = Column(Integer, nullable=False, default=0)
+    used = Column(Boolean, nullable=False, default=False)
+    created_at = Column(DateTime, server_default=func.now())
 
 
 class TaskStatus(str, enum.Enum):
