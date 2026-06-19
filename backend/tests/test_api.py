@@ -385,7 +385,9 @@ def test_update_and_delete_task(client, project, stub_parser):
     assert patched.status_code == 200
     assert patched.json()["status"] == "in_progress"
 
-    assert client.delete(f"/api/v1/tasks/{task_id}").status_code == 204
+    deleted = client.delete(f"/api/v1/tasks/{task_id}")
+    assert deleted.status_code == 200
+    assert deleted.json()["task"]["id"] == task_id
     assert client.patch(f"/api/v1/tasks/{task_id}", json={"status": "done"}).status_code == 404
 
 
@@ -398,3 +400,39 @@ def test_audio_endpoint_unavailable_without_whisper(client, project, monkeypatch
     )
     assert resp.status_code == 503
     assert "whisper" in resp.json()["detail"].lower()
+
+
+# --- Undo: delete snapshot + restore -----------------------------------------------
+
+
+def _make_task(client, project, description="t"):
+    resp = client.post(
+        "/api/v1/tasks", json={"project_id": project["id"], "description": description}
+    )
+    assert resp.status_code == 201
+    return resp.json()["id"]
+
+
+def test_restore_deleted_task_round_trips(client, project):
+    a = _make_task(client, project, "Renew TLS cert")
+    client.patch(f"/api/v1/tasks/{a}", json={"owner": "Sam", "status": "in_progress"})
+
+    snapshot = client.delete(f"/api/v1/tasks/{a}").json()
+    assert snapshot["task"]["id"] == a
+    assert client.get(f"/api/v1/tasks?project_id={project['id']}").json() == []
+
+    restored = client.post("/api/v1/tasks/restore", json=snapshot)
+    assert restored.status_code == 201
+    body = restored.json()
+    assert body["id"] == a  # same id is reused
+    assert (body["owner"], body["status"]) == ("Sam", "in_progress")
+    assert len(client.get(f"/api/v1/tasks?project_id={project['id']}").json()) == 1
+
+
+def test_restore_requires_edit_access(client, project):
+    a = _make_task(client, project, "A")
+    snapshot = client.delete(f"/api/v1/tasks/{a}").json()
+
+    view_headers = {"X-Workspace-Token": project["view_token"]}
+    blocked = client.post("/api/v1/tasks/restore", json=snapshot, headers=view_headers)
+    assert blocked.status_code == 403

@@ -8,6 +8,8 @@ interface Props {
   onOwnerChange: (owner: string) => void;
   sortByDeadline: boolean;
   onSortToggle: () => void;
+  /** The "Sort by deadline" toggle is meaningless in the calendar view, so it can be hidden. */
+  showSort?: boolean;
 }
 
 export default function Filters({
@@ -16,6 +18,7 @@ export default function Filters({
   onOwnerChange,
   sortByDeadline,
   onSortToggle,
+  showSort = true,
 }: Props) {
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -57,19 +60,21 @@ export default function Filters({
         );
       })}
 
-      <button
-        onClick={onSortToggle}
-        className={`ml-auto inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-          sortByDeadline
-            ? "bg-slate-900 text-white"
-            : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
-        }`}
-      >
-        <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
-          <path d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm2 5a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm3 4a1 1 0 100 2h4a1 1 0 100-2H8z" />
-        </svg>
-        Sort by deadline
-      </button>
+      {showSort && (
+        <button
+          onClick={onSortToggle}
+          className={`ml-auto inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+            sortByDeadline
+              ? "bg-slate-900 text-white"
+              : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+          }`}
+        >
+          <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
+            <path d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm2 5a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm3 4a1 1 0 100 2h4a1 1 0 100-2H8z" />
+          </svg>
+          Sort by deadline
+        </button>
+      )}
     </div>
   );
 }

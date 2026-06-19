@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.auth import get_optional_user, require_project_edit, require_project_view
 from app.db import get_db
-from app.models.models import Project, Task, TaskStatus, User
-from app.schemas.schemas import TaskCreate, TaskOut, TaskUpdate
+from app.models.models import Meeting, Project, Task, TaskStatus, User
+from app.schemas.schemas import DeletedTask, TaskCreate, TaskOut, TaskRestore, TaskUpdate
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -90,7 +90,7 @@ def update_task(
     return task
 
 
-@router.delete("/{task_id}", status_code=204)
+@router.delete("/{task_id}", response_model=DeletedTask)
 def delete_task(
     task_id: int,
     user: Optional[User] = Depends(get_optional_user),
@@ -98,5 +98,40 @@ def delete_task(
     db: Session = Depends(get_db),
 ):
     task = _editable_task(db, task_id, user, x_workspace_token)
+    # Snapshot the task first so the client can offer an undo (POST /tasks/restore).
+    snapshot = DeletedTask(task=TaskOut.model_validate(task))
     db.delete(task)
     db.commit()
+    return snapshot
+
+
+@router.post("/restore", response_model=TaskOut, status_code=201)
+def restore_task(
+    payload: TaskRestore,
+    user: Optional[User] = Depends(get_optional_user),
+    x_workspace_token: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+):
+    """Recreate a deleted task (with its original id) from a DeletedTask snapshot. Powers undo."""
+    snap = payload.task
+    require_project_edit(db, snap.project_id, user, x_workspace_token)
+    if db.get(Task, snap.id) is not None:
+        raise HTTPException(status_code=409, detail="Task already exists")
+
+    # Drop a dangling meeting link (e.g. the whole meeting was deleted meanwhile).
+    meeting_id = snap.meeting_id if snap.meeting_id and db.get(Meeting, snap.meeting_id) else None
+    task = Task(
+        id=snap.id,
+        project_id=snap.project_id,
+        meeting_id=meeting_id,
+        description=snap.description,
+        owner=snap.owner,
+        deadline=snap.deadline,
+        status=snap.status,
+        confidence=snap.confidence,
+        source_decision=snap.source_decision,
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    return task

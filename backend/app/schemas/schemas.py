@@ -116,6 +116,29 @@ class TaskUpdate(BaseModel):
     status: Optional[TaskStatus] = None
 
 
+class DeletedTask(BaseModel):
+    """Snapshot returned by DELETE /tasks/{id} so the client can offer an undo."""
+
+    task: TaskOut
+
+
+class TaskRestoreData(BaseModel):
+    # Extra fields from a TaskOut snapshot (meeting_title, created_at) are ignored.
+    id: int
+    project_id: int
+    meeting_id: Optional[int] = None
+    description: str
+    owner: Optional[str] = None
+    deadline: Optional[date] = None
+    status: TaskStatus = TaskStatus.TODO
+    confidence: float = 1.0
+    source_decision: Optional[str] = None
+
+
+class TaskRestore(BaseModel):
+    task: TaskRestoreData
+
+
 class MeetingUpdate(BaseModel):
     title: str
 

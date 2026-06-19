@@ -14,9 +14,12 @@ recordings for end-to-end processing.
   action items via a forced tool-use schema (validated with Pydantic).
 - **Owner & deadline inference** — owners assigned only when explicitly stated; deadlines
   inferred from contextual cues ("by this Friday") relative to the meeting date.
-- **Kanban dashboard** — auto-generated cards in To Do / In Progress / Done, drag-and-drop
-  status changes, filter by owner, sort by deadline, confidence shown per card, and a search
-  across task text, owners, and source meetings.
+- **Two views — Kanban & calendar** — a Kanban board (auto-generated cards in To Do / In Progress
+  / Done with drag-and-drop status changes) and a month calendar that plots tasks by their deadline
+  with drag-to-reschedule (drag onto a "no deadline" tray to clear it). Both support owner filtering
+  and a search across task text, owners, and source meetings; cards show extraction confidence.
+- **Undo** — an Undo button (and ⌘Z / Ctrl+Z) reverses status changes, edits, reschedules, and
+  deletes; a deleted task is restored with its original id.
 - **Manual & sourced tasks** — tasks are usually extracted from a meeting (the source meeting
   title shows on each card and can be renamed inline), but you can also add tasks by hand for
   work raised outside a captured meeting.
@@ -37,8 +40,8 @@ recordings for end-to-end processing.
 
 ```
 Next.js / React frontend  ──HTTP──>  FastAPI backend  ──>  Claude API (structured output)
-   Kanban board, filters,             REST API,             decisions + action items
-   search, share UI                   JWT auth + share
+   Kanban + calendar views,           REST API,             decisions + action items
+   filters, search, undo, share       JWT auth + share
    transcript / audio upload          tokens, SQLAlchemy
                                        Whisper (optional)
                                               │

@@ -1,4 +1,4 @@
-import type { AuthResponse, Meeting, Project, Task, TaskStatus, User } from "./types";
+import type { AuthResponse, DeletedTask, Meeting, Project, Task, TaskStatus, User } from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000/api/v1";
 
@@ -33,6 +33,9 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  // --- system ---
+  health: () => request<{ status: string }>("/health"),
+
   // --- auth ---
   signup: (email: string, password: string, claimTokens: string[] = []) =>
     request<AuthResponse>("/auth/signup", {
@@ -108,7 +111,11 @@ export const api = {
   updateTask: (id: number, patch: Partial<Pick<Task, "status" | "owner" | "deadline" | "description">>) =>
     request<Task>(`/tasks/${id}`, { method: "PATCH", body: JSON.stringify(patch) }),
 
-  deleteTask: (id: number) => request<void>(`/tasks/${id}`, { method: "DELETE" }),
+  // Returns a snapshot of what was removed, so the caller can offer an undo.
+  deleteTask: (id: number) => request<DeletedTask>(`/tasks/${id}`, { method: "DELETE" }),
+
+  restoreTask: (snapshot: DeletedTask) =>
+    request<Task>("/tasks/restore", { method: "POST", body: JSON.stringify(snapshot) }),
 
   // --- transcripts ---
   submitTranscript: (projectId: number, title: string, transcriptText: string) =>

@@ -13,8 +13,10 @@
 5. The backend sends the transcript to Claude with a forced tool-use schema; the response is
    validated into decisions, action items, owners, deadlines, and confidence via Pydantic.
 6. The structured data is persisted to the relational database (a `Meeting` plus its `Task` rows).
-7. The frontend fetches the task list and renders the Kanban board, with search, owner filtering,
-   and deadline sorting; status changes are written back with `PATCH /tasks/{id}`.
+7. The frontend fetches the task list and renders it two ways — a **Kanban board** (drag-and-drop
+   status changes) and a **month calendar** (tasks plotted by deadline, drag-to-reschedule) — both
+   with search and owner filtering. Edits are written back with `PATCH /tasks/{id}`; deletes return
+   a snapshot so an **Undo** action (button + ⌘Z/Ctrl+Z) can restore via `POST /tasks/restore`.
 
 ## Component diagram
 
@@ -23,7 +25,7 @@ flowchart LR
     subgraph Client[Next.js / React frontend]
         A[Auth gate / share-link open]
         U[Transcript / audio upload]
-        K[Kanban board + filters + search + share]
+        K[Board + calendar views, filters, search, undo, share]
     end
 
     subgraph API[FastAPI backend]
@@ -58,11 +60,12 @@ flowchart LR
 
 ## Components
 
-- **Frontend (Next.js/React):** auth gate (sign in / create account / continue as guest), Kanban
-  board, owner filter / deadline sort / text search, transcript-and-audio upload, and a share
-  dialog exposing view/edit links. A small session layer persists the account token and guest
-  boards in `localStorage`. Talks to the backend via `src/lib/api.ts`, which attaches the
-  `Authorization` bearer and `X-Workspace-Token` headers.
+- **Frontend (Next.js/React):** auth gate (sign in / create account / continue as guest), a
+  **Kanban board** and a **month calendar** view (toggle), owner filter / deadline sort / text
+  search, an **undo** stack (button + ⌘Z/Ctrl+Z) over status/edit/reschedule/delete actions,
+  transcript-and-audio upload, and a share dialog exposing view/edit links. A small session layer
+  persists the account token and guest boards in `localStorage`. Talks to the backend via
+  `src/lib/api.ts`, which attaches the `Authorization` bearer and `X-Workspace-Token` headers.
 - **Backend (FastAPI):**
   - `POST /auth/signup` (with optional guest-board claim), `POST /auth/login`, `GET /auth/me`,
     `POST /auth/password` (change password), `DELETE /auth/me` (delete account; owned boards are
@@ -72,7 +75,8 @@ flowchart LR
     `PATCH|DELETE /projects/{id}`.
   - `POST /transcripts`, `POST /transcripts/audio`, `GET /transcripts/{id}`,
     `PATCH /transcripts/{id}` (rename a meeting; reflected on its tasks).
-  - `GET|POST /tasks`, `PATCH /tasks/{id}`, `DELETE /tasks/{id}`. `GET /tasks` filters by
+  - `GET|POST /tasks`, `PATCH /tasks/{id}`, `DELETE /tasks/{id}` (returns a snapshot for undo),
+    `POST /tasks/restore` (recreate a deleted task with its original id). `GET /tasks` filters by
     `project_id`, `owner`, `status`, `due_before`, `due_after`; with no `project_id` an
     authenticated user gets tasks across all boards they own.
   - `GET|POST /stakeholders`.

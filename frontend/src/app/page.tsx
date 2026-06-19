@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import AccountModal from "@/components/AccountModal";
 import AuthGate from "@/components/AuthGate";
+import CalendarView from "@/components/CalendarView";
 import EditTaskModal from "@/components/EditTaskModal";
 import Filters from "@/components/Filters";
 import KanbanBoard from "@/components/KanbanBoard";
@@ -26,12 +27,29 @@ import {
   upsertGuestWorkspace,
   workspaceTokenFor,
 } from "@/lib/session";
-import type { AuthResponse, Project, Task, TaskStatus, User } from "@/lib/types";
+import type { AuthResponse, Project, Task, TaskStatus, UndoAction, User } from "@/lib/types";
 
 type Session = { mode: "user"; user: User } | { mode: "guest" } | null;
+type BoardView = "board" | "calendar";
+
+// Render's free tier sleeps after inactivity, so the first request cold-starts (~30-60s).
+// Poll health up front so the rest of bootstrap hits a warm server; cap the wait so a truly
+// down backend still lets the app render and surface a real error.
+async function waitForBackend(): Promise<void> {
+  const deadline = Date.now() + 90_000;
+  while (Date.now() < deadline) {
+    try {
+      await api.health();
+      return;
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
+  }
+}
 
 export default function DashboardPage() {
   const [ready, setReady] = useState(false);
+  const [slow, setSlow] = useState(false); // backend is taking a while (likely a cold start)
   const [session, setSession] = useState<Session>(null);
   const [showAuth, setShowAuth] = useState(false); // guest upgrade overlay
   const [showAccount, setShowAccount] = useState(false); // account settings overlay
@@ -41,6 +59,7 @@ export default function DashboardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedOwner, setSelectedOwner] = useState("");
   const [sortByDeadline, setSortByDeadline] = useState(false);
+  const [view, setView] = useState<BoardView>("board");
   const [search, setSearch] = useState("");
   const [searchAllProjects, setSearchAllProjects] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -51,9 +70,19 @@ export default function DashboardPage() {
 
   const user = session?.mode === "user" ? session.user : null;
 
+  // While bootstrapping, escalate the loader message if the backend is slow to answer.
+  useEffect(() => {
+    if (ready) return;
+    const timer = setTimeout(() => setSlow(true), 4000);
+    return () => clearTimeout(timer);
+  }, [ready]);
+
   // --- bootstrap: decide session, load boards, honour a ?w=<token> share link ---
   useEffect(() => {
     (async () => {
+      // Wait for the (possibly cold-starting) backend before any real requests.
+      await waitForBackend();
+
       const url = new URL(window.location.href);
       const wToken = url.searchParams.get("w");
       const stored = loadAuth();
@@ -159,18 +188,81 @@ export default function DashboardPage() {
     return result;
   }, [tasks, selectedOwner, sortByDeadline, search]);
 
+  // Calendar plots task deadlines; it works in any task view (single board or across all).
+  const activeView: BoardView = view;
+
+  // --- undo: a shared stack whose entries each perform the inverse of an action ---
+  const undoStackRef = useRef<UndoAction[]>([]);
+  const [undoDepth, setUndoDepth] = useState(0);
+
+  const pushUndo = useCallback((action: UndoAction) => {
+    undoStackRef.current.push(action);
+    if (undoStackRef.current.length > 50) undoStackRef.current.shift();
+    setUndoDepth(undoStackRef.current.length);
+  }, []);
+
+  const handleUndo = useCallback(async () => {
+    const action = undoStackRef.current.pop();
+    setUndoDepth(undoStackRef.current.length);
+    if (!action) return;
+    try {
+      await action.run();
+    } catch (err) {
+      setLoadError((err as Error).message);
+    }
+  }, []);
+
+  // Cmd/Ctrl+Z anywhere (except while typing in a field).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.shiftKey || e.key.toLowerCase() !== "z") return;
+      const el = e.target as HTMLElement | null;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
+      e.preventDefault();
+      handleUndo();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [handleUndo]);
+
   // --- task handlers ---
   const handleStatusChange = async (taskId: number, status: TaskStatus) => {
-    setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status } : t)));
+    const prev = tasks.find((t) => t.id === taskId)?.status;
+    setTasks((cur) => cur.map((t) => (t.id === taskId ? { ...t, status } : t)));
     await api.updateTask(taskId, { status });
+    if (prev && prev !== status) {
+      pushUndo({
+        label: "status change",
+        run: async () => {
+          setTasks((cur) => cur.map((t) => (t.id === taskId ? { ...t, status: prev } : t)));
+          await api.updateTask(taskId, { status: prev });
+        },
+      });
+    }
   };
 
   const handleEditTask = async (
     taskId: number,
     patch: { description?: string; owner?: string | null; deadline?: string | null; status?: TaskStatus }
   ) => {
+    const before = tasks.find((t) => t.id === taskId);
     const updated = await api.updateTask(taskId, patch);
-    setTasks((prev) => prev.map((t) => (t.id === taskId ? updated : t)));
+    setTasks((cur) => cur.map((t) => (t.id === taskId ? updated : t)));
+    if (before) {
+      const revert = {
+        description: before.description,
+        owner: before.owner,
+        deadline: before.deadline,
+        status: before.status,
+      };
+      pushUndo({
+        label: "edit task",
+        run: async () => {
+          const reverted = await api.updateTask(taskId, revert);
+          setTasks((cur) => cur.map((t) => (t.id === taskId ? reverted : t)));
+        },
+      });
+    }
   };
 
   const handleCreateTask = async (values: {
@@ -193,7 +285,19 @@ export default function DashboardPage() {
 
   const handleDelete = async (taskId: number) => {
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
-    await api.deleteTask(taskId);
+    try {
+      const snapshot = await api.deleteTask(taskId);
+      pushUndo({
+        label: "delete task",
+        run: async () => {
+          const restored = await api.restoreTask(snapshot);
+          setTasks((cur) => (cur.some((t) => t.id === restored.id) ? cur : [restored, ...cur]));
+        },
+      });
+    } catch (err) {
+      setLoadError((err as Error).message);
+      reloadTasks(); // delete failed — resync so the card isn't wrongly hidden
+    }
   };
 
   const handleTranscriptSubmit = async (title: string, transcriptText: string) => {
@@ -299,7 +403,7 @@ export default function DashboardPage() {
   };
 
   if (!ready) {
-    return <div className="min-h-screen" />;
+    return <LoadingScreen slow={slow} />;
   }
 
   // Full-page gate when no session has been chosen yet.
@@ -451,6 +555,40 @@ export default function DashboardPage() {
                       </button>
                     </div>
                   )}
+                  <div className="flex shrink-0 rounded-lg bg-slate-100 p-1 text-sm font-medium">
+                    <button
+                      onClick={() => setView("board")}
+                      className={`rounded-md px-3 py-1 transition ${
+                        activeView === "board" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                      }`}
+                    >
+                      Board
+                    </button>
+                    <button
+                      onClick={() => setView("calendar")}
+                      className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1 transition ${
+                        activeView === "calendar" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                      }`}
+                    >
+                      <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="currentColor">
+                        <path d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v9a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zM4 8h12v7H4V8z" />
+                      </svg>
+                      Calendar
+                    </button>
+                  </div>
+                  {canEdit && (
+                    <button
+                      onClick={handleUndo}
+                      disabled={undoDepth === 0}
+                      title="Undo (⌘Z / Ctrl+Z)"
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
+                    >
+                      <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
+                        <path d="M8 5V2.5a.5.5 0 00-.82-.38l-4.5 3.75a.5.5 0 000 .76l4.5 3.75A.5.5 0 008 10V7.5h3.5a4 4 0 110 8H7a1 1 0 100 2h4.5a6 6 0 100-12H8z" />
+                      </svg>
+                      Undo
+                    </button>
+                  )}
                   {canEdit && (
                     <button
                       onClick={() => setCreatingTask(true)}
@@ -471,10 +609,19 @@ export default function DashboardPage() {
                     onOwnerChange={setSelectedOwner}
                     sortByDeadline={sortByDeadline}
                     onSortToggle={() => setSortByDeadline((v) => !v)}
+                    showSort={activeView === "board"}
                   />
                 )}
 
-                {search.trim() && visibleTasks.length === 0 ? (
+                {activeView === "calendar" ? (
+                  <CalendarView
+                    tasks={visibleTasks}
+                    canEdit={!!canEdit}
+                    onEditTask={setEditingTask}
+                    onDeleteTask={handleDelete}
+                    onReschedule={(taskId, deadline) => handleEditTask(taskId, { deadline })}
+                  />
+                ) : search.trim() && visibleTasks.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-slate-200 bg-white/60 px-4 py-12 text-center text-sm text-slate-500">
                     No tasks match <span className="font-medium text-slate-700">“{search.trim()}”</span>.
                   </div>
@@ -542,6 +689,41 @@ export default function DashboardPage() {
           onChangePassword={handleChangePassword}
           onDeleteAccount={handleDeleteAccount}
         />
+      )}
+    </div>
+  );
+}
+
+function LoadingScreen({ slow }: { slow: boolean }) {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-5 px-6 text-center">
+      <div className="relative flex items-center justify-center">
+        <span className="absolute h-16 w-16 animate-ping rounded-full bg-slate-300/40" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/logo.png"
+          alt="Meeting Orchestrator"
+          className="relative h-14 w-14 rounded-full object-cover shadow-card"
+        />
+      </div>
+
+      <div className="flex items-center gap-2 text-slate-600">
+        <svg className="h-4 w-4 animate-spin text-slate-400" viewBox="0 0 24 24" fill="none">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          />
+        </svg>
+        <span className="text-sm font-medium">Loading your boards…</span>
+      </div>
+
+      {slow && (
+        <p className="max-w-sm text-xs leading-relaxed text-slate-400">
+          Waking up the server — the free hosting tier sleeps after inactivity, so the first load
+          can take up to a minute. Hang tight, this only happens on the first visit.
+        </p>
       )}
     </div>
   );

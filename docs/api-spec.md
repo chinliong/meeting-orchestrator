@@ -167,7 +167,17 @@ Update any of `description`, `owner`, `deadline`, `status`. Requires edit access
 board. Returns the updated task; `404` if not found.
 
 ### `DELETE /tasks/{task_id}`
-Removes the task. Requires edit access. `204 No Content`; `404` if not found.
+Removes the task. Requires edit access. `404` if not found. Returns `200` with a snapshot of what
+was removed, so the client can offer an **undo**:
+```json
+{ "task": { "id": 40, "project_id": 1, "...": "full task object" } }
+```
+
+### `POST /tasks/restore`
+Recreates a previously deleted task from a `DELETE` snapshot — powers undo. Body is the snapshot
+above (`{ "task": { ... } }`). The task is restored with its **original id** (so references stay
+valid). Requires edit access to the task's board. `201` with the restored task; `409` if a task
+with that id already exists. A dangling `meeting_id` (its meeting was deleted meanwhile) is cleared.
 
 ## Stakeholders
 

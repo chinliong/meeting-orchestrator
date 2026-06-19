@@ -38,6 +38,17 @@ export interface Task {
   created_at: string;
 }
 
+/** Snapshot returned when a task is deleted, enough to restore it (powers undo). */
+export interface DeletedTask {
+  task: Task;
+}
+
+/** A reversible action on the undo stack. `run` performs the inverse of what just happened. */
+export interface UndoAction {
+  label: string;
+  run: () => void | Promise<void>;
+}
+
 export type MeetingStatus = "pending" | "processing" | "complete" | "failed";
 
 export interface Meeting {
