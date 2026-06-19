@@ -37,14 +37,16 @@ def send_email(to: str, subject: str, body: str) -> None:
     port = int(os.getenv("SMTP_PORT", "587"))
     user = os.getenv("SMTP_USER")
     password = os.getenv("SMTP_PASSWORD")
+    # Bound every network step so a slow/blocked SMTP host can't hang a worker indefinitely.
+    timeout = float(os.getenv("SMTP_TIMEOUT", "15"))
 
     if port == 465:
-        with smtplib.SMTP_SSL(host, port) as server:
+        with smtplib.SMTP_SSL(host, port, timeout=timeout) as server:
             if user and password:
                 server.login(user, password)
             server.send_message(msg)
     else:
-        with smtplib.SMTP(host, port) as server:
+        with smtplib.SMTP(host, port, timeout=timeout) as server:
             server.starttls()
             if user and password:
                 server.login(user, password)

@@ -2,7 +2,7 @@ import logging
 import secrets
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 
 from app.auth import create_access_token, get_current_user, hash_password, verify_password
@@ -105,12 +105,32 @@ def delete_account(
     return Response(status_code=204)
 
 
+def _send_reset_email(to: str, code: str) -> None:
+    """Send a reset code, swallowing errors so a flaky SMTP host never surfaces to callers."""
+    try:
+        send_email(
+            to=to,
+            subject="Your password reset code",
+            body=(
+                f"Your password reset code is {code}\n\n"
+                "It expires in 15 minutes. If you didn't request this, you can ignore this email."
+            ),
+        )
+    except Exception:
+        logger.exception("Failed to send password reset email")
+
+
 @router.post("/forgot-password", status_code=204)
-def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db)):
+def forgot_password(
+    payload: ForgotPasswordRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
     """Email a 6-digit reset code.
 
     Always returns 204 regardless of whether the email exists, so the endpoint can't be
-    used to discover which addresses have accounts.
+    used to discover which addresses have accounts. The email is sent in the background so
+    a slow SMTP handshake doesn't hold the request open.
     """
     email = payload.email.strip().lower()
     user = db.query(User).filter(User.email == email).first()
@@ -129,18 +149,7 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
             )
         )
         db.commit()
-
-        try:
-            send_email(
-                to=user.email,
-                subject="Your password reset code",
-                body=(
-                    f"Your password reset code is {code}\n\n"
-                    "It expires in 15 minutes. If you didn't request this, you can ignore this email."
-                ),
-            )
-        except Exception:  # don't leak send failures (or that the account exists)
-            logger.exception("Failed to send password reset email")
+        background_tasks.add_task(_send_reset_email, user.email, code)
 
     return Response(status_code=204)
 
