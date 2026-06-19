@@ -11,6 +11,7 @@ interface Props {
   user: User | null;
   onLogin: () => void;
   onLogout: () => void;
+  onOpenAccount: () => void;
 }
 
 export default function TopBar({
@@ -21,6 +22,7 @@ export default function TopBar({
   user,
   onLogin,
   onLogout,
+  onOpenAccount,
 }: Props) {
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur">
@@ -60,9 +62,13 @@ export default function TopBar({
           <div className="ml-1 flex items-center gap-2 border-l border-slate-200 pl-3">
             {user ? (
               <>
-                <span className="hidden text-sm text-slate-500 sm:inline" title={user.email}>
+                <button
+                  onClick={onOpenAccount}
+                  title="Account settings"
+                  className="hidden max-w-[180px] truncate rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 sm:inline-block"
+                >
                   {user.email}
-                </span>
+                </button>
                 <button
                   onClick={onLogout}
                   className="shrink-0 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50"

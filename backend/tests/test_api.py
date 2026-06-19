@@ -58,6 +58,46 @@ def test_me_requires_auth(client):
     assert client.get("/api/v1/auth/me").status_code == 401
 
 
+def test_change_password(client, account):
+    # Wrong current password is rejected.
+    bad = client.post(
+        "/api/v1/auth/password",
+        json={"current_password": "wrong", "new_password": "newpw123"},
+        headers=account["headers"],
+    )
+    assert bad.status_code == 401
+
+    # Correct current password updates the hash.
+    ok = client.post(
+        "/api/v1/auth/password",
+        json={"current_password": "pw12345", "new_password": "newpw123"},
+        headers=account["headers"],
+    )
+    assert ok.status_code == 204
+
+    # Old password no longer works; new one does.
+    assert client.post("/api/v1/auth/login", json={"email": "owner@example.com", "password": "pw12345"}).status_code == 401
+    assert client.post("/api/v1/auth/login", json={"email": "owner@example.com", "password": "newpw123"}).status_code == 200
+
+
+def test_change_password_requires_auth(client):
+    resp = client.post("/api/v1/auth/password", json={"current_password": "a", "new_password": "b"})
+    assert resp.status_code == 401
+
+
+def test_delete_account_orphans_projects(client, account):
+    created = client.post("/api/v1/projects", json={"name": "Keep me"}, headers=account["headers"]).json()
+
+    resp = client.request("DELETE", "/api/v1/auth/me", headers=account["headers"])
+    assert resp.status_code == 204
+
+    # The account is gone...
+    assert client.get("/api/v1/auth/me", headers=account["headers"]).status_code == 401
+    # ...but the board survives and is still reachable by its share link.
+    by_token = client.get(f"/api/v1/projects/by-token/{created['edit_token']}")
+    assert by_token.status_code == 200 and by_token.json()["name"] == "Keep me"
+
+
 # --- projects & ownership ---
 
 def test_list_projects_is_scoped_to_owner(client, account):

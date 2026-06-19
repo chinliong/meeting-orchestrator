@@ -45,6 +45,12 @@ export const api = {
       body: JSON.stringify({ email, password }),
     }),
   me: () => request<User>("/auth/me"),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    request<void>("/auth/password", {
+      method: "POST",
+      body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+    }),
+  deleteAccount: () => request<void>("/auth/me", { method: "DELETE" }),
 
   // --- projects ---
   listProjects: () => request<Project[]>("/projects"),

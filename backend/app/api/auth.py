@@ -1,10 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 
 from app.auth import create_access_token, get_current_user, hash_password, verify_password
 from app.db import get_db
 from app.models.models import Project, User
-from app.schemas.schemas import AuthResponse, LoginRequest, SignupRequest, UserOut
+from app.schemas.schemas import (
+    AuthResponse,
+    ChangePasswordRequest,
+    LoginRequest,
+    SignupRequest,
+    UserOut,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -52,3 +58,36 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserOut)
 def me(user: User = Depends(get_current_user)):
     return user
+
+
+@router.post("/password", status_code=204)
+def change_password(
+    payload: ChangePasswordRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if not verify_password(payload.current_password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Current password is incorrect")
+    if not payload.new_password:
+        raise HTTPException(status_code=400, detail="New password is required")
+    user.password_hash = hash_password(payload.new_password)
+    db.commit()
+    return Response(status_code=204)
+
+
+@router.delete("/me", status_code=204)
+def delete_account(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Delete the account and release its boards.
+
+    Owned projects are orphaned (owner_user_id -> None) rather than deleted, so they
+    revert to guest boards still reachable by their share links — matching how
+    unclaimed boards already behave.
+    """
+    for project in db.query(Project).filter(Project.owner_user_id == user.id).all():
+        project.owner_user_id = None
+    db.delete(user)
+    db.commit()
+    return Response(status_code=204)

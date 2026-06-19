@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import AccountModal from "@/components/AccountModal";
 import AuthGate from "@/components/AuthGate";
 import EditTaskModal from "@/components/EditTaskModal";
 import Filters from "@/components/Filters";
@@ -33,6 +34,7 @@ export default function DashboardPage() {
   const [ready, setReady] = useState(false);
   const [session, setSession] = useState<Session>(null);
   const [showAuth, setShowAuth] = useState(false); // guest upgrade overlay
+  const [showAccount, setShowAccount] = useState(false); // account settings overlay
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
@@ -286,6 +288,16 @@ export default function DashboardPage() {
     setSelectedProjectId(null);
   };
 
+  const handleChangePassword = async (currentPassword: string, newPassword: string) => {
+    await api.changePassword(currentPassword, newPassword);
+  };
+
+  const handleDeleteAccount = async () => {
+    await api.deleteAccount();
+    setShowAccount(false);
+    handleLogout();
+  };
+
   if (!ready) {
     return <div className="min-h-screen" />;
   }
@@ -309,6 +321,7 @@ export default function DashboardPage() {
         user={user}
         onLogin={() => setShowAuth(true)}
         onLogout={handleLogout}
+        onOpenAccount={() => setShowAccount(true)}
       />
 
       <main className="mx-auto max-w-7xl px-6 py-6">
@@ -520,6 +533,16 @@ export default function DashboardPage() {
       />
 
       <ShareModal project={shareProject} onClose={() => setShareProject(null)} />
+
+      {user && (
+        <AccountModal
+          open={showAccount}
+          user={user}
+          onClose={() => setShowAccount(false)}
+          onChangePassword={handleChangePassword}
+          onDeleteAccount={handleDeleteAccount}
+        />
+      )}
     </div>
   );
 }
