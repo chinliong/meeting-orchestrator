@@ -15,6 +15,24 @@ export function setWorkspaceToken(token: string | null) {
   workspaceToken = token;
 }
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Render's free tier sleeps after inactivity. The first request that wakes it is answered by
+// Render's boot proxy, not our app — a response with no CORS headers, which the browser surfaces
+// as a "Failed to fetch" TypeError. That throw happens before the request reaches the server, so
+// retrying is safe (nothing ran server-side). We retry ONLY these network throws — an actual HTTP
+// response (e.g. 401) is returned to the caller untouched and fails immediately upstream.
+async function fetchWithRetry(url: string, init: RequestInit, maxAttempts = 5): Promise<Response> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await fetch(url, init);
+    } catch (err) {
+      if (attempt >= maxAttempts) throw err;
+      await sleep(2000);
+    }
+  }
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -23,7 +41,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
   if (workspaceToken) headers["X-Workspace-Token"] = workspaceToken;
 
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  const res = await fetchWithRetry(`${API_BASE}${path}`, { ...options, headers });
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`${options?.method ?? "GET"} ${path} failed (${res.status}): ${body}`);
@@ -138,7 +156,7 @@ export const api = {
     const headers: Record<string, string> = {};
     if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
     if (workspaceToken) headers["X-Workspace-Token"] = workspaceToken;
-    const res = await fetch(`${API_BASE}/transcripts/audio`, { method: "POST", body: form, headers });
+    const res = await fetchWithRetry(`${API_BASE}/transcripts/audio`, { method: "POST", body: form, headers });
     if (!res.ok) {
       const body = await res.text();
       throw new Error(`POST /transcripts/audio failed (${res.status}): ${body}`);
