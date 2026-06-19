@@ -738,7 +738,7 @@ function LoadingScreen({ slow }: { slow: boolean }) {
       {slow && (
         <p className="max-w-sm text-xs leading-relaxed text-slate-400">
           Waking up the server — the free hosting tier sleeps after inactivity, so the first load
-          can take up to a minute. Hang tight, this only happens on the first visit.
+          can take up to a minute.
         </p>
       )}
     </div>
