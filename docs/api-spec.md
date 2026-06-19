@@ -36,6 +36,28 @@ credentials.
 ### `GET /auth/me`
 Returns the current user (requires bearer). `401` if unauthenticated.
 
+### `POST /auth/password`
+Change the signed-in user's password. Requires bearer. Body
+`{ "current_password": "string", "new_password": "string" }`. `204` on success; `401` if the
+current password is wrong; `400` if the new password is empty.
+
+### `DELETE /auth/me`
+Delete the signed-in user's account. Requires bearer. The user's owned boards are **orphaned**
+(`owner_user_id` set to null) rather than deleted, so they revert to guest boards still reachable
+by their share links. `204`.
+
+### `POST /auth/forgot-password`
+Request a password-reset code. Body `{ "email": "string" }`. Always returns `204` — whether or not
+the email matches an account — so the endpoint can't be used to probe which addresses are
+registered. If the email exists, a single-use 6-digit code (valid 15 minutes) is generated and
+emailed in the background; any earlier outstanding codes for that user are invalidated.
+
+### `POST /auth/reset-password`
+Complete a reset. Body `{ "email": "string", "code": "string", "new_password": "string" }`.
+`204` on success. `400` (`Invalid or expired code`) if the code is wrong, expired, already used,
+or the new password is empty. The code is invalidated after success or after too many wrong
+attempts.
+
 ## Projects
 
 A project object:

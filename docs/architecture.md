@@ -64,7 +64,10 @@ flowchart LR
   boards in `localStorage`. Talks to the backend via `src/lib/api.ts`, which attaches the
   `Authorization` bearer and `X-Workspace-Token` headers.
 - **Backend (FastAPI):**
-  - `POST /auth/signup` (with optional guest-board claim), `POST /auth/login`, `GET /auth/me`.
+  - `POST /auth/signup` (with optional guest-board claim), `POST /auth/login`, `GET /auth/me`,
+    `POST /auth/password` (change password), `DELETE /auth/me` (delete account; owned boards are
+    orphaned to guest boards), and `POST /auth/forgot-password` + `POST /auth/reset-password`
+    (emailed 6-digit reset code).
   - `GET|POST /projects`, `GET /projects/by-token/{token}` (open a share link),
     `PATCH|DELETE /projects/{id}`.
   - `POST /transcripts`, `POST /transcripts/audio`, `GET /transcripts/{id}`,
@@ -76,12 +79,16 @@ flowchart LR
   - **Auth & access control** (`app/auth.py`) — bcrypt password hashing, JWT issue/verify, and
     `project_access_level()` which resolves a request to `edit` / `view` / no-access from the
     bearer user (owner) or the `X-Workspace-Token` (edit/view token).
+  - **Email sender** (`app/email.py`) — sends password-reset codes. Prefers Brevo's HTTPS API
+    (`BREVO_API_KEY`) so it works on hosts that block outbound SMTP (e.g. Render's free tier),
+    falls back to SMTP, and otherwise logs the code. Reset emails are dispatched via FastAPI
+    background tasks so a slow send never holds the request open.
   - **LLM parser** (`app/llm/parser.py`) — a reusable, framework-agnostic module: raw text in,
     validated `ExtractionResult` out, via Claude tool-use.
   - **Whisper module** (`app/llm/transcription.py`) — optional, lazily imported; prefers a hosted
     Whisper API and falls back to a local model, so the core app runs without the heavy dependency.
 - **Database:** PostgreSQL (prod) / SQLite (dev), via SQLAlchemy. Tables: `users`, `projects`,
-  `meetings`, `stakeholders`, `tasks`.
+  `meetings`, `stakeholders`, `tasks`, `password_resets`.
 - **LLM provider:** Claude (Anthropic), structured output through a forced `record_extraction` tool.
 
 ## Access model
@@ -98,6 +105,7 @@ flowchart LR
 ```mermaid
 erDiagram
     USER ||--o{ PROJECT : owns
+    USER ||--o{ PASSWORD_RESET : requests
     PROJECT ||--o{ MEETING : has
     PROJECT ||--o{ TASK : has
     MEETING ||--o{ TASK : produces
@@ -105,6 +113,14 @@ erDiagram
         int id PK
         string email
         string password_hash
+    }
+    PASSWORD_RESET {
+        int id PK
+        int user_id FK
+        string code_hash
+        datetime expires_at
+        int attempts
+        bool used
     }
     PROJECT {
         int id PK

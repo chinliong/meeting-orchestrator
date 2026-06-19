@@ -22,6 +22,9 @@ recordings for end-to-end processing.
   work raised outside a captured meeting.
 - **Accounts & guest mode** — sign up to keep your boards under an account, or continue as a
   guest (guest boards are kept on the device and can be carried into an account on sign-up).
+- **Account self-service** — change your password, reset a forgotten one with a 6-digit code
+  emailed to you, or delete your account (owned boards are released as guest boards rather than
+  destroyed, so existing share links keep working).
 - **Shareable boards** — every board has a permanent **view link** and **edit link**; anyone
   with a link can open it (no account needed). View links are read-only; the UI hides every
   editing affordance on a view-only board.
@@ -41,7 +44,7 @@ Next.js / React frontend  ──HTTP──>  FastAPI backend  ──>  Claude AP
                                               │
                                               v
                                      SQLite (dev) / PostgreSQL (prod)
-                          users · projects · meetings · tasks · stakeholders
+              users · projects · meetings · tasks · stakeholders · password_resets
 ```
 
 See [docs/architecture.md](docs/architecture.md) for detail and [docs/api-spec.md](docs/api-spec.md)
@@ -54,6 +57,7 @@ for the full API.
 | Frontend | Next.js 14, React 18, TypeScript, Tailwind CSS |
 | Backend | FastAPI, Pydantic v2, SQLAlchemy 2 |
 | Auth | Email/password (bcrypt via passlib), JWT access tokens, capability-link sharing |
+| Email | Brevo transactional API (HTTPS) for password-reset codes; SMTP fallback for local dev |
 | LLM | Claude (Anthropic) via `anthropic` SDK, tool-use structured output |
 | Speech-to-text | Whisper — hosted API (OpenAI/Groq) by default, optional local model |
 | Database | SQLite (dev) / PostgreSQL (prod; e.g. Neon) |
@@ -116,6 +120,20 @@ pip install -r requirements-audio.txt
 
 With neither configured, the audio endpoint returns a clear `503` and the text path works as normal.
 
+### 4. (Optional) Password-reset email
+
+The "forgot password" flow emails a 6-digit code. Email delivery is optional — **if no provider
+is configured, the code is written to the backend log** instead, which is enough for local testing.
+Two ways to send for real:
+
+- **Brevo HTTPS API** (recommended; the only option on hosts that block SMTP, like Render's free
+  tier). Create a free [Brevo](https://www.brevo.com) account, verify a sender address, generate
+  an API key, then set `BREVO_API_KEY` and `SMTP_FROM` (the verified sender).
+- **SMTP** (local dev or hosts that allow it). Set `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/
+  `SMTP_PASSWORD`/`SMTP_FROM` — e.g. Gmail with an App Password.
+
+See `backend/.env.example` for the full list.
+
 ## Run with Docker
 
 ```bash
@@ -141,6 +159,9 @@ database is an **external Postgres** (e.g. a free [Neon](https://neon.tech) proj
      (`postgresql://…/<db>?sslmode=require`; `db.py` normalises `postgres://` URLs)
    - backend `CORS_ORIGINS` = `https://orchestrator-frontend.onrender.com`
    - frontend `NEXT_PUBLIC_API_BASE` = `https://orchestrator-backend.onrender.com/api/v1`
+   - backend `BREVO_API_KEY` + `SMTP_FROM` (optional) = enable password-reset emails — see
+     "Password-reset email" below. **Render's free tier blocks outbound SMTP**, so the Brevo
+     HTTPS API is required there; the `SMTP_*` host/port/user/password vars won't work.
 
    `AUTH_SECRET` is generated automatically by the blueprint. `NEXT_PUBLIC_API_BASE` is baked in
    at build time, so changing it requires a frontend redeploy.
@@ -185,7 +206,7 @@ accuracy, compares prompt variants, writes `eval/results.json`, and refreshes
 ## Project layout
 
 ```
-backend/      FastAPI app (api/, llm/, models/, schemas/, auth.py), tests, Dockerfile
+backend/      FastAPI app (api/, llm/, models/, schemas/, auth.py, email.py), tests, Dockerfile
 frontend/     Next.js app (src/app, src/components, src/lib), Dockerfile
 data/         synthetic-transcripts/ (inputs) + annotated-test-set/ (ground truth)
 eval/         evaluation harness + matcher tests
