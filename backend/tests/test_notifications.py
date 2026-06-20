@@ -8,7 +8,7 @@ from datetime import date, timedelta
 import pytest
 
 from app.auth import hash_password
-from app.models.models import Project, Task, TaskStatus, User
+from app.models.models import Project, Subtask, Task, TaskStatus, User
 from app.notifications import NotificationSendError, send_due_date_notifications, send_test_notification
 
 TODAY = date(2026, 6, 20)
@@ -125,6 +125,28 @@ def test_ignores_done_tasks(db_session, sent_emails):
 
     assert send_due_date_notifications(db_session, today=TODAY) == 0
     assert sent_emails == []
+
+
+def test_digest_includes_subtask_progress_and_open_items(db_session, sent_emails):
+    user = _make_user(db_session)
+    project = _make_project(db_session, user)
+    task = _make_task(db_session, project, deadline=TODAY)
+    db_session.add_all(
+        [
+            Subtask(task_id=task.id, title="Export records", done=True, position=0),
+            Subtask(task_id=task.id, title="Validate mapping", done=False, position=1),
+            Subtask(task_id=task.id, title="Get sign-off", done=False, position=2),
+        ]
+    )
+    db_session.commit()
+
+    assert send_due_date_notifications(db_session, today=TODAY) == 1
+    body = sent_emails[0]["body"]
+    assert "1/3 subtasks done" in body
+    # Open subtasks are listed; the completed one is not.
+    assert "Validate mapping" in body
+    assert "Get sign-off" in body
+    assert "Export records" not in body
 
 
 def test_digests_multiple_tasks_into_one_email(db_session, sent_emails):

@@ -69,6 +69,8 @@ export default function DashboardPage() {
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   // Bumped on every undo so the open card re-seeds its fields from the reverted task.
   const [undoNonce, setUndoNonce] = useState(0);
+  // Bumped when an undo reverses a subtask change, so the open subtask list re-fetches.
+  const [subtaskReloadNonce, setSubtaskReloadNonce] = useState(0);
   const [creatingTask, setCreatingTask] = useState(false);
   const [shareProject, setShareProject] = useState<Project | null>(null);
 
@@ -713,6 +715,9 @@ export default function DashboardPage() {
         canUndo={undoDepth > 0}
         syncNonce={undoNonce}
         onUndo={handleUndo}
+        onPushUndo={pushUndo}
+        subtaskReloadNonce={subtaskReloadNonce}
+        onRequestSubtaskReload={() => setSubtaskReloadNonce((n) => n + 1)}
         onClose={() => {
           setEditingTaskId(null);
           setCreatingTask(false);

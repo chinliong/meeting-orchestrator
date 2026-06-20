@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import AttachmentList from "@/components/AttachmentList";
 import SubtaskList from "@/components/SubtaskList";
-import type { Task, TaskMeta, TaskStatus } from "@/lib/types";
+import type { Task, TaskMeta, TaskStatus, UndoAction } from "@/lib/types";
 
 interface TaskValues {
   description: string;
@@ -25,6 +25,11 @@ interface Props {
   /** Bumped by the parent after an undo so the card re-seeds its fields from the reverted task. */
   syncNonce?: number;
   onUndo?: () => void;
+  /** Push a reversible action (used so subtask edits land on the same global undo stack). */
+  onPushUndo?: (action: UndoAction) => void;
+  /** Bumped when an undo touches subtasks, so the open list re-fetches from the server. */
+  subtaskReloadNonce?: number;
+  onRequestSubtaskReload?: () => void;
   onClose: () => void;
   onSave: (id: number, patch: Partial<TaskValues>) => Promise<void>;
   onCreate: (values: TaskValues) => Promise<void>;
@@ -45,6 +50,9 @@ export default function EditTaskModal({
   canUndo = false,
   syncNonce = 0,
   onUndo,
+  onPushUndo,
+  subtaskReloadNonce = 0,
+  onRequestSubtaskReload,
   onClose,
   onSave,
   onCreate,
@@ -171,18 +179,34 @@ export default function EditTaskModal({
         className="relative max-h-[90dvh] w-full max-w-lg animate-fade-in overflow-y-auto rounded-2xl bg-white p-5 shadow-xl sm:p-6"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <button
-          type="button"
-          onClick={handleClose}
-          aria-label="Close"
-          className="absolute right-3 top-3 rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-        >
-          <svg viewBox="0 0 20 20" className="h-5 w-5" fill="currentColor">
-            <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-          </svg>
-        </button>
+        <div className="absolute right-3 top-3 flex items-center gap-0.5">
+          {task && !readOnly && onUndo && (
+            <button
+              type="button"
+              onClick={onUndo}
+              disabled={!canUndo}
+              aria-label="Undo last change"
+              title="Undo last change (⌘Z / Ctrl+Z)"
+              className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
+            >
+              <svg viewBox="0 0 20 20" className="h-5 w-5" fill="currentColor">
+                <path d="M8 5V2.5a.5.5 0 00-.82-.38l-4.5 3.75a.5.5 0 000 .76l4.5 3.75A.5.5 0 008 10V7.5h3.5a4 4 0 110 8H7a1 1 0 100 2h4.5a6 6 0 100-12H8z" />
+              </svg>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={handleClose}
+            aria-label="Close"
+            className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+          >
+            <svg viewBox="0 0 20 20" className="h-5 w-5" fill="currentColor">
+              <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+            </svg>
+          </button>
+        </div>
 
-        <h2 className="pr-8 text-lg font-semibold text-slate-900">
+        <h2 className="pr-16 text-lg font-semibold text-slate-900">
           {createMode ? "Add task" : readOnly ? "Task" : "Edit task"}
         </h2>
         <p className="mt-1 text-sm text-slate-500">
@@ -254,24 +278,6 @@ export default function EditTaskModal({
             <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{autoSaveError}</p>
           )}
 
-          {/* Editing auto-saves, so instead of Save there's an Undo for the last change. */}
-          {task && !readOnly && onUndo && (
-            <div className="flex justify-end pt-1">
-              <button
-                type="button"
-                onClick={onUndo}
-                disabled={!canUndo}
-                title="Undo last change (⌘Z / Ctrl+Z)"
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
-              >
-                <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
-                  <path d="M8 5V2.5a.5.5 0 00-.82-.38l-4.5 3.75a.5.5 0 000 .76l4.5 3.75A.5.5 0 008 10V7.5h3.5a4 4 0 110 8H7a1 1 0 100 2h4.5a6 6 0 100-12H8z" />
-                </svg>
-                Undo
-              </button>
-            </div>
-          )}
-
           {/* Create needs an explicit submit (there's no task to save into yet). Editing saves
               each field on change, so it has no Save button — just close when done. */}
           {createMode && (
@@ -301,7 +307,10 @@ export default function EditTaskModal({
             <SubtaskList
               taskId={task.id}
               canEdit={canEdit}
+              reloadNonce={subtaskReloadNonce}
               onMetaChange={(meta) => onMetaChange?.(task.id, meta)}
+              pushUndo={onPushUndo}
+              requestReload={onRequestSubtaskReload}
             />
             <AttachmentList
               taskId={task.id}

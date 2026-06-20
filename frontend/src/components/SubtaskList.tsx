@@ -3,16 +3,29 @@
 import { useEffect, useRef, useState } from "react";
 
 import { api } from "@/lib/api";
-import type { Subtask, TaskMeta } from "@/lib/types";
+import type { Subtask, TaskMeta, UndoAction } from "@/lib/types";
 
 interface Props {
   taskId: number;
   canEdit: boolean;
+  /** Bumped by the parent when an undo touches subtasks, so the list re-fetches. */
+  reloadNonce?: number;
   /** Report the rollup counts up so the task card badge stays in sync. */
   onMetaChange: (meta: Partial<TaskMeta>) => void;
+  /** Push a reversible action onto the global undo stack. */
+  pushUndo?: (action: UndoAction) => void;
+  /** Ask the parent to bump reloadNonce (used by undo actions to refresh this list). */
+  requestReload?: () => void;
 }
 
-export default function SubtaskList({ taskId, canEdit, onMetaChange }: Props) {
+export default function SubtaskList({
+  taskId,
+  canEdit,
+  reloadNonce = 0,
+  onMetaChange,
+  pushUndo,
+  requestReload,
+}: Props) {
   const [subtasks, setSubtasks] = useState<Subtask[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,9 +54,10 @@ export default function SubtaskList({ taskId, canEdit, onMetaChange }: Props) {
     });
   };
 
+  // Loads on mount and re-loads when reloadNonce changes (after an undo reverses on the server).
+  // Doesn't toggle `loading` on reload, so an undo refresh doesn't flash a "Loading…" state.
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     api
       .listSubtasks(taskId)
       .then((list) => {
@@ -59,7 +73,25 @@ export default function SubtaskList({ taskId, canEdit, onMetaChange }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [taskId]);
+  }, [taskId, reloadNonce]);
+
+  // Push an undo action that reverses a subtask change on the server, then refreshes counts and
+  // (if the card is still open) the list itself. Server is the source of truth on undo.
+  const pushReverse = (label: string, reverse: () => Promise<unknown>) => {
+    if (!pushUndo) return;
+    pushUndo({
+      label,
+      run: async () => {
+        await reverse();
+        const list = await api.listSubtasks(taskId);
+        onMetaRef.current({
+          subtask_total: list.length,
+          subtask_done: list.filter((s) => s.done).length,
+        });
+        requestReload?.();
+      },
+    });
+  };
 
   const doneCount = subtasks.filter((s) => s.done).length;
 
@@ -72,6 +104,7 @@ export default function SubtaskList({ taskId, canEdit, onMetaChange }: Props) {
       const created = await api.createSubtask(taskId, title);
       sync([...subtasks, created]);
       setNewTitle("");
+      pushReverse("add subtask", () => api.deleteSubtask(created.id));
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -86,6 +119,7 @@ export default function SubtaskList({ taskId, canEdit, onMetaChange }: Props) {
     try {
       const updated = await api.updateSubtask(subtask.id, { done: !subtask.done });
       sync(subtasks.map((s) => (s.id === updated.id ? updated : s)));
+      pushReverse("subtask", () => api.updateSubtask(subtask.id, { done: subtask.done }));
     } catch (err) {
       sync(subtasks); // revert
       setError((err as Error).message);
@@ -96,9 +130,11 @@ export default function SubtaskList({ taskId, canEdit, onMetaChange }: Props) {
     const title = editDraft.trim();
     setEditingId(null);
     if (!title || title === subtask.title) return;
+    const previousTitle = subtask.title;
     try {
       const updated = await api.updateSubtask(subtask.id, { title });
       sync(subtasks.map((s) => (s.id === updated.id ? updated : s)));
+      pushReverse("rename subtask", () => api.updateSubtask(subtask.id, { title: previousTitle }));
     } catch (err) {
       setError((err as Error).message);
     }
@@ -106,9 +142,12 @@ export default function SubtaskList({ taskId, canEdit, onMetaChange }: Props) {
 
   const removeSubtask = async (id: number) => {
     const prev = subtasks;
+    const removed = subtasks.find((s) => s.id === id);
     sync(subtasks.filter((s) => s.id !== id));
     try {
       await api.deleteSubtask(id);
+      // Undo re-creates it (with a fresh id, appended) — close enough for a checklist item.
+      if (removed) pushReverse("delete subtask", () => api.createSubtask(taskId, removed.title));
     } catch (err) {
       sync(prev);
       setError((err as Error).message);
@@ -128,6 +167,9 @@ export default function SubtaskList({ taskId, canEdit, onMetaChange }: Props) {
       sync([...subtasks, ...created]);
       setInstructMode(false);
       setInstructions("");
+      pushReverse("generate subtasks", () =>
+        Promise.all(created.map((s) => api.deleteSubtask(s.id)))
+      );
     } catch (err) {
       setError((err as Error).message);
     } finally {

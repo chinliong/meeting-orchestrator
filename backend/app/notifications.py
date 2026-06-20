@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 from datetime import date, timedelta
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.email import send_email
 from app.models.models import Project, Task, TaskStatus, User
@@ -38,6 +38,7 @@ def _candidate_tasks(db: Session, user_id: int | None = None) -> list[Task]:
     account-wide and has enabled reminders for that particular project."""
     query = (
         db.query(Task)
+        .options(selectinload(Task.subtasks))  # for the digest's subtask progress/open items
         .join(Project, Task.project_id == Project.id)
         .join(User, Project.owner_user_id == User.id)
         .filter(
@@ -62,7 +63,18 @@ def _format_digest(tasks: list[Task], today: date) -> tuple[str, str]:
         else:
             tag = f"due {task.deadline:%b %d}"
         owner = f" — {task.owner}" if task.owner else ""
-        lines.append(f"- [{tag}] {task.description}{owner} ({task.project.name})")
+
+        # Surface subtask progress on the task line, then list the still-open subtasks beneath
+        # so the reminder is actionable rather than just a heads-up.
+        subtasks = task.subtasks
+        progress = ""
+        if subtasks:
+            done = sum(1 for s in subtasks if s.done)
+            progress = f" · {done}/{len(subtasks)} subtasks done"
+        lines.append(f"- [{tag}] {task.description}{owner} ({task.project.name}){progress}")
+        for sub in subtasks:
+            if not sub.done:
+                lines.append(f"    ◦ {sub.title}")
 
     subject = f"{len(tasks)} task{'s' if len(tasks) != 1 else ''} need attention"
     body = "Reminder from Meeting Orchestrator:\n\n" + "\n".join(lines)
