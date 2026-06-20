@@ -543,8 +543,8 @@ export default function DashboardPage() {
               )}
 
               <div className="space-y-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="relative min-w-[200px] flex-1">
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                  <div className="relative w-full sm:min-w-[200px] sm:flex-1">
                     <svg
                       viewBox="0 0 20 20"
                       className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
@@ -575,6 +575,9 @@ export default function DashboardPage() {
                     )}
                   </div>
 
+                  {/* Action controls: keep these on one tidy row (they share a line on mobile,
+                      while the search box gets its own full-width row above). */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-normal">
                   {user && projects.length > 1 && (
                     <div className="flex shrink-0 rounded-lg bg-slate-100 p-1 text-sm font-medium">
                       <button
@@ -626,7 +629,7 @@ export default function DashboardPage() {
                       <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
                         <path d="M8 5V2.5a.5.5 0 00-.82-.38l-4.5 3.75a.5.5 0 000 .76l4.5 3.75A.5.5 0 008 10V7.5h3.5a4 4 0 110 8H7a1 1 0 100 2h4.5a6 6 0 100-12H8z" />
                       </svg>
-                      Undo
+                      <span className="hidden sm:inline">Undo</span>
                     </button>
                   )}
                   {canEdit && (
@@ -640,6 +643,7 @@ export default function DashboardPage() {
                       Add task
                     </button>
                   )}
+                  </div>
                 </div>
 
                 {owners.length > 0 && (
