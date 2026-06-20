@@ -76,14 +76,15 @@ A project object:
   "id": 1, "name": "string", "description": "string",
   "created_at": "2026-06-17T09:30:00",
   "owner_user_id": 1,
-  "notify_muted": false,
+  "notify_enabled": false,
   "access_level": "edit",
   "view_token": "string",
   "edit_token": "string | null"
 }
 ```
-`edit_token` is returned only to edit-level callers. `notify_muted` opts this project out of
-deadline reminders even if the owner has them enabled account-wide.
+`edit_token` is returned only to edit-level callers. `notify_enabled` opts this project **in** to
+deadline reminders (off by default); reminders are sent only when this is on **and** the owner has
+reminders enabled account-wide.
 
 ### `GET /projects`
 Lists the signed-in user's own boards (newest first). Requires bearer (`401` otherwise). Guests
@@ -98,7 +99,7 @@ Resolves a share link to its board at the level the token grants (`edit` or `vie
 token matches nothing.
 
 ### `PATCH /projects/{project_id}`
-Update `name` / `description` / `notify_muted`. Requires edit access. Returns the project;
+Update `name` / `description` / `notify_enabled`. Requires edit access. Returns the project;
 `404`/`403` as above.
 
 ### `DELETE /projects/{project_id}`
@@ -162,7 +163,7 @@ meeting. Requires edit access. `404` if not found.
 ## Tasks
 
 A task object includes `meeting_title` (the source meeting's title, `null` for manually-added
-tasks).
+tasks) and three read-only rollup counts: `subtask_total`, `subtask_done`, and `attachment_count`.
 
 ### `GET /tasks`
 Query params (all optional): `project_id`, `owner`, `status` (`todo|in_progress|done`),
@@ -191,6 +192,52 @@ Recreates a previously deleted task from a `DELETE` snapshot — powers undo. Bo
 above (`{ "task": { ... } }`). The task is restored with its **original id** (so references stay
 valid). Requires edit access to the task's board. `201` with the restored task; `409` if a task
 with that id already exists. A dangling `meeting_id` (its meeting was deleted meanwhile) is cleared.
+
+## Subtasks
+
+A subtask is a checklist item under a task: `{ "id", "task_id", "title", "done", "position" }`.
+All routes require **view** access to read and **edit** access to mutate; subtasks cascade-delete
+with their task.
+
+### `GET /tasks/{task_id}/subtasks`
+List a task's subtasks in order. Requires view access.
+
+### `POST /tasks/{task_id}/subtasks`
+Body `{ "title": "string" }` → `201` subtask (appended at the end). `422` if the title is blank.
+Requires edit access.
+
+### `POST /tasks/{task_id}/subtasks/generate`
+Have the LLM break the task down and append the suggestions as real subtasks. Body
+`{ "instructions": "string | null" }` — when `instructions` is non-empty the model is steered by
+that text ("from your instructions"), otherwise it works from the task's own details ("from task
+details"). Returns `201` with the newly-created subtasks. `502` if the model call fails or returns
+nothing. Requires edit access.
+
+### `PATCH /subtasks/{subtask_id}`
+Update `title` and/or `done`. `422` on a blank title. Requires edit access. `404` if not found.
+
+### `DELETE /subtasks/{subtask_id}`
+Removes the subtask. Requires edit access. `204`. `404` if not found.
+
+## Attachments
+
+A file attached to a task. Metadata object: `{ "id", "task_id", "filename", "content_type",
+"size", "created_at" }` — the bytes themselves are stored in the database and streamed only by the
+download route. Attachments cascade-delete with their task.
+
+### `GET /tasks/{task_id}/attachments`
+List a task's attachment metadata. Requires view access.
+
+### `POST /tasks/{task_id}/attachments`
+Upload a file (`multipart/form-data`, field `file`) → `201` attachment metadata. Requires edit
+access. `400` empty file · `413` over the 10 MB limit.
+
+### `GET /attachments/{attachment_id}`
+Download the file bytes (with a `Content-Disposition` filename). Requires view access. `404` if not
+found. The client fetches this with the auth/workspace headers, so it isn't a plain link.
+
+### `DELETE /attachments/{attachment_id}`
+Removes the attachment. Requires edit access. `204`. `404` if not found.
 
 ## Stakeholders
 

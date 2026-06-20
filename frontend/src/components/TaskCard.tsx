@@ -189,6 +189,38 @@ export default function TaskCard({
           </span>
         )}
 
+        {task.subtask_total > 0 && (
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+              task.subtask_done === task.subtask_total
+                ? "bg-emerald-50 text-emerald-700"
+                : "bg-slate-100 text-slate-600"
+            }`}
+            title={`${task.subtask_done} of ${task.subtask_total} subtasks done`}
+          >
+            <svg viewBox="0 0 20 20" className="h-3 w-3" fill="currentColor">
+              <path d="M3 5.5A1.5 1.5 0 014.5 4h.7l1 1H4.5v9h11V8.8l1.5-1.5v7.2A1.5 1.5 0 0115.5 16h-11A1.5 1.5 0 013 14.5v-9zm14.7-1.2a1 1 0 010 1.4l-7 7a1 1 0 01-1.4 0L6 9.4a1 1 0 011.4-1.4l1.6 1.6 6.3-6.3a1 1 0 011.4 0z" />
+            </svg>
+            {task.subtask_done}/{task.subtask_total}
+          </span>
+        )}
+
+        {task.attachment_count > 0 && (
+          <span
+            className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600"
+            title={`${task.attachment_count} attachment${task.attachment_count === 1 ? "" : "s"}`}
+          >
+            <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.2">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"
+              />
+            </svg>
+            {task.attachment_count}
+          </span>
+        )}
+
         {task.meeting_id !== null && (
           <span
             className={`ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${confidenceTone(

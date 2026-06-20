@@ -498,10 +498,12 @@ def test_test_notification_provider_failure_returns_clean_502(client, account, m
     assert resp.status_code == 502
 
 
-def test_project_notify_mute_toggle(client, project):
-    resp = client.patch(f"/api/v1/projects/{project['id']}", json={"notify_muted": True})
+def test_project_notify_enable_toggle(client, project):
+    # Reminders are opt-in: a new board starts off, and can be switched on per project.
+    assert client.get(f"/api/v1/projects/by-token/{project['edit_token']}").json()["notify_enabled"] is False
+    resp = client.patch(f"/api/v1/projects/{project['id']}", json={"notify_enabled": True})
     assert resp.status_code == 200
-    assert resp.json()["notify_muted"] is True
+    assert resp.json()["notify_enabled"] is True
 
 
 # --- internal cron-trigger endpoint -------------------------------------------------

@@ -44,6 +44,19 @@ export function isOverdue(iso: string): boolean {
   return d < today;
 }
 
+/** Human-readable file size, e.g. 2048 → "2 KB", 1500000 → "1.4 MB". */
+export function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  const units = ["KB", "MB", "GB"];
+  let value = bytes / 1024;
+  let i = 0;
+  while (value >= 1024 && i < units.length - 1) {
+    value /= 1024;
+    i++;
+  }
+  return `${value < 10 ? value.toFixed(1) : Math.round(value)} ${units[i]}`;
+}
+
 /** Tailwind classes for a confidence pill, by how explicit the extraction was. */
 export function confidenceTone(confidence: number): string {
   if (confidence >= 0.85) return "bg-emerald-50 text-emerald-700";

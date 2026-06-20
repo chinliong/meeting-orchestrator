@@ -1,4 +1,14 @@
-import type { AuthResponse, DeletedTask, Meeting, Project, Task, TaskStatus, User } from "./types";
+import type {
+  Attachment,
+  AuthResponse,
+  DeletedTask,
+  Meeting,
+  Project,
+  Subtask,
+  Task,
+  TaskStatus,
+  User,
+} from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000/api/v1";
 
@@ -31,6 +41,15 @@ async function fetchWithRetry(url: string, init: RequestInit, maxAttempts = 5): 
       await sleep(2000);
     }
   }
+}
+
+// Auth/workspace headers without a JSON Content-Type — for multipart uploads and binary
+// downloads, where the browser must set (or omit) Content-Type itself.
+function authHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {};
+  if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
+  if (workspaceToken) headers["X-Workspace-Token"] = workspaceToken;
+  return headers;
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -100,7 +119,7 @@ export const api = {
   getProjectByToken: (token: string) =>
     request<Project>(`/projects/by-token/${encodeURIComponent(token)}`),
 
-  updateProject: (id: number, patch: { name?: string; description?: string; notify_muted?: boolean }) =>
+  updateProject: (id: number, patch: { name?: string; description?: string; notify_enabled?: boolean }) =>
     request<Project>(`/projects/${id}`, { method: "PATCH", body: JSON.stringify(patch) }),
 
   deleteProject: (id: number) => request<void>(`/projects/${id}`, { method: "DELETE" }),
@@ -141,6 +160,70 @@ export const api = {
 
   restoreTask: (snapshot: DeletedTask) =>
     request<Task>("/tasks/restore", { method: "POST", body: JSON.stringify(snapshot) }),
+
+  // --- subtasks ---
+  listSubtasks: (taskId: number) => request<Subtask[]>(`/tasks/${taskId}/subtasks`),
+
+  createSubtask: (taskId: number, title: string) =>
+    request<Subtask>(`/tasks/${taskId}/subtasks`, {
+      method: "POST",
+      body: JSON.stringify({ title }),
+    }),
+
+  // Have the LLM break the task down; the new subtasks are persisted and returned.
+  generateSubtasks: (taskId: number, instructions?: string) =>
+    request<Subtask[]>(`/tasks/${taskId}/subtasks/generate`, {
+      method: "POST",
+      body: JSON.stringify({ instructions: instructions ?? null }),
+    }),
+
+  updateSubtask: (id: number, patch: { title?: string; done?: boolean }) =>
+    request<Subtask>(`/subtasks/${id}`, { method: "PATCH", body: JSON.stringify(patch) }),
+
+  deleteSubtask: (id: number) => request<void>(`/subtasks/${id}`, { method: "DELETE" }),
+
+  // --- attachments ---
+  listAttachments: (taskId: number) => request<Attachment[]>(`/tasks/${taskId}/attachments`),
+
+  uploadAttachment: async (taskId: number, file: File): Promise<Attachment> => {
+    const form = new FormData();
+    form.set("file", file);
+    // No Content-Type header — the browser sets the multipart boundary itself.
+    const res = await fetchWithRetry(`${API_BASE}/tasks/${taskId}/attachments`, {
+      method: "POST",
+      body: form,
+      headers: authHeaders(),
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`POST /tasks/${taskId}/attachments failed (${res.status}): ${body}`);
+    }
+    return res.json();
+  },
+
+  deleteAttachment: (id: number) => request<void>(`/attachments/${id}`, { method: "DELETE" }),
+
+  // The file is access-controlled, so it can't be a plain <a href>: fetch it with the auth
+  // headers, then hand the browser a blob URL to save under the original filename.
+  downloadAttachment: async (id: number, filename: string): Promise<void> => {
+    const res = await fetchWithRetry(`${API_BASE}/attachments/${id}`, {
+      method: "GET",
+      headers: authHeaders(),
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`GET /attachments/${id} failed (${res.status}): ${body}`);
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  },
 
   // --- transcripts ---
   submitTranscript: (projectId: number, title: string, transcriptText: string) =>

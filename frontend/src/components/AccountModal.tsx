@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from "react";
 
-import type { User } from "@/lib/types";
+import type { Project, User } from "@/lib/types";
 
 interface Props {
   open: boolean;
   user: User;
+  /** The user's own boards — each can individually opt in to deadline reminders. */
+  reminderProjects: Project[];
+  onToggleProjectReminder: (projectId: number, enabled: boolean) => Promise<void>;
   onClose: () => void;
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   onDeleteAccount: () => Promise<void>;
@@ -24,6 +27,8 @@ function readableError(err: unknown, fallback: string): string {
 export default function AccountModal({
   open,
   user,
+  reminderProjects,
+  onToggleProjectReminder,
   onClose,
   onChangePassword,
   onDeleteAccount,
@@ -71,6 +76,16 @@ export default function AccountModal({
   }, [open]);
 
   if (!open) return null;
+
+  // "Select all" is on only when every owned project already has reminders enabled.
+  const allRemindersOn =
+    reminderProjects.length > 0 && reminderProjects.every((p) => p.notify_enabled);
+  const toggleAllReminders = () => {
+    const target = !allRemindersOn;
+    reminderProjects.forEach((p) => {
+      if (p.notify_enabled !== target) onToggleProjectReminder(p.id, target);
+    });
+  };
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -256,6 +271,45 @@ export default function AccountModal({
                   <option value={7}>1 week before</option>
                 </select>
               </label>
+
+              {/* Per-project opt-in: pick exactly which boards should remind you. */}
+              {reminderProjects.length > 0 ? (
+                <div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-medium text-slate-500">Projects to remind me about</p>
+                    <button
+                      type="button"
+                      onClick={toggleAllReminders}
+                      className="text-xs font-medium text-slate-500 transition hover:text-slate-800"
+                    >
+                      {allRemindersOn ? "Clear all" : "Select all"}
+                    </button>
+                  </div>
+                  <div className="mt-1.5 max-h-40 space-y-0.5 overflow-y-auto rounded-lg border border-slate-100 p-1">
+                    {reminderProjects.map((p) => (
+                      <label
+                        key={p.id}
+                        className="flex items-center gap-2 rounded px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={p.notify_enabled}
+                          onChange={(e) => onToggleProjectReminder(p.id, e.target.checked)}
+                          className="h-4 w-4 shrink-0 rounded border-slate-300 text-slate-900 focus:ring-slate-400"
+                        />
+                        <span className="truncate">{p.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <p className="mt-1 text-xs text-slate-400">
+                    Reminders are sent only for the projects you tick here.
+                  </p>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400">
+                  You have no projects yet — create one to choose where reminders apply.
+                </p>
+              )}
 
               <div>
                 <button

@@ -3,8 +3,21 @@ from __future__ import annotations
 import enum
 import secrets
 
-from sqlalchemy import Boolean, Column, Date, DateTime, Enum, Float, ForeignKey, Integer, String, Text
-from sqlalchemy.orm import relationship
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
+    Integer,
+    LargeBinary,
+    String,
+    Text,
+    select,
+)
+from sqlalchemy.orm import column_property, relationship
 from sqlalchemy.sql import func
 
 from app.db import Base
@@ -74,9 +87,10 @@ class Project(Base):
     # Permanent capability tokens: holding the link is the credential.
     view_token = Column(String, nullable=False, unique=True, index=True, default=_new_token)
     edit_token = Column(String, nullable=False, unique=True, index=True, default=_new_token)
-    # Per-project override: skip deadline reminders for this board even if the owner has
-    # them enabled account-wide.
-    notify_muted = Column(Boolean, nullable=False, default=False)
+    # Per-project opt-in: deadline reminders are sent for this board only if this is on AND the
+    # owner has reminders enabled account-wide. Off by default — the owner picks which boards
+    # should remind them.
+    notify_enabled = Column(Boolean, nullable=False, default=False)
 
     owner = relationship("User", back_populates="projects")
     meetings = relationship("Meeting", back_populates="project", cascade="all, delete-orphan")
@@ -125,8 +139,78 @@ class Task(Base):
 
     project = relationship("Project", back_populates="tasks")
     meeting = relationship("Meeting", back_populates="tasks")
+    # A task can be broken down into a checklist of subtasks (often AI-generated) and can carry
+    # file attachments. Both are removed with the task.
+    subtasks = relationship(
+        "Subtask",
+        back_populates="task",
+        cascade="all, delete-orphan",
+        order_by="Subtask.position, Subtask.id",
+    )
+    attachments = relationship(
+        "Attachment",
+        back_populates="task",
+        cascade="all, delete-orphan",
+        order_by="Attachment.created_at",
+    )
 
     @property
     def meeting_title(self) -> str | None:
         """Title of the source meeting, or None for manually-added tasks."""
         return self.meeting.title if self.meeting else None
+
+
+class Subtask(Base):
+    """A single checklist item under a Task. Used for the AI task-breakdown feature."""
+
+    __tablename__ = "subtasks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    task_id = Column(Integer, ForeignKey("tasks.id"), nullable=False, index=True)
+    title = Column(String, nullable=False)
+    done = Column(Boolean, nullable=False, default=False)
+    # Manual ordering within a task; AI-generated items keep the order the model returned.
+    position = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime, server_default=func.now())
+
+    task = relationship("Task", back_populates="subtasks")
+
+
+class Attachment(Base):
+    """A file attached to a Task.
+
+    The bytes are stored in the database (BYTEA/BLOB) rather than on disk: the deployment
+    target (Render free tier) has an ephemeral filesystem and no object storage, so a row in
+    the DB is the only thing that survives a restart. Uploads are size-capped in the API.
+    """
+
+    __tablename__ = "attachments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    task_id = Column(Integer, ForeignKey("tasks.id"), nullable=False, index=True)
+    filename = Column(String, nullable=False)
+    content_type = Column(String, nullable=False, default="application/octet-stream")
+    size = Column(Integer, nullable=False)
+    data = Column(LargeBinary, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+    task = relationship("Task", back_populates="attachments")
+
+
+# Lightweight rollup counts exposed on every Task without loading the child rows (in particular
+# without pulling attachment blobs). Added as correlated scalar subqueries so they ride along in
+# the same SELECT that loads the task — no extra round trip and no N+1.
+Task.subtask_total = column_property(
+    select(func.count(Subtask.id)).where(Subtask.task_id == Task.id).scalar_subquery(),
+    deferred=False,
+)
+Task.subtask_done = column_property(
+    select(func.count(Subtask.id))
+    .where(Subtask.task_id == Task.id, Subtask.done == True)  # noqa: E712
+    .scalar_subquery(),
+    deferred=False,
+)
+Task.attachment_count = column_property(
+    select(func.count(Attachment.id)).where(Attachment.task_id == Task.id).scalar_subquery(),
+    deferred=False,
+)

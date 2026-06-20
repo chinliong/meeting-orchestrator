@@ -14,7 +14,7 @@ class ProjectCreate(BaseModel):
 class ProjectUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
-    notify_muted: Optional[bool] = None
+    notify_enabled: Optional[bool] = None
 
 
 class ProjectOut(BaseModel):
@@ -23,7 +23,7 @@ class ProjectOut(BaseModel):
     description: str
     created_at: datetime
     owner_user_id: Optional[int] = None
-    notify_muted: bool
+    notify_enabled: bool
     # The caller's access to this board, and the tokens they're allowed to see.
     access_level: str  # "edit" | "view"
     view_token: str
@@ -108,6 +108,10 @@ class TaskOut(BaseModel):
     confidence: float
     source_decision: Optional[str]
     created_at: datetime
+    # Rollup counts (computed on the model) so cards can show progress without fetching children.
+    subtask_total: int = 0
+    subtask_done: int = 0
+    attachment_count: int = 0
 
 
 class TaskCreate(BaseModel):
@@ -162,6 +166,46 @@ class MeetingOut(BaseModel):
     error_message: Optional[str]
     created_at: datetime
     tasks: list[TaskOut] = []
+
+
+class SubtaskOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    task_id: int
+    title: str
+    done: bool
+    position: int
+
+
+class SubtaskCreate(BaseModel):
+    title: str
+
+
+class SubtaskUpdate(BaseModel):
+    title: Optional[str] = None
+    done: Optional[bool] = None
+
+
+class SubtaskGenerate(BaseModel):
+    """Request body for AI subtask generation.
+
+    When `instructions` is non-empty the model is steered by the user's wording ("from your
+    instructions"); otherwise it breaks the task down from its own details ("from task details").
+    """
+
+    instructions: Optional[str] = None
+
+
+class AttachmentOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    task_id: int
+    filename: str
+    content_type: str
+    size: int
+    created_at: datetime
 
 
 class ExtractedActionItem(BaseModel):

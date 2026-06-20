@@ -103,6 +103,31 @@ export default function CalendarView({ tasks, canEdit, onEditTask, onDeleteTask,
           <span className="truncate">{task.description}</span>
         </button>
 
+        {(task.subtask_total > 0 || task.attachment_count > 0) && (
+          <span
+            className={`flex shrink-0 items-center gap-1 text-[9px] font-medium text-slate-500 ${
+              canEdit ? "group-hover/chip:hidden [@media(hover:none)]:hidden" : ""
+            }`}
+          >
+            {task.subtask_total > 0 && (
+              <span className="inline-flex items-center gap-0.5" title={`${task.subtask_done}/${task.subtask_total} subtasks done`}>
+                <svg viewBox="0 0 20 20" className="h-2.5 w-2.5" fill="currentColor">
+                  <path d="M3 5.5A1.5 1.5 0 014.5 4h.7l1 1H4.5v9h11V8.8l1.5-1.5v7.2A1.5 1.5 0 0115.5 16h-11A1.5 1.5 0 013 14.5v-9zm14.7-1.2a1 1 0 010 1.4l-7 7a1 1 0 01-1.4 0L6 9.4a1 1 0 011.4-1.4l1.6 1.6 6.3-6.3a1 1 0 011.4 0z" />
+                </svg>
+                {task.subtask_done}/{task.subtask_total}
+              </span>
+            )}
+            {task.attachment_count > 0 && (
+              <span className="inline-flex items-center gap-0.5" title={`${task.attachment_count} attachment(s)`}>
+                <svg viewBox="0 0 24 24" className="h-2.5 w-2.5" fill="none" stroke="currentColor" strokeWidth="2.4">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                </svg>
+                {task.attachment_count}
+              </span>
+            )}
+          </span>
+        )}
+
         {task.owner && (
           <span
             className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[8px] font-semibold text-white ${avatarColor(

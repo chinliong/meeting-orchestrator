@@ -28,7 +28,7 @@ import {
   upsertGuestWorkspace,
   workspaceTokenFor,
 } from "@/lib/session";
-import type { AuthResponse, Project, Task, TaskStatus, UndoAction, User } from "@/lib/types";
+import type { AuthResponse, Project, Task, TaskMeta, TaskStatus, UndoAction, User } from "@/lib/types";
 
 type Session = { mode: "user"; user: User } | { mode: "guest" } | null;
 type BoardView = "board" | "calendar";
@@ -65,7 +65,10 @@ export default function DashboardPage() {
   const [searchAllProjects, setSearchAllProjects] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [projectModal, setProjectModal] = useState<"create" | "edit" | null>(null);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  // The card edits a *live* task looked up by id, so changes (incl. undo) flow back into it.
+  const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
+  // Bumped on every undo so the open card re-seeds its fields from the reverted task.
+  const [undoNonce, setUndoNonce] = useState(0);
   const [creatingTask, setCreatingTask] = useState(false);
   const [shareProject, setShareProject] = useState<Project | null>(null);
 
@@ -135,6 +138,9 @@ export default function DashboardPage() {
 
   const selectedProject = projects.find((p) => p.id === selectedProjectId) ?? null;
   const canEdit = selectedProject?.access_level === "edit";
+
+  // The task the card is editing, resolved live from state so edits/undo are reflected.
+  const editingTask = editingTaskId != null ? tasks.find((t) => t.id === editingTaskId) ?? null : null;
 
   const projectNames = useMemo(
     () => new Map(projects.map((p) => [p.id, p.name])),
@@ -208,6 +214,8 @@ export default function DashboardPage() {
     if (!action) return;
     try {
       await action.run();
+      // Let an open card re-seed its fields from the now-reverted task.
+      setUndoNonce((n) => n + 1);
     } catch (err) {
       setLoadError((err as Error).message);
     }
@@ -265,6 +273,11 @@ export default function DashboardPage() {
       });
     }
   };
+
+  // Keep a task's subtask/attachment count badges in sync as they change inside the modal.
+  const handleTaskMetaChange = useCallback((taskId: number, meta: Partial<TaskMeta>) => {
+    setTasks((cur) => cur.map((t) => (t.id === taskId ? { ...t, ...meta } : t)));
+  }, []);
 
   const handleCreateTask = async (values: {
     description: string;
@@ -334,11 +347,24 @@ export default function DashboardPage() {
     setTasks([]);
   };
 
-  const handleUpdateProject = async (name: string, description: string, notifyMuted: boolean) => {
+  const handleUpdateProject = async (name: string, description: string) => {
     if (!selectedProjectId) return;
-    const updated = await api.updateProject(selectedProjectId, { name, description, notify_muted: notifyMuted });
+    const updated = await api.updateProject(selectedProjectId, { name, description });
     setProjects((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
     if (!user) upsertGuestWorkspace(updated);
+  };
+
+  // Turn deadline reminders on/off for a single board (opt-in). Driven from Account settings,
+  // where the user picks which of their projects should remind them.
+  const handleToggleProjectReminder = async (projectId: number, enabled: boolean) => {
+    setProjects((prev) => prev.map((p) => (p.id === projectId ? { ...p, notify_enabled: enabled } : p)));
+    try {
+      await api.updateProject(projectId, { notify_enabled: enabled });
+    } catch (err) {
+      // Roll back the optimistic flip on failure.
+      setProjects((prev) => prev.map((p) => (p.id === projectId ? { ...p, notify_enabled: !enabled } : p)));
+      setLoadError((err as Error).message);
+    }
   };
 
   const handleDeleteProject = async () => {
@@ -629,7 +655,7 @@ export default function DashboardPage() {
                   <CalendarView
                     tasks={visibleTasks}
                     canEdit={!!canEdit}
-                    onEditTask={setEditingTask}
+                    onEditTask={(t) => setEditingTaskId(t.id)}
                     onDeleteTask={handleDelete}
                     onReschedule={(taskId, deadline) => handleEditTask(taskId, { deadline })}
                   />
@@ -643,7 +669,7 @@ export default function DashboardPage() {
                     projectNames={searchAllProjects ? projectNames : undefined}
                     canEdit={!!canEdit}
                     onStatusChange={handleStatusChange}
-                    onEdit={setEditingTask}
+                    onEdit={(t) => setEditingTaskId(t.id)}
                     onDelete={handleDelete}
                     onRenameMeeting={handleRenameMeeting}
                   />
@@ -676,8 +702,6 @@ export default function DashboardPage() {
         mode={projectModal ?? "create"}
         initialName={projectModal === "edit" ? selectedProject?.name ?? "" : ""}
         initialDescription={projectModal === "edit" ? selectedProject?.description ?? "" : ""}
-        showNotifyMute={!!user}
-        initialNotifyMuted={projectModal === "edit" ? selectedProject?.notify_muted ?? false : false}
         onClose={() => setProjectModal(null)}
         onSubmit={projectModal === "edit" ? handleUpdateProject : handleCreateProject}
       />
@@ -685,12 +709,17 @@ export default function DashboardPage() {
       <EditTaskModal
         task={editingTask}
         createMode={creatingTask}
+        canEdit={!!canEdit}
+        canUndo={undoDepth > 0}
+        syncNonce={undoNonce}
+        onUndo={handleUndo}
         onClose={() => {
-          setEditingTask(null);
+          setEditingTaskId(null);
           setCreatingTask(false);
         }}
         onSave={handleEditTask}
         onCreate={handleCreateTask}
+        onMetaChange={handleTaskMetaChange}
       />
 
       <ShareModal project={shareProject} onClose={() => setShareProject(null)} />
@@ -699,6 +728,8 @@ export default function DashboardPage() {
         <AccountModal
           open={showAccount}
           user={user}
+          reminderProjects={projects.filter((p) => p.owner_user_id === user.id)}
+          onToggleProjectReminder={handleToggleProjectReminder}
           onClose={() => setShowAccount(false)}
           onChangePassword={handleChangePassword}
           onDeleteAccount={handleDeleteAccount}

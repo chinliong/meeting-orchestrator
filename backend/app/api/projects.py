@@ -26,7 +26,7 @@ def project_out(project: Project, level: AccessLevel) -> ProjectOut:
         description=project.description or "",
         created_at=project.created_at,
         owner_user_id=project.owner_user_id,
-        notify_muted=project.notify_muted,
+        notify_enabled=project.notify_enabled,
         access_level=level,
         view_token=project.view_token,
         edit_token=project.edit_token if level == "edit" else None,

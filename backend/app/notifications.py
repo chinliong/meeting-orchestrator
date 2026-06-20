@@ -3,7 +3,7 @@
 A single daily pass (`send_due_date_notifications`) finds every task that has just entered
 its reminder window — from `notify_days_before` days out through one day after the
 deadline (a one-time overdue nudge, not a repeating one) — and emails each affected account
-holder a single digest covering all of their newly-due tasks across every (unmuted) project.
+holder a single digest covering all of their newly-due tasks across every reminder-enabled project.
 
 Idempotency is tracked per task via `Task.last_notified_for`: once a task has been notified
 for a given deadline, re-running the same day (or after the deadline) never re-sends. Changing
@@ -34,8 +34,8 @@ def _in_notify_window(today: date, deadline: date, days_before: int) -> bool:
 
 
 def _candidate_tasks(db: Session, user_id: int | None = None) -> list[Task]:
-    """Open tasks with a deadline, belonging to an account holder who has opted in and
-    hasn't muted that particular project."""
+    """Open tasks with a deadline, belonging to an account holder who has opted in
+    account-wide and has enabled reminders for that particular project."""
     query = (
         db.query(Task)
         .join(Project, Task.project_id == Project.id)
@@ -43,7 +43,7 @@ def _candidate_tasks(db: Session, user_id: int | None = None) -> list[Task]:
         .filter(
             Task.status != TaskStatus.DONE,
             Task.deadline.isnot(None),
-            Project.notify_muted.is_(False),
+            Project.notify_enabled.is_(True),
             User.notify_email.is_(True),
         )
     )

@@ -89,17 +89,21 @@ flowchart LR
     Brevo's HTTPS API (`BREVO_API_KEY`) so it works on hosts that block outbound SMTP (e.g. Render's
     free tier), falls back to SMTP, and otherwise logs the message. Reset emails are dispatched via
     FastAPI background tasks so a slow send never holds the request open.
-  - **Deadline reminders** (`app/notifications.py`) — opt-in (off by default) per account, with a
-    per-project mute and a configurable "days before" threshold. `GET /internal/notify-due-tasks`
+  - **Deadline reminders** (`app/notifications.py`) — opt-in (off by default) per account, with
+    per-project opt-in selection and a configurable "days before" threshold. `GET /internal/notify-due-tasks`
     (shared-secret protected) runs the daily check over HTTP, for a free external scheduler to
     call once a day — Render has no built-in free scheduler and Render Cron Jobs are a paid
     add-on. See "Deadline reminders" below.
   - **LLM parser** (`app/llm/parser.py`) — a reusable, framework-agnostic module: raw text in,
     validated `ExtractionResult` out, via Claude tool-use.
+  - **Subtask generator** (`app/llm/subtasks.py`) — breaks a single task into an ordered checklist
+    via Claude tool-use, either from the task's own details or from user-supplied instructions.
   - **Whisper module** (`app/llm/transcription.py`) — optional, lazily imported; prefers a hosted
     Whisper API and falls back to a local model, so the core app runs without the heavy dependency.
 - **Database:** PostgreSQL (prod) / SQLite (dev), via SQLAlchemy. Tables: `users`, `projects`,
-  `meetings`, `stakeholders`, `tasks`, `password_resets`.
+  `meetings`, `stakeholders`, `tasks`, `subtasks`, `attachments`, `password_resets`. Attachment
+  bytes are stored in the `attachments` row (the deploy target has an ephemeral filesystem and no
+  object storage), size-capped in the API.
 - **LLM provider:** Claude (Anthropic), structured output through a forced `record_extraction` tool.
 
 ## Access model
@@ -114,12 +118,13 @@ flowchart LR
 ## Deadline reminders
 
 - Opt-in per account (`User.notify_email`, default off) with a configurable
-  `notify_days_before`, plus a per-project mute (`Project.notify_muted`) that overrides the
-  account setting for one board.
+  `notify_days_before`, plus per-project opt-in (`Project.notify_enabled`, default off): a board
+  is reminded only when both the account flag and that board's flag are on. The user picks which
+  boards remind them from the project checklist in Account settings.
 - `app/notifications.py` finds tasks inside their reminder window — from `notify_days_before`
   days out through one day past the deadline (a one-time overdue nudge, not a repeat) — and
   emails each affected account holder a single digest covering every newly-due task across their
-  (unmuted) projects.
+  reminder-enabled projects.
 - Idempotency: `Task.last_notified_for` records the deadline last notified for, so re-running the
   same day, or after the deadline, never double-sends. Rescheduling a task's deadline clears the
   match, re-opening the window.
@@ -140,6 +145,8 @@ erDiagram
     PROJECT ||--o{ MEETING : has
     PROJECT ||--o{ TASK : has
     MEETING ||--o{ TASK : produces
+    TASK ||--o{ SUBTASK : "broken into"
+    TASK ||--o{ ATTACHMENT : has
     USER {
         int id PK
         string email
@@ -162,7 +169,7 @@ erDiagram
         text description
         string view_token
         string edit_token
-        bool notify_muted
+        bool notify_enabled
     }
     MEETING {
         int id PK
@@ -184,6 +191,21 @@ erDiagram
         text source_decision
         date last_notified_for
     }
+    SUBTASK {
+        int id PK
+        int task_id FK
+        string title
+        bool done
+        int position
+    }
+    ATTACHMENT {
+        int id PK
+        int task_id FK
+        string filename
+        string content_type
+        int size
+        blob data
+    }
     STAKEHOLDER {
         int id PK
         string name
@@ -200,5 +222,7 @@ no `meeting_id` and carry full confidence.
   `error_message`) rather than crashing the request, so the client always gets a response.
 - The audio endpoint degrades gracefully: if no Whisper backend is configured it returns `503`
   with an actionable message instead of failing at import time.
-- The schema is created on startup via `create_all`, which never alters existing tables; after a
-  schema change, `python -m app.reset_db` rebuilds and re-seeds the database.
+- The schema is created on startup via `create_all`, which adds missing tables but never alters
+  existing ones. New tables (e.g. `subtasks`, `attachments`) appear automatically; a new column on
+  an existing table needs an additive migration (`app/migrate_add_notifications.py`,
+  `app/migrate_reminder_optin.py`). `python -m app.reset_db` rebuilds and re-seeds from scratch.

@@ -8,7 +8,7 @@ export interface Project {
   description: string;
   created_at: string;
   owner_user_id: number | null;
-  notify_muted: boolean;
+  notify_enabled: boolean;
   access_level: AccessLevel;
   view_token: string;
   edit_token: string | null; // present only when you have edit access
@@ -38,6 +38,34 @@ export interface Task {
   status: TaskStatus;
   confidence: number;
   source_decision: string | null;
+  created_at: string;
+  // Rollup counts so cards can show progress without fetching the children.
+  subtask_total: number;
+  subtask_done: number;
+  attachment_count: number;
+}
+
+/** Per-task rollup counts, kept in sync as subtasks/attachments change in the editor. */
+export interface TaskMeta {
+  subtask_total: number;
+  subtask_done: number;
+  attachment_count: number;
+}
+
+export interface Subtask {
+  id: number;
+  task_id: number;
+  title: string;
+  done: boolean;
+  position: number;
+}
+
+export interface Attachment {
+  id: number;
+  task_id: number;
+  filename: string;
+  content_type: string;
+  size: number;
   created_at: string;
 }
 

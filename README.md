@@ -18,8 +18,14 @@ recordings for end-to-end processing.
   / Done with drag-and-drop status changes) and a month calendar that plots tasks by their deadline
   with drag-to-reschedule (drag onto a "no deadline" tray to clear it). Both support owner filtering
   and a search across task text, owners, and source meetings; cards show extraction confidence.
-- **Undo** — an Undo button (and ⌘Z / Ctrl+Z) reverses status changes, edits, reschedules, and
-  deletes; a deleted task is restored with its original id.
+- **Task detail — AI subtasks & attachments** — open any task to break it into a checklist of
+  subtasks (add them by hand, or have the LLM generate them from the task's own details or from
+  your free-text instructions) and to attach files (stored in the database, up to 10 MB each).
+  Card fields and both lists **save automatically** as you go; cards show subtask progress
+  (e.g. `2/5`) and an attachment count.
+- **Undo** — an Undo button (in the toolbar and inside the task card) and ⌘Z / Ctrl+Z reverse
+  status changes, field edits, reschedules, and deletes; a deleted task is restored with its
+  original id.
 - **Manual & sourced tasks** — tasks are usually extracted from a meeting (the source meeting
   title shows on each card and can be renamed inline), but you can also add tasks by hand for
   work raised outside a captured meeting.
@@ -29,14 +35,16 @@ recordings for end-to-end processing.
   emailed to you, or delete your account (owned boards are released as guest boards rather than
   destroyed, so existing share links keep working).
 - **Deadline email reminders** — opt-in (off by default) digest emails for tasks about to be due
-  or just gone overdue, with a configurable "remind me N days before" and a per-project mute.
+  or just gone overdue, with a configurable "remind me N days before" and **per-project selection**
+  — in Account settings you pick exactly which of your boards should remind you.
 - **Shareable boards** — every board has a permanent **view link** and **edit link**; anyone
   with a link can open it (no account needed). View links are read-only; the UI hides every
   editing affordance on a view-only board.
 - **Optional audio/video input** — upload a recording; it is transcribed with Whisper (a hosted
   Whisper API by default, or a local model) before parsing.
-- **Evaluation harness** — scores extraction quality against an annotated test set and
-  compares prompt variants (see [docs/evaluation-report.md](docs/evaluation-report.md)).
+- **Evaluation harnesses** — scores transcript-extraction quality against an annotated test set
+  and compares prompt variants (see [docs/evaluation-report.md](docs/evaluation-report.md)); a
+  separate LLM-as-judge rubric qualitatively scores the open-ended AI subtask generation.
 
 ## Architecture
 
@@ -49,7 +57,7 @@ Next.js / React frontend  ──HTTP──>  FastAPI backend  ──>  Claude AP
                                               │
                                               v
                                      SQLite (dev) / PostgreSQL (prod)
-              users · projects · meetings · tasks · stakeholders · password_resets
+       users · projects · meetings · tasks · subtasks · attachments · stakeholders · password_resets
 ```
 
 See [docs/architecture.md](docs/architecture.md) for detail and [docs/api-spec.md](docs/api-spec.md)
@@ -188,9 +196,25 @@ cd backend
 DATABASE_URL="<your Postgres connection string>" python -m app.seed
 ```
 
-If you change the schema later, the startup `create_all` does **not** alter existing tables — run
-`python -m app.reset_db` (drops, recreates, and re-seeds — **destructive**) against that
-`DATABASE_URL` to rebuild it.
+### Schema changes on an existing database
+
+The startup `create_all` **adds missing tables** but never alters existing ones, so it picks up
+brand-new tables (e.g. `subtasks`, `attachments`) automatically on the next deploy — but a new
+**column** on an existing table needs a one-off, additive migration. Run these from your machine
+against the deployed `DATABASE_URL` (idempotent, non-destructive):
+
+```bash
+cd backend
+DATABASE_URL="<your Postgres connection string>" python -m app.migrate_add_notifications   # deadline-reminder columns
+DATABASE_URL="<your Postgres connection string>" python -m app.migrate_reminder_optin      # adds projects.notify_enabled (opt-in reminders)
+```
+
+> Deploying the opt-in-reminders change to a database that predates it **requires**
+> `migrate_reminder_optin` — without `projects.notify_enabled` the projects API will error. It
+> seeds the new flag from the old one so boards that were being reminded keep being reminded.
+
+To rebuild from scratch instead (drops, recreates, re-seeds — **destructive**), run
+`python -m app.reset_db` against that `DATABASE_URL`.
 
 Note on the free tier: web services spin down after ~15 min idle and cold-start in ~50s.
 
@@ -215,6 +239,17 @@ python -m eval.run_eval --write-report
 This parses the annotated transcripts in `data/`, scores precision/recall/owner/deadline
 accuracy, compares prompt variants, writes `eval/results.json`, and refreshes
 [docs/evaluation-report.md](docs/evaluation-report.md).
+
+The AI **subtask** generator is open-ended (no single correct breakdown, so no ground truth):
+it's assessed qualitatively with an LLM-as-judge rubric (relevance, actionability, coverage,
+non-redundancy) over a sample of the annotated action items.
+
+```bash
+python -m eval.subtask_eval --write-report
+```
+
+This writes `eval/subtask_results.json` and refreshes
+[docs/subtask-evaluation-report.md](docs/subtask-evaluation-report.md).
 
 ## Project layout
 

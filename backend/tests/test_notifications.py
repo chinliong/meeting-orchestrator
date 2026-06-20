@@ -26,8 +26,9 @@ def _make_user(db, email="owner@example.com", notify=True, days_before=1):
     return user
 
 
-def _make_project(db, user, muted=False):
-    project = Project(name="P", owner_user_id=user.id, notify_muted=muted)
+def _make_project(db, user, enabled=True):
+    # Reminders are opt-in per project; most tests want a reminder to fire, so default it on.
+    project = Project(name="P", owner_user_id=user.id, notify_enabled=enabled)
     db.add(project)
     db.flush()
     return project
@@ -105,9 +106,10 @@ def test_respects_opt_out(db_session, sent_emails):
     assert sent_emails == []
 
 
-def test_respects_project_mute(db_session, sent_emails):
+def test_respects_project_not_enabled(db_session, sent_emails):
+    # A board with reminders left off (the default) sends nothing, even for a due task.
     user = _make_user(db_session)
-    project = _make_project(db_session, user, muted=True)
+    project = _make_project(db_session, user, enabled=False)
     _make_task(db_session, project, deadline=TODAY)
     db_session.commit()
 
