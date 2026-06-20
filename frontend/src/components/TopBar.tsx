@@ -26,7 +26,7 @@ export default function TopBar({
 }: Props) {
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-3">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <div className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="Meeting Orchestrator logo" className="h-10 w-10 rounded-full object-cover" />
@@ -58,6 +58,18 @@ export default function TopBar({
           <div className="ml-1 flex items-center gap-2 border-l border-slate-200 pl-3">
             {user ? (
               <>
+                {/* Below sm the email button is hidden, so give phones a compact icon to reach
+                    Account settings. */}
+                <button
+                  onClick={onOpenAccount}
+                  title="Account settings"
+                  aria-label="Account settings"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 sm:hidden"
+                >
+                  <svg viewBox="0 0 20 20" className="h-5 w-5" fill="currentColor">
+                    <path d="M10 10a4 4 0 100-8 4 4 0 000 8zm0 2c-4 0-7 2.2-7 5v1h14v-1c0-2.8-3-5-7-5z" />
+                  </svg>
+                </button>
                 <button
                   onClick={onOpenAccount}
                   title="Account settings"
