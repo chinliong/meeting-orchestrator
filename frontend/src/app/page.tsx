@@ -542,7 +542,7 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              <div className="space-y-4">
+              <div className="min-w-0 space-y-4">
                 <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                   <div className="relative w-full sm:min-w-[200px] sm:flex-1">
                     <svg
@@ -620,28 +620,29 @@ export default function DashboardPage() {
                     </button>
                   </div>
                   {canEdit && (
-                    <button
-                      onClick={handleUndo}
-                      disabled={undoDepth === 0}
-                      title="Undo (⌘Z / Ctrl+Z)"
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
-                    >
-                      <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
-                        <path d="M8 5V2.5a.5.5 0 00-.82-.38l-4.5 3.75a.5.5 0 000 .76l4.5 3.75A.5.5 0 008 10V7.5h3.5a4 4 0 110 8H7a1 1 0 100 2h4.5a6 6 0 100-12H8z" />
-                      </svg>
-                      <span className="hidden sm:inline">Undo</span>
-                    </button>
-                  )}
-                  {canEdit && (
-                    <button
-                      onClick={() => setCreatingTask(true)}
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
-                    >
-                      <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
-                        <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" />
-                      </svg>
-                      Add task
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleUndo}
+                        disabled={undoDepth === 0}
+                        title="Undo (⌘Z / Ctrl+Z)"
+                        aria-label="Undo"
+                        className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
+                      >
+                        <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
+                          <path d="M8 5V2.5a.5.5 0 00-.82-.38l-4.5 3.75a.5.5 0 000 .76l4.5 3.75A.5.5 0 008 10V7.5h3.5a4 4 0 110 8H7a1 1 0 100 2h4.5a6 6 0 100-12H8z" />
+                        </svg>
+                        <span className="hidden sm:inline">Undo</span>
+                      </button>
+                      <button
+                        onClick={() => setCreatingTask(true)}
+                        className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
+                      >
+                        <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
+                          <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" />
+                        </svg>
+                        Add task
+                      </button>
+                    </div>
                   )}
                   </div>
                 </div>
