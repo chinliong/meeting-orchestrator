@@ -123,15 +123,14 @@ export default function ShareModal({ project, isOwner, onRegenerate, onClose }: 
   if (!project) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm"
-      onMouseDown={onClose}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onMouseDown={onClose}>
+      {/* The dim + blur lives in its own sibling layer, NOT as an ancestor of the panel.
+          When backdrop-filter wraps the interactive content, hovering a button forces
+          Chrome to re-evaluate the filter and flashes for a frame. Isolating it here
+          means button repaints never touch the blurred layer. */}
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" aria-hidden="true" />
       <div
-        // transform-gpu promotes the panel to its own compositing layer, so button
-        // hover repaints don't force the blurred backdrop above to re-render (which
-        // caused a one-frame flicker on hover in Chrome).
-        className="w-full max-w-md transform-gpu animate-fade-in rounded-2xl bg-white p-6 shadow-xl"
+        className="relative w-full max-w-md animate-fade-in rounded-2xl bg-white p-6 shadow-xl"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <h2 className="font-display text-lg font-bold tracking-tight text-slate-900">Share “{project.name}”</h2>
