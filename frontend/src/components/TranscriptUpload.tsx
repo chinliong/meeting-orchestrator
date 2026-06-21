@@ -95,7 +95,7 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Paste the raw meeting transcript here — messy is fine."
+            placeholder="Paste the raw meeting transcript here."
             rows={6}
             className="w-full resize-y rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-brand focus:bg-white/10 focus:ring-2 focus:ring-brand/30"
           />
