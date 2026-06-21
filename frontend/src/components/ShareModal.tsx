@@ -71,28 +71,6 @@ function LinkRow({
         <span className={`h-2 w-2 rounded-full ${accent}`} />
         <span className="text-sm font-medium text-slate-700">{label}</span>
         <span className="text-xs text-slate-400">{hint}</span>
-        {onRegenerate && (
-          <button
-            type="button"
-            onClick={regenerate}
-            disabled={regenerating}
-            aria-label={`Regenerate ${label.toLowerCase()}`}
-            title={`Regenerate ${label.toLowerCase()}`}
-            className="ml-auto rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <svg
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              className={`h-4 w-4 ${regenerating ? "animate-spin" : ""}`}
-            >
-              <path
-                fillRule="evenodd"
-                d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h1.21a.75.75 0 000-1.5H2.812a.75.75 0 00-.75.75v3.5a.75.75 0 001.5 0v-1.434l.281.282a7 7 0 0011.712-3.138.75.75 0 00-1.443-.395zm1.183-5.93a.75.75 0 00-.75.75v1.434l-.281-.282A7 7 0 003.752 10.534a.75.75 0 101.444.395 5.5 5.5 0 019.201-2.466l.312.311h-1.21a.75.75 0 000 1.5h3.397a.75.75 0 00.75-.75v-3.5a.75.75 0 00-.75-.75z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
-        )}
       </div>
       <div className="flex gap-2">
         <input
@@ -107,6 +85,28 @@ function LinkRow({
         >
           {copied ? "Copied" : "Copy"}
         </button>
+        {onRegenerate && (
+          <button
+            type="button"
+            onClick={regenerate}
+            disabled={regenerating}
+            aria-label={`Regenerate ${label.toLowerCase()}`}
+            title={`Regenerate ${label.toLowerCase()}`}
+            className="flex shrink-0 items-center justify-center rounded-lg border border-slate-300 px-2.5 text-slate-400 transition hover:bg-slate-50 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <svg
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              className={`h-4 w-4 ${regenerating ? "animate-spin" : ""}`}
+            >
+              <path
+                fillRule="evenodd"
+                d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h1.21a.75.75 0 000-1.5H2.812a.75.75 0 00-.75.75v3.5a.75.75 0 001.5 0v-1.434l.281.282a7 7 0 0011.712-3.138.75.75 0 00-1.443-.395zm1.183-5.93a.75.75 0 00-.75.75v1.434l-.281-.282A7 7 0 003.752 10.534a.75.75 0 101.444.395 5.5 5.5 0 019.201-2.466l.312.311h-1.21a.75.75 0 000 1.5h3.397a.75.75 0 00.75-.75v-3.5a.75.75 0 00-.75-.75z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+        )}
       </div>
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
