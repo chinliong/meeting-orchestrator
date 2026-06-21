@@ -100,7 +100,7 @@ export default function LandingContent() {
               <span className="text-brand-600">tracked action plan</span>.
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
-              Drop in a raw transcript — or upload the recording — and an LLM pulls out the decisions,
+              Drop in a raw transcript, or upload the recording, and an LLM pulls out the decisions,
               assigns each action item to a named owner, and infers deadlines. Everything lands on a live
               Kanban board, with zero manual minute-taking.
             </p>
@@ -109,7 +109,7 @@ export default function LandingContent() {
                 href="/app"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-brand transition hover:bg-brand-700 sm:w-auto"
               >
-                Try it now — no sign-up
+                Try it now, no sign-up
                 <Icon path="M5 12h14M13 6l6 6-6 6" className="h-4 w-4" />
               </Link>
               <a
@@ -185,19 +185,19 @@ export default function LandingContent() {
             n={1}
             icon={ICONS.doc}
             title="Drop in the meeting"
-            body="Paste a raw or messy transcript, or upload an audio/video recording — Whisper transcribes it for you."
+            body="Paste a raw or messy transcript, or upload an audio/video recording and let Whisper transcribe it for you."
           />
           <StepCard
             n={2}
             icon={ICONS.bolt}
             title="Let the LLM parse it"
-            body="The model extracts key decisions, action items, named owners, and deadlines inferred from contextual cues — returned as clean structured data."
+            body="The model extracts key decisions, action items, named owners, and deadlines inferred from contextual cues, returned as clean structured data."
           />
           <StepCard
             n={3}
             icon={ICONS.board}
             title="Track it on the board"
-            body="Action items appear as cards across To Do, In Progress, and Done — filter by owner, sort by deadline, and follow up with confidence."
+            body="Action items appear as cards across To Do, In Progress, and Done. Filter by owner, sort by deadline, and follow up with confidence."
           />
         </div>
       </section>
@@ -213,7 +213,7 @@ export default function LandingContent() {
             <FeatureCard
               icon={ICONS.bolt}
               title="Structured extraction"
-              body="Decisions, action items, owners, and deadlines — pulled from the transcript by an LLM and validated before they ever hit the board."
+              body="Decisions, action items, owners, and deadlines, pulled from the transcript by an LLM and validated before they ever hit the board."
             />
             <FeatureCard
               icon={ICONS.mic}
@@ -228,7 +228,7 @@ export default function LandingContent() {
             <FeatureCard
               icon={ICONS.checklist}
               title="AI sub-task breakdown"
-              body="Turn any action item into a concrete checklist — the assistant suggests the steps, you tick them off as the work gets done."
+              body="Turn any action item into a concrete checklist. The assistant suggests the steps, and you tick them off as the work gets done."
             />
             <FeatureCard
               icon={ICONS.bell}
@@ -238,12 +238,12 @@ export default function LandingContent() {
             <FeatureCard
               icon={ICONS.calendar}
               title="Deadline calendar"
-              body="Flip to a calendar view to see every action item by its due date — and reschedule by dragging it to a new day."
+              body="Flip to a calendar view to see every action item by its due date, and reschedule by dragging it to a new day."
             />
             <FeatureCard
               icon={ICONS.paperclip}
               title="File attachments"
-              body="Attach supporting files — specs, screenshots, documents — directly to a task so the context lives with the work."
+              body="Attach supporting files like specs, screenshots, and documents directly to a task so the context lives with the work."
             />
             <FeatureCard
               icon={ICONS.share}
@@ -290,7 +290,7 @@ export default function LandingContent() {
             Stop chasing action items.
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-300">
-            Turn your next meeting into a board you can actually act on — in seconds.
+            Turn your next meeting into a board you can actually act on, in seconds.
           </p>
           <Link
             href="/app"
