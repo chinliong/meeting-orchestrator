@@ -81,7 +81,7 @@ function LinkRow({
         />
         <button
           onClick={copy}
-          className="shrink-0 rounded-lg bg-ink px-3 py-2 text-xs font-medium text-white transition hover:bg-ink-700"
+          className="shrink-0 rounded-lg bg-ink px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-ink-700"
         >
           {copied ? "Copied" : "Copy"}
         </button>
@@ -92,7 +92,7 @@ function LinkRow({
             disabled={regenerating}
             aria-label={`Regenerate ${label.toLowerCase()}`}
             title={`Regenerate ${label.toLowerCase()}`}
-            className="flex shrink-0 items-center justify-center rounded-lg border border-slate-300 px-2.5 text-slate-400 transition hover:bg-slate-50 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex shrink-0 items-center justify-center rounded-lg border border-slate-300 px-2.5 text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <svg
               viewBox="0 0 20 20"
@@ -128,7 +128,10 @@ export default function ShareModal({ project, isOwner, onRegenerate, onClose }: 
       onMouseDown={onClose}
     >
       <div
-        className="w-full max-w-md animate-fade-in rounded-2xl bg-white p-6 shadow-xl"
+        // transform-gpu promotes the panel to its own compositing layer, so button
+        // hover repaints don't force the blurred backdrop above to re-render (which
+        // caused a one-frame flicker on hover in Chrome).
+        className="w-full max-w-md transform-gpu animate-fade-in rounded-2xl bg-white p-6 shadow-xl"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <h2 className="font-display text-lg font-bold tracking-tight text-slate-900">Share “{project.name}”</h2>
