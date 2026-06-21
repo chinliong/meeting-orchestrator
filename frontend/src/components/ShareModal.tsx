@@ -44,7 +44,7 @@ function LinkRow({ label, hint, token, accent }: { label: string; hint: string; 
         />
         <button
           onClick={copy}
-          className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800"
+          className="shrink-0 rounded-lg bg-ink px-3 py-2 text-xs font-medium text-white transition hover:bg-ink-700"
         >
           {copied ? "Copied" : "Copy"}
         </button>
@@ -71,7 +71,7 @@ export default function ShareModal({ project, onClose }: Props) {
         className="w-full max-w-md animate-fade-in rounded-2xl bg-white p-6 shadow-xl"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-semibold text-slate-900">Share “{project.name}”</h2>
+        <h2 className="font-display text-lg font-bold tracking-tight text-slate-900">Share “{project.name}”</h2>
         <p className="mt-1 text-sm text-slate-500">
           Anyone with a link can open this board — no account needed.
         </p>
@@ -95,7 +95,7 @@ export default function ShareModal({ project, onClose }: Props) {
         <div className="mt-5 flex justify-end">
           <button
             onClick={onClose}
-            className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
+            className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-ink-700"
           >
             Done
           </button>

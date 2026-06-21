@@ -40,7 +40,7 @@ export default function TopBar({
               className="h-10 w-10 shrink-0 rounded-full object-cover"
             />
             <div className="min-w-0 leading-tight">
-              <h1 className="truncate text-base font-semibold text-slate-900">Meeting Orchestrator</h1>
+              <h1 className="truncate font-display text-base font-bold tracking-tight text-slate-900">Meeting Orchestrator</h1>
               <p className="hidden truncate text-xs text-slate-500 sm:block">
                 AI action items from meeting transcripts
               </p>
@@ -91,7 +91,7 @@ export default function TopBar({
           )}
           <button
             onClick={onNewProject}
-            className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
+            className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-ink px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-ink-700"
           >
             <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0" fill="currentColor">
               <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" />

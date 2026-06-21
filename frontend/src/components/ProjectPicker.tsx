@@ -69,7 +69,7 @@ export default function ProjectPicker({ projects, selectedProjectId, onSelect }:
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex min-w-[120px] max-w-[160px] items-center gap-2 rounded-lg border border-slate-300 bg-white py-2 pl-3 pr-2 text-sm font-medium text-slate-700 outline-none transition hover:bg-slate-50 focus:border-slate-900 focus:ring-2 focus:ring-slate-200 sm:max-w-[260px]"
+        className="flex min-w-[120px] max-w-[160px] items-center gap-2 rounded-lg border border-slate-300 bg-white py-2 pl-3 pr-2 text-sm font-medium text-slate-700 outline-none transition hover:bg-slate-50 focus:border-brand focus:ring-2 focus:ring-brand/20 sm:max-w-[260px]"
       >
         <span className="flex-1 truncate text-left">{selected?.name ?? "Select project"}</span>
         <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0 text-slate-400" fill="currentColor">
@@ -93,7 +93,7 @@ export default function ProjectPicker({ projects, selectedProjectId, onSelect }:
               }}
               onKeyDown={onKeyDown}
               placeholder="Search projects..."
-              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
             />
           </div>
           <ul className="max-h-72 overflow-y-auto p-1">

@@ -6,7 +6,7 @@ import type { Task, TaskStatus } from "@/lib/types";
 import TaskCard from "./TaskCard";
 
 const COLUMNS: { status: TaskStatus; title: string; dot: string; empty: string }[] = [
-  { status: "todo", title: "To Do", dot: "bg-slate-400", empty: "Nothing to do yet" },
+  { status: "todo", title: "To Do", dot: "bg-brand", empty: "Nothing to do yet" },
   { status: "in_progress", title: "In Progress", dot: "bg-amber-400", empty: "Nothing in progress" },
   { status: "done", title: "Done", dot: "bg-emerald-500", empty: "Nothing done yet" },
 ];
@@ -67,9 +67,9 @@ export default function KanbanBoard({
             }`}
           >
             <div className="mb-3 flex items-center gap-2 px-1">
-              <span className={`h-2 w-2 rounded-full ${column.dot}`} />
-              <h2 className="text-sm font-semibold text-slate-700">{column.title}</h2>
-              <span className="ml-auto rounded-full bg-white px-2 py-0.5 text-xs font-medium text-slate-500 shadow-sm">
+              <span className={`h-2.5 w-2.5 rounded-full ${column.dot}`} />
+              <h2 className="font-display text-sm font-bold text-slate-700">{column.title}</h2>
+              <span className="ml-auto rounded-full bg-white px-2 py-0.5 font-display text-xs font-bold text-slate-500 shadow-sm">
                 {columnTasks.length}
               </span>
             </div>

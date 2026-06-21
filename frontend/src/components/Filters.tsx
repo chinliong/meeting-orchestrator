@@ -22,7 +22,7 @@ export default function Filters({
 }: Props) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-sm font-medium text-slate-500">Filter</span>
+      <span className="font-display text-sm font-semibold text-slate-500">Filter</span>
 
       {/* "All" pill */}
       <button

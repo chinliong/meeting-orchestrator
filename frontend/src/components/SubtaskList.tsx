@@ -191,7 +191,7 @@ export default function SubtaskList({
                   setInstructMode(false);
                 }}
                 disabled={generating}
-                className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50"
+                className="group inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-b from-ink-700 to-ink px-2.5 py-1 text-xs font-semibold text-white shadow-sm ring-1 ring-brand/40 transition hover:brightness-110 disabled:opacity-50"
                 title="Generate subtasks with AI"
               >
                 {generating ? (
@@ -200,7 +200,7 @@ export default function SubtaskList({
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                   </svg>
                 ) : (
-                  <SparkleIcon className="h-3.5 w-3.5" />
+                  <SparkleIcon className="h-3.5 w-3.5 text-brand-100 transition-transform group-hover:scale-110" />
                 )}
                 {generating ? "Generating…" : "Generate"}
               </button>
@@ -222,7 +222,7 @@ export default function SubtaskList({
                       onClick={() => generate(false)}
                       className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-50"
                     >
-                      <SparkleIcon className="h-4 w-4 text-emerald-600" />
+                      <SparkleIcon className="h-4 w-4 text-brand" />
                       From task details
                     </button>
                     <button
@@ -263,13 +263,13 @@ export default function SubtaskList({
               if (e.key === "Escape") setInstructMode(false);
             }}
             placeholder="e.g. focus on testing and rollback steps"
-            className="flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+            className="flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
           />
           <button
             type="button"
             onClick={() => generate(true)}
             disabled={generating || !instructions.trim()}
-            className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+            className="rounded-lg bg-ink px-3 py-1.5 text-sm font-medium text-white transition hover:bg-ink-700 disabled:opacity-50"
           >
             Generate
           </button>
@@ -356,7 +356,7 @@ export default function SubtaskList({
             onChange={(e) => setNewTitle(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addSubtask()}
             placeholder="Add a subtask…"
-            className="flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+            className="flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
           />
           <button
             type="button"

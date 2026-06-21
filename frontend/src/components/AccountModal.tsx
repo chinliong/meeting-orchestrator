@@ -178,21 +178,21 @@ export default function AccountModal({
         className="my-auto max-h-[90dvh] w-full max-w-md animate-fade-in overflow-y-auto rounded-2xl bg-white p-5 shadow-xl sm:p-6"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-semibold text-slate-900">Account settings</h2>
+        <h2 className="font-display text-lg font-bold tracking-tight text-slate-900">Account settings</h2>
         <p className="mt-1 text-sm text-slate-500">
           Signed in as <span className="font-medium text-slate-700">{user.email}</span>
         </p>
 
         {/* --- change password --- */}
         <form onSubmit={handleChangePassword} className="mt-5 space-y-3">
-          <h3 className="text-sm font-semibold text-slate-900">Change password</h3>
+          <h3 className="font-display text-sm font-bold text-slate-900">Change password</h3>
           <input
             type="password"
             autoComplete="current-password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
             placeholder="Current password"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
           />
           <input
             type="password"
@@ -200,7 +200,7 @@ export default function AccountModal({
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder="New password"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
           />
           <input
             type="password"
@@ -208,7 +208,7 @@ export default function AccountModal({
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Confirm new password"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
           />
 
           {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
@@ -221,7 +221,7 @@ export default function AccountModal({
           <button
             type="submit"
             disabled={submitting || !currentPassword || !newPassword}
-            className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-50"
+            className="w-full rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-ink-700 disabled:opacity-50"
           >
             {submitting ? "Updating..." : "Update password"}
           </button>
@@ -231,7 +231,7 @@ export default function AccountModal({
         <div className="mt-6 border-t border-slate-200 pt-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900">Deadline reminders</h3>
+              <h3 className="font-display text-sm font-bold text-slate-900">Deadline reminders</h3>
               <p className="mt-0.5 text-xs text-slate-500">
                 Get a digest email when a task is about to be due or has gone overdue.
               </p>
@@ -243,7 +243,7 @@ export default function AccountModal({
               onClick={handleToggleNotify}
               disabled={notifySaving}
               className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition disabled:opacity-50 ${
-                notifyEmail ? "bg-slate-900" : "bg-slate-200"
+                notifyEmail ? "bg-brand" : "bg-slate-200"
               }`}
             >
               <span
@@ -262,7 +262,7 @@ export default function AccountModal({
                   value={notifyDaysBefore}
                   onChange={(e) => handleDaysBeforeChange(Number(e.target.value))}
                   disabled={notifySaving}
-                  className="rounded-lg border border-slate-300 px-2 py-1 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+                  className="rounded-lg border border-slate-300 px-2 py-1 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
                 >
                   <option value={0}>on the due date</option>
                   <option value={1}>1 day before</option>

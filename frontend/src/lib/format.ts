@@ -10,16 +10,19 @@ export function initials(name: string): string {
     .toUpperCase();
 }
 
+// Distinct per-person colours with warm/cool variety so owners are easy to tell apart.
+// Deliberately avoids brand blue (the To Do status) and emerald (Done) so an avatar is
+// never confused with a status colour.
 const AVATAR_COLORS = [
-  "bg-rose-500",
-  "bg-orange-500",
-  "bg-amber-500",
-  "bg-emerald-500",
-  "bg-teal-500",
-  "bg-sky-500",
   "bg-indigo-500",
+  "bg-rose-500",
+  "bg-amber-500",
   "bg-violet-500",
+  "bg-orange-500",
+  "bg-teal-500",
   "bg-fuchsia-500",
+  "bg-cyan-600",
+  "bg-pink-500",
 ];
 
 export function avatarColor(name: string): string {
@@ -57,9 +60,13 @@ export function formatBytes(bytes: number): string {
   return `${value < 10 ? value.toFixed(1) : Math.round(value)} ${units[i]}`;
 }
 
-/** Tailwind classes for a confidence pill, by how explicit the extraction was. */
-export function confidenceTone(confidence: number): string {
-  if (confidence >= 0.85) return "bg-emerald-50 text-emerald-700";
-  if (confidence >= 0.6) return "bg-amber-50 text-amber-700";
-  return "bg-slate-100 text-slate-500";
+/**
+ * Accent colour for the confidence meter, by how explicit the extraction was.
+ * The chip itself stays a neutral chip; this colours just the icon + number so
+ * high/medium/low still reads at a glance without a loud coloured pill.
+ */
+export function confidenceColor(confidence: number): string {
+  if (confidence >= 0.85) return "text-emerald-600";
+  if (confidence >= 0.6) return "text-amber-600";
+  return "text-slate-400";
 }

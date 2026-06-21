@@ -65,7 +65,7 @@ export default function ProjectModal({
         className="w-full max-w-md animate-fade-in rounded-2xl bg-white p-6 shadow-xl"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-semibold text-slate-900">
+        <h2 className="font-display text-lg font-bold tracking-tight text-slate-900">
           {isEdit ? "Edit project" : "New project"}
         </h2>
         <p className="mt-1 text-sm text-slate-500">
@@ -76,17 +76,17 @@ export default function ProjectModal({
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Name</label>
+            <label className="mb-1 block font-display text-sm font-semibold text-slate-700">Name</label>
             <input
               autoFocus
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. SAP S/4HANA Go-Live Programme"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">
+            <label className="mb-1 block font-display text-sm font-semibold text-slate-700">
               Description <span className="font-normal text-slate-400">(optional)</span>
             </label>
             <textarea
@@ -94,7 +94,7 @@ export default function ProjectModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="What this workstream is about..."
               rows={3}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
             />
           </div>
 
@@ -111,7 +111,7 @@ export default function ProjectModal({
             <button
               type="submit"
               disabled={submitting || !name.trim()}
-              className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-50"
+              className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-ink-700 disabled:opacity-50"
             >
               {submitting ? "Saving..." : isEdit ? "Save changes" : "Create project"}
             </button>

@@ -2,18 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
-    Arial, "Apple Color Emoji", "Segoe UI Emoji";
-}
+/* Note: --font-sans / --font-display are provided by next/font on the <html> element
+   (see layout.tsx). Don't redefine them here — a :root override has equal specificity
+   and would win on source order, silently falling the whole app back to system fonts. */
 
 html,
 body {
-  font-family: var(--font-sans);
-  background-color: #f8fafc;
-  color: #0f172a;
+  font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  color: #0b1220;
+  /* Soft enterprise ground: two faint slate-blue washes over a near-white base. */
+  background-color: #f5f6f8;
+  background-image: radial-gradient(1100px 440px at 88% -10%, #eaf0f8 0%, transparent 58%),
+    radial-gradient(900px 420px at -6% 0%, #eef2f6 0%, transparent 52%);
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  letter-spacing: -0.005em;
+}
+
+/* UI chrome — buttons and control labels — speak in the geometric display voice
+   (Space Grotesk), while reading content and inputs stay in Inter. This is what
+   keeps the whole interface feeling like one considered system. */
+button {
+  font-family: var(--font-display, var(--font-sans));
+}
+/* Inputs are for reading/typing, so keep them in the body face. */
+input,
+textarea,
+select {
+  font-family: var(--font-sans);
 }
 
 /* Subtle, modern scrollbars for the board columns. */

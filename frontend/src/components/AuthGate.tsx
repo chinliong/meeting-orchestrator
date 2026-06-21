@@ -130,7 +130,7 @@ export default function AuthGate({ claimTokens, onAuthed, onGuest, allowGuest = 
       <div className="mb-5 flex flex-col items-center text-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.png" alt="Meeting Orchestrator logo" className="mb-3 h-14 w-14 rounded-full object-cover" />
-        <h1 className="text-lg font-semibold text-slate-900">Meeting Orchestrator</h1>
+        <h1 className="font-display text-lg font-bold tracking-tight text-slate-900">Meeting Orchestrator</h1>
       </div>
       {children}
     </div>
@@ -154,13 +154,13 @@ export default function AuthGate({ claimTokens, onAuthed, onGuest, allowGuest = 
               value={resetEmail}
               onChange={(e) => setResetEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
             />
             {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
             <button
               type="submit"
               disabled={submitting || !resetEmail.trim()}
-              className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-50"
+              className="w-full rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-ink-700 disabled:opacity-50"
             >
               {submitting ? "Sending..." : "Send code"}
             </button>
@@ -178,7 +178,7 @@ export default function AuthGate({ claimTokens, onAuthed, onGuest, allowGuest = 
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
               placeholder="6-digit code"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-center text-lg tracking-[0.4em] outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-center text-lg tracking-[0.4em] outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
             />
             <input
               type="password"
@@ -186,13 +186,13 @@ export default function AuthGate({ claimTokens, onAuthed, onGuest, allowGuest = 
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="New password"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
             />
             {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
             <button
               type="submit"
               disabled={submitting || code.length < 6 || !newPassword}
-              className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-50"
+              className="w-full rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-ink-700 disabled:opacity-50"
             >
               {submitting ? "Resetting..." : "Reset password"}
             </button>
@@ -232,14 +232,14 @@ export default function AuthGate({ claimTokens, onAuthed, onGuest, allowGuest = 
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
         />
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
         />
 
         {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
@@ -247,7 +247,7 @@ export default function AuthGate({ claimTokens, onAuthed, onGuest, allowGuest = 
         <button
           type="submit"
           disabled={submitting || !email.trim() || !password}
-          className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-50"
+          className="w-full rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-ink-700 disabled:opacity-50"
         >
           {submitting ? "Please wait..." : mode === "signup" ? "Create account" : "Sign in"}
         </button>

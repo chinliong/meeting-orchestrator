@@ -18,7 +18,7 @@ interface Props {
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const STATUS_DOT: Record<Task["status"], string> = {
-  todo: "bg-slate-400",
+  todo: "bg-brand",
   in_progress: "bg-amber-400",
   done: "bg-emerald-500",
 };
@@ -163,7 +163,7 @@ export default function CalendarView({ tasks, canEdit, onEditTask, onDeleteTask,
         <div className="relative">
           <button
             onClick={openPicker}
-            className="inline-flex items-center gap-1.5 rounded-lg px-1 text-base font-semibold text-slate-900 transition hover:text-slate-600"
+            className="inline-flex items-center gap-1.5 rounded-lg px-1 font-display text-lg font-bold tracking-tight text-slate-900 transition hover:text-slate-600"
           >
             {month.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
             <svg viewBox="0 0 20 20" className="h-4 w-4 text-slate-400" fill="currentColor">
@@ -212,7 +212,7 @@ export default function CalendarView({ tasks, canEdit, onEditTask, onDeleteTask,
                         }}
                         className={`rounded-md px-2 py-1.5 text-sm font-medium transition ${
                           active
-                            ? "bg-slate-900 text-white"
+                            ? "bg-brand text-white"
                             : "text-slate-600 hover:bg-slate-100"
                         }`}
                       >
@@ -289,7 +289,7 @@ export default function CalendarView({ tasks, canEdit, onEditTask, onDeleteTask,
                     <span
                       className={`flex h-5 w-5 items-center justify-center rounded-full text-xs font-medium ${
                         isToday
-                          ? "bg-slate-900 text-white"
+                          ? "bg-brand text-white"
                           : inMonth
                             ? "text-slate-600"
                             : "text-slate-300"

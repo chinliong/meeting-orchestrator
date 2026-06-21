@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import type { Task } from "@/lib/types";
-import { avatarColor, confidenceTone, formatDate, initials, isOverdue } from "@/lib/format";
+import { avatarColor, confidenceColor, formatDate, initials, isOverdue } from "@/lib/format";
 
 interface Props {
   task: Task;
@@ -53,14 +53,24 @@ export default function TaskCard({
     }
   };
 
+  const edgeColor =
+    task.status === "done"
+      ? "bg-emerald-500"
+      : task.status === "in_progress"
+        ? "bg-amber-400"
+        : "bg-brand";
+
   return (
     <div
       draggable={canEdit && !renaming}
       onDragStart={(e) => onDragStart(e, task)}
-      className={`group relative mb-2.5 rounded-lg border border-slate-200 bg-white p-3 shadow-card transition hover:border-slate-300 hover:shadow-card-hover ${
+      className={`group relative mb-2.5 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 pl-4 shadow-card transition duration-150 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-card-hover ${
         canEdit ? "cursor-grab active:cursor-grabbing" : ""
       }`}
     >
+      {/* Status accent edge — quietly colour-codes each card to its column. */}
+      <span className={`absolute inset-y-0 left-0 w-1 ${edgeColor}`} aria-hidden />
+
       <div
         className={`absolute right-1.5 top-1.5 flex gap-0.5 opacity-0 transition group-hover:opacity-100 [@media(hover:none)]:opacity-100 ${
           canEdit ? "" : "hidden"
@@ -223,17 +233,22 @@ export default function TaskCard({
 
         {task.meeting_id !== null && (
           <span
-            className={`ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${confidenceTone(
-              task.confidence
-            )}`}
-            title={`AI confidence: ${Math.round(
+            className="ml-auto inline-flex items-center gap-1.5 rounded-md bg-slate-50 px-2 py-1 ring-1 ring-slate-200/70"
+            title={`AI confidence: how sure the AI is that this is a real action item (${Math.round(
               task.confidence * 100
-            )}% sure this is a real action item. Lower means double-check it.`}
+            )}%). Lower means it's worth a quick double-check.`}
           >
-            <svg viewBox="0 0 20 20" className="h-3 w-3" fill="currentColor">
+            <svg
+              viewBox="0 0 20 20"
+              className={`h-3 w-3 ${confidenceColor(task.confidence)}`}
+              fill="currentColor"
+            >
               <path d="M2 12a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1H3a1 1 0 01-1-1v-4zm6-4a1 1 0 011-1h2a1 1 0 011 1v8a1 1 0 01-1 1H9a1 1 0 01-1-1V8zm6-4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
             </svg>
-            {Math.round(task.confidence * 100)}% conf.
+            <span className={`text-[11px] font-semibold tabular-nums ${confidenceColor(task.confidence)}`}>
+              {Math.round(task.confidence * 100)}%
+            </span>
+            <span className="text-[10px] font-medium text-slate-400">confidence</span>
           </span>
         )}
       </div>

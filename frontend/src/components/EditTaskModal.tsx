@@ -206,7 +206,7 @@ export default function EditTaskModal({
           </button>
         </div>
 
-        <h2 className="pr-16 text-lg font-semibold text-slate-900">
+        <h2 className="pr-16 font-display text-lg font-bold tracking-tight text-slate-900">
           {createMode ? "Add task" : readOnly ? "Task" : "Edit task"}
         </h2>
         <p className="mt-1 text-sm text-slate-500">
@@ -219,7 +219,7 @@ export default function EditTaskModal({
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Description</label>
+            <label className="mb-1 block font-display text-sm font-semibold text-slate-700">Description</label>
             <textarea
               autoFocus={!readOnly}
               value={description}
@@ -228,42 +228,42 @@ export default function EditTaskModal({
               disabled={readOnly}
               rows={3}
               placeholder={createMode ? "What needs to be done?" : undefined}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200 disabled:bg-slate-50 disabled:text-slate-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:bg-slate-50 disabled:text-slate-500"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Owner</label>
+              <label className="mb-1 block font-display text-sm font-semibold text-slate-700">Owner</label>
               <input
                 value={owner}
                 onChange={(e) => setOwner(e.target.value)}
                 onBlur={task ? () => commitField("owner", owner.trim() || null) : undefined}
                 disabled={readOnly}
                 placeholder="Unassigned"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200 disabled:bg-slate-50 disabled:text-slate-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:bg-slate-50 disabled:text-slate-500"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Deadline</label>
+              <label className="mb-1 block font-display text-sm font-semibold text-slate-700">Deadline</label>
               <input
                 type="date"
                 ref={deadlineRef}
                 defaultValue={task?.deadline ?? ""}
                 onBlur={task ? () => commitField("deadline", deadlineRef.current?.value || null) : undefined}
                 disabled={readOnly}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200 disabled:bg-slate-50 disabled:text-slate-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:bg-slate-50 disabled:text-slate-500"
               />
             </div>
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Status</label>
+            <label className="mb-1 block font-display text-sm font-semibold text-slate-700">Status</label>
             <select
               value={status}
               onChange={(e) => handleStatusChange(e.target.value as TaskStatus)}
               disabled={readOnly}
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200 disabled:bg-slate-50 disabled:text-slate-500"
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:bg-slate-50 disabled:text-slate-500"
             >
               {STATUSES.map((s) => (
                 <option key={s.value} value={s.value}>
@@ -292,7 +292,7 @@ export default function EditTaskModal({
               <button
                 type="submit"
                 disabled={saving || !description.trim()}
-                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-50"
+                className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-ink-700 disabled:opacity-50"
               >
                 {saving ? "Saving..." : "Add task"}
               </button>
