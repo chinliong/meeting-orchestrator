@@ -33,6 +33,18 @@ select {
   font-family: var(--font-sans);
 }
 
+/* iOS Safari gives <input type="date"> its own native box: a taller intrinsic
+   height, a tinted fill, and a value that's centred rather than left-aligned —
+   so on mobile the Deadline field doesn't line up with the plain Owner input
+   beside it. Reset the native chrome and pin the value to the left so it matches. */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+}
+
 /* Subtle, modern scrollbars for the board columns. */
 * {
   scrollbar-width: thin;
