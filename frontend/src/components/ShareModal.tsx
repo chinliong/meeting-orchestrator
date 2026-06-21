@@ -6,6 +6,9 @@ import type { Project } from "@/lib/types";
 
 interface Props {
   project: Project | null;
+  /** Only the signed-in board owner may regenerate links. */
+  isOwner: boolean;
+  onRegenerate: (which: "view" | "edit") => Promise<void>;
   onClose: () => void;
 }
 
@@ -14,8 +17,23 @@ function linkFor(token: string): string {
   return `${origin}/?w=${token}`;
 }
 
-function LinkRow({ label, hint, token, accent }: { label: string; hint: string; token: string; accent: string }) {
+function LinkRow({
+  label,
+  hint,
+  token,
+  accent,
+  onRegenerate,
+}: {
+  label: string;
+  hint: string;
+  token: string;
+  accent: string;
+  /** When present, shows a "Regenerate" action that rotates this link's token. */
+  onRegenerate?: () => Promise<void>;
+}) {
   const [copied, setCopied] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const url = linkFor(token);
 
   const copy = async () => {
@@ -28,12 +46,41 @@ function LinkRow({ label, hint, token, accent }: { label: string; hint: string; 
     }
   };
 
+  const regenerate = async () => {
+    if (!onRegenerate) return;
+    if (
+      !window.confirm(
+        `Regenerate the ${label.toLowerCase()}? The current link will stop working for everyone and you'll need to reshare the new one.`,
+      )
+    )
+      return;
+    setRegenerating(true);
+    setError(null);
+    try {
+      await onRegenerate();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't regenerate the link");
+    } finally {
+      setRegenerating(false);
+    }
+  };
+
   return (
     <div>
       <div className="mb-1 flex items-center gap-2">
         <span className={`h-2 w-2 rounded-full ${accent}`} />
         <span className="text-sm font-medium text-slate-700">{label}</span>
         <span className="text-xs text-slate-400">{hint}</span>
+        {onRegenerate && (
+          <button
+            type="button"
+            onClick={regenerate}
+            disabled={regenerating}
+            className="ml-auto text-xs font-medium text-slate-500 underline-offset-2 transition hover:text-ink hover:underline disabled:opacity-50"
+          >
+            {regenerating ? "Regenerating…" : "Regenerate"}
+          </button>
+        )}
       </div>
       <div className="flex gap-2">
         <input
@@ -49,11 +96,12 @@ function LinkRow({ label, hint, token, accent }: { label: string; hint: string; 
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
+      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   );
 }
 
-export default function ShareModal({ project, onClose }: Props) {
+export default function ShareModal({ project, isOwner, onRegenerate, onClose }: Props) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     if (project) window.addEventListener("keydown", onKey);
@@ -83,13 +131,22 @@ export default function ShareModal({ project, onClose }: Props) {
               hint="can view & modify"
               token={project.edit_token}
               accent="bg-emerald-500"
+              onRegenerate={isOwner ? () => onRegenerate("edit") : undefined}
             />
           )}
-          <LinkRow label="View link" hint="read-only" token={project.view_token} accent="bg-slate-400" />
+          <LinkRow
+            label="View link"
+            hint="read-only"
+            token={project.view_token}
+            accent="bg-slate-400"
+            onRegenerate={isOwner ? () => onRegenerate("view") : undefined}
+          />
         </div>
 
         <p className="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
-          These links are permanent and can&apos;t be revoked — share them only with people you trust.
+          {isOwner
+            ? "Sharing a link grants access to anyone who has it. Regenerate a link to revoke the old one."
+            : "These links can't be revoked from here — share them only with people you trust."}
         </p>
 
         <div className="mt-5 flex justify-end">

@@ -1,6 +1,6 @@
-from typing import Optional
+from typing import Literal, Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.auth import (
@@ -9,10 +9,11 @@ from app.auth import (
     get_optional_user,
     project_access_level,
     require_project_edit,
+    require_project_owner,
     require_project_view,
 )
 from app.db import get_db
-from app.models.models import Project, User
+from app.models.models import Project, User, _new_token
 from app.schemas.schemas import ProjectCreate, ProjectOut, ProjectUpdate
 
 router = APIRouter(prefix="/projects", tags=["projects"])
@@ -97,6 +98,28 @@ def update_project(
     project = require_project_edit(db, project_id, user, x_workspace_token)
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(project, field, value)
+    db.commit()
+    db.refresh(project)
+    return project_out(project, "edit")
+
+
+@router.post("/{project_id}/rotate-token", response_model=ProjectOut)
+def rotate_token(
+    project_id: int,
+    which: Literal["view", "edit"] = Query(..., description="Which share link to regenerate"),
+    user: Optional[User] = Depends(get_optional_user),
+    db: Session = Depends(get_db),
+):
+    """Mint a fresh share token, instantly invalidating the old link of that kind.
+
+    Owner-only: the board owner manages who can reach it. The owner reaches the board
+    through their account, not the token, so rotating never locks them out.
+    """
+    project = require_project_owner(db, project_id, user)
+    if which == "edit":
+        project.edit_token = _new_token()
+    else:
+        project.view_token = _new_token()
     db.commit()
     db.refresh(project)
     return project_out(project, "edit")

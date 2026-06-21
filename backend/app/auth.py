@@ -111,3 +111,16 @@ def require_project_edit(
     if project_access_level(project, user, ws_token) != "edit":
         raise HTTPException(status_code=403, detail="This share link is view-only")
     return project
+
+
+def require_project_owner(db: Session, project_id: int, user: Optional[User]) -> Project:
+    """Require the signed-in account that owns the board.
+
+    Stricter than edit access: a guest holding the edit link can change tasks but
+    can't manage the share links themselves. Guest-created boards (no owner) have
+    nobody who can pass this gate — they're unmanaged by design.
+    """
+    project = _load_project(db, project_id)
+    if user is None or project.owner_user_id != user.id:
+        raise HTTPException(status_code=403, detail="Only the board owner can do this")
+    return project

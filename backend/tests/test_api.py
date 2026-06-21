@@ -219,6 +219,36 @@ def test_view_token_is_read_only(client, project, stub_parser):
     assert blocked.status_code == 403
 
 
+def test_owner_can_rotate_edit_token(client, account):
+    created = client.post("/api/v1/projects", json={"name": "Mine"}, headers=account["headers"]).json()
+    old_edit, old_view = created["edit_token"], created["view_token"]
+
+    rotated = client.post(
+        f"/api/v1/projects/{created['id']}/rotate-token?which=edit",
+        headers=account["headers"],
+    )
+    assert rotated.status_code == 200
+    body = rotated.json()
+    assert body["edit_token"] != old_edit  # new link minted
+    assert body["view_token"] == old_view  # the other link is untouched
+    # The old edit link no longer resolves; the new one does.
+    assert client.get(f"/api/v1/projects/by-token/{old_edit}").status_code == 404
+    assert client.get(f"/api/v1/projects/by-token/{body['edit_token']}").status_code == 200
+
+
+def test_rotate_token_is_owner_only(client, account, project):
+    # A guest holding the edit link (the `project` fixture) cannot rotate it...
+    assert client.post(f"/api/v1/projects/{project['id']}/rotate-token?which=edit").status_code == 403
+    # ...nor can a different signed-in user who doesn't own the board.
+    owned = client.post("/api/v1/projects", json={"name": "Mine"}, headers=account["headers"]).json()
+    other = client.post("/api/v1/auth/signup", json={"email": "other@b.com", "password": "pw"}).json()
+    blocked = client.post(
+        f"/api/v1/projects/{owned['id']}/rotate-token?which=view",
+        headers={"Authorization": f"Bearer {other['token']}"},
+    )
+    assert blocked.status_code == 403
+
+
 def test_no_token_no_access(client):
     # A second, token-less client cannot reach a board it doesn't own.
     pid = client.post("/api/v1/projects", json={"name": "Private"}).json()["id"]

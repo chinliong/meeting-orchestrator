@@ -369,6 +369,15 @@ export default function DashboardPage() {
     }
   };
 
+  // Regenerate one of a board's share links. Owner-only, so we only touch the owned
+  // projects list — and keep the open share dialog in sync with the new token.
+  const handleRotateToken = async (which: "view" | "edit") => {
+    if (!shareProject) return;
+    const updated = await api.rotateProjectToken(shareProject.id, which);
+    setProjects((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+    setShareProject(updated);
+  };
+
   const handleDeleteProject = async () => {
     if (!selectedProjectId) return;
     if (!window.confirm("Delete this project and all its meetings and tasks? This cannot be undone."))
@@ -732,7 +741,12 @@ export default function DashboardPage() {
         onMetaChange={handleTaskMetaChange}
       />
 
-      <ShareModal project={shareProject} onClose={() => setShareProject(null)} />
+      <ShareModal
+        project={shareProject}
+        isOwner={!!user && !!shareProject && shareProject.owner_user_id === user.id}
+        onRegenerate={handleRotateToken}
+        onClose={() => setShareProject(null)}
+      />
 
       {user && (
         <AccountModal

@@ -122,6 +122,10 @@ export const api = {
   updateProject: (id: number, patch: { name?: string; description?: string; notify_enabled?: boolean }) =>
     request<Project>(`/projects/${id}`, { method: "PATCH", body: JSON.stringify(patch) }),
 
+  // Regenerate a share link, invalidating the old one. Owner-only on the server.
+  rotateProjectToken: (id: number, which: "view" | "edit") =>
+    request<Project>(`/projects/${id}/rotate-token?which=${which}`, { method: "POST" }),
+
   deleteProject: (id: number) => request<void>(`/projects/${id}`, { method: "DELETE" }),
 
   // --- tasks ---
