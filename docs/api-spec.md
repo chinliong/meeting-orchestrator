@@ -255,7 +255,8 @@ Meant to be called once a day by an external scheduler rather than a logged-in c
 no bearer/workspace token, so it's protected by a shared secret (`CRON_SECRET`) instead, passed
 as either an `X-Cron-Secret` header or a `?secret=` query param. `503` if `CRON_SECRET` isn't
 configured on the server; `403` if the secret is missing or wrong. `200` `{ "sent": <int> }` on
-success — the number of digest emails sent.
+success — the number of digest emails sent. The reminder window's notion of "today" follows
+`REMINDER_TIMEZONE` (IANA zone, default UTC), so the run time should suit that zone.
 
 ## LLM extraction schema
 

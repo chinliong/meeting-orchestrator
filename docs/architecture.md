@@ -103,7 +103,10 @@ flowchart LR
 - **Database:** PostgreSQL (prod) / SQLite (dev), via SQLAlchemy. Tables: `users`, `projects`,
   `meetings`, `stakeholders`, `tasks`, `subtasks`, `attachments`, `password_resets`. Attachment
   bytes are stored in the `attachments` row (the deploy target has an ephemeral filesystem and no
-  object storage), size-capped in the API.
+  object storage), size-capped in the API. The engine is created with `pool_pre_ping` (and a 5-min
+  `pool_recycle`) because serverless Postgres (Neon) drops idle connections — without it, the first
+  request after the free backend wakes from sleep fails with "SSL connection has been closed
+  unexpectedly"; pre-ping validates and reconnects transparently instead.
 - **LLM provider:** Claude (Anthropic), structured output through a forced `record_extraction` tool.
 
 ## Access model
@@ -128,6 +131,9 @@ flowchart LR
 - Idempotency: `Task.last_notified_for` records the deadline last notified for, so re-running the
   same day, or after the deadline, never double-sends. Rescheduling a task's deadline clears the
   match, re-opening the window.
+- The window is date-based, so "today" is computed in `REMINDER_TIMEZONE` (IANA zone, default UTC).
+  The server clock is UTC, which would otherwise put a reminder a day off for users elsewhere — a
+  task due "Jun 24" with a one-day lead enters its window at 08:00 SGT on Jun 23 under plain UTC.
 - Two ways to trigger a pass: `python -m app.notify_due_tasks` (a CLI script, useful for a local
   cron entry or manual runs) and `GET /internal/notify-due-tasks` (the same logic over HTTP,
   guarded by a shared secret `CRON_SECRET` instead of a user session). The latter is meant for a

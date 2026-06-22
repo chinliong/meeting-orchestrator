@@ -74,7 +74,7 @@ for the full API.
 | LLM | Claude (Anthropic) via `anthropic` SDK, tool-use structured output |
 | Speech-to-text | Whisper — hosted API (OpenAI/Groq) by default, optional local model |
 | Database | SQLite (dev) / PostgreSQL (prod; e.g. Neon) |
-| Deployment | Docker, Render blueprint (frontend + backend) + external Postgres |
+| Deployment | Render blueprint — backend (Docker web service) + frontend (static site) + external Postgres |
 
 ## Access model (accounts, guests, sharing)
 
@@ -162,9 +162,12 @@ the default image; build with `--build-arg INSTALL_AUDIO=true` to include local 
 
 ## Deploy to Render + external Postgres
 
-The blueprint provisions a backend web service and a frontend web service on the free tier. The
-database is an **external Postgres** (e.g. a free [Neon](https://neon.tech) project) referenced by
-`DATABASE_URL`, so it isn't subject to a managed-DB expiry window.
+The blueprint provisions a backend **web service** and a frontend **static site** on the free tier.
+The frontend is client-only, so it exports to static HTML (`output: "export"` → `out/`) served from
+Render's CDN — free, never sleeps, and it doesn't consume instance-hours, which keeps the whole
+750-hour free pool available for the backend. The database is an **external Postgres** (e.g. a free
+[Neon](https://neon.tech) project) referenced by `DATABASE_URL`, so it isn't subject to a managed-DB
+expiry window.
 
 1. Push the repo to GitHub.
 2. In Render: **New → Blueprint**, point at the repo. It reads [render.yaml](render.yaml).
@@ -173,20 +176,28 @@ database is an **external Postgres** (e.g. a free [Neon](https://neon.tech) proj
    - backend `ANTHROPIC_API_KEY` = your key
    - backend `DATABASE_URL` = your Postgres connection string
      (`postgresql://…/<db>?sslmode=require`; `db.py` normalises `postgres://` URLs)
-   - backend `CORS_ORIGINS` = `https://orchestrator-frontend.onrender.com`
+   - backend `CORS_ORIGINS` = the frontend's exact origin, e.g. `https://orchestrator-frontend.onrender.com`
+     (scheme + host only — no trailing slash, no path; defaults to `*` if left unset)
    - frontend `NEXT_PUBLIC_API_BASE` = `https://orchestrator-backend.onrender.com/api/v1`
    - backend `BREVO_API_KEY` + `SMTP_FROM` (optional) = enable password-reset and deadline-reminder
      emails — see "Email delivery" above. **Render's free tier blocks outbound SMTP**, so the
      Brevo HTTPS API is required there; the `SMTP_*` host/port/user/password vars won't work.
 
-   `AUTH_SECRET` and `CRON_SECRET` are generated automatically by the blueprint. `NEXT_PUBLIC_API_BASE`
-   is baked in at build time, so changing it requires a frontend redeploy.
+   `AUTH_SECRET` and `CRON_SECRET` are generated automatically by the blueprint, and
+   `REMINDER_TIMEZONE` is preset to `Asia/Singapore` (the IANA zone the reminder window is measured
+   in — change it to your audience's zone, or unset for UTC). `NEXT_PUBLIC_API_BASE` is baked in at
+   build time, so changing it requires a frontend rebuild.
 4. Apply. The schema is created automatically on first startup against an empty database.
 5. (Optional) To enable automatic deadline reminders, copy the generated `CRON_SECRET` from the
    backend service's Environment tab, then set up a free scheduler like
    [cron-job.org](https://cron-job.org) to hit
    `https://<your-backend>.onrender.com/api/v1/internal/notify-due-tasks?secret=<CRON_SECRET>`
-   once a day.
+   once a day. The reminder window is measured in `REMINDER_TIMEZONE`, so pick a run time that
+   suits that zone. Because the free backend sleeps after ~15 min idle, the daily call would
+   otherwise hit a ~30–50s cold start; add a second cron job pinging `/api/v1/health` every ~10 min
+   to keep it warm. (Free schedulers cap their request timeout near 30s, so a cold first request can
+   show as a failure — a steady keep-alive avoids ever being cold. The static frontend uses no
+   instance-hours, so the backend can stay warm within the free 750h.)
 
 Seeding sample data: Render's web shell is a paid feature, so run the seed from your own machine
 pointed at the deployed database:
@@ -216,7 +227,11 @@ DATABASE_URL="<your Postgres connection string>" python -m app.migrate_reminder_
 To rebuild from scratch instead (drops, recreates, re-seeds — **destructive**), run
 `python -m app.reset_db` against that `DATABASE_URL`.
 
-Note on the free tier: web services spin down after ~15 min idle and cold-start in ~50s.
+Note on the free tier: the **backend** web service spins down after ~15 min idle and cold-starts in
+~30–50s (the static frontend never sleeps). The backend's SQLAlchemy engine uses
+`pool_pre_ping`/`pool_recycle` so a connection that Neon dropped during that idle window reconnects
+transparently, instead of the first request failing with "SSL connection has been closed
+unexpectedly". A `/health` keep-alive (see step 5) avoids the cold start altogether.
 
 ## Tests
 
@@ -255,7 +270,7 @@ This writes `eval/subtask_results.json` and refreshes
 
 ```
 backend/      FastAPI app (api/, llm/, models/, schemas/, auth.py, email.py, notifications.py), tests, Dockerfile
-frontend/     Next.js app (src/app, src/components, src/lib), Dockerfile
+frontend/     Next.js app (src/app, src/components, src/lib); Dockerfile for local compose, Render hosts it as a static export (out/)
 data/         synthetic-transcripts/ (inputs) + annotated-test-set/ (ground truth)
 eval/         evaluation harness + matcher tests
 docs/         architecture, API spec, evaluation report
