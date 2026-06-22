@@ -19,6 +19,10 @@ services:
       # Signing secret for account auth tokens — Render generates a strong random value.
       - key: AUTH_SECRET
         generateValue: true
+      # Timezone for the deadline-reminder window. The server clock is UTC, which can put a
+      # reminder a day off for users elsewhere, so set this to your audience's zone. Unset = UTC.
+      - key: REMINDER_TIMEZONE
+        value: Asia/Singapore
       # Shared secret for GET /internal/notify-due-tasks (the daily deadline-reminder check).
       # Render has no free scheduler and Render Cron Jobs are paid, so point a free external
       # one (e.g. cron-job.org) at that URL once a day with ?secret=<this value>.

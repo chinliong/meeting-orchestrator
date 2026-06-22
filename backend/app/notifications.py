@@ -12,7 +12,9 @@ a task's deadline clears that match, so a rescheduled task gets a fresh reminder
 from __future__ import annotations
 
 import logging
-from datetime import date, timedelta
+import os
+from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from sqlalchemy.orm import Session, selectinload
 
@@ -25,6 +27,25 @@ log = logging.getLogger("uvicorn.error")
 
 class NotificationSendError(RuntimeError):
     """Raised when the email provider itself fails (e.g. Brevo rejects or times out)."""
+
+
+def _reminder_today() -> date:
+    """Today's date for the reminder window, in REMINDER_TIMEZONE if set.
+
+    The window is date-based, so which calendar day "now" falls on decides whether a task is
+    in range. The server clock is UTC, which can be a day off for users elsewhere (a task due
+    "Jun 24" enters its window at 08:00 SGT on Jun 23), so the timezone is configurable, e.g.
+    REMINDER_TIMEZONE=Asia/Singapore. Unset keeps the old behaviour (server/UTC date); an
+    invalid value falls back to it with a warning rather than crashing the daily run.
+    """
+    tz_name = os.getenv("REMINDER_TIMEZONE")
+    if not tz_name:
+        return date.today()
+    try:
+        return datetime.now(ZoneInfo(tz_name)).date()
+    except Exception:
+        log.warning("notifications: invalid REMINDER_TIMEZONE %r; using server date", tz_name)
+        return date.today()
 
 
 def _in_notify_window(today: date, deadline: date, days_before: int) -> bool:
@@ -90,7 +111,7 @@ def send_due_date_notifications(db: Session, today: date | None = None) -> int:
     logged rather than raised — it must not block every other user's reminder, or look like the
     whole job failed. That user's tasks are simply left unmarked and picked up on the next run.
     """
-    today = today or date.today()
+    today = today or _reminder_today()
 
     by_user: dict[int, list[Task]] = {}
     for task in _candidate_tasks(db):
@@ -122,7 +143,7 @@ def send_test_notification(db: Session, user: User) -> int:
     email" button). Ignores `last_notified_for` so it can be re-clicked, and sends even
     when there's nothing currently due — confirming the email channel itself works.
     """
-    today = date.today()
+    today = _reminder_today()
     tasks = [
         task
         for task in _candidate_tasks(db, user_id=user.id)

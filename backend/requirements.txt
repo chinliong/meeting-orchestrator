@@ -10,3 +10,4 @@ psycopg2-binary==2.9.9  # PostgreSQL driver (used in deployment; SQLite needs no
 PyJWT==2.9.0  # signed access tokens for account auth
 passlib[bcrypt]==1.7.4  # password hashing
 bcrypt==4.0.1  # passlib 1.7.4 reads this version cleanly (4.1+ dropped __about__)
+tzdata==2024.1  # IANA tz database for zoneinfo (REMINDER_TIMEZONE); python:slim has no system tzdata
