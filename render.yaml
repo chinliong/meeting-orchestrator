@@ -63,12 +63,15 @@ services:
       - key: SMTP_PASSWORD
         sync: false
 
+  # Static Site (not a web service): the frontend is client-only, so it exports to plain
+  # HTML/JS/CSS and is served from Render's CDN — free, no instance-hours, never sleeps. This
+  # keeps the whole 750 free-hours pool available for the backend's keep-alive.
   - type: web
     name: meeting-orchestrator
-    runtime: docker
-    dockerfilePath: ./frontend/Dockerfile
-    dockerContext: ./frontend
-    plan: free
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: out
     envVars:
       # Baked into the client bundle at BUILD time, so it needs the full backend URL
       # including scheme and the /api/v1 path. Set this after the backend's first deploy,

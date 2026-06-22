@@ -1,4 +1,6 @@
-import { redirect } from "next/navigation";
+"use client";
+
+import { useEffect } from "react";
 
 import LandingContent from "@/components/LandingContent";
 
@@ -8,10 +10,15 @@ import LandingContent from "@/components/LandingContent";
 //
 // The one exception is a share link (/?w=token): that recipient came to open a
 // specific board, so we forward them straight to the app with the token intact,
-// preserving the existing share-link contract.
-export default function Home({ searchParams }: { searchParams: { w?: string } }) {
-  if (searchParams.w) {
-    redirect(`/app?w=${encodeURIComponent(searchParams.w)}`);
-  }
+// preserving the existing share-link contract. The site is statically exported
+// (no server), so this check runs in the browser on mount rather than server-side.
+export default function Home() {
+  useEffect(() => {
+    const token = new URLSearchParams(window.location.search).get("w");
+    if (token) {
+      window.location.replace(`/app?w=${encodeURIComponent(token)}`);
+    }
+  }, []);
+
   return <LandingContent />;
 }
