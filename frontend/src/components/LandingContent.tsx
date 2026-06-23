@@ -1,8 +1,4 @@
-import type { CSSProperties } from "react";
-
 import Link from "next/link";
-
-import ScrollReveal from "@/components/ScrollReveal";
 
 // The marketing landing UI. Rendered both at /landing (direct) and at / for
 // first-time visitors via the entry gate in app/page.tsx.
@@ -49,17 +45,13 @@ function FeatureCard({
   icon,
   title,
   body,
-  delay = 0,
 }: {
   icon: string;
   title: string;
   body: string;
-  delay?: number;
 }) {
   return (
     <div
-      data-reveal
-      style={{ "--reveal-delay": `${delay}ms` } as CSSProperties}
       className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover"
     >
       <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600 ring-1 ring-brand-100">
@@ -76,7 +68,6 @@ function FeatureCard({
 export default function LandingContent() {
   return (
     <div className="min-h-screen">
-      <ScrollReveal />
       {/* ---------- top nav ---------- */}
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5 sm:px-6">
@@ -113,10 +104,7 @@ export default function LandingContent() {
       {/* ---------- hero ---------- */}
       <section className="relative overflow-hidden">
         <div className="mx-auto max-w-6xl px-5 pb-10 pt-16 sm:px-6 sm:pt-24">
-          <div
-            data-reveal
-            className="mx-auto max-w-3xl text-center"
-          >
+          <div className="mx-auto max-w-3xl text-center">
             <h1 className="font-display text-4xl font-bold leading-[1.05] tracking-tight text-slate-900 sm:text-6xl">
               Turn every meeting into a{" "}
               <span className="text-brand-600">tracked action plan</span>.
@@ -147,11 +135,7 @@ export default function LandingContent() {
           </div>
 
           {/* ---------- hero visual: a faux Kanban preview ---------- */}
-          <div
-            data-reveal
-            style={{ "--reveal-delay": "120ms" } as CSSProperties}
-            className="relative mx-auto mt-16 max-w-5xl"
-          >
+          <div className="relative mx-auto mt-16 max-w-5xl">
             <div className="absolute -inset-x-8 -top-8 -z-10 h-64 rounded-full bg-brand-100/40 blur-3xl" />
             <div className="rounded-2xl border border-slate-200 bg-white/90 p-3 shadow-ink backdrop-blur sm:p-4">
               {/* window chrome */}
@@ -164,7 +148,6 @@ export default function LandingContent() {
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <BoardColumn
                   title="To Do"
-                  delay={180}
                   accent="bg-slate-400"
                   cards={[
                     { text: "Finalise data-migration cutover plan", owner: "Priya", due: "Jun 28", late: false },
@@ -173,7 +156,6 @@ export default function LandingContent() {
                 />
                 <BoardColumn
                   title="In Progress"
-                  delay={260}
                   accent="bg-brand-600"
                   cards={[
                     { text: "Draft fallback plan for payroll interface", owner: "Aisha", due: "Jun 24", late: true },
@@ -181,7 +163,6 @@ export default function LandingContent() {
                 />
                 <BoardColumn
                   title="Done"
-                  delay={340}
                   accent="bg-emerald-500"
                   cards={[
                     { text: "Approve revised go-live date", owner: "Steering", due: "Jun 20", late: false, done: true },
@@ -197,9 +178,9 @@ export default function LandingContent() {
       {/* ---------- problem strip ---------- */}
       <section className="border-y border-slate-200 bg-white/60">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-5 py-12 sm:grid-cols-3 sm:px-6">
-          <Stat figure="31 hrs" delay={0} label="lost to unproductive meetings each month, per professional" />
-          <Stat figure="< 50%" delay={90} label="of action items are actually followed through on" />
-          <Stat figure="0 min" delay={180} label="spent writing minutes once the transcript is in" />
+          <Stat figure="31 hrs" label="lost to unproductive meetings each month, per professional" />
+          <Stat figure="< 50%" label="of action items are actually followed through on" />
+          <Stat figure="0 min" label="spent writing minutes once the transcript is in" />
         </div>
       </section>
 
@@ -212,21 +193,18 @@ export default function LandingContent() {
         <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
           <StepCard
             n={1}
-            delay={0}
             icon={ICONS.doc}
             title="Drop in the meeting"
             body="Paste a raw or messy transcript, or upload an audio/video recording and let Whisper transcribe it for you."
           />
           <StepCard
             n={2}
-            delay={120}
             icon={ICONS.bolt}
             title="Let the LLM parse it"
             body="The model extracts key decisions, action items, named owners, and deadlines inferred from contextual cues, returned as clean structured data."
           />
           <StepCard
             n={3}
-            delay={240}
             icon={ICONS.board}
             title="Track it on the board"
             body="Action items appear as cards across To Do, In Progress, and Done. Filter by owner, sort by deadline, and follow up with confidence."
@@ -288,9 +266,8 @@ export default function LandingContent() {
                 title: "Guest or account",
                 body: "Start instantly as a guest, then create an account to sync boards across devices and unlock email reminders.",
               },
-            ].map((f, i) => (
-              // Stagger by column so each row of three ripples in left-to-right.
-              <FeatureCard key={f.title} {...f} delay={(i % 3) * 80} />
+            ].map((f) => (
+              <FeatureCard key={f.title} {...f} />
             ))}
           </div>
         </div>
@@ -309,11 +286,9 @@ export default function LandingContent() {
             "Tailwind CSS",
             "Pydantic",
             "Docker",
-          ].map((t, i) => (
+          ].map((t) => (
             <span
               key={t}
-              data-reveal
-              style={{ "--reveal-delay": `${i * 50}ms` } as CSSProperties}
               className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-card"
             >
               {t}
@@ -324,10 +299,7 @@ export default function LandingContent() {
 
       {/* ---------- final CTA ---------- */}
       <section className="px-5 pb-20 sm:px-6">
-        <div
-          data-reveal
-          className="mx-auto max-w-5xl overflow-hidden rounded-3xl bg-ink px-8 py-14 text-center shadow-ink sm:px-12"
-        >
+        <div className="mx-auto max-w-5xl overflow-hidden rounded-3xl bg-ink px-8 py-14 text-center shadow-ink sm:px-12">
           <h2 className="font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
             Stop chasing action items.
           </h2>
@@ -365,7 +337,7 @@ export default function LandingContent() {
 
 function SectionHeading({ kicker, title }: { kicker: string; title: string }) {
   return (
-    <div data-reveal className="mx-auto max-w-2xl text-center">
+    <div className="mx-auto max-w-2xl text-center">
       <p className="font-display text-sm font-semibold uppercase tracking-wider text-brand-600">{kicker}</p>
       <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{title}</h2>
     </div>
@@ -377,20 +349,14 @@ function StepCard({
   icon,
   title,
   body,
-  delay = 0,
 }: {
   n: number;
   icon: string;
   title: string;
   body: string;
-  delay?: number;
 }) {
   return (
-    <div
-      data-reveal
-      style={{ "--reveal-delay": `${delay}ms` } as CSSProperties}
-      className="relative rounded-2xl border border-slate-200 bg-white p-7 shadow-card"
-    >
+    <div className="relative rounded-2xl border border-slate-200 bg-white p-7 shadow-card">
       <span className="absolute right-6 top-6 font-display text-5xl font-bold text-slate-100">{n}</span>
       <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-ink text-white">
         <Icon path={icon} className="h-6 w-6" />
@@ -401,13 +367,9 @@ function StepCard({
   );
 }
 
-function Stat({ figure, label, delay = 0 }: { figure: string; label: string; delay?: number }) {
+function Stat({ figure, label }: { figure: string; label: string }) {
   return (
-    <div
-      data-reveal
-      style={{ "--reveal-delay": `${delay}ms` } as CSSProperties}
-      className="text-center sm:text-left"
-    >
+    <div className="text-center sm:text-left">
       <p className="font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{figure}</p>
       <p className="mt-1 text-sm leading-relaxed text-slate-500">{label}</p>
     </div>
@@ -420,19 +382,13 @@ function BoardColumn({
   title,
   accent,
   cards,
-  delay = 0,
 }: {
   title: string;
   accent: string;
   cards: Card[];
-  delay?: number;
 }) {
   return (
-    <div
-      data-reveal
-      style={{ "--reveal-delay": `${delay}ms` } as CSSProperties}
-      className="rounded-xl bg-slate-50 p-3"
-    >
+    <div className="rounded-xl bg-slate-50 p-3">
       <div className="mb-2.5 flex items-center gap-2 px-1">
         <span className={`h-2 w-2 rounded-full ${accent}`} />
         <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</span>
