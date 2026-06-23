@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { api } from "@/lib/api";
 import type { AuthResponse } from "@/lib/types";
+import PasswordInput from "@/components/PasswordInput";
 
 interface Props {
   /** Edit tokens of guest boards to carry into a new account on sign-up. */
@@ -180,13 +181,11 @@ export default function AuthGate({ claimTokens, onAuthed, onGuest, allowGuest = 
               placeholder="6-digit code"
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-center text-lg tracking-[0.4em] outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
             />
-            <input
-              type="password"
+            <PasswordInput
               autoComplete="new-password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="New password"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
             />
             {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
             <button
@@ -234,12 +233,11 @@ export default function AuthGate({ claimTokens, onAuthed, onGuest, allowGuest = 
           placeholder="you@example.com"
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
         />
-        <input
-          type="password"
+        <PasswordInput
+          autoComplete={mode === "signup" ? "new-password" : "current-password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
         />
 
         {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import type { Project, User } from "@/lib/types";
+import PasswordInput from "@/components/PasswordInput";
 
 interface Props {
   open: boolean;
@@ -186,29 +187,23 @@ export default function AccountModal({
         {/* --- change password --- */}
         <form onSubmit={handleChangePassword} className="mt-5 space-y-3">
           <h3 className="font-display text-sm font-bold text-slate-900">Change password</h3>
-          <input
-            type="password"
+          <PasswordInput
             autoComplete="current-password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
             placeholder="Current password"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
           />
-          <input
-            type="password"
+          <PasswordInput
             autoComplete="new-password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder="New password"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
           />
-          <input
-            type="password"
+          <PasswordInput
             autoComplete="new-password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Confirm new password"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
           />
 
           {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
