@@ -42,9 +42,10 @@ recordings for end-to-end processing.
   editing affordance on a view-only board.
 - **Optional audio/video input** — upload a recording; it is transcribed with Whisper (a hosted
   Whisper API by default, or a local model) before parsing.
-- **Evaluation harnesses** — scores transcript-extraction quality against an annotated test set
-  and compares prompt variants (see [docs/evaluation-report.md](docs/evaluation-report.md)); a
-  separate LLM-as-judge rubric qualitatively scores the open-ended AI subtask generation.
+- **Evaluation harnesses** — scores transcript-extraction quality against an annotated test set,
+  measured with and without the structured guidance layer
+  (see [docs/evaluation-report.md](docs/evaluation-report.md)); a separate LLM-as-judge rubric
+  qualitatively scores the open-ended AI subtask generation.
 
 ## Architecture
 
@@ -246,25 +247,51 @@ python -m pytest eval/test_matching.py
 
 ## Evaluation
 
+Parsing and scoring are separated: `--parse` calls the model and caches every predicted item to
+`eval/predictions.json`; scoring then reads that cache. Without the split, any change to the
+scoring step also re-samples the model, and on a 33-item test set that noise is larger than most
+effects worth measuring. It also means regenerating the report is free and repeatable.
+
 ```bash
-# from the repo root, with the backend venv active and ANTHROPIC_API_KEY set
-python -m eval.run_eval --write-report
+# from the repo root, with the backend venv active
+python -m eval.run_eval --write-report      # FREE - no API calls, no key needed
 ```
 
-This parses the annotated transcripts in `data/`, scores precision/recall/owner/deadline
-accuracy, compares prompt variants, writes `eval/results.json`, and refreshes
-[docs/evaluation-report.md](docs/evaluation-report.md).
+This scores the cached predictions, writes `eval/results.json`, and refreshes
+[docs/evaluation-report.md](docs/evaluation-report.md). It reports precision / recall / F1, plus
+owner, status and deadline accuracy, for two conditions:
+
+| Condition | System prompt | Tool schema |
+|---|---|---|
+| **Basic** | one-line instruction | shape only, no descriptions |
+| **Improved** | full rules | full field descriptions |
+
+Both emit an identical JSON shape, so only the guidance differs. Predictions are matched to the
+annotated ground truth by two independent matchers — word overlap (deterministic, no model) and
+an LLM judge — and both are reported.
+
+Two flags **do** call the model and need `ANTHROPIC_API_KEY`:
+
+```bash
+python -m eval.run_eval --parse           # add another parse run to the cache
+python -m eval.run_eval --rescore-judge   # recompute the LLM-judge column
+```
+
+The default path prints `Judge scores reused from eval/results.json (no API calls)` to confirm
+nothing was spent. Keep `eval/predictions.json` — without it the report can only be rebuilt by
+re-parsing.
 
 The AI **subtask** generator is open-ended (no single correct breakdown, so no ground truth):
 it's assessed qualitatively with an LLM-as-judge rubric (relevance, actionability, coverage,
 non-redundancy) over a sample of the annotated action items.
 
 ```bash
-python -m eval.subtask_eval --write-report
+python -m eval.subtask_eval --write-report        # calls the model; --limit N for a smaller sample
 ```
 
 This writes `eval/subtask_results.json` and refreshes
-[docs/subtask-evaluation-report.md](docs/subtask-evaluation-report.md).
+[docs/subtask-evaluation-report.md](docs/subtask-evaluation-report.md). Unlike the transcript
+evaluation there is no cache, so every run calls the model twice per task (generate, then judge).
 
 ## Project layout
 
@@ -272,7 +299,7 @@ This writes `eval/subtask_results.json` and refreshes
 backend/      FastAPI app (api/, llm/, models/, schemas/, auth.py, email.py, notifications.py), tests, Dockerfile
 frontend/     Next.js app (src/app, src/components, src/lib); Dockerfile for local compose, Render hosts it as a static export (out/)
 data/         synthetic-transcripts/ (inputs) + annotated-test-set/ (ground truth)
-eval/         evaluation harness + matcher tests
+eval/         evaluation harness, cached predictions (predictions.json), matcher tests
 docs/         architecture, API spec, evaluation report
 render.yaml   Render deployment blueprint
 ```

@@ -1,80 +1,300 @@
-[
-  {
-    "variant": "baseline",
-    "expected_items": 33,
-    "predicted_items": 30,
-    "matched_items": 25,
-    "precision": 0.833,
-    "recall": 0.758,
-    "f1": 0.794,
-    "owner_accuracy": 1.0,
-    "status_accuracy": 0.88,
-    "deadline_exact_accuracy": 0.667,
-    "deadline_within_3d_accuracy": 0.8,
-    "per_transcript": [
-      {
-        "transcript": "finance-workshop-01.txt",
-        "expected": 9,
-        "predicted": 7,
-        "matched": 5
-      },
-      {
-        "transcript": "logistics-workshop-02.txt",
-        "expected": 8,
-        "predicted": 9,
-        "matched": 7
-      },
-      {
-        "transcript": "security-workshop-03.txt",
-        "expected": 8,
-        "predicted": 5,
-        "matched": 5
-      },
-      {
-        "transcript": "data-migration-workshop-04.txt",
-        "expected": 8,
-        "predicted": 9,
-        "matched": 8
-      }
-    ]
+{
+  "runs": 2,
+  "overlap": {
+    "naive": {
+      "runs": [
+        {
+          "expected_items": 33,
+          "predicted_items": 30,
+          "matched_items": 26,
+          "precision": 0.867,
+          "recall": 0.788,
+          "f1": 0.825,
+          "owner_accuracy": 1.0,
+          "status_accuracy": 1.0,
+          "deadline_exact_accuracy": 0.8,
+          "deadline_within_3d_accuracy": 0.933
+        },
+        {
+          "expected_items": 33,
+          "predicted_items": 21,
+          "matched_items": 18,
+          "precision": 0.857,
+          "recall": 0.545,
+          "f1": 0.667,
+          "owner_accuracy": 1.0,
+          "status_accuracy": 0.944,
+          "deadline_exact_accuracy": 0.727,
+          "deadline_within_3d_accuracy": 0.909
+        }
+      ],
+      "precision": 0.862,
+      "recall": 0.667,
+      "f1": 0.746,
+      "owner_accuracy": 1.0,
+      "status_accuracy": 0.972,
+      "deadline_exact_accuracy": 0.764,
+      "deadline_within_3d_accuracy": 0.921,
+      "validation_failures": 1,
+      "parses": 8
+    },
+    "prod": {
+      "runs": [
+        {
+          "expected_items": 33,
+          "predicted_items": 31,
+          "matched_items": 24,
+          "precision": 0.774,
+          "recall": 0.727,
+          "f1": 0.75,
+          "owner_accuracy": 1.0,
+          "status_accuracy": 0.917,
+          "deadline_exact_accuracy": 0.733,
+          "deadline_within_3d_accuracy": 0.8
+        },
+        {
+          "expected_items": 33,
+          "predicted_items": 33,
+          "matched_items": 29,
+          "precision": 0.879,
+          "recall": 0.879,
+          "f1": 0.879,
+          "owner_accuracy": 1.0,
+          "status_accuracy": 0.931,
+          "deadline_exact_accuracy": 0.733,
+          "deadline_within_3d_accuracy": 0.8
+        }
+      ],
+      "precision": 0.827,
+      "recall": 0.803,
+      "f1": 0.815,
+      "owner_accuracy": 1.0,
+      "status_accuracy": 0.924,
+      "deadline_exact_accuracy": 0.733,
+      "deadline_within_3d_accuracy": 0.8,
+      "validation_failures": 0,
+      "parses": 8
+    }
   },
-  {
-    "variant": "prod",
-    "expected_items": 33,
-    "predicted_items": 37,
-    "matched_items": 30,
-    "precision": 0.811,
-    "recall": 0.909,
-    "f1": 0.857,
-    "owner_accuracy": 1.0,
-    "status_accuracy": 0.933,
-    "deadline_exact_accuracy": 0.8,
-    "deadline_within_3d_accuracy": 0.867,
-    "per_transcript": [
-      {
-        "transcript": "finance-workshop-01.txt",
-        "expected": 9,
-        "predicted": 11,
-        "matched": 8
-      },
-      {
-        "transcript": "logistics-workshop-02.txt",
-        "expected": 8,
-        "predicted": 9,
-        "matched": 7
-      },
-      {
-        "transcript": "security-workshop-03.txt",
-        "expected": 8,
-        "predicted": 8,
-        "matched": 7
-      },
-      {
-        "transcript": "data-migration-workshop-04.txt",
-        "expected": 8,
-        "predicted": 9,
-        "matched": 8
-      }
-    ]
+  "judge": {
+    "naive": {
+      "runs": [
+        {
+          "expected_items": 33,
+          "predicted_items": 30,
+          "matched_items": 28,
+          "precision": 0.933,
+          "recall": 0.848,
+          "f1": 0.889,
+          "owner_accuracy": 1.0,
+          "status_accuracy": 1.0,
+          "deadline_exact_accuracy": 0.8,
+          "deadline_within_3d_accuracy": 0.933
+        },
+        {
+          "expected_items": 33,
+          "predicted_items": 21,
+          "matched_items": 20,
+          "precision": 0.952,
+          "recall": 0.606,
+          "f1": 0.741,
+          "owner_accuracy": 1.0,
+          "status_accuracy": 0.95,
+          "deadline_exact_accuracy": 0.727,
+          "deadline_within_3d_accuracy": 0.909
+        }
+      ],
+      "unmatched": [
+        {
+          "transcript": "finance-workshop-01.txt",
+          "predicted": "Chase Wei Lin's office for a response on the month-end timetable.",
+          "closest_annotation": "send the change request for additional consulting days to Wei Lin",
+          "jaccard": 0.143
+        },
+        {
+          "transcript": "data-migration-workshop-04.txt",
+          "predicted": "Confirm and communicate legacy data freeze date (July 20th) to application owners and stakeholders.",
+          "closest_annotation": "clean the material master source data extract",
+          "jaccard": 0.062
+        },
+        {
+          "transcript": "finance-workshop-01.txt",
+          "predicted": "Chase Wei Lin's office for a response on the month-end timetable. (Low urgency this week.)",
+          "closest_annotation": "send the change request for additional consulting days to Wei Lin",
+          "jaccard": 0.118
+        }
+      ],
+      "precision": 0.943,
+      "recall": 0.727,
+      "f1": 0.815,
+      "owner_accuracy": 1.0,
+      "status_accuracy": 0.975,
+      "deadline_exact_accuracy": 0.764,
+      "deadline_within_3d_accuracy": 0.921,
+      "validation_failures": 1,
+      "parses": 8
+    },
+    "schema_only": {
+      "runs": [
+        {
+          "expected_items": 33,
+          "predicted_items": 37,
+          "matched_items": 33,
+          "precision": 0.892,
+          "recall": 1.0,
+          "f1": 0.943,
+          "owner_accuracy": 1.0,
+          "status_accuracy": 0.939,
+          "deadline_exact_accuracy": 0.8,
+          "deadline_within_3d_accuracy": 0.867
+        },
+        {
+          "expected_items": 33,
+          "predicted_items": 33,
+          "matched_items": 30,
+          "precision": 0.909,
+          "recall": 0.909,
+          "f1": 0.909,
+          "owner_accuracy": 1.0,
+          "status_accuracy": 0.933,
+          "deadline_exact_accuracy": 0.733,
+          "deadline_within_3d_accuracy": 0.867
+        }
+      ],
+      "unmatched": [
+        {
+          "transcript": "finance-workshop-01.txt",
+          "predicted": "Draft change request for additional consulting days to cover bank integration rework \u2014 draft completed with justification written up.",
+          "closest_annotation": "send the change request for additional consulting days to Wei Lin",
+          "jaccard": 0.294
+        },
+        {
+          "transcript": "finance-workshop-01.txt",
+          "predicted": "Chase Wei Lin's office for a response on the month-end timetable.",
+          "closest_annotation": "send the change request for additional consulting days to Wei Lin",
+          "jaccard": 0.143
+        },
+        {
+          "transcript": "logistics-workshop-02.txt",
+          "predicted": "Extract WM-to-TMS interface timeout error logs from load testing.",
+          "closest_annotation": "investigate the WM to TMS interface timeout errors",
+          "jaccard": 0.364
+        },
+        {
+          "transcript": "data-migration-workshop-04.txt",
+          "predicted": "Confirm and communicate the legacy data freeze date to application owners and stakeholders.",
+          "closest_annotation": "clean the material master source data extract",
+          "jaccard": 0.071
+        },
+        {
+          "transcript": "finance-workshop-01.txt",
+          "predicted": "Chase Wei Lin's office for a response on the month-end timetable.",
+          "closest_annotation": "send the change request for additional consulting days to Wei Lin",
+          "jaccard": 0.143
+        },
+        {
+          "transcript": "logistics-workshop-02.txt",
+          "predicted": "Extract and review WM/TMS interface logs from the load-testing session.",
+          "closest_annotation": "investigate the WM to TMS interface timeout errors",
+          "jaccard": 0.25
+        },
+        {
+          "transcript": "data-migration-workshop-04.txt",
+          "predicted": "Confirm and communicate the legacy data freeze date (July 20) to application owners and stakeholders.",
+          "closest_annotation": "clean the material master source data extract",
+          "jaccard": 0.062
+        }
+      ],
+      "precision": 0.901,
+      "recall": 0.955,
+      "f1": 0.926,
+      "owner_accuracy": 1.0,
+      "status_accuracy": 0.936,
+      "deadline_exact_accuracy": 0.766,
+      "deadline_within_3d_accuracy": 0.867,
+      "validation_failures": 0,
+      "parses": 8
+    },
+    "prod": {
+      "runs": [
+        {
+          "expected_items": 33,
+          "predicted_items": 31,
+          "matched_items": 27,
+          "precision": 0.871,
+          "recall": 0.818,
+          "f1": 0.844,
+          "owner_accuracy": 1.0,
+          "status_accuracy": 0.926,
+          "deadline_exact_accuracy": 0.733,
+          "deadline_within_3d_accuracy": 0.8
+        },
+        {
+          "expected_items": 33,
+          "predicted_items": 33,
+          "matched_items": 30,
+          "precision": 0.909,
+          "recall": 0.909,
+          "f1": 0.909,
+          "owner_accuracy": 1.0,
+          "status_accuracy": 0.933,
+          "deadline_exact_accuracy": 0.733,
+          "deadline_within_3d_accuracy": 0.8
+        }
+      ],
+      "unmatched": [
+        {
+          "transcript": "finance-workshop-01.txt",
+          "predicted": "Chase Wei Lin's office for a response on the month-end timetable.",
+          "closest_annotation": "send the change request for additional consulting days to Wei Lin",
+          "jaccard": 0.143
+        },
+        {
+          "transcript": "logistics-workshop-02.txt",
+          "predicted": "Analyse extracted WM-to-TMS interface logs to determine whether the timeout errors are a config issue on the SAP side or on the TMS side, and report findings.",
+          "closest_annotation": "investigate the WM to TMS interface timeout errors",
+          "jaccard": 0.294
+        },
+        {
+          "transcript": "logistics-workshop-02.txt",
+          "predicted": "Ensure the WM-TMS timeout analysis findings are placed near the top of Monday's meeting agenda.",
+          "closest_annotation": "investigate the WM to TMS interface timeout errors",
+          "jaccard": 0.2
+        },
+        {
+          "transcript": "data-migration-workshop-04.txt",
+          "predicted": "Confirm and communicate the legacy data freeze date (July 20) to all application owners.",
+          "closest_annotation": "clean the material master source data extract",
+          "jaccard": 0.062
+        },
+        {
+          "transcript": "finance-workshop-01.txt",
+          "predicted": "Chase Wei Lin's office for a response on the month-end timetable.",
+          "closest_annotation": "send the change request for additional consulting days to Wei Lin",
+          "jaccard": 0.143
+        },
+        {
+          "transcript": "logistics-workshop-02.txt",
+          "predicted": "Analyse extracted WM-to-TMS interface logs to diagnose intermittent timeout errors and report findings.",
+          "closest_annotation": "investigate the WM to TMS interface timeout errors",
+          "jaccard": 0.385
+        },
+        {
+          "transcript": "data-migration-workshop-04.txt",
+          "predicted": "Confirm and communicate the legacy data freeze date (July 20, 2026) to application owners.",
+          "closest_annotation": "clean the material master source data extract",
+          "jaccard": 0.062
+        }
+      ],
+      "precision": 0.89,
+      "recall": 0.863,
+      "f1": 0.877,
+      "owner_accuracy": 1.0,
+      "status_accuracy": 0.929,
+      "deadline_exact_accuracy": 0.733,
+      "deadline_within_3d_accuracy": 0.8,
+      "validation_failures": 0,
+      "parses": 8
+    }
   }
-]
+}
