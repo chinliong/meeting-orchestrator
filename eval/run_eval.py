@@ -1212,7 +1212,8 @@ def main() -> None:
                     help="COSTS ANTHROPIC API CALLS. Re-run the LLM-judge matcher. Without this, "
                          "stored judge scores are reused and missing ones are left blank.")
     ap.add_argument("--write-report", action="store_true",
-                    help="Refresh docs/evaluation-report.md.")
+                    help="Refresh docs/evaluation-report.md (short) and "
+                         "docs/evaluation-appendix.md (detail). Free - no API calls.")
     args = ap.parse_args()
 
     annotations = json.loads(ANNOTATIONS.read_text())
