@@ -1,5 +1,5 @@
 {
-  "runs": 2,
+  "runs": 10,
   "overlap": {
     "naive": {
       "runs": [
@@ -36,7 +36,9 @@
       "deadline_exact_accuracy": 0.764,
       "deadline_within_3d_accuracy": 0.921,
       "validation_failures": 1,
-      "parses": 8
+      "api_failures": 0,
+      "parses": 8,
+      "n_runs": 2
     },
     "prod": {
       "runs": [
@@ -73,7 +75,189 @@
       "deadline_exact_accuracy": 0.733,
       "deadline_within_3d_accuracy": 0.8,
       "validation_failures": 0,
-      "parses": 8
+      "api_failures": 0,
+      "parses": 8,
+      "n_runs": 2
+    },
+    "gemini_naive": {
+      "runs": [
+        {
+          "expected_items": 33,
+          "predicted_items": 35,
+          "matched_items": 33,
+          "precision": 0.943,
+          "recall": 1.0,
+          "f1": 0.971,
+          "owner_accuracy": 1.0,
+          "status_accuracy": 0.97,
+          "deadline_exact_accuracy": 0.933,
+          "deadline_within_3d_accuracy": 0.933
+        },
+        {
+          "expected_items": 33,
+          "predicted_items": 27,
+          "matched_items": 25,
+          "precision": 0.926,
+          "recall": 0.758,
+          "f1": 0.833,
+          "owner_accuracy": 1.0,
+          "status_accuracy": 1.0,
+          "deadline_exact_accuracy": 1.0,
+          "deadline_within_3d_accuracy": 1.0
+        }
+      ],
+      "precision": 0.934,
+      "recall": 0.879,
+      "f1": 0.902,
+      "owner_accuracy": 1.0,
+      "status_accuracy": 0.985,
+      "deadline_exact_accuracy": 0.967,
+      "deadline_within_3d_accuracy": 0.967,
+      "validation_failures": 1,
+      "api_failures": 0,
+      "parses": 8,
+      "n_runs": 2
+    },
+    "gemini_prod": {
+      "runs": [
+        {
+          "expected_items": 33,
+          "predicted_items": 37,
+          "matched_items": 30,
+          "precision": 0.811,
+          "recall": 0.909,
+          "f1": 0.857,
+          "owner_accuracy": 0.967,
+          "status_accuracy": 0.967,
+          "deadline_exact_accuracy": 0.867,
+          "deadline_within_3d_accuracy": 0.867
+        },
+        {
+          "expected_items": 33,
+          "predicted_items": 35,
+          "matched_items": 31,
+          "precision": 0.886,
+          "recall": 0.939,
+          "f1": 0.912,
+          "owner_accuracy": 0.968,
+          "status_accuracy": 0.968,
+          "deadline_exact_accuracy": 0.867,
+          "deadline_within_3d_accuracy": 0.867
+        }
+      ],
+      "precision": 0.849,
+      "recall": 0.924,
+      "f1": 0.885,
+      "owner_accuracy": 0.968,
+      "status_accuracy": 0.968,
+      "deadline_exact_accuracy": 0.867,
+      "deadline_within_3d_accuracy": 0.867,
+      "validation_failures": 0,
+      "api_failures": 0,
+      "parses": 8,
+      "n_runs": 2
+    },
+    "haiku_prod": {
+      "runs": [
+        {
+          "expected_items": 33,
+          "predicted_items": 27,
+          "matched_items": 24,
+          "precision": 0.889,
+          "recall": 0.727,
+          "f1": 0.8,
+          "owner_accuracy": 1.0,
+          "status_accuracy": 0.875,
+          "deadline_exact_accuracy": 0.231,
+          "deadline_within_3d_accuracy": 0.923
+        },
+        {
+          "expected_items": 33,
+          "predicted_items": 25,
+          "matched_items": 23,
+          "precision": 0.92,
+          "recall": 0.697,
+          "f1": 0.793,
+          "owner_accuracy": 1.0,
+          "status_accuracy": 0.913,
+          "deadline_exact_accuracy": 0.357,
+          "deadline_within_3d_accuracy": 0.857
+        },
+        {
+          "expected_items": 33,
+          "predicted_items": 22,
+          "matched_items": 21,
+          "precision": 0.955,
+          "recall": 0.636,
+          "f1": 0.764,
+          "owner_accuracy": 1.0,
+          "status_accuracy": 0.952,
+          "deadline_exact_accuracy": 0.308,
+          "deadline_within_3d_accuracy": 0.846
+        }
+      ],
+      "precision": 0.921,
+      "recall": 0.687,
+      "f1": 0.786,
+      "owner_accuracy": 1.0,
+      "status_accuracy": 0.913,
+      "deadline_exact_accuracy": 0.299,
+      "deadline_within_3d_accuracy": 0.875,
+      "validation_failures": 0,
+      "api_failures": 0,
+      "parses": 12,
+      "n_runs": 3
+    },
+    "mistral_prod": {
+      "runs": [
+        {
+          "expected_items": 33,
+          "predicted_items": 22,
+          "matched_items": 22,
+          "precision": 1.0,
+          "recall": 0.667,
+          "f1": 0.8,
+          "owner_accuracy": 0.955,
+          "status_accuracy": 0.955,
+          "deadline_exact_accuracy": 0.714,
+          "deadline_within_3d_accuracy": 1.0
+        },
+        {
+          "expected_items": 33,
+          "predicted_items": 21,
+          "matched_items": 21,
+          "precision": 1.0,
+          "recall": 0.636,
+          "f1": 0.778,
+          "owner_accuracy": 0.952,
+          "status_accuracy": 0.952,
+          "deadline_exact_accuracy": 0.929,
+          "deadline_within_3d_accuracy": 1.0
+        },
+        {
+          "expected_items": 33,
+          "predicted_items": 21,
+          "matched_items": 21,
+          "precision": 1.0,
+          "recall": 0.636,
+          "f1": 0.778,
+          "owner_accuracy": 1.0,
+          "status_accuracy": 0.905,
+          "deadline_exact_accuracy": 0.714,
+          "deadline_within_3d_accuracy": 1.0
+        }
+      ],
+      "precision": 1.0,
+      "recall": 0.646,
+      "f1": 0.785,
+      "owner_accuracy": 0.969,
+      "status_accuracy": 0.937,
+      "deadline_exact_accuracy": 0.786,
+      "deadline_within_3d_accuracy": 1.0,
+      "validation_failures": 0,
+      "api_failures": 0,
+      "parses": 12,
+      "n_runs": 3
     }
   },
   "judge": {
@@ -132,87 +316,6 @@
       "deadline_exact_accuracy": 0.764,
       "deadline_within_3d_accuracy": 0.921,
       "validation_failures": 1,
-      "parses": 8
-    },
-    "schema_only": {
-      "runs": [
-        {
-          "expected_items": 33,
-          "predicted_items": 37,
-          "matched_items": 33,
-          "precision": 0.892,
-          "recall": 1.0,
-          "f1": 0.943,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.939,
-          "deadline_exact_accuracy": 0.8,
-          "deadline_within_3d_accuracy": 0.867
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 33,
-          "matched_items": 30,
-          "precision": 0.909,
-          "recall": 0.909,
-          "f1": 0.909,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.933,
-          "deadline_exact_accuracy": 0.733,
-          "deadline_within_3d_accuracy": 0.867
-        }
-      ],
-      "unmatched": [
-        {
-          "transcript": "finance-workshop-01.txt",
-          "predicted": "Draft change request for additional consulting days to cover bank integration rework \u2014 draft completed with justification written up.",
-          "closest_annotation": "send the change request for additional consulting days to Wei Lin",
-          "jaccard": 0.294
-        },
-        {
-          "transcript": "finance-workshop-01.txt",
-          "predicted": "Chase Wei Lin's office for a response on the month-end timetable.",
-          "closest_annotation": "send the change request for additional consulting days to Wei Lin",
-          "jaccard": 0.143
-        },
-        {
-          "transcript": "logistics-workshop-02.txt",
-          "predicted": "Extract WM-to-TMS interface timeout error logs from load testing.",
-          "closest_annotation": "investigate the WM to TMS interface timeout errors",
-          "jaccard": 0.364
-        },
-        {
-          "transcript": "data-migration-workshop-04.txt",
-          "predicted": "Confirm and communicate the legacy data freeze date to application owners and stakeholders.",
-          "closest_annotation": "clean the material master source data extract",
-          "jaccard": 0.071
-        },
-        {
-          "transcript": "finance-workshop-01.txt",
-          "predicted": "Chase Wei Lin's office for a response on the month-end timetable.",
-          "closest_annotation": "send the change request for additional consulting days to Wei Lin",
-          "jaccard": 0.143
-        },
-        {
-          "transcript": "logistics-workshop-02.txt",
-          "predicted": "Extract and review WM/TMS interface logs from the load-testing session.",
-          "closest_annotation": "investigate the WM to TMS interface timeout errors",
-          "jaccard": 0.25
-        },
-        {
-          "transcript": "data-migration-workshop-04.txt",
-          "predicted": "Confirm and communicate the legacy data freeze date (July 20) to application owners and stakeholders.",
-          "closest_annotation": "clean the material master source data extract",
-          "jaccard": 0.062
-        }
-      ],
-      "precision": 0.901,
-      "recall": 0.955,
-      "f1": 0.926,
-      "owner_accuracy": 1.0,
-      "status_accuracy": 0.936,
-      "deadline_exact_accuracy": 0.766,
-      "deadline_within_3d_accuracy": 0.867,
-      "validation_failures": 0,
       "parses": 8
     },
     "prod": {

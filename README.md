@@ -241,8 +241,8 @@ cd backend
 pip install -r requirements-dev.txt
 python -m pytest tests/            # API + parser unit tests (LLM mocked)
 
-# from the repo root, eval matcher unit tests:
-python -m pytest eval/test_matching.py
+# from the repo root, eval matcher + provider-schema unit tests (no API calls):
+python -m pytest eval/
 ```
 
 ## Evaluation
@@ -257,29 +257,58 @@ effects worth measuring. It also means regenerating the report is free and repea
 python -m eval.run_eval --write-report      # FREE - no API calls, no key needed
 ```
 
-This scores the cached predictions, writes `eval/results.json`, and refreshes
-[docs/evaluation-report.md](docs/evaluation-report.md). It reports precision / recall / F1, plus
-owner, status and deadline accuracy, for two conditions:
+This scores the cached predictions, writes `eval/results.json`, and refreshes **two** documents:
 
-| Condition | System prompt | Tool schema |
+- **[docs/evaluation-report.md](docs/evaluation-report.md)** — the findings and the
+  recommendation, two tables, readable in a couple of minutes. Start here.
+- **[docs/evaluation-appendix.md](docs/evaluation-appendix.md)** — full methodology, every
+  condition's precision / recall / F1, the confounds, and the corrections.
+
+Both are generated from the same cached predictions, so they cannot disagree.
+
+It answers **two** questions with two sets of conditions.
+
+**1. Does the guidance layer help?** A 2×2 — guidance level crossed with model family:
+
+| | Basic guidance | Improved guidance |
 |---|---|---|
-| **Basic** | one-line instruction | shape only, no descriptions |
-| **Improved** | full rules | full field descriptions |
+| | one-line prompt, shape-only schema | full prompt rules, fully described schema |
+| **Claude Sonnet** (`CLAUDE_MODEL`) | `naive` | `prod` — what ships |
+| **Gemini Flash** (`GEMINI_MODEL`) | `gemini_naive` | `gemini_prod` |
 
-Both emit an identical JSON shape, so only the guidance differs. Predictions are matched to the
-annotated ground truth by two independent matchers — word overlap (deterministic, no model) and
-an LLM judge — and both are reported.
+Within a model the two arms differ *only* in guidance text — identical fields, types, enum and
+required list. The second model is there because the guidance effect on Claude alone is smaller
+than the run-to-run spread.
 
-Two flags **do** call the model and need `ANTHROPIC_API_KEY`:
+> These two rows are **not** a provider ranking — the cached models are a generation apart. Only
+> the within-model Basic/Improved contrast is a fair comparison.
+
+**2. Which model should the project use?** Claude Haiku, Gemini Flash and Mistral Small on the
+shipped config only (`haiku_prod`, `gemini_prod`, `mistral_prod`). Tier-matched — all three are
+the small/fast tier of their family — so it compares vendors rather than model size. Sonnet is
+excluded for that reason.
+
+Predictions are matched to the annotated ground truth by two independent matchers — word overlap
+(deterministic, no model) and an LLM judge — and both are reported.
+
+`--parse` runs one model group at a time. Only `claude` and `haiku` **spend Anthropic credit**:
 
 ```bash
-python -m eval.run_eval --parse           # add another parse run to the cache
-python -m eval.run_eval --rescore-judge   # recompute the LLM-judge column
+python -m eval.run_eval --parse --provider gemini  --runs 3   # free (20 req/day/model)
+python -m eval.run_eval --parse --provider mistral --runs 3   # free tier
+python -m eval.run_eval --parse --provider haiku   --runs 3   # ~$0.04/run
+python -m eval.run_eval --parse --provider claude  --runs 1   # Sonnet 2x2
+python -m eval.run_eval --rescore-judge                       # LLM-judge column
 ```
 
-The default path prints `Judge scores reused from eval/results.json (no API calls)` to confirm
-nothing was spent. Keep `eval/predictions.json` — without it the report can only be rebuilt by
-re-parsing.
+Gemini and Mistral need `GEMINI_API_KEY` / `MISTRAL_API_KEY` in `backend/.env`.
+
+Because each run holds one group, adding runs for a free model cannot disturb another model's
+cached figures. Judge scores are cached **per condition** for the same reason — conditions
+without them print as `-` until `--rescore-judge` is passed. Requests that never completed (rate
+limit, capacity) are recorded as API failures and excluded from scoring, so an exhausted quota is
+never counted as the model failing to find items. Each run records which model produced it. Keep
+`eval/predictions.json` — without it the report can only be rebuilt by re-parsing.
 
 The AI **subtask** generator is open-ended (no single correct breakdown, so no ground truth):
 it's assessed qualitatively with an LLM-as-judge rubric (relevance, actionability, coverage,
