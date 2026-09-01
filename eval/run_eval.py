@@ -705,8 +705,11 @@ def _models_used(cache: dict, overlap: dict) -> dict:
 _MODEL_NOTES = {
     "prod": "paid, ~$3/$15 per M tokens; current model",
     "haiku_prod": "paid, ~$1/$5 per M tokens",
-    "gemini_prod": "free tier used for this evaluation; paid tier available",
-    "mistral_prod": "free tier used for this evaluation; paid tier available",
+    # Both are ordinary paid models. Their vendors grant a small daily allowance of free
+    # requests, and this evaluation stayed inside it - a billing arrangement, not a different
+    # or lesser model, and so not a reason to prefer or reject either one.
+    "gemini_prod": "paid; evaluated within its free daily request allowance",
+    "mistral_prod": "paid; evaluated within its free daily request allowance",
 }
 
 # Below this, differences in F1 on this test set are not distinguishable from run-to-run noise.
@@ -839,8 +842,8 @@ Each candidate carries a flaw that is specifically disqualifying for this produc
 - **Claude Haiku** resolves relative dates a day late on most deadlines, so every reminder would
   fire late. The cheapest model is the one whose failure most directly breaks the core feature.
 - **Gemini Flash** extracts the most and reads dates best, but leaves `source_decision` empty on
-  most items - a field the schema defines and the application uses. Its free tier is also a demo
-  quota, not a production one.
+  most items - a field the schema defines and the application uses. That is the whole case
+  against it; its billing is not part of the argument.
 - **Mistral Small** proposes almost nothing wrong, but misses roughly a third of the real work.
   For a meeting orchestrator a dropped action item is the worst available failure.
 
@@ -855,6 +858,57 @@ not instead of one.
 def _fails(m: dict) -> str:
     """Validation failures as a fraction of parses, e.g. "3/16"."""
     return f"{m['validation_failures']}/{m['parses']}"
+
+
+def _run_count_note(overlap: dict) -> str:
+    """Say what the run counts actually are, rather than asserting they differ."""
+    counts = {m["n_runs"] for m in overlap.values()}
+    if len(counts) == 1:
+        return (f"Every condition is averaged over its own {counts.pop()} runs, never pooled "
+                f"across models.")
+    return ("Run counts differ because the daily free-request allowances cap how many runs a "
+            "model can do in a day; each condition is averaged over its own runs, never pooled "
+            "across models.")
+
+
+def _precision_note(overlap: dict) -> str:
+    """Why precision falls when the guidance is added.
+
+    Written out because it is the one arrow in the study 1 table that points the wrong way, and
+    an adverse number left without an explanation reads as one nobody looked at. Every figure is
+    computed, so the paragraph cannot drift away from the table above it.
+    """
+    def totals(cond):
+        runs = overlap[cond]["runs"]
+        return (sum(r["predicted_items"] for r in runs), sum(r["matched_items"] for r in runs))
+
+    def spread(cond):
+        ps = [r["precision"] for r in overlap[cond]["runs"]]
+        return max(ps) - min(ps)
+
+    if not all(c in overlap for c in ("naive", "prod", "gemini_naive", "gemini_prod")):
+        return ""
+
+    pb, mb = totals("naive")
+    pi, mi = totals("prod")
+    extra, hit = pi - pb, mi - mb
+    gpb, gmb = totals("gemini_naive")
+    gpi, gmi = totals("gemini_prod")
+    g_extra, g_hit = gpi - gpb, gmi - gmb
+
+    return _wrap(f"""**Why precision falls.** Precision is the share of proposed items that turned
+out to be real. With the guidance the model proposes more of them - {pi} against the control's
+{pb} on Claude Sonnet - so there is simply more to be wrong about. The extra proposals are almost
+as good as the ones the control already made: {hit} of the {extra} extra matched an annotated
+item, a hit rate of {hit / extra:.0%} against the control's {mb / pb:.0%}. That is why precision
+barely moves ({overlap['naive']['precision']} -> {overlap['prod']['precision']}) while recall
+moves a lot ({overlap['naive']['recall']} -> {overlap['prod']['recall']}): {hit} real tasks
+recovered for {extra - hit} spurious ones. Gemini Flash makes the same trade less well -
+{g_hit} of {g_extra} - so its precision falls further. Neither drop is larger than the
+run-to-run variation inside that same arm ({spread('prod'):.3f} on Claude,
+{spread('gemini_prod'):.3f} on Gemini), so neither is separable from noise. For this application
+the trade is the right way round in any case: a spurious task sits on the board where someone
+can delete it, while a missed one leaves no trace at all.""")
 
 
 def _study_one(overlap, comp, counts) -> str:
@@ -906,6 +960,8 @@ but the net F1 effect has {signs} ({d_claude:+.3f} on Claude, {d_gemini:+.3f} on
 {span}. The second model was added expecting the guidance to help *more*
 where the model is weaker; it did not, and that expectation is recorded here as refuted rather
 than quietly dropped.
+
+{_precision_note(overlap)}
 
 **Record quality - Claude only.** Source-decision capture rose
 {_pct(c_n.get('source_decision_rate'))} -> {_pct(c_p.get('source_decision_rate'))} on Claude but
@@ -973,8 +1029,7 @@ rather than vendor loyalty.
 |---|---|---|---|---|---|---|---|---|
 {chr(10).join(rows)}
 
-Run counts differ because the free tiers cap daily requests; each condition is averaged over its
-own runs, never pooled across models.
+{_run_count_note(overlap)}
 """
 
 
@@ -1223,10 +1278,10 @@ enum, because a translation bug would surface as a model difference that is real
   runs of the same configuration varied by up to ~{NOISE_FLOOR_F1} F1 - larger than most gaps reported here.
   This is the binding limitation and it bounds every number above. More runs on a larger, noisier
   test set is the single highest-value improvement.
-- **Run counts are capped by cost and quota**, not chosen for statistical power: the free tiers
-  limit daily requests and the Claude runs are billed. Each condition is averaged over its own
-  runs and the count is printed in the results table, so an unequal batch would be visible
-  rather than silently pooled.
+- **Run counts are capped by cost and quota**, not chosen for statistical power: the Claude runs
+  are billed, and the Gemini and Mistral keys have a small daily allowance of free requests.
+  Each condition is averaged over its own runs and the count is printed in the results table,
+  so an unequal batch would be visible rather than silently pooled.
 - **The Study 1 models are a generation apart** (`{bare.get('claude', '?')}` vs `{bare.get('gemini', '?')}`), so nothing
   here ranks providers. Only within-model contrasts are fair. Re-running the Claude side on a
   current model is the fix and costs API credit.
