@@ -7,14 +7,14 @@ _Summary and recommendation: [evaluation-report.md](evaluation-report.md)._
 
 1. **The described schema eliminates malformed output.** The shape-only schema returned
    responses that failed validation; the described schema never did, on either model (Claude
-   Sonnet 2/16 -> 0/16; Gemini Flash 3/16 -> 0/16). This is the best-supported result here - it
+   Sonnet 3/16 -> 0/16; Gemini Flash 3/16 -> 0/16). This is the best-supported result here - it
    replicated across two independent model families - and it is a qualitative failure: there is
    no record at all to score.
 
-2. **The guidance does not measurably change extraction accuracy.** The F1 delta is +0.076 on
-   Claude and +0.042 on Gemini - opposite signs, both far inside the ~0.15 run-to-run spread.
-   What does move consistently is the trade: recall up, precision down, on both models. Any
-   claim of an accuracy gain would need a larger test set than this one.
+2. **The guidance does not measurably change extraction accuracy.** The F1 delta is +0.115 on
+   Claude and +0.042 on Gemini - the same sign on both models, both smaller than the ~0.15 run-
+   to-run spread. What does move consistently is the trade: recall up, precision down, on both
+   models. Any claim of an accuracy gain would need a larger test set than this one.
 
 3. **Claude Haiku has a systematic date bias.** 52% of its deadlines land exactly +1 day from
    the annotated one - no other model produces that offset once. Unlike the F1 differences, this
@@ -29,7 +29,7 @@ would be reporting noise. What it does resolve is how each one *fails*:
 
 | Model | Recall | Deadlines exact | `source_decision` | Cost |
 |---|---|---|---|---|
-| Claude Sonnet | 0.826 | 45/60 | 81% | paid, ~$3/$15 per M tokens; current model |
+| Claude Sonnet | 0.848 | 46/60 | 82% | paid, ~$3/$15 per M tokens; current model |
 | Claude Haiku | 0.705 | 17/54 | 95% | paid, ~$1/$5 per M tokens |
 | Gemini Flash | 0.947 | 54/60 | 19% | free tier used for this evaluation; paid tier available |
 | Mistral Small | 0.644 | 42/56 | 47% | free tier used for this evaluation; paid tier available |
@@ -83,8 +83,8 @@ translation.
 
 | Condition | Runs | Precision | Recall | F1 | Validation failures | `source_decision` | Owner |
 |---|---|---|---|---|---|---|---|
-| Basic (Claude Sonnet) | 4 | 0.856 | 0.682 | 0.755 | 2/16 | 46% | 90/90 (1.00) |
-| **Improved (Claude Sonnet)** | 4 | 0.837 | 0.826 | **0.831** | 0/16 | 81% | 108/109 (0.99) |
+| Basic (Claude Sonnet) | 4 | 0.849 | 0.644 | 0.73 | 3/16 | 53% | 85/85 (1.00) |
+| **Improved (Claude Sonnet)** | 4 | 0.842 | 0.848 | **0.845** | 0/16 | 82% | 110/112 (0.98) |
 | Basic (Gemini Flash) | 4 | 0.93 | 0.819 | 0.867 | 3/16 | 16% | 108/108 (1.00) |
 | **Improved (Gemini Flash)** | 4 | 0.875 | 0.947 | **0.909** | 0/16 | 19% | 121/125 (0.97) |
 
@@ -93,15 +93,15 @@ both models; the described schema never did on either. Two unrelated model famil
 same way, and being fixed the same way, is the strongest evidence here.
 
 **Accuracy - not established.** The guidance raises recall and lowers precision on both models,
-but the net F1 effect has opposite signs (+0.076 on Claude, +0.042 on Gemini) and both sit
-inside the noise. The second model was added expecting the guidance to help *more* where the
-model is weaker; it did not, and that expectation is recorded here as refuted rather than
-quietly dropped.
+but the net F1 effect has the same sign on both models (+0.115 on Claude, +0.042 on Gemini),
+both smaller than the ~0.15 run-to-run spread. The second model was added expecting the guidance
+to help *more* where the model is weaker; it did not, and that expectation is recorded here as
+refuted rather than quietly dropped.
 
-**Record quality - Claude only.** Source-decision capture rose 46% -> 81% on Claude but only 16%
+**Record quality - Claude only.** Source-decision capture rose 53% -> 82% on Claude but only 16%
 -> 19% on Gemini. The schema asks both models for the same field; only Claude acts on it. Claude
-also varies its confidence score as instructed (0.75-0.99, 12 distinct values) where the control
-emits a near-constant one (0.9-1.0, 6 values) that cannot be filtered on.
+also varies its confidence score as instructed (0.75-0.99, 11 distinct values) where the control
+emits a near-constant one (0.8-1.0, 7 values) that cannot be filtered on.
 
 > These two models are a generation apart, so rows are comparable *within* a model but not
 > *across* one - a cross-model gap here would measure release date as much as capability.
@@ -120,7 +120,7 @@ rather than vendor loyalty.
 
 | Model | Model id | Runs | Precision | Recall | F1 | Validation failures | `source_decision` | Status |
 |---|---|---|---|---|---|---|---|---|
-| Claude Sonnet | `claude-sonnet-4-6` | 4 | 0.837 | 0.826 | **0.831** | 0/16 | 81% | 100/109 (0.92) |
+| Claude Sonnet | `claude-sonnet-4-6` | 4 | 0.842 | 0.848 | **0.845** | 0/16 | 82% | 103/112 (0.92) |
 | Claude Haiku | `claude-haiku-4-5` | 4 | 0.931 | 0.705 | **0.801** | 0/16 | 95% | 85/93 (0.91) |
 | Gemini Flash | `gemini-3.6-flash` | 4 | 0.875 | 0.947 | **0.909** | 0/16 | 19% | 122/125 (0.98) |
 | Mistral Small | `mistral-small-2603` | 4 | 1.0 | 0.644 | **0.784** | 0/16 | 47% | 79/85 (0.93) |
@@ -136,11 +136,10 @@ bug a prompt could fix, and it shifts every reminder this product sends.
 
 | Model | Deadlines scored | Exact | Most common error |
 |---|---|---|---|
-| Claude Sonnet | 60 | 45/60 (75%) | -7 day (10%) |
+| Claude Sonnet | 60 | 46/60 (77%) | -7 day (10%) |
 | Claude Haiku | 54 | 17/54 (31%) | +1 day (52%) |
 | Gemini Flash | 60 | 54/60 (90%) | -7 day (5%) |
 | Mistral Small | 56 | 42/56 (75%) | -2 day (12%) |
-| Claude Sonnet | 60 | 45/60 (75%) | -7 day (10%) |
 
 **Claude Haiku is systematically biased, not confused.** 52% of its matched deadlines land
 exactly +1 day from the annotated one - it resolves relative cues ("by Friday", "end of next

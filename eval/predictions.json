@@ -3,273 +3,9 @@
   "runs": [
     {
       "validation_failures": {
-        "naive": 0,
-        "schema_only": 0,
-        "prod": 0
+        "schema_only": 0
       },
       "conditions": {
-        "naive": [
-          {
-            "transcript_file": "finance-workshop-01.txt",
-            "predicted": [
-              {
-                "description": "Complete APAC cost center hierarchy mapping (approximately two-thirds done; final third is blocked on cost center codes from Priya).",
-                "owner": "Daniel Tan",
-                "deadline": "2026-06-19",
-                "status": "in_progress",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Compile and send new cost center codes to Daniel Tan to unblock the final third of APAC mapping.",
-                "owner": "Priya Nair",
-                "deadline": "2026-06-17",
-                "status": "todo",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Loop in the banking team and get them onto next week's call to confirm the real MT940 bank statement format, unblocking the parser config fix.",
-                "owner": "Aisha Rahman",
-                "deadline": "2026-06-22",
-                "status": "todo",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Complete and finalize the MT940 parser configuration fix in the dev system (currently half-built; stalled pending banking team format confirmation).",
-                "owner": "Daniel Tan",
-                "deadline": null,
-                "status": "in_progress",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Clear the eleven identified duplicate postings from the system before the dress rehearsal.",
-                "owner": "Priya Nair",
-                "deadline": "2026-06-25",
-                "status": "todo",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Send the drafted change request for additional consulting days (driven by bank integration rework) to Wei Lin's office for approval.",
-                "owner": "Daniel Tan",
-                "deadline": "2026-06-18",
-                "status": "todo",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Chase Wei Lin's office for a response on the month-end timetable.",
-                "owner": "Priya Nair",
-                "deadline": null,
-                "status": "todo",
-                "confidence": 0.9,
-                "source_decision": null
-              }
-            ]
-          },
-          {
-            "transcript_file": "logistics-workshop-02.txt",
-            "predicted": [
-              {
-                "description": "Chase the barcode scanner firmware vendor to obtain a firm patch release date.",
-                "owner": "Marcus Wong",
-                "deadline": "2026-06-19",
-                "status": "todo",
-                "confidence": 0.99,
-                "source_decision": "Decision to run readiness test in degraded mode until firmware patch lands; need a firm date to plan around."
-              },
-              {
-                "description": "Draft a one-page risk note on the barcode scanner delay for the steering committee.",
-                "owner": "Marcus Wong",
-                "deadline": "2026-06-22",
-                "status": "todo",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Reconfigure the test environment for degraded-mode operation (manual entry instead of barcode scanning) in preparation for the readiness test.",
-                "owner": "Marcus Wong",
-                "deadline": "2026-06-17",
-                "status": "in_progress",
-                "confidence": 0.99,
-                "source_decision": "Decision to run readiness test in degraded mode."
-              },
-              {
-                "description": "Analyse the extracted WM-to-TMS interface timeout logs to determine whether the intermittent failures (~1 in 40 transactions) are due to a timeout config issue on the SAP side or the TMS side, and report findings.",
-                "owner": "Daniel Tan",
-                "deadline": "2026-06-22",
-                "status": "todo",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Resume and complete the label printer integration configuration (currently ~40% complete, paused due to scanner issue). To be picked up after the timeout investigation is closed.",
-                "owner": "Daniel Tan",
-                "deadline": null,
-                "status": "in_progress",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Update the cutover runbook to incorporate the degraded-mode (manual entry) plan agreed in this session.",
-                "owner": "Aisha Rahman",
-                "deadline": null,
-                "status": "todo",
-                "confidence": 0.99,
-                "source_decision": "Decision to run readiness test in degraded mode."
-              }
-            ]
-          },
-          {
-            "transcript_file": "security-workshop-03.txt",
-            "predicted": [
-              {
-                "description": "Package the fourteen SoD conflict findings from the analysis into a readable conflict report and circulate it to the team.",
-                "owner": "Marcus Wong",
-                "deadline": "2026-06-18",
-                "status": "todo",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Prepare the mitigating controls document mapping each of the fourteen SoD conflicts to a mitigating control, for use before the external audit. Blocked on Marcus Wong's conflict report.",
-                "owner": "Daniel Tan",
-                "deadline": "2026-06-25",
-                "status": "todo",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Complete the EAM (Emergency Access Management) workflow configuration \u2014 approval routing and logging are done (~70%), notification step and testing still remaining.",
-                "owner": "Marcus Wong",
-                "deadline": "2026-06-24",
-                "status": "in_progress",
-                "confidence": 0.99,
-                "source_decision": "All firefighter access must go through the EAM workflow \u2014 no exceptions."
-              },
-              {
-                "description": "Schedule a penetration test with the external vendor.",
-                "owner": "Marcus Wong",
-                "deadline": "2026-06-27",
-                "status": "todo",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Tune the production authorization trace settings to reduce log volume and prevent disk from filling up. Owner to be determined.",
-                "owner": null,
-                "deadline": null,
-                "status": "todo",
-                "confidence": 0.95,
-                "source_decision": null
-              },
-              {
-                "description": "SoD conflict analysis run \u2014 completed overnight without errors, fourteen conflicts flagged.",
-                "owner": "Marcus Wong",
-                "deadline": null,
-                "status": "done",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Build and unit-test the twelve finance composite roles \u2014 all completed and now in QA.",
-                "owner": "Daniel Tan",
-                "deadline": null,
-                "status": "done",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Legacy access review for system decommission \u2014 all dormant accounts disabled and documented.",
-                "owner": "Priya Nair",
-                "deadline": null,
-                "status": "done",
-                "confidence": 0.99,
-                "source_decision": null
-              }
-            ]
-          },
-          {
-            "transcript_file": "data-migration-workshop-04.txt",
-            "predicted": [
-              {
-                "description": "Rerun material master validation against the cleaned source extract file.",
-                "owner": "Priya Nair",
-                "deadline": "2026-06-22",
-                "status": "in_progress",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Complete the data reconciliation report template for post-load validation (currently ~50% complete; paused due to material master cleanup).",
-                "owner": "Priya Nair",
-                "deadline": "2026-06-22",
-                "status": "in_progress",
-                "confidence": 0.97,
-                "source_decision": null
-              },
-              {
-                "description": "Finalize customer master mapping (now unblocked following receipt of dedup results from data quality team).",
-                "owner": "Daniel Tan",
-                "deadline": "2026-06-19",
-                "status": "todo",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Request and obtain business approval for the revised 18-hour downtime window for the big-bang load.",
-                "owner": "Aisha Rahman",
-                "deadline": "2026-06-24",
-                "status": "todo",
-                "confidence": 0.99,
-                "source_decision": "Downtime window estimate revised to 18 hours based on timed trial results."
-              },
-              {
-                "description": "Write up the rollback steps from the fallback rollback script into the cutover runbook in plain English for the on-call team.",
-                "owner": "Daniel Tan",
-                "deadline": "2026-06-18",
-                "status": "todo",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Material master source data cleanup/scrubbing (addressing missing units of measure errors).",
-                "owner": "Priya Nair",
-                "deadline": null,
-                "status": "done",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Timed trial load \u2014 full end-to-end trial run at real volumes to establish accurate downtime estimate.",
-                "owner": "Marcus Wong",
-                "deadline": null,
-                "status": "done",
-                "confidence": 0.99,
-                "source_decision": "Trial revealed ~16 hours actual processing time, leading to 18-hour revised estimate."
-              },
-              {
-                "description": "Fallback rollback script \u2014 written and tested against QA system; validated and complete.",
-                "owner": "Marcus Wong",
-                "deadline": null,
-                "status": "done",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Confirm and communicate legacy data freeze date (July 20th) to application owners and stakeholders.",
-                "owner": "Priya Nair",
-                "deadline": null,
-                "status": "done",
-                "confidence": 0.99,
-                "source_decision": "Legacy freeze date locked at July 20th."
-              }
-            ]
-          }
-        ],
         "schema_only": [
           {
             "transcript_file": "finance-workshop-01.txt",
@@ -584,276 +320,6 @@
                 "status": "done",
                 "confidence": 0.99,
                 "source_decision": "First validation run returned ~3% error rate, ~90% attributable to missing UoM values in legacy records."
-              }
-            ]
-          }
-        ],
-        "prod": [
-          {
-            "transcript_file": "finance-workshop-01.txt",
-            "predicted": [
-              {
-                "description": "Complete APAC cost center hierarchy mapping (currently ~two-thirds done).",
-                "owner": "Daniel Tan",
-                "deadline": "2026-06-19",
-                "status": "in_progress",
-                "confidence": 0.98,
-                "source_decision": "APAC mapping in progress; completion unblocked once cost center codes are received from Priya by Wednesday."
-              },
-              {
-                "description": "Compile and send new cost center codes to Daniel Tan.",
-                "owner": "Priya Nair",
-                "deadline": "2026-06-17",
-                "status": "todo",
-                "confidence": 0.98,
-                "source_decision": "Daniel's APAC mapping completion is blocked on receiving these codes by Wednesday."
-              },
-              {
-                "description": "Loop in the banking team and get them onto next week's call to confirm the real MT940 statement format.",
-                "owner": "Aisha Rahman",
-                "deadline": "2026-06-22",
-                "status": "todo",
-                "confidence": 0.97,
-                "source_decision": "Bank statement integration fix is blocked on banking team confirming the statement format."
-              },
-              {
-                "description": "Finish and test the MT940 parser configuration fix (candidate fix half-built in dev system; stalled pending banking team format confirmation).",
-                "owner": "Daniel Tan",
-                "deadline": null,
-                "status": "in_progress",
-                "confidence": 0.96,
-                "source_decision": "Root cause of bank statement upload failure identified as a delimiter issue in MT940 multi-currency lines."
-              },
-              {
-                "description": "Clear the eleven duplicate postings identified in the open items review out of the system before the dress rehearsal.",
-                "owner": "Priya Nair",
-                "deadline": "2026-06-18",
-                "status": "todo",
-                "confidence": 0.97,
-                "source_decision": "Open items review completed; eleven duplicates flagged and listed with document numbers."
-              },
-              {
-                "description": "Send the drafted change request for additional consulting days to Wei Lin's office for approval.",
-                "owner": "Daniel Tan",
-                "deadline": "2026-06-18",
-                "status": "in_progress",
-                "confidence": 0.97,
-                "source_decision": "Bank integration rework is driving additional consulting cost; change request draft is complete."
-              },
-              {
-                "description": "Chase Wei Lin's office for a response on the month-end timetable.",
-                "owner": "Priya Nair",
-                "deadline": null,
-                "status": "todo",
-                "confidence": 0.78,
-                "source_decision": null
-              }
-            ]
-          },
-          {
-            "transcript_file": "logistics-workshop-02.txt",
-            "predicted": [
-              {
-                "description": "Chase the vendor for a firm patch date for the barcode scanner firmware fix.",
-                "owner": "Marcus Wong",
-                "deadline": "2026-06-19",
-                "status": "todo",
-                "confidence": 0.98,
-                "source_decision": "Firmware incompatibility identified; vendor patch estimated ~2 weeks out but a firm date is needed for planning."
-              },
-              {
-                "description": "Reconfigure the test environment to support manual entry (degraded mode) instead of barcode scanning for the readiness test.",
-                "owner": "Marcus Wong",
-                "deadline": "2026-06-17",
-                "status": "in_progress",
-                "confidence": 0.97,
-                "source_decision": "Decision to run the warehouse readiness test in degraded mode while awaiting the firmware patch."
-              },
-              {
-                "description": "Draft a one-page risk note on the barcode scanner delay for the steering committee, to be sent before Tuesday's meeting.",
-                "owner": "Marcus Wong",
-                "deadline": "2026-06-22",
-                "status": "todo",
-                "confidence": 0.97,
-                "source_decision": "Steering committee requires visibility on the scanner delay risk before their Tuesday meeting."
-              },
-              {
-                "description": "Run compatibility test matrix against all transaction types for the current firmware build.",
-                "owner": "Marcus Wong",
-                "deadline": null,
-                "status": "done",
-                "confidence": 0.99,
-                "source_decision": "Needed to confirm whether the handheld unit freeze issue was firmware- or config-related."
-              },
-              {
-                "description": "Extract logs from the WM-to-TMS interface load testing to investigate intermittent timeout errors.",
-                "owner": "Daniel Tan",
-                "deadline": null,
-                "status": "done",
-                "confidence": 0.98,
-                "source_decision": "Intermittent timeout errors (~1 in 40 transactions) observed during load testing of the WM-TMS interface."
-              },
-              {
-                "description": "Analyse extracted WM-to-TMS interface logs to determine whether the timeout errors are a config issue on the SAP side or on the TMS side, and report findings.",
-                "owner": "Daniel Tan",
-                "deadline": "2026-06-22",
-                "status": "todo",
-                "confidence": 0.97,
-                "source_decision": "Intermittent timeout errors (~1 in 40 transactions) observed during load testing of the WM-TMS interface."
-              },
-              {
-                "description": "Ensure the WM-TMS timeout analysis findings are placed near the top of Monday's meeting agenda.",
-                "owner": "Aisha Rahman",
-                "deadline": "2026-06-22",
-                "status": "todo",
-                "confidence": 0.85,
-                "source_decision": "Aisha requested the timeout topic be prominently featured on Monday's agenda, not buried."
-              },
-              {
-                "description": "Complete mapping of all SAP goods movement types, test in QA, and sign off.",
-                "owner": "Daniel Tan",
-                "deadline": null,
-                "status": "done",
-                "confidence": 0.99,
-                "source_decision": null
-              },
-              {
-                "description": "Update the cutover runbook to incorporate the degraded-mode (manual entry) plan agreed in this meeting.",
-                "owner": "Aisha Rahman",
-                "deadline": null,
-                "status": "todo",
-                "confidence": 0.97,
-                "source_decision": "Decision to run the warehouse readiness test in degraded mode requires the cutover runbook to be updated accordingly."
-              },
-              {
-                "description": "Resume and complete the label printer integration (currently ~40% configured, paused when scanner issue escalated); to be picked up after the WM-TMS timeout investigation is closed.",
-                "owner": "Daniel Tan",
-                "deadline": null,
-                "status": "in_progress",
-                "confidence": 0.96,
-                "source_decision": "Label printer integration was deprioritised when the scanner firmware blocker escalated; Daniel will resume it post-timeout investigation."
-              }
-            ]
-          },
-          {
-            "transcript_file": "security-workshop-03.txt",
-            "predicted": [
-              {
-                "description": "Package the fourteen SoD conflicts from the raw tool output into a readable conflict report and circulate it to the team.",
-                "owner": "Marcus Wong",
-                "deadline": "2026-06-18",
-                "status": "todo",
-                "confidence": 0.98,
-                "source_decision": "SoD conflict analysis run completed; report write-up is the remaining action before Daniel can begin mitigating controls mapping."
-              },
-              {
-                "description": "Map each of the fourteen SoD conflicts to a mitigating control and produce the mitigating controls document before the external audit.",
-                "owner": "Daniel Tan",
-                "deadline": "2026-06-25",
-                "status": "todo",
-                "confidence": 0.98,
-                "source_decision": "Mitigating controls document required before the external audit on the 25th; blocked on Marcus's conflict report."
-              },
-              {
-                "description": "Finish and test the EAM workflow configuration \u2014 complete the notification step and perform end-to-end testing (currently ~70% done: approval routing and logging are complete).",
-                "owner": "Marcus Wong",
-                "deadline": "2026-06-26",
-                "status": "in_progress",
-                "confidence": 0.95,
-                "source_decision": "All firefighter access must go through the EAM workflow \u2014 no exceptions."
-              },
-              {
-                "description": "Schedule the external penetration test with the vendor; budget is approved.",
-                "owner": "Marcus Wong",
-                "deadline": "2026-06-26",
-                "status": "todo",
-                "confidence": 0.97,
-                "source_decision": "Penetration test approved and to be kicked off by end of next week."
-              },
-              {
-                "description": "Tune the production authorization trace settings to reduce log volume and prevent disk from filling up.",
-                "owner": null,
-                "deadline": null,
-                "status": "todo",
-                "confidence": 0.88,
-                "source_decision": "Issue flagged as unassigned; ownership deferred until disk situation becomes urgent."
-              }
-            ]
-          },
-          {
-            "transcript_file": "data-migration-workshop-04.txt",
-            "predicted": [
-              {
-                "description": "Rerun material master validation against the cleaned source extract file.",
-                "owner": "Priya Nair",
-                "deadline": "2026-06-22",
-                "status": "in_progress",
-                "confidence": 0.97,
-                "source_decision": "Source extract cleanup is complete; rerun is needed to confirm data quality before dress rehearsal."
-              },
-              {
-                "description": "Complete the final mapping pass for the customer master (unblocked by dedup results received this morning).",
-                "owner": "Daniel Tan",
-                "deadline": "2026-06-26",
-                "status": "todo",
-                "confidence": 0.97,
-                "source_decision": "Customer master mapping was blocked pending dedup results; now unblocked as of 2026-06-18."
-              },
-              {
-                "description": "Request and obtain business sign-off on the revised 18-hour downtime window.",
-                "owner": "Aisha Rahman",
-                "deadline": "2026-06-24",
-                "status": "todo",
-                "confidence": 0.97,
-                "source_decision": "Timed trial revealed actual processing time is ~16 hours; official estimate revised to 18 hours, requiring business approval."
-              },
-              {
-                "description": "Write up the rollback steps into the cutover runbook in plain English for the on-call team.",
-                "owner": "Daniel Tan",
-                "deadline": "2026-06-25",
-                "status": "todo",
-                "confidence": 0.95,
-                "source_decision": "Rollback script is complete and tested, but is not yet documented in the runbook \u2014 gap identified by Marcus."
-              },
-              {
-                "description": "Complete the data reconciliation report template for post-load validation (currently ~50% done; parked due to material master cleanup work).",
-                "owner": "Priya Nair",
-                "deadline": "2026-06-22",
-                "status": "in_progress",
-                "confidence": 0.92,
-                "source_decision": "Template was started but paused; Priya plans to resume once the validation rerun completes on Monday."
-              },
-              {
-                "description": "Clean material master source extract to resolve missing units-of-measure errors.",
-                "owner": "Priya Nair",
-                "deadline": null,
-                "status": "done",
-                "confidence": 0.99,
-                "source_decision": "First validation run returned ~3% error rate, almost entirely due to missing UoM on legacy records."
-              },
-              {
-                "description": "Run the full timed trial load end-to-end at real volumes to establish an accurate downtime estimate.",
-                "owner": "Marcus Wong",
-                "deadline": null,
-                "status": "done",
-                "confidence": 0.99,
-                "source_decision": "Original 12-hour estimate needed to be validated; trial revealed ~16 hours actual processing time."
-              },
-              {
-                "description": "Write and test the fallback rollback script against the QA environment.",
-                "owner": "Marcus Wong",
-                "deadline": null,
-                "status": "done",
-                "confidence": 0.99,
-                "source_decision": "A validated rollback mechanism is required as part of cutover planning."
-              },
-              {
-                "description": "Confirm and communicate the legacy data freeze date (July 20) to all application owners.",
-                "owner": "Priya Nair",
-                "deadline": null,
-                "status": "done",
-                "confidence": 0.99,
-                "source_decision": "Business stakeholders required a firm freeze date ahead of cutover."
               }
             ]
           }
@@ -6756,6 +6222,537 @@
                 "status": "done",
                 "confidence": 0.99,
                 "source_decision": "Legacy freeze date locked at July 20th, no movement."
+              }
+            ]
+          }
+        ]
+      },
+      "models": {
+        "naive": "claude-sonnet-4-6",
+        "prod": "claude-sonnet-4-6"
+      }
+    },
+    {
+      "validation_failures": {
+        "naive": 1,
+        "prod": 0
+      },
+      "api_failures": {
+        "naive": 0,
+        "prod": 0
+      },
+      "conditions": {
+        "naive": [
+          {
+            "transcript_file": "finance-workshop-01.txt",
+            "predicted": [
+              {
+                "description": "Complete EMEA cost center hierarchy migration \u2014 validate against org chart and sign off.",
+                "owner": "Daniel Tan",
+                "deadline": null,
+                "status": "done",
+                "confidence": 1.0,
+                "source_decision": null
+              },
+              {
+                "description": "Complete APAC cost center hierarchy mapping (currently ~two-thirds done).",
+                "owner": "Daniel Tan",
+                "deadline": "2026-06-20",
+                "status": "in_progress",
+                "confidence": 1.0,
+                "source_decision": null
+              },
+              {
+                "description": "Compile and send new cost center codes to Daniel Tan (currently scattered across spreadsheets).",
+                "owner": "Priya Nair",
+                "deadline": "2026-06-17",
+                "status": "todo",
+                "confidence": 1.0,
+                "source_decision": "APAC mapping completion by Friday is blocked on these codes being received by Wednesday."
+              },
+              {
+                "description": "Diagnose root cause of bank statement upload test failures in QA \u2014 identified as a delimiter issue in the MT940 file for multi-currency lines.",
+                "owner": "Daniel Tan",
+                "deadline": null,
+                "status": "done",
+                "confidence": 1.0,
+                "source_decision": null
+              },
+              {
+                "description": "Loop in the banking team and get them onto next week's call to confirm the real MT940 statement format.",
+                "owner": "Aisha Rahman",
+                "deadline": "2026-06-22",
+                "status": "todo",
+                "confidence": 1.0,
+                "source_decision": "Bank format must be confirmed by the banking team before the integration test can be signed off."
+              },
+              {
+                "description": "Complete the MT940 parser configuration fix in the dev system (candidate fix already half-built, stalled pending banking team format confirmation).",
+                "owner": "Daniel Tan",
+                "deadline": null,
+                "status": "in_progress",
+                "confidence": 1.0,
+                "source_decision": null
+              },
+              {
+                "description": "Conduct full review of open items report and flag duplicate postings.",
+                "owner": "Priya Nair",
+                "deadline": null,
+                "status": "done",
+                "confidence": 1.0,
+                "source_decision": null
+              },
+              {
+                "description": "Clear the eleven identified duplicate postings from the system before the dress rehearsal.",
+                "owner": "Priya Nair",
+                "deadline": "2026-06-19",
+                "status": "todo",
+                "confidence": 1.0,
+                "source_decision": null
+              },
+              {
+                "description": "Draft change request for additional consulting days due to bank integration rework.",
+                "owner": "Daniel Tan",
+                "deadline": null,
+                "status": "done",
+                "confidence": 1.0,
+                "source_decision": null
+              },
+              {
+                "description": "Send the drafted change request for additional consulting days to Wei Lin's office for approval.",
+                "owner": "Daniel Tan",
+                "deadline": "2026-06-18",
+                "status": "todo",
+                "confidence": 1.0,
+                "source_decision": null
+              },
+              {
+                "description": "Chase Wei Lin's office for a response on the month-end timetable.",
+                "owner": "Priya Nair",
+                "deadline": null,
+                "status": "todo",
+                "confidence": 0.8,
+                "source_decision": null
+              }
+            ]
+          },
+          {
+            "transcript_file": "logistics-workshop-02.txt",
+            "predicted": [
+              {
+                "description": "Chase the barcode scanner firmware vendor for a firm patch release date.",
+                "owner": "Marcus Wong",
+                "deadline": "2026-06-19",
+                "status": "todo",
+                "confidence": 0.99,
+                "source_decision": "Firmware patch timeline is blocking warehouse go-live readiness test planning."
+              },
+              {
+                "description": "Draft a one-page risk note on the barcode scanner delay for the steering committee.",
+                "owner": "Marcus Wong",
+                "deadline": "2026-06-22",
+                "status": "todo",
+                "confidence": 0.99,
+                "source_decision": "Steering committee requires visibility on scanner delay risk before Tuesday's meeting."
+              },
+              {
+                "description": "Reconfigure the test environment to support manual entry (degraded mode) instead of barcode scanning for the readiness test.",
+                "owner": "Marcus Wong",
+                "deadline": "2026-06-17",
+                "status": "in_progress",
+                "confidence": 0.99,
+                "source_decision": "Agreed to run readiness test in degraded mode while awaiting firmware patch."
+              },
+              {
+                "description": "Analyse WM-to-TMS interface timeout logs to determine whether intermittent failures (~1 in 40 transactions) are due to timeout config on SAP side or the TMS side, and report findings.",
+                "owner": "Daniel Tan",
+                "deadline": "2026-06-22",
+                "status": "in_progress",
+                "confidence": 0.99,
+                "source_decision": "Intermittent timeout errors discovered during load testing; logs already extracted and ready for review."
+              },
+              {
+                "description": "Resume and complete label printer integration configuration (currently ~40% complete, paused due to scanner issue).",
+                "owner": "Daniel Tan",
+                "deadline": null,
+                "status": "in_progress",
+                "confidence": 0.98,
+                "source_decision": "Integration is paused until timeout investigation is closed; will resume after that."
+              },
+              {
+                "description": "Update the cutover runbook to reflect the newly agreed degraded-mode plan.",
+                "owner": "Aisha Rahman",
+                "deadline": null,
+                "status": "todo",
+                "confidence": 0.99,
+                "source_decision": "Degraded-mode approach agreed in this session requires runbook to be updated accordingly."
+              }
+            ]
+          },
+          {
+            "transcript_file": "security-workshop-03.txt",
+            "predicted": [
+              {
+                "description": "Package the fourteen SoD conflicts from the raw tool output into a readable conflict report and circulate it to the team.",
+                "owner": "Marcus Wong",
+                "deadline": "2026-06-18",
+                "status": "todo",
+                "confidence": 0.99,
+                "source_decision": "SoD conflict analysis run completed; report write-up is the remaining step before Daniel can begin mitigating controls mapping."
+              },
+              {
+                "description": "Map each of the fourteen SoD conflicts to a mitigating control and prepare a mitigating controls document before the external audit.",
+                "owner": "Daniel Tan",
+                "deadline": "2026-06-25",
+                "status": "todo",
+                "confidence": 0.99,
+                "source_decision": "Blocked on Marcus Wong's conflict report; explicitly confirmed as not started and not in progress."
+              },
+              {
+                "description": "Complete the EAM workflow configuration \u2014 finish the notification step and perform testing (currently ~70% complete; approval routing and logging are done).",
+                "owner": "Marcus Wong",
+                "deadline": "2026-06-26",
+                "status": "in_progress",
+                "confidence": 0.99,
+                "source_decision": "All firefighter access must go through the EAM workflow per confirmed policy; configuration must be completed next week."
+              },
+              {
+                "description": "Schedule a penetration test with the external vendor. Budget has been approved by Wei Lin.",
+                "owner": "Marcus Wong",
+                "deadline": "2026-06-26",
+                "status": "todo",
+                "confidence": 0.99,
+                "source_decision": null
+              },
+              {
+                "description": "Tune the production authorization trace settings to reduce excessive log volume and prevent disk from filling up.",
+                "owner": null,
+                "deadline": null,
+                "status": "todo",
+                "confidence": 0.95,
+                "source_decision": "Task is unassigned by team decision; will be revisited if disk usage becomes critical."
+              },
+              {
+                "description": "Finance composite role build and unit testing for all twelve composite roles \u2014 completed and currently in QA.",
+                "owner": "Daniel Tan",
+                "deadline": null,
+                "status": "done",
+                "confidence": 0.99,
+                "source_decision": null
+              },
+              {
+                "description": "SoD conflict analysis run for the finance module role redesign.",
+                "owner": "Marcus Wong",
+                "deadline": null,
+                "status": "done",
+                "confidence": 0.99,
+                "source_decision": null
+              },
+              {
+                "description": "Legacy system user access review for decommission \u2014 dormant accounts disabled and documented.",
+                "owner": "Priya Nair",
+                "deadline": null,
+                "status": "done",
+                "confidence": 0.99,
+                "source_decision": null
+              }
+            ]
+          },
+          {
+            "transcript_file": "data-migration-workshop-04.txt",
+            "predicted": []
+          }
+        ],
+        "prod": [
+          {
+            "transcript_file": "finance-workshop-01.txt",
+            "predicted": [
+              {
+                "description": "Complete APAC cost center hierarchy mapping (currently ~two-thirds done).",
+                "owner": "Daniel Tan",
+                "deadline": "2026-06-19",
+                "status": "in_progress",
+                "confidence": 0.98,
+                "source_decision": "APAC mapping must be completed by Friday; parallel ledger cutover is now tied to its completion."
+              },
+              {
+                "description": "Compile and send new APAC cost center codes to Daniel Tan.",
+                "owner": "Priya Nair",
+                "deadline": "2026-06-17",
+                "status": "todo",
+                "confidence": 0.98,
+                "source_decision": "Daniel needs the codes by Wednesday or the Friday APAC mapping deadline will slip."
+              },
+              {
+                "description": "Loop in the banking team and get them onto next week's call to confirm the MT940 bank statement format.",
+                "owner": "Aisha Rahman",
+                "deadline": "2026-06-22",
+                "status": "todo",
+                "confidence": 0.97,
+                "source_decision": "Bank statement parser fix and integration test sign-off are blocked on banking team format confirmation."
+              },
+              {
+                "description": "Finish and test the MT940 parser configuration fix for the multi-currency delimiter issue (currently half-built in dev system; blocked on banking team format confirmation).",
+                "owner": "Daniel Tan",
+                "deadline": null,
+                "status": "in_progress",
+                "confidence": 0.95,
+                "source_decision": "Root cause of bank statement upload failure identified as a delimiter issue; fix is in progress but stalled pending banking team input."
+              },
+              {
+                "description": "Clear the eleven duplicate postings from the system ahead of the dress rehearsal.",
+                "owner": "Priya Nair",
+                "deadline": "2026-06-18",
+                "status": "todo",
+                "confidence": 0.97,
+                "source_decision": "Open items review is complete; duplicate clearing is the remaining step before the dress rehearsal on Thursday."
+              },
+              {
+                "description": "Send the drafted change request for additional consulting days to Wei Lin's office for approval.",
+                "owner": "Daniel Tan",
+                "deadline": "2026-06-18",
+                "status": "in_progress",
+                "confidence": 0.96,
+                "source_decision": "Bank integration rework is driving a need for additional consulting days; draft is written, sending is the pending step."
+              },
+              {
+                "description": "Chase Wei Lin's office for a response on the month-end timetable.",
+                "owner": "Priya Nair",
+                "deadline": null,
+                "status": "todo",
+                "confidence": 0.75,
+                "source_decision": null
+              }
+            ]
+          },
+          {
+            "transcript_file": "logistics-workshop-02.txt",
+            "predicted": [
+              {
+                "description": "Chase the barcode scanner firmware vendor to obtain a firm patch release date.",
+                "owner": "Marcus Wong",
+                "deadline": "2026-06-19",
+                "status": "todo",
+                "confidence": 0.98,
+                "source_decision": "Firmware confirmed as root cause of goods receipt freeze; vendor patch estimated at ~2 weeks but no firm date yet."
+              },
+              {
+                "description": "Reconfigure the test environment for degraded-mode operation (manual entry, no barcode scanning) to support the readiness test.",
+                "owner": "Marcus Wong",
+                "deadline": "2026-06-17",
+                "status": "in_progress",
+                "confidence": 0.98,
+                "source_decision": "Decision to run the warehouse readiness test in degraded mode while awaiting the firmware patch."
+              },
+              {
+                "description": "Draft a one-page risk note on the barcode scanner delay for the steering committee, to be sent before Tuesday's meeting.",
+                "owner": "Marcus Wong",
+                "deadline": "2026-06-22",
+                "status": "todo",
+                "confidence": 0.97,
+                "source_decision": "Steering committee requires visibility on the scanner delay risk before their Tuesday meeting."
+              },
+              {
+                "description": "Analyse the extracted WM-to-TMS interface timeout logs to determine whether the root cause is a timeout config issue on the SAP side or a TMS-side problem, and report findings by Monday.",
+                "owner": "Daniel Tan",
+                "deadline": "2026-06-22",
+                "status": "in_progress",
+                "confidence": 0.95,
+                "source_decision": "Intermittent timeout errors (~1 in 40 transactions) observed during load testing; logs have already been extracted."
+              },
+              {
+                "description": "Present the WM-to-TMS timeout investigation findings near the top of Monday's meeting agenda.",
+                "owner": "Aisha Rahman",
+                "deadline": "2026-06-22",
+                "status": "todo",
+                "confidence": 0.85,
+                "source_decision": "Agreement to ensure the timeout investigation results are prominently placed on Monday's agenda."
+              },
+              {
+                "description": "Update the cutover runbook to reflect the agreed degraded-mode plan (manual entry steps in place of barcode scanning).",
+                "owner": "Aisha Rahman",
+                "deadline": null,
+                "status": "todo",
+                "confidence": 0.97,
+                "source_decision": "Decision to run the readiness test in degraded mode requires the cutover runbook to be updated accordingly."
+              },
+              {
+                "description": "Resume and complete the label printer integration configuration (currently ~40% complete, paused due to the scanner issue).",
+                "owner": "Daniel Tan",
+                "deadline": null,
+                "status": "in_progress",
+                "confidence": 0.95,
+                "source_decision": "Label printer integration was paused mid-stream when the scanner firmware issue escalated; will resume after the timeout investigation is closed."
+              },
+              {
+                "description": "Run the full barcode scanner compatibility test matrix against all transaction types and current firmware build.",
+                "owner": "Marcus Wong",
+                "deadline": null,
+                "status": "done",
+                "confidence": 0.99,
+                "source_decision": "Completed to confirm firmware (not configuration) is the root cause of goods receipt freezes."
+              },
+              {
+                "description": "Extract WM-to-TMS interface timeout logs from load testing.",
+                "owner": "Daniel Tan",
+                "deadline": null,
+                "status": "done",
+                "confidence": 0.99,
+                "source_decision": "Logs needed to investigate intermittent timeout errors during load testing."
+              },
+              {
+                "description": "Map and test all goods movement types in QA and sign off.",
+                "owner": "Daniel Tan",
+                "deadline": null,
+                "status": "done",
+                "confidence": 0.99,
+                "source_decision": "Goods movement mapping confirmed fully complete and signed off; removed from open items."
+              }
+            ]
+          },
+          {
+            "transcript_file": "security-workshop-03.txt",
+            "predicted": [
+              {
+                "description": "Package the fourteen SoD conflict flags from the overnight analysis run into a readable conflict report and circulate it to the team.",
+                "owner": "Marcus Wong",
+                "deadline": "2026-06-18",
+                "status": "todo",
+                "confidence": 0.98,
+                "source_decision": "SoD conflict analysis run completed; report write-up is the remaining outstanding piece on the critical path before the external audit."
+              },
+              {
+                "description": "Map each of the fourteen SoD conflicts to a mitigating control and prepare the mitigating controls document before the external audit.",
+                "owner": "Daniel Tan",
+                "deadline": "2026-06-25",
+                "status": "todo",
+                "confidence": 0.98,
+                "source_decision": "All fourteen conflicts must be mapped to mitigating controls before the external audit on the twenty-fifth; blocked on Marcus's conflict report."
+              },
+              {
+                "description": "Finish the EAM workflow configuration \u2014 complete the notification step and test the workflow (currently ~70% done; approval routing and logging are complete).",
+                "owner": "Marcus Wong",
+                "deadline": "2026-06-26",
+                "status": "in_progress",
+                "confidence": 0.95,
+                "source_decision": "All firefighter access must go through the EAM workflow; configuration is in progress and expected to wrap next week."
+              },
+              {
+                "description": "Schedule a penetration test with the external vendor.",
+                "owner": "Marcus Wong",
+                "deadline": "2026-06-26",
+                "status": "todo",
+                "confidence": 0.97,
+                "source_decision": "Budget approved by Wei Lin; pen test to be kicked off by end of next week."
+              },
+              {
+                "description": "Tune the production authorization trace settings down to reduce excessive log volume and prevent disk from filling.",
+                "owner": null,
+                "deadline": null,
+                "status": "todo",
+                "confidence": 0.88,
+                "source_decision": "Issue raised during meeting; kept on the board as an unassigned to-do with ownership to be determined if disk becomes tight."
+              },
+              {
+                "description": "SoD conflict analysis run completed overnight without errors, flagging fourteen conflicts. (No further action required \u2014 recorded for completeness.)",
+                "owner": "Marcus Wong",
+                "deadline": null,
+                "status": "done",
+                "confidence": 0.99,
+                "source_decision": "SoD conflict analysis run finished clean; raw output exists and is the basis for the conflict report."
+              },
+              {
+                "description": "Build and unit-test all twelve finance composite roles and move them to QA. (Completed Monday 2026-06-15.)",
+                "owner": "Daniel Tan",
+                "deadline": null,
+                "status": "done",
+                "confidence": 0.99,
+                "source_decision": "Finance role redesign for the finance module; roles are in QA and ready for conflict mapping."
+              },
+              {
+                "description": "User access review for the legacy system decommission: disable all dormant accounts and document them. (Completed ~two weeks ago.)",
+                "owner": null,
+                "deadline": null,
+                "status": "done",
+                "confidence": 0.99,
+                "source_decision": "Legacy system decommission access review closed out by Priya and Daniel approximately two weeks before the meeting."
+              }
+            ]
+          },
+          {
+            "transcript_file": "data-migration-workshop-04.txt",
+            "predicted": [
+              {
+                "description": "Rerun material master validation against the cleaned source extract file.",
+                "owner": "Priya Nair",
+                "deadline": "2026-06-22",
+                "status": "in_progress",
+                "confidence": 0.98,
+                "source_decision": "Source extract cleanup completed; rerun needed to confirm error resolution before dress rehearsal."
+              },
+              {
+                "description": "Complete final pass on customer master mapping now that deduplication results are available.",
+                "owner": "Daniel Tan",
+                "deadline": "2026-06-19",
+                "status": "todo",
+                "confidence": 0.97,
+                "source_decision": "Daniel was blocked on dedup results from data quality team; now unblocked as of this morning."
+              },
+              {
+                "description": "Request and obtain business sign-off on the revised 18-hour downtime window for the big-bang load.",
+                "owner": "Aisha Rahman",
+                "deadline": "2026-06-24",
+                "status": "todo",
+                "confidence": 0.98,
+                "source_decision": "Timed trial revealed actual processing time is ~16 hours; estimate revised to 18 hours for safety, requiring business approval."
+              },
+              {
+                "description": "Write rollback steps into the cutover runbook in plain English for the on-call team (currently only the script exists, no runbook documentation).",
+                "owner": "Daniel Tan",
+                "deadline": "2026-06-25",
+                "status": "todo",
+                "confidence": 0.97,
+                "source_decision": "Rollback script is complete and validated on QA, but rollback steps are not yet documented in the runbook."
+              },
+              {
+                "description": "Complete the data reconciliation report template for post-load validation (approximately 50% done; structure and partial logic are in place).",
+                "owner": "Priya Nair",
+                "deadline": "2026-06-22",
+                "status": "in_progress",
+                "confidence": 0.93,
+                "source_decision": "Work was paused due to material master cleanup; Priya to resume once the validation rerun completes on Monday."
+              },
+              {
+                "description": "Clean source extract for material master (scrubbing missing units of measure from legacy records).",
+                "owner": "Priya Nair",
+                "deadline": null,
+                "status": "done",
+                "confidence": 0.99,
+                "source_decision": "First validation run returned ~3% error rate, almost entirely due to missing units of measure; Priya completed the scrub on 2026-06-17."
+              },
+              {
+                "description": "Run full timed trial load (end-to-end, real volumes) to establish accurate downtime estimate.",
+                "owner": "Marcus Wong",
+                "deadline": null,
+                "status": "done",
+                "confidence": 0.99,
+                "source_decision": "Timed trial run on Saturday revealed ~16 hours of actual processing, prompting revision of the downtime window estimate to 18 hours."
+              },
+              {
+                "description": "Write and test the fallback rollback script against the QA system.",
+                "owner": "Marcus Wong",
+                "deadline": null,
+                "status": "done",
+                "confidence": 0.99,
+                "source_decision": "Rollback script written and validated on QA this week; confirmed finished."
+              },
+              {
+                "description": "Confirm and communicate the legacy data freeze date (July 20th) to application owners and stakeholders.",
+                "owner": "Priya Nair",
+                "deadline": null,
+                "status": "done",
+                "confidence": 0.99,
+                "source_decision": "Business repeatedly asked about the freeze date; Priya confirmed July 20th with application owners on Monday and distributed the notice."
               }
             ]
           }

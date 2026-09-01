@@ -742,6 +742,19 @@ def _offset_shape(entry: dict) -> str:
     return f"{dom:+d} day ({entry['dominant_share']:.0%})"
 
 
+def _delta_shape(dc: float, dg: float) -> tuple[str, str]:
+    """How the two guidance deltas relate, in words.
+
+    Derived rather than written out, because the deltas move with every re-run: a hardcoded
+    phrase silently contradicts the numbers it sits next to the first time a sign flips.
+    """
+    signs = "opposite signs" if (dc >= 0) != (dg >= 0) else "the same sign on both models"
+    span = (f"both smaller than the ~{NOISE_FLOOR_F1} run-to-run spread"
+            if max(abs(dc), abs(dg)) < NOISE_FLOOR_F1
+            else f"the larger of them at or beyond the ~{NOISE_FLOOR_F1} run-to-run spread")
+    return signs, span
+
+
 def _summary(overlap, comp, offsets) -> str:
     """Answers first. A reader who stops here should still have the whole story.
 
@@ -768,10 +781,11 @@ def _summary(overlap, comp, offsets) -> str:
     if all(k in overlap for k in ("naive", "prod", "gemini_naive", "gemini_prod")):
         dc = round(overlap["prod"]["f1"] - overlap["naive"]["f1"], 3)
         dg = round(overlap["gemini_prod"]["f1"] - overlap["gemini_naive"]["f1"], 3)
+        signs, span = _delta_shape(dc, dg)
         bullets.append(
             f"2. **The guidance does not measurably change extraction accuracy.** The F1 delta is "
-            f"{dc:+.3f} on Claude and {dg:+.3f} on Gemini - opposite signs, both far inside the "
-            f"~{NOISE_FLOOR_F1} run-to-run spread. What does move consistently is the trade: "
+            f"{dc:+.3f} on Claude and {dg:+.3f} on Gemini - {signs}, {span}. "
+            f"What does move consistently is the trade: "
             f"recall up, precision down, on both models. Any claim of an accuracy gain would need "
             f"a larger test set than this one.")
 
@@ -860,6 +874,7 @@ def _study_one(overlap, comp, counts) -> str:
     g_n, g_p = (comp or {}).get("gemini_naive", {}), (comp or {}).get("gemini_prod", {})
     d_claude = overlap["prod"]["f1"] - overlap["naive"]["f1"]
     d_gemini = overlap["gemini_prod"]["f1"] - overlap["gemini_naive"]["f1"]
+    signs, span = _delta_shape(d_claude, d_gemini)
 
     # Built then wrapped, rather than laid out inline: interpolated numbers vary in width and
     # would otherwise break these sentences at arbitrary points in the generated markdown.
@@ -868,8 +883,8 @@ failed validation on both models; the described schema never did on either. Two 
 families failing the same way, and being fixed the same way, is the strongest evidence here.
 
 **Accuracy - not established.** The guidance raises recall and lowers precision on both models,
-but the net F1 effect has opposite signs ({d_claude:+.3f} on Claude, {d_gemini:+.3f} on Gemini)
-and both sit inside the noise. The second model was added expecting the guidance to help *more*
+but the net F1 effect has {signs} ({d_claude:+.3f} on Claude, {d_gemini:+.3f} on Gemini),
+{span}. The second model was added expecting the guidance to help *more*
 where the model is weaker; it did not, and that expectation is recorded here as refuted rather
 than quietly dropped.
 
@@ -940,7 +955,9 @@ own runs, never pooled across models.
 
 def _deadline_section(offsets: dict) -> str:
     """Systematic vs random date error - the one place a clear model difference shows up."""
-    present = [c for c in COMPARISON_CONDITIONS + ["prod"] if c in offsets]
+    # dict.fromkeys keeps the incumbent in the list without listing it twice - "prod" is
+    # already the first entry of COMPARISON_CONDITIONS.
+    present = [c for c in dict.fromkeys(COMPARISON_CONDITIONS + ["prod"]) if c in offsets]
     if len(present) < 2:
         return ""
 
