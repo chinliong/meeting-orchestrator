@@ -44,7 +44,7 @@ Each candidate carries a flaw that is specifically disqualifying for this produc
 - **Mistral Small** proposes almost nothing wrong, but misses roughly a third of the real work.
   For a meeting orchestrator a dropped action item is the worst available failure.
 
-**Recommendation: keep the shipped Claude Sonnet configuration.** It is the only option without a
+**Recommendation: keep the with-guidance Claude Sonnet configuration.** It is the only option without a
 specific disqualifier. If cost later forces a change, Haiku is the most rescuable of the three - a
 constant offset is the kind of error a prompt change could plausibly remove, unlike a field the
 model declines to populate or recall it never had. That fix would need validating before a switch,
@@ -77,16 +77,18 @@ enum, because a translation bug would surface as a model difference that is real
 
 ## Study 1 - does the guidance layer help?
 
-Within each model the two rows differ **only** in guidance text; the JSON contract is identical.
+Within each model the two arms differ **only** in guidance text; the JSON contract is identical.
 `eval/test_matching.py` asserts this for Claude, `eval/test_providers.py` for Gemini after schema
 translation.
 
-| Condition | Runs | Precision | Recall | F1 | Validation failures | `source_decision` | Owner |
+Each cell reads *without guidance* -> **with guidance**, for that model alone. The contrast is
+within one row; the two models are a generation apart, so a gap read *down* a column would
+measure release date as much as capability.
+
+| Model | Runs | Validation failures | `source_decision` | Recall | Precision | F1 | Owner |
 |---|---|---|---|---|---|---|---|
-| Basic (Claude Sonnet) | 4 | 0.849 | 0.644 | 0.73 | 3/16 | 53% | 85/85 (1.00) |
-| **Improved (Claude Sonnet)** | 4 | 0.842 | 0.848 | **0.845** | 0/16 | 82% | 110/112 (0.98) |
-| Basic (Gemini Flash) | 4 | 0.93 | 0.819 | 0.867 | 3/16 | 16% | 108/108 (1.00) |
-| **Improved (Gemini Flash)** | 4 | 0.875 | 0.947 | **0.909** | 0/16 | 19% | 121/125 (0.97) |
+| Claude Sonnet | 4 | 3/16 -> **0/16** | 53% -> **82%** | 0.644 -> **0.848** | 0.849 -> **0.842** | 0.73 -> **0.845** | 85/85 (1.00) -> **110/112 (0.98)** |
+| Gemini Flash | 4 | 3/16 -> **0/16** | 16% -> **19%** | 0.819 -> **0.947** | 0.93 -> **0.875** | 0.867 -> **0.909** | 108/108 (1.00) -> **121/125 (0.97)** |
 
 **Reliability - replicated.** The shape-only schema produced output that failed validation on
 both models; the described schema never did on either. Two unrelated model families failing the
@@ -103,12 +105,14 @@ refuted rather than quietly dropped.
 also varies its confidence score as instructed (0.75-0.99, 11 distinct values) where the control
 emits a near-constant one (0.8-1.0, 7 values) that cannot be filtered on.
 
-> These two models are a generation apart, so rows are comparable *within* a model but not
-> *across* one - a cross-model gap here would measure release date as much as capability.
+> Gemini Flash is here as a replication check, not as a competitor: the question is whether the
+> guidance effect is a property of the schema or a quirk of one vendor's tool use. The model
+> comparison is Study 2.
 
 ## Study 2 - which model should the project use?
 
-Every row runs the **shipped configuration**; only the model changes. The incumbent (Claude
+Every row runs the **with-guidance configuration** - the one the project ships; only the
+model changes. The incumbent (Claude
 Sonnet) is included because the question is whether to replace it, and a candidate list without
 the thing being replaced cannot answer that.
 

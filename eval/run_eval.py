@@ -8,15 +8,15 @@ recall / F1, plus owner, status and deadline accuracy on the items that matched.
 
 Two questions are answered, by two different sets of conditions (see CONDITIONS):
 
-1. **Does the guidance layer help?** A 2x2: guidance level - "Basic", a no-guidance control,
-   against "Improved", the shipped configuration - crossed with model family, Claude Sonnet
+1. **Does the guidance layer help?** A 2x2: guidance level - a no-guidance control against
+   the with-guidance configuration the project ships - crossed with model family, Claude Sonnet
    against Gemini Flash. On Claude alone the two levels cannot be separated on extraction
    accuracy: the run-to-run spread is larger than the gap, and the report says so rather than
    claiming a gain. The second model tests whether the guidance does work a capable model
    already does unaided.
 
 2. **Which model should the project use?** Claude Sonnet (the incumbent), Claude Haiku, Gemini
-   Flash and Mistral Small, all on the shipped configuration only. The incumbent is included
+   Flash and Mistral Small, all on the with-guidance configuration only. The incumbent is included
    because the question is whether to replace it. Tiers and release dates differ and the
    mismatch runs both ways - Sonnet is a larger tier, Gemini Flash is a later release - so
    this is reported as a procurement decision for this project, not a vendor ranking. Haiku is
@@ -162,7 +162,7 @@ BARE_TOOL["description"] = "Record extracted data."
 
 @dataclass(frozen=True)
 class Condition:
-    label: str          # how the report names it, e.g. "Improved (Gemini Flash)"
+    label: str          # how the report names it, e.g. "With guidance (Gemini Flash)"
     provider: str       # "claude" | "gemini" | "mistral" - which adapter drives it
     guidance: str       # "Basic" | "Improved" - the axis being ablated
     prompt: str
@@ -176,21 +176,21 @@ class Condition:
 
 CONDITIONS = {
     # The guidance 2x2.
-    "naive":        Condition("Basic (Claude Sonnet)", "claude", "Basic",
+    "naive":        Condition("Without guidance (Claude Sonnet)", "claude", "Basic",
                               BASELINE_PROMPT, BARE_TOOL, group="claude", short="Claude Sonnet"),
-    "prod":         Condition("Improved (Claude Sonnet)", "claude", "Improved",
+    "prod":         Condition("With guidance (Claude Sonnet)", "claude", "Improved",
                               SYSTEM_PROMPT, EXTRACTION_TOOL, group="claude", short="Claude Sonnet"),
-    "gemini_naive": Condition("Basic (Gemini Flash)", "gemini", "Basic",
+    "gemini_naive": Condition("Without guidance (Gemini Flash)", "gemini", "Basic",
                               BASELINE_PROMPT, BARE_TOOL, group="gemini", short="Gemini Flash"),
-    "gemini_prod":  Condition("Improved (Gemini Flash)", "gemini", "Improved",
+    "gemini_prod":  Condition("With guidance (Gemini Flash)", "gemini", "Improved",
                               SYSTEM_PROMPT, EXTRACTION_TOOL, group="gemini", short="Gemini Flash"),
     # Model comparison, shipped config only. These deliberately carry no Basic arm: the guidance
     # question is already answered by the 2x2 above, and "which model should this product use?"
     # is correctly asked under the configuration that actually ships.
-    "haiku_prod":   Condition("Improved (Claude Haiku)", "claude", "Improved",
+    "haiku_prod":   Condition("With guidance (Claude Haiku)", "claude", "Improved",
                               SYSTEM_PROMPT, EXTRACTION_TOOL, group="haiku",
                               short="Claude Haiku", model="claude-haiku-4-5"),
-    "mistral_prod": Condition("Improved (Mistral Small)", "mistral", "Improved",
+    "mistral_prod": Condition("With guidance (Mistral Small)", "mistral", "Improved",
                               SYSTEM_PROMPT, EXTRACTION_TOOL, group="mistral", short="Mistral Small"),
 }
 
@@ -844,7 +844,7 @@ Each candidate carries a flaw that is specifically disqualifying for this produc
 - **Mistral Small** proposes almost nothing wrong, but misses roughly a third of the real work.
   For a meeting orchestrator a dropped action item is the worst available failure.
 
-**Recommendation: keep the shipped Claude Sonnet configuration.** It is the only option without a
+**Recommendation: keep the with-guidance Claude Sonnet configuration.** It is the only option without a
 specific disqualifier. If cost later forces a change, Haiku is the most rescuable of the three - a
 constant offset is the kind of error a prompt change could plausibly remove, unlike a field the
 model declines to populate or recall it never had. That fix would need validating before a switch,
@@ -852,23 +852,42 @@ not instead of one.
 """
 
 
+def _fails(m: dict) -> str:
+    """Validation failures as a fraction of parses, e.g. "3/16"."""
+    return f"{m['validation_failures']}/{m['parses']}"
+
+
 def _study_one(overlap, comp, counts) -> str:
-    """Does the guidance layer help? One table, both models, both arms."""
-    order = ["naive", "prod", "gemini_naive", "gemini_prod"]
-    present = [c for c in order if c in overlap]
-    if len(present) < 2:
+    """Does the guidance layer help? One row per model, every cell a within-model contrast.
+
+    Laid out as `without -> with` pairs rather than one row per arm. The only valid comparison
+    here is within a model - the two families are a generation apart - and a four-row grid
+    invites reading down the columns instead. Pairing the arms inside each cell makes the
+    change the unit of analysis, and puts the replicated result (both models 3/16 -> 0/16) in
+    one column where it can be seen at a glance.
+    """
+    pairs = [("naive", "prod"), ("gemini_naive", "gemini_prod")]
+    have = [(b, i) for b, i in pairs if b in overlap and i in overlap]
+    if not have:
         return ""
 
+    def arrow(before, after) -> str:
+        return f"{before} -> **{after}**"
+
     rows = []
-    for cond in present:
-        m, q = overlap[cond], (comp or {}).get(cond, {})
-        bold = "**" if CONDITIONS[cond].guidance == "Improved" else ""
+    for base, impr in have:
+        mb, mi = overlap[base], overlap[impr]
+        qb, qi = (comp or {}).get(base, {}), (comp or {}).get(impr, {})
+        runs = (str(mi["n_runs"]) if mb["n_runs"] == mi["n_runs"]
+                else f"{mb['n_runs']} / {mi['n_runs']}")
         rows.append(
-            f"| {bold}{CONDITIONS[cond].label}{bold} | {m['n_runs']} | {m['precision']} | "
-            f"{m['recall']} | {bold}{m['f1']}{bold} | "
-            f"{m['validation_failures']}/{m['parses']} | "
-            f"{_pct(q.get('source_decision_rate'))} | "
-            f"{_fmt_frac(counts, cond, 'owner')} |")
+            f"| {CONDITIONS[impr].short} | {runs} | "
+            f"{arrow(_fails(mb), _fails(mi))} | "
+            f"{arrow(_pct(qb.get('source_decision_rate')), _pct(qi.get('source_decision_rate')))} | "
+            f"{arrow(mb['recall'], mi['recall'])} | "
+            f"{arrow(mb['precision'], mi['precision'])} | "
+            f"{arrow(mb['f1'], mi['f1'])} | "
+            f"{arrow(_fmt_frac(counts, base, 'owner'), _fmt_frac(counts, impr, 'owner'))} |")
 
     c_n, c_p = (comp or {}).get("naive", {}), (comp or {}).get("prod", {})
     g_n, g_p = (comp or {}).get("gemini_naive", {}), (comp or {}).get("gemini_prod", {})
@@ -900,18 +919,23 @@ that cannot be filtered on.""")
     return f"""
 ## Study 1 - does the guidance layer help?
 
-Within each model the two rows differ **only** in guidance text; the JSON contract is identical.
+Within each model the two arms differ **only** in guidance text; the JSON contract is identical.
 `eval/test_matching.py` asserts this for Claude, `eval/test_providers.py` for Gemini after schema
 translation.
 
-| Condition | Runs | Precision | Recall | F1 | Validation failures | `source_decision` | Owner |
+Each cell reads *without guidance* -> **with guidance**, for that model alone. The contrast is
+within one row; the two models are a generation apart, so a gap read *down* a column would
+measure release date as much as capability.
+
+| Model | Runs | Validation failures | `source_decision` | Recall | Precision | F1 | Owner |
 |---|---|---|---|---|---|---|---|
 {chr(10).join(rows)}
 
 {prose}
 
-> These two models are a generation apart, so rows are comparable *within* a model but not
-> *across* one - a cross-model gap here would measure release date as much as capability.
+> Gemini Flash is here as a replication check, not as a competitor: the question is whether the
+> guidance effect is a property of the schema or a quirk of one vendor's tool use. The model
+> comparison is Study 2.
 """
 
 
@@ -934,7 +958,8 @@ def _study_two(overlap, comp, counts, models) -> str:
     return f"""
 ## Study 2 - which model should the project use?
 
-Every row runs the **shipped configuration**; only the model changes. The incumbent (Claude
+Every row runs the **with-guidance configuration** - the one the project ships; only the
+model changes. The incumbent (Claude
 Sonnet) is included because the question is whether to replace it, and a candidate list without
 the thing being replaced cannot answer that.
 
@@ -1068,7 +1093,8 @@ The transcript parser is scored against **{n_transcripts} synthetic SAP meeting 
 
 ## Step 1 - choosing the model
 
-Every row runs the same shipped configuration; only the model changes.
+Every row runs the same with-guidance configuration - the one the project ships; only the
+model changes.
 
 | Model | Action items found | F1 | Deadlines correct | Context captured | Cost |
 |---|---|---|---|---|---|
@@ -1095,7 +1121,7 @@ Having chosen Claude Sonnet, the same model is run with and without the structur
 the refined prompt rules plus the fully described JSON schema. The output contract is identical in
 both columns; only the guidance text differs.
 
-| Metric | No guidance | Shipped |
+| Metric | Without guidance | With guidance |
 |---|---|---|
 {guidance_rows}
 
@@ -1291,12 +1317,12 @@ def main() -> None:
         print("Judge scores reused from eval/results.json where available (no API calls).")
 
     print("\n=== mean over each condition's own runs ===")
-    hdr = (f"{'condition':26} {'runs':>5} {'F1 ovl':>8} {'F1 judge':>9} {'prec':>7} "
+    hdr = (f"{'condition':32} {'runs':>5} {'F1 ovl':>8} {'F1 judge':>9} {'prec':>7} "
            f"{'recall':>7} {'fail':>8}")
     print(hdr); print("-" * len(hdr))
     for name, agg in overlap.items():
         j = judge.get(name, {}).get("f1", "-")
-        print(f"{LABELS.get(name, name):26} {agg['n_runs']:5} {agg['f1']:8} {str(j):>9} "
+        print(f"{LABELS.get(name, name):32} {agg['n_runs']:5} {agg['f1']:8} {str(j):>9} "
               f"{agg['precision']:7} {agg['recall']:7} "
               f"{str(agg['validation_failures']) + '/' + str(agg['parses']):>8}")
 

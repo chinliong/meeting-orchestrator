@@ -13,7 +13,8 @@ The transcript parser is scored against **4 synthetic SAP meeting transcripts** 
 
 ## Step 1 - choosing the model
 
-Every row runs the same shipped configuration; only the model changes.
+Every row runs the same with-guidance configuration - the one the project ships; only the
+model changes.
 
 | Model | Action items found | F1 | Deadlines correct | Context captured | Cost |
 |---|---|---|---|---|---|
@@ -45,7 +46,7 @@ Having chosen Claude Sonnet, the same model is run with and without the structur
 the refined prompt rules plus the fully described JSON schema. The output contract is identical in
 both columns; only the guidance text differs.
 
-| Metric | No guidance | Shipped |
+| Metric | Without guidance | With guidance |
 |---|---|---|
 | Source decision captured | 53% | **82%** |
 | Confidence actually varies | 0.8 - 1.0 (7 values) | **0.75 - 0.99 (11 values)** |
