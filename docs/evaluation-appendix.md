@@ -30,9 +30,9 @@ would be reporting noise. What it does resolve is how each one *fails*:
 | Model | Recall | Deadlines exact | `source_decision` | Cost |
 |---|---|---|---|---|
 | Claude Sonnet | 0.826 | 45/60 | 81% | paid, ~$3/$15 per M tokens; current model |
-| Claude Haiku | 0.705 | 17/54 | 95% | paid, ~$1/$5 per M tokens; no request cap |
-| Gemini Flash | 0.947 | 54/60 | 19% | free tier, 20 requests/day/model |
-| Mistral Small | 0.644 | 42/56 | 47% | free tier, rate-limited |
+| Claude Haiku | 0.705 | 17/54 | 95% | paid, ~$1/$5 per M tokens |
+| Gemini Flash | 0.947 | 54/60 | 19% | free tier used for this evaluation; paid tier available |
+| Mistral Small | 0.644 | 42/56 | 47% | free tier used for this evaluation; paid tier available |
 
 Each candidate carries a flaw that is specifically disqualifying for this product:
 
@@ -151,6 +151,16 @@ elsewhere in this report, 52% of 54 scored deadlines is well outside the noise.
 
 ## Limitations
 
+- **The test set is synthetic.** The four transcripts were generated for this project and written
+  to be deliberately messy - interruptions, corrections, half-finished sentences and decisions
+  revisited later - so that the parser is not only measured on tidy prose. They are still authored
+  text rather than a transcription of real speech, which is the honest caveat: generated dialogue
+  may be more internally consistent than a genuine recording even when written to look untidy. The
+  pipeline was separately exercised end to end on a real recording from the AMI meeting corpus, but
+  that recording is not part of the scored test set.
+- **One annotator, no second opinion.** The answer key was labelled by the project author, so there
+  is no inter-annotator agreement figure and no independent check on what counts as an action item.
+  On a four-transcript set a single ambiguous judgement moves the reported rates measurably.
 - **Small test set** (4 transcripts, 33 annotated items) and few runs per condition. Individual
   runs of the same configuration varied by up to ~0.15 F1 - larger than most gaps reported here.
   This is the binding limitation and it bounds every number above. More runs on a larger, noisier

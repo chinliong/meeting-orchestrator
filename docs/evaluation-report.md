@@ -18,9 +18,9 @@ Every row runs the same shipped configuration; only the model changes.
 | Model | Action items found | F1 | Deadlines correct | Context captured | Cost |
 |---|---|---|---|---|---|
 | **Claude Sonnet** | 83% | 0.831 | 75% | 81% | paid, ~$3/$15 per M tokens; current model |
-| Claude Haiku | 70% | 0.801 | 31% | 95% | paid, ~$1/$5 per M tokens; no request cap |
-| Gemini Flash | 95% | 0.909 | 90% | 19% | free tier, 20 requests/day/model |
-| Mistral Small | 64% | 0.784 | 75% | 47% | free tier, rate-limited |
+| Claude Haiku | 70% | 0.801 | 31% | 95% | paid, ~$1/$5 per M tokens |
+| Gemini Flash | 95% | 0.909 | 90% | 19% | free tier used for this evaluation; paid tier available |
+| Mistral Small | 64% | 0.784 | 75% | 47% | free tier used for this evaluation; paid tier available |
 
 **Claude Haiku has a systematic date bug.** 52% of the deadlines it produced land exactly +1 day
 from the correct one - it reads "by Friday" as the following day, consistently. Every reminder
@@ -29,10 +29,10 @@ scheduled from it would fire a day late.
 **No model wins outright, and Claude Sonnet was chosen because it is the only one with no
 disqualifying failure.** Gemini Flash actually finds more action items and reads dates better,
 but leaves the source-decision field empty on most of them, so its tasks arrive without the
-context the board needs - and its free tier allows 20 requests a day, which is a demo quota
-rather than a production one. Mistral Small proposes almost nothing wrong but misses roughly a
-third of the real work, and a dropped action item is the worst failure this application can
-have. Claude Haiku carries the date bug above.
+context the board and the subtask generator depend on. Mistral Small proposes almost nothing
+wrong but misses roughly a third of the real work, and a dropped action item is the worst
+failure this application can have - nothing on the board indicates that it is missing. Claude
+Haiku carries the date bug above.
 
 > These models sit at different price tiers *and* different release dates - Sonnet is a larger
 > tier than the other three, while Gemini Flash is a later release than Sonnet. The confound

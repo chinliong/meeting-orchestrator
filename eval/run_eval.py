@@ -704,9 +704,9 @@ def _models_used(cache: dict, overlap: dict) -> dict:
 # and price are what actually separate the options.
 _MODEL_NOTES = {
     "prod": "paid, ~$3/$15 per M tokens; current model",
-    "haiku_prod": "paid, ~$1/$5 per M tokens; no request cap",
-    "gemini_prod": "free tier, 20 requests/day/model",
-    "mistral_prod": "free tier, rate-limited",
+    "haiku_prod": "paid, ~$1/$5 per M tokens",
+    "gemini_prod": "free tier used for this evaluation; paid tier available",
+    "mistral_prod": "free tier used for this evaluation; paid tier available",
 }
 
 # Below this, differences in F1 on this test set are not distinguishable from run-to-run noise.
@@ -1062,10 +1062,10 @@ Every row runs the same shipped configuration; only the model changes.
 {_wrap('''**No model wins outright, and Claude Sonnet was chosen because it is the only one with no
 disqualifying failure.** Gemini Flash actually finds more action items and reads dates better, but
 leaves the source-decision field empty on most of them, so its tasks arrive without the context the
-board needs - and its free tier allows 20 requests a day, which is a demo quota rather than a
-production one. Mistral Small proposes almost nothing wrong but misses roughly a third of the real
-work, and a dropped action item is the worst failure this application can have. Claude Haiku carries
-the date bug above.''')}
+board and the subtask generator depend on. Mistral Small proposes almost nothing wrong but misses
+roughly a third of the real work, and a dropped action item is the worst failure this application
+can have - nothing on the board indicates that it is missing. Claude Haiku carries the date bug
+above.''')}
 
 > {_wrap('''These models sit at different price tiers *and* different release dates - Sonnet is a
 larger tier than the other three, while Gemini Flash is a later release than Sonnet. The confound
@@ -1166,6 +1166,16 @@ enum, because a translation bug would surface as a model difference that is real
 {_study_one(overlap, comp, counts)}{_study_two(overlap, comp, counts, models)}{_deadline_section(offsets)}
 ## Limitations
 
+- **The test set is synthetic.** The four transcripts were generated for this project and written
+  to be deliberately messy - interruptions, corrections, half-finished sentences and decisions
+  revisited later - so that the parser is not only measured on tidy prose. They are still authored
+  text rather than a transcription of real speech, which is the honest caveat: generated dialogue
+  may be more internally consistent than a genuine recording even when written to look untidy. The
+  pipeline was separately exercised end to end on a real recording from the AMI meeting corpus, but
+  that recording is not part of the scored test set.
+- **One annotator, no second opinion.** The answer key was labelled by the project author, so there
+  is no inter-annotator agreement figure and no independent check on what counts as an action item.
+  On a four-transcript set a single ambiguous judgement moves the reported rates measurably.
 - **Small test set** ({n_transcripts} transcripts, {n_items} annotated items) and few runs per condition. Individual
   runs of the same configuration varied by up to ~{NOISE_FLOOR_F1} F1 - larger than most gaps reported here.
   This is the binding limitation and it bounds every number above. More runs on a larger, noisier
