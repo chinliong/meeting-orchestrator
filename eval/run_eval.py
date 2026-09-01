@@ -1170,8 +1170,10 @@ enum, because a translation bug would surface as a model difference that is real
   runs of the same configuration varied by up to ~{NOISE_FLOOR_F1} F1 - larger than most gaps reported here.
   This is the binding limitation and it bounds every number above. More runs on a larger, noisier
   test set is the single highest-value improvement.
-- **Run counts are unequal** (free tiers cap daily requests; Claude runs cost credit), so the
-  means are not equally precise estimates of each other.
+- **Run counts are capped by cost and quota**, not chosen for statistical power: the free tiers
+  limit daily requests and the Claude runs are billed. Each condition is averaged over its own
+  runs and the count is printed in the results table, so an unequal batch would be visible
+  rather than silently pooled.
 - **The Study 1 models are a generation apart** (`{bare.get('claude', '?')}` vs `{bare.get('gemini', '?')}`), so nothing
   here ranks providers. Only within-model contrasts are fair. Re-running the Claude side on a
   current model is the fix and costs API credit.
@@ -1190,9 +1192,9 @@ enum, because a translation bug would surface as a model difference that is real
 
 ## Raw results
 
-`eval/results.json` holds the scored metrics for every condition, including the LLM-judge figures
-omitted from the tables. `eval/predictions.json` holds the cached raw parser output each run was
-scored from, so scoring can be repeated offline without re-querying any model.
+`eval/results.json` holds the scored metrics for every condition, including any LLM-judge
+figures that have been computed. `eval/predictions.json` holds the cached raw parser output
+each run was scored from, so scoring can be repeated offline without re-querying any model.
 """
 
 # --------------------------------------------------------------------------- main
