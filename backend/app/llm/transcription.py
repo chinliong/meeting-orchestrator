@@ -151,6 +151,12 @@ def _compress_for_api(src_path: str) -> str | None:
 
 # Gemini's inline-data request cap; base64 expands the payload by about a third.
 _GEMINI_MAX_AUDIO_BYTES = 14 * 1024 * 1024
+# Hard ceiling on the whole chain. Transcription is a foreground request the user is waiting
+# on, and a Whisper fallback is usually configured, so an unbounded walk through every model is
+# worse than giving up early: in testing a six-minute chain of 503s exhausted the browser's
+# patience before the fallback ever ran. Two attempts per model, then move on.
+_GEMINI_DEADLINE_SECONDS = float(os.getenv("GEMINI_CHAIN_DEADLINE_SECONDS", "100"))
+_GEMINI_ATTEMPTS_PER_MODEL = 2
 _GEMINI_PROMPT = (
     "Transcribe this meeting recording verbatim in English. Output only the transcript text, "
     "with no speaker labels, timestamps, commentary or headings. Include every spoken word, "
@@ -212,14 +218,20 @@ def _transcribe_via_gemini(tmp_path: str) -> str:
     }
     payload = _json.dumps(body).encode()
     last = "no Gemini model answered"
+    deadline = time.monotonic() + _GEMINI_DEADLINE_SECONDS
     for model in _gemini_models():
-        for attempt in range(3):
+        for attempt in range(_GEMINI_ATTEMPTS_PER_MODEL):
+            if time.monotonic() > deadline:
+                log.warning("transcription: Gemini chain out of time after %.0fs, giving up",
+                            _GEMINI_DEADLINE_SECONDS)
+                raise TranscriptionError(f"Transcription timed out: {last}.")
             url = (f"https://generativelanguage.googleapis.com/v1beta/models/"
                    f"{model}:generateContent?key={_gemini_key()}")
             req = urllib.request.Request(url, payload, {"Content-Type": "application/json"})
             started = time.perf_counter()
             try:
-                with urllib.request.urlopen(req, timeout=600) as resp:
+                remaining = max(5.0, deadline - time.monotonic())
+                with urllib.request.urlopen(req, timeout=remaining) as resp:
                     data = _json.loads(resp.read())
             except urllib.error.HTTPError as exc:
                 last = f"HTTP {exc.code} from {model}"
@@ -227,11 +239,11 @@ def _transcribe_via_gemini(tmp_path: str) -> str:
                     log.info("transcription: %s quota exhausted, trying next model", model)
                     break
                 log.info("transcription: %s HTTP %d (attempt %d)", model, exc.code, attempt + 1)
-                time.sleep(2 * (attempt + 1))
+                time.sleep(min(3.0, max(0.0, deadline - time.monotonic())))
                 continue
             except urllib.error.URLError as exc:
                 last = f"could not reach Gemini: {exc.reason}"
-                time.sleep(2 * (attempt + 1))
+                time.sleep(min(3.0, max(0.0, deadline - time.monotonic())))
                 continue
             candidates = data.get("candidates") or []
             text = "".join(
@@ -323,10 +335,11 @@ def transcribe_audio(data: bytes, suffix: str = ".wav") -> str:
         if _gemini_key() is not None:
             try:
                 return _transcribe_via_gemini(tmp_path)
-            except TranscriptionError:
+            except TranscriptionError as exc:
                 if _api_key() is None and not _local_whisper_installed():
                     raise
-                log.warning("transcription: Gemini chain failed, falling back")
+                log.warning("transcription: Gemini unavailable (%s), "
+                            "falling back to Whisper", exc)
         if _api_key() is not None:
             return _transcribe_via_api(tmp_path)
         return _transcribe_locally(tmp_path)
