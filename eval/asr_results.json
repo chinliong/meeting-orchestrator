@@ -1,274 +1,445 @@
 {
-  "scores": {
-    "turbo": {
-      "wer": 0.1748,
-      "sub": 167,
-      "del": 237,
-      "ins": 46,
-      "ref_words": 2574,
-      "hyp_words": 2383,
-      "label": "Whisper turbo",
-      "seconds": 212,
-      "note": "",
-      "realtime_factor": 4.9,
-      "ci": [
-        0.1406,
-        0.2075
-      ]
+  "ES2008a": {
+    "scores": {
+      "deepgram-nova-3": {
+        "wer": 0.1298,
+        "sub": 119,
+        "del": 181,
+        "ins": 34,
+        "ref_words": 2574,
+        "hyp_words": 2427,
+        "label": "Deepgram Nova-3",
+        "where": "hosted",
+        "note": "",
+        "seconds": 3.47,
+        "realtime_factor": 300.6,
+        "ci": [
+          0.1027,
+          0.1596
+        ]
+      },
+      "groq-large-v3": {
+        "wer": 0.1639,
+        "sub": 121,
+        "del": 266,
+        "ins": 35,
+        "ref_words": 2574,
+        "hyp_words": 2343,
+        "label": "Whisper large-v3",
+        "where": "hosted",
+        "note": "",
+        "seconds": 4.43,
+        "realtime_factor": 235.4,
+        "ci": [
+          0.1368,
+          0.1919
+        ]
+      },
+      "groq-turbo": {
+        "wer": 0.1659,
+        "sub": 125,
+        "del": 269,
+        "ins": 33,
+        "ref_words": 2574,
+        "hyp_words": 2338,
+        "label": "Whisper large-v3-turbo",
+        "where": "hosted",
+        "note": "",
+        "seconds": 2.35,
+        "realtime_factor": 443.8,
+        "ci": [
+          0.1369,
+          0.1965
+        ]
+      },
+      "local-turbo": {
+        "wer": 0.1748,
+        "sub": 167,
+        "del": 237,
+        "ins": 46,
+        "ref_words": 2574,
+        "hyp_words": 2383,
+        "label": "Whisper turbo",
+        "where": "local",
+        "note": "",
+        "seconds": 212,
+        "realtime_factor": 4.9,
+        "ci": [
+          0.1406,
+          0.2075
+        ]
+      },
+      "local-medium": {
+        "wer": 0.1946,
+        "sub": 142,
+        "del": 311,
+        "ins": 48,
+        "ref_words": 2574,
+        "hyp_words": 2311,
+        "label": "Whisper medium",
+        "where": "local",
+        "note": "",
+        "seconds": 198,
+        "realtime_factor": 5.3,
+        "ci": [
+          0.16,
+          0.2284
+        ]
+      },
+      "local-small": {
+        "wer": 0.2106,
+        "sub": 209,
+        "del": 290,
+        "ins": 43,
+        "ref_words": 2574,
+        "hyp_words": 2327,
+        "label": "Whisper small",
+        "where": "local",
+        "note": "",
+        "seconds": 78,
+        "realtime_factor": 13.4,
+        "ci": [
+          0.1717,
+          0.2484
+        ]
+      },
+      "local-base": {
+        "wer": 0.2883,
+        "sub": 323,
+        "del": 332,
+        "ins": 87,
+        "ref_words": 2574,
+        "hyp_words": 2329,
+        "label": "Whisper base",
+        "where": "local",
+        "note": "the library default before this evaluation",
+        "seconds": 33,
+        "realtime_factor": 31.6,
+        "ci": [
+          0.2199,
+          0.3629
+        ]
+      },
+      "local-large-v3": {
+        "wer": 0.3314,
+        "sub": 284,
+        "del": 377,
+        "ins": 192,
+        "ref_words": 2574,
+        "hyp_words": 2389,
+        "label": "Whisper large-v3",
+        "where": "local",
+        "note": "hallucination loops - see below",
+        "seconds": 623,
+        "realtime_factor": 1.7,
+        "ci": [
+          0.2521,
+          0.4211
+        ]
+      },
+      "local-turbo-perchannel": {
+        "wer": 0.6686,
+        "sub": 224,
+        "del": 182,
+        "ins": 1315,
+        "ref_words": 2574,
+        "hyp_words": 3707,
+        "label": "Whisper turbo, per-channel",
+        "where": "local",
+        "note": "four headset channels merged; microphone bleed duplicates most speech",
+        "seconds": 470,
+        "realtime_factor": 2.2,
+        "ci": [
+          0.5753,
+          0.7619
+        ]
+      }
     },
-    "medium": {
-      "wer": 0.1946,
-      "sub": 142,
-      "del": 311,
-      "ins": 48,
-      "ref_words": 2574,
-      "hyp_words": 2311,
-      "label": "Whisper medium",
-      "seconds": 198,
-      "note": "",
-      "realtime_factor": 5.3,
-      "ci": [
-        0.16,
-        0.2284
-      ]
-    },
-    "small": {
-      "wer": 0.2106,
-      "sub": 209,
-      "del": 290,
-      "ins": 43,
-      "ref_words": 2574,
-      "hyp_words": 2327,
-      "label": "Whisper small",
-      "seconds": 78,
-      "note": "",
-      "realtime_factor": 13.4,
-      "ci": [
-        0.1717,
-        0.2484
-      ]
-    },
-    "base": {
-      "wer": 0.2883,
-      "sub": 323,
-      "del": 332,
-      "ins": 87,
-      "ref_words": 2574,
-      "hyp_words": 2329,
-      "label": "Whisper base",
-      "seconds": 33,
-      "note": "the configured default before this evaluation",
-      "realtime_factor": 31.6,
-      "ci": [
-        0.2199,
-        0.3629
-      ]
-    },
-    "large-v3": {
-      "wer": 0.3314,
-      "sub": 284,
-      "del": 377,
-      "ins": 192,
-      "ref_words": 2574,
-      "hyp_words": 2389,
-      "label": "Whisper large-v3",
-      "seconds": 623,
-      "note": "hallucination loops: 133 repeated 5-grams against 26-39 for every other single-channel configuration - see below, the same weights score 16.4% when hosted",
-      "realtime_factor": 1.7,
-      "ci": [
-        0.2521,
-        0.4211
-      ]
-    },
-    "perchannel-turbo": {
-      "wer": 0.6686,
-      "sub": 224,
-      "del": 182,
-      "ins": 1315,
-      "ref_words": 2574,
-      "hyp_words": 3707,
-      "label": "Whisper turbo, per-channel",
-      "seconds": 470,
-      "note": "four headset channels transcribed separately and merged; microphone bleed duplicates most speech",
-      "realtime_factor": 2.2,
-      "ci": [
-        0.5753,
-        0.7619
-      ]
-    },
-    "groq-turbo": {
-      "wer": 0.1659,
-      "sub": 125,
-      "del": 269,
-      "ins": 33,
-      "ref_words": 2574,
-      "hyp_words": 2338,
-      "label": "Groq whisper-large-v3-turbo (hosted)",
-      "seconds": 2.35,
-      "note": "the configured default: nothing runs on the server, so the audio path fits a memory-limited free tier",
-      "realtime_factor": 443.8,
-      "ci": [
-        0.1369,
-        0.1965
-      ]
-    },
-    "groq-large-v3": {
-      "wer": 0.1639,
-      "sub": 121,
-      "del": 266,
-      "ins": 35,
-      "ref_words": 2574,
-      "hyp_words": 2343,
-      "label": "Groq whisper-large-v3 (hosted)",
-      "seconds": 4.43,
-      "note": "nominally ahead of hosted turbo but inside the interval, and 1.9x the wall-clock",
-      "realtime_factor": 235.4,
-      "ci": [
-        0.1368,
-        0.1919
-      ]
+    "pairs": {
+      "deepgram-nova-3 vs groq-large-v3": {
+        "lo": -0.0575,
+        "hi": -0.0112,
+        "significant": true
+      },
+      "deepgram-nova-3 vs groq-turbo": {
+        "lo": -0.0555,
+        "hi": -0.0155,
+        "significant": true
+      },
+      "deepgram-nova-3 vs local-turbo": {
+        "lo": -0.0692,
+        "hi": -0.0204,
+        "significant": true
+      },
+      "deepgram-nova-3 vs local-medium": {
+        "lo": -0.0956,
+        "hi": -0.0342,
+        "significant": true
+      },
+      "deepgram-nova-3 vs local-small": {
+        "lo": -0.1115,
+        "hi": -0.0519,
+        "significant": true
+      },
+      "deepgram-nova-3 vs local-base": {
+        "lo": -0.2249,
+        "hi": -0.101,
+        "significant": true
+      },
+      "deepgram-nova-3 vs local-large-v3": {
+        "lo": -0.2918,
+        "hi": -0.1232,
+        "significant": true
+      },
+      "deepgram-nova-3 vs local-turbo-perchannel": {
+        "lo": -0.6453,
+        "hi": -0.4332,
+        "significant": true
+      },
+      "groq-large-v3 vs groq-turbo": {
+        "lo": -0.0177,
+        "hi": 0.0122,
+        "significant": false
+      },
+      "groq-large-v3 vs local-turbo": {
+        "lo": -0.035,
+        "hi": 0.0131,
+        "significant": false
+      },
+      "groq-large-v3 vs local-medium": {
+        "lo": -0.048,
+        "hi": -0.0138,
+        "significant": true
+      },
+      "groq-large-v3 vs local-small": {
+        "lo": -0.0738,
+        "hi": -0.0221,
+        "significant": true
+      },
+      "groq-large-v3 vs local-base": {
+        "lo": -0.1849,
+        "hi": -0.0684,
+        "significant": true
+      },
+      "groq-large-v3 vs local-large-v3": {
+        "lo": -0.2535,
+        "hi": -0.0932,
+        "significant": true
+      },
+      "groq-large-v3 vs local-turbo-perchannel": {
+        "lo": -0.6115,
+        "hi": -0.3982,
+        "significant": true
+      },
+      "groq-turbo vs local-turbo": {
+        "lo": -0.0319,
+        "hi": 0.0163,
+        "significant": false
+      },
+      "groq-turbo vs local-medium": {
+        "lo": -0.0492,
+        "hi": -0.0091,
+        "significant": true
+      },
+      "groq-turbo vs local-small": {
+        "lo": -0.073,
+        "hi": -0.0212,
+        "significant": true
+      },
+      "groq-turbo vs local-base": {
+        "lo": -0.18,
+        "hi": -0.0699,
+        "significant": true
+      },
+      "groq-turbo vs local-large-v3": {
+        "lo": -0.2512,
+        "hi": -0.0932,
+        "significant": true
+      },
+      "groq-turbo vs local-turbo-perchannel": {
+        "lo": -0.6102,
+        "hi": -0.3916,
+        "significant": true
+      },
+      "local-turbo vs local-turbo-perchannel": {
+        "lo": -0.6064,
+        "hi": -0.3854,
+        "significant": true
+      },
+      "local-medium vs local-turbo": {
+        "lo": 0.0012,
+        "hi": 0.0432,
+        "significant": true
+      },
+      "local-medium vs local-small": {
+        "lo": -0.0358,
+        "hi": 0.0059,
+        "significant": false
+      },
+      "local-medium vs local-turbo-perchannel": {
+        "lo": -0.5857,
+        "hi": -0.3632,
+        "significant": true
+      },
+      "local-small vs local-turbo": {
+        "lo": 0.0181,
+        "hi": 0.0559,
+        "significant": true
+      },
+      "local-small vs local-turbo-perchannel": {
+        "lo": -0.5754,
+        "hi": -0.3399,
+        "significant": true
+      },
+      "local-base vs local-turbo": {
+        "lo": 0.068,
+        "hi": 0.1692,
+        "significant": true
+      },
+      "local-base vs local-medium": {
+        "lo": 0.0436,
+        "hi": 0.15,
+        "significant": true
+      },
+      "local-base vs local-small": {
+        "lo": 0.0335,
+        "hi": 0.1288,
+        "significant": true
+      },
+      "local-base vs local-large-v3": {
+        "lo": -0.1321,
+        "hi": 0.0354,
+        "significant": false
+      },
+      "local-base vs local-turbo-perchannel": {
+        "lo": -0.5152,
+        "hi": -0.2358,
+        "significant": true
+      },
+      "local-large-v3 vs local-turbo": {
+        "lo": 0.0816,
+        "hi": 0.2455,
+        "significant": true
+      },
+      "local-large-v3 vs local-medium": {
+        "lo": 0.0612,
+        "hi": 0.2261,
+        "significant": true
+      },
+      "local-large-v3 vs local-small": {
+        "lo": 0.0443,
+        "hi": 0.2098,
+        "significant": true
+      },
+      "local-large-v3 vs local-turbo-perchannel": {
+        "lo": -0.4665,
+        "hi": -0.188,
+        "significant": true
+      }
     }
   },
-  "pairs": {
-    "medium vs turbo": {
-      "lo": 0.0012,
-      "hi": 0.0432,
-      "significant": true
+  "ES2010a": {
+    "scores": {
+      "deepgram-nova-3": {
+        "wer": 0.1535,
+        "sub": 59,
+        "del": 128,
+        "ins": 51,
+        "ref_words": 1550,
+        "hyp_words": 1473,
+        "label": "Deepgram Nova-3",
+        "where": "hosted",
+        "note": "",
+        "seconds": 3.47,
+        "realtime_factor": 185.7,
+        "ci": [
+          0.1045,
+          0.209
+        ]
+      },
+      "groq-large-v3": {
+        "wer": 0.1871,
+        "sub": 62,
+        "del": 175,
+        "ins": 53,
+        "ref_words": 1550,
+        "hyp_words": 1428,
+        "label": "Whisper large-v3",
+        "where": "hosted",
+        "note": "",
+        "seconds": 4.09,
+        "realtime_factor": 157.5,
+        "ci": [
+          0.1342,
+          0.2484
+        ]
+      },
+      "groq-turbo": {
+        "wer": 0.1716,
+        "sub": 74,
+        "del": 137,
+        "ins": 55,
+        "ref_words": 1550,
+        "hyp_words": 1468,
+        "label": "Whisper large-v3-turbo",
+        "where": "hosted",
+        "note": "",
+        "seconds": 2.5,
+        "realtime_factor": 257.7,
+        "ci": [
+          0.1206,
+          0.231
+        ]
+      },
+      "local-turbo": {
+        "wer": 0.2058,
+        "sub": 105,
+        "del": 126,
+        "ins": 88,
+        "ref_words": 1550,
+        "hyp_words": 1512,
+        "label": "Whisper turbo",
+        "where": "local",
+        "note": "",
+        "seconds": 138.5,
+        "realtime_factor": 4.7,
+        "ci": [
+          0.1458,
+          0.2742
+        ]
+      }
     },
-    "medium vs small": {
-      "lo": -0.0358,
-      "hi": 0.0059,
-      "significant": false
-    },
-    "medium vs perchannel-turbo": {
-      "lo": -0.5857,
-      "hi": -0.3632,
-      "significant": true
-    },
-    "small vs turbo": {
-      "lo": 0.0181,
-      "hi": 0.0559,
-      "significant": true
-    },
-    "base vs turbo": {
-      "lo": 0.068,
-      "hi": 0.1692,
-      "significant": true
-    },
-    "base vs medium": {
-      "lo": 0.0436,
-      "hi": 0.15,
-      "significant": true
-    },
-    "base vs small": {
-      "lo": 0.0335,
-      "hi": 0.1288,
-      "significant": true
-    },
-    "base vs large-v3": {
-      "lo": -0.1321,
-      "hi": 0.0354,
-      "significant": false
-    },
-    "base vs perchannel-turbo": {
-      "lo": -0.5152,
-      "hi": -0.2358,
-      "significant": true
-    },
-    "base vs groq-turbo": {
-      "lo": 0.0699,
-      "hi": 0.1804,
-      "significant": true
-    },
-    "base vs groq-large-v3": {
-      "lo": 0.0684,
-      "hi": 0.1861,
-      "significant": true
-    },
-    "large-v3 vs turbo": {
-      "lo": 0.0816,
-      "hi": 0.2455,
-      "significant": true
-    },
-    "large-v3 vs medium": {
-      "lo": 0.0612,
-      "hi": 0.2261,
-      "significant": true
-    },
-    "large-v3 vs small": {
-      "lo": 0.0443,
-      "hi": 0.2098,
-      "significant": true
-    },
-    "large-v3 vs perchannel-turbo": {
-      "lo": -0.4665,
-      "hi": -0.188,
-      "significant": true
-    },
-    "perchannel-turbo vs turbo": {
-      "lo": 0.3862,
-      "hi": 0.6069,
-      "significant": true
-    },
-    "perchannel-turbo vs small": {
-      "lo": 0.3403,
-      "hi": 0.5754,
-      "significant": true
-    },
-    "groq-turbo vs turbo": {
-      "lo": -0.0319,
-      "hi": 0.0163,
-      "significant": false
-    },
-    "groq-turbo vs medium": {
-      "lo": -0.0492,
-      "hi": -0.0091,
-      "significant": true
-    },
-    "groq-turbo vs small": {
-      "lo": -0.073,
-      "hi": -0.0212,
-      "significant": true
-    },
-    "groq-turbo vs large-v3": {
-      "lo": -0.2512,
-      "hi": -0.0932,
-      "significant": true
-    },
-    "groq-turbo vs perchannel-turbo": {
-      "lo": -0.6102,
-      "hi": -0.3916,
-      "significant": true
-    },
-    "groq-large-v3 vs turbo": {
-      "lo": -0.035,
-      "hi": 0.0131,
-      "significant": false
-    },
-    "groq-large-v3 vs medium": {
-      "lo": -0.048,
-      "hi": -0.0138,
-      "significant": true
-    },
-    "groq-large-v3 vs small": {
-      "lo": -0.0738,
-      "hi": -0.0221,
-      "significant": true
-    },
-    "groq-large-v3 vs large-v3": {
-      "lo": -0.2535,
-      "hi": -0.0932,
-      "significant": true
-    },
-    "groq-large-v3 vs perchannel-turbo": {
-      "lo": -0.6115,
-      "hi": -0.3982,
-      "significant": true
-    },
-    "groq-large-v3 vs groq-turbo": {
-      "lo": -0.0177,
-      "hi": 0.0122,
-      "significant": false
+    "pairs": {
+      "deepgram-nova-3 vs groq-large-v3": {
+        "lo": -0.0516,
+        "hi": -0.0161,
+        "significant": true
+      },
+      "deepgram-nova-3 vs groq-turbo": {
+        "lo": -0.0355,
+        "hi": -0.0006,
+        "significant": true
+      },
+      "deepgram-nova-3 vs local-turbo": {
+        "lo": -0.0961,
+        "hi": -0.0168,
+        "significant": true
+      },
+      "groq-large-v3 vs groq-turbo": {
+        "lo": 0.0013,
+        "hi": 0.0316,
+        "significant": true
+      },
+      "groq-large-v3 vs local-turbo": {
+        "lo": -0.0619,
+        "hi": 0.0142,
+        "significant": false
+      },
+      "groq-turbo vs local-turbo": {
+        "lo": -0.0787,
+        "hi": -0.0006,
+        "significant": true
+      }
     }
   }
 }

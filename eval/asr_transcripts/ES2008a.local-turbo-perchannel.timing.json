@@ -1,0 +1,8 @@
+{
+  "seconds": 470,
+  "runs": [
+    470
+  ],
+  "model": "perchannel-turbo",
+  "base_url": "local"
+}

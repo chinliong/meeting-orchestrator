@@ -8,8 +8,8 @@
 2. The user submits a meeting — pasted transcript text or an uploaded audio/video file.
 3. The frontend calls the FastAPI backend (`POST /transcripts` for text, `POST /transcripts/audio`
    for files). Write endpoints require edit access to the target board.
-4. For audio, the backend first runs Whisper (a hosted Whisper API by default, or a local model)
-   to obtain the transcript text.
+4. For audio, the backend first transcribes the file with a hosted service (Deepgram, falling
+   back to hosted Whisper) to obtain the transcript text.
 5. The backend sends the transcript to Claude with a forced tool-use schema; the response is
    validated into decisions, action items, owners, deadlines, and confidence via Pydantic.
 6. The structured data is persisted to the relational database (a `Meeting` plus its `Task` rows).
@@ -34,7 +34,7 @@ flowchart LR
         TK[tasks router]
         P[projects / stakeholders routers]
         AC[access control: owner JWT or workspace token]
-        W[Whisper transcription module]
+        W[transcription module]
         L[LLM parser module]
     end
 
@@ -98,8 +98,10 @@ flowchart LR
     validated `ExtractionResult` out, via Claude tool-use.
   - **Subtask generator** (`app/llm/subtasks.py`) — breaks a single task into an ordered checklist
     via Claude tool-use, either from the task's own details or from user-supplied instructions.
-  - **Whisper module** (`app/llm/transcription.py`) — optional, lazily imported; prefers a hosted
-    Whisper API and falls back to a local model, so the core app runs without the heavy dependency.
+  - **Transcription module** (`app/llm/transcription.py`) — optional, lazily imported. Tries
+    Deepgram, then hosted Whisper, then a local model, so a provider outage or an exhausted free
+    tier degrades the transcript instead of failing, and the core app runs without the heavy
+    local dependency. Model choice is measured in `docs/asr-evaluation.md`.
 - **Database:** PostgreSQL (prod) / SQLite (dev), via SQLAlchemy. Tables: `users`, `projects`,
   `meetings`, `stakeholders`, `tasks`, `subtasks`, `attachments`, `password_resets`. Attachment
   bytes are stored in the `attachments` row (the deploy target has an ephemeral filesystem and no
@@ -226,7 +228,7 @@ no `meeting_id` and carry full confidence.
 
 - LLM/API failures during parsing are caught and recorded on the meeting (`status = failed`,
   `error_message`) rather than crashing the request, so the client always gets a response.
-- The audio endpoint degrades gracefully: if no Whisper backend is configured it returns `503`
+- The audio endpoint degrades gracefully: if no transcription backend is configured it returns `503`
   with an actionable message instead of failing at import time.
 - The schema is created on startup via `create_all`, which adds missing tables but never alters
   existing ones. New tables (e.g. `subtasks`, `attachments`) appear automatically; a new column on

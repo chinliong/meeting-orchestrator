@@ -24,10 +24,9 @@ from whisper.normalizers import EnglishTextNormalizer
 
 REPO = Path(__file__).resolve().parent.parent
 TRANSCRIPTS = REPO / "eval" / "asr_transcripts"
-REFERENCE = REPO / "data" / "test-audio" / "ES2008a.reference.words.txt"
+REF_DIR = REPO / "data" / "test-audio"
 RESULTS = REPO / "eval" / "asr_results.json"
 REPORT = REPO / "docs" / "asr-evaluation.md"
-AUDIO_SECONDS = 1043.0          # ES2008a.Mix-Headset.wav, 17.4 minutes
 BOOTSTRAP_BLOCK = 50            # reference words per resampled block
 BOOTSTRAP_N = 2000              # resamples; seeded, so the intervals are reproducible
 
@@ -35,34 +34,35 @@ BOOTSTRAP_N = 2000              # resamples; seeded, so the intervals are reprod
 @dataclass(frozen=True)
 class Backend:
     label: str
-    seconds: float | None = None    # wall-clock for the full recording, single measurement;
-    note: str = ""                  # None means read it from the .timing.json sidecar
+    where: str                  # "hosted" or "local" - the deployment, not the model
+    note: str = ""
 
 
-# Wall-clock timings are single measurements on one machine, so they rank configurations but do
-# not support fine-grained claims - see the limitations in the report.
+# Ordered best-first within each deployment. Timings come from the .timing.json sidecars.
 BACKENDS = {
-    "turbo":            Backend("Whisper turbo", 212),
-    "medium":           Backend("Whisper medium", 198),
-    "small":            Backend("Whisper small", 78),
-    "base":             Backend("Whisper base", 33,
-                                note="the configured default before this evaluation"),
-    "large-v3":         Backend("Whisper large-v3", 623,
-                                note="hallucination loops: 133 repeated 5-grams against 26-39 "
-                                     "for every other single-channel configuration - see below, "
-                                     "the same weights score 16.4% when hosted"),
-    "perchannel-turbo": Backend("Whisper turbo, per-channel", 470,
-                                note="four headset channels transcribed separately and merged; "
-                                     "microphone bleed duplicates most speech"),
-    # Hosted endpoints, timed by eval.asr_transcribe through the application's own upload path.
-    "groq-turbo":       Backend("Groq whisper-large-v3-turbo (hosted)",
-                                note="the configured default: nothing runs on the server, so the "
-                                     "audio path fits a memory-limited free tier"),
-    "groq-large-v3":    Backend("Groq whisper-large-v3 (hosted)",
-                                note="nominally ahead of hosted turbo but inside the interval, "
-                                     "and 1.9x the wall-clock"),
+    "deepgram-nova-3":        Backend("Deepgram Nova-3", "hosted"),
+    "groq-large-v3":          Backend("Whisper large-v3", "hosted"),
+    "groq-turbo":             Backend("Whisper large-v3-turbo", "hosted"),
+    "local-turbo":            Backend("Whisper turbo", "local"),
+    "local-medium":           Backend("Whisper medium", "local"),
+    "local-small":            Backend("Whisper small", "local"),
+    "local-base":             Backend("Whisper base", "local",
+                                      note="the library default before this evaluation"),
+    "local-large-v3":         Backend("Whisper large-v3", "local",
+                                      note="hallucination loops - see below"),
+    "local-turbo-perchannel": Backend("Whisper turbo, per-channel", "local",
+                                      note="four headset channels merged; microphone bleed "
+                                           "duplicates most speech"),
 }
 
+# The two AMI meetings, with the share of reference words spoken over another speaker.
+MEETINGS = {
+    "ES2008a": {"seconds": 1043.0, "overlap": "9.4%", "minutes": 17.4},
+    "ES2010a": {"seconds": 644.3, "overlap": "19.3%", "minutes": 10.7},
+}
+
+# The models compared in the body; the rest are the size ladder, reported in the appendix.
+HEADLINE = ["deepgram-nova-3", "groq-turbo", "groq-large-v3", "local-turbo"]
 
 def wer(ref: list[str], hyp: list[str]) -> dict:
     """Levenshtein over word sequences, with the substitution/deletion/insertion split.
@@ -159,29 +159,41 @@ def bootstrap(err_by_key: dict[str, list[int]]) -> dict:
     return out
 
 
-def score_all() -> dict:
+def score_meeting(meeting: str) -> tuple[dict, dict]:
+    """WER, timing and bootstrap intervals for every configuration run on one meeting."""
     norm = EnglishTextNormalizer()
-    ref = norm(REFERENCE.read_text()).split()
+    ref = norm((REF_DIR / f"{meeting}.reference.words.txt").read_text()).split()
     out, errors = {}, {}
     for key, b in BACKENDS.items():
-        f = TRANSCRIPTS / f"ES2008a.{key}.txt"
-        if not f.exists():
-            continue
-        timing = TRANSCRIPTS / f"ES2008a.{key}.timing.json"
-        seconds = json.loads(timing.read_text())["seconds"] if timing.exists() else b.seconds
-        if seconds is None:
+        f = TRANSCRIPTS / f"{meeting}.{key}.txt"
+        timing = TRANSCRIPTS / f"{meeting}.{key}.timing.json"
+        if not f.exists() or not timing.exists():
             continue
         hyp = norm(f.read_text()).split()
+        seconds = json.loads(timing.read_text())["seconds"]
         r = wer(ref, hyp)
-        r.update(label=b.label, seconds=seconds, note=b.note,
-                 realtime_factor=round(AUDIO_SECONDS / seconds, 1))
+        r.update(label=b.label, where=b.where, note=b.note, seconds=seconds,
+                 realtime_factor=round(MEETINGS[meeting]["seconds"] / seconds, 1))
         out[key] = r
         errors[key] = per_ref_errors(ref, hyp)
-
     stats = bootstrap(errors)
     for key, r in out.items():
         r["ci"] = stats["ci"][key]
     return out, stats["pairs"]
+
+
+def score_all() -> dict:
+    """Every meeting, keyed by meeting id."""
+    return {m: dict(zip(("scores", "pairs"), score_meeting(m))) for m in MEETINGS}
+
+
+
+    argparse.ArgumentParser(description="Score the speech-to-text configurations.").parse_args()
+    scores, pairs = score_all()
+    RESULTS.write_text(json.dumps({"scores": scores, "pairs": pairs}, indent=2) + "\n")
+    REPORT.write_text(render(scores, pairs))
+    print(f"{len(scores)} configurations scored")
+    print(f"wrote {RESULTS.relative_to(REPO)} and {REPORT.relative_to(REPO)}")
 
 
 def _wrap(text: str, width: int = 96) -> str:
@@ -189,164 +201,155 @@ def _wrap(text: str, width: int = 96) -> str:
                        for p in text.strip().split("\n\n"))
 
 
-def render(scores: dict, pairs: dict) -> str:
-    rows = sorted(scores.values(), key=lambda v: v["wer"])
-    best = rows[0]["label"]
-    table = "\n".join(
-        f"| {'**' if v['label'] == best else ''}{v['label']}"
-        f"{'**' if v['label'] == best else ''} | {v['wer']:.1%} | "
-        f"[{v['ci'][0]:.1%}, {v['ci'][1]:.1%}] | {v['sub']} | {v['del']} | "
-        f"{v['ins']} | {v['seconds']:.0f}s | {v['realtime_factor']:.0f}x |" for v in rows)
-    sig = "\n".join(
-        f"| {k} | {v['lo']:+.1%} to {v['hi']:+.1%} | "
-        f"{'**yes**' if v['significant'] else 'no'} |"
-        for k, v in pairs.items()
-        if k in ("groq-turbo vs turbo", "groq-large-v3 vs groq-turbo",
-                 "groq-turbo vs medium", "base vs turbo"))
-    notes = "\n".join(f"- **{v['label']}** - {v['note']}" for v in rows if v["note"])
+def _pct(v):
+    return f"{v:.1%}" if v is not None else "-"
+
+
+def render(data: dict) -> str:
+    a, b = data["ES2008a"], data["ES2010a"]
+
+    def row(key):
+        ra, rb = a["scores"].get(key), b["scores"].get(key)
+        r = ra or rb
+        return (f"| {r['label']} | {r['where']} | {_pct(ra and ra['wer'])} | "
+                f"{_pct(rb and rb['wer'])} | {ra['seconds']:.0f}s |")
+
+    body = "\n".join(row(k) for k in HEADLINE if k in a["scores"] or k in b["scores"])
+    ladder = "\n".join(
+        f"| {a['scores'][k]['label']} | {a['scores'][k]['wer']:.1%} | "
+        f"{a['scores'][k]['seconds']:.0f}s | {a['scores'][k]['note'] or ''} |"
+        for k in BACKENDS if k.startswith("local-") and k in a["scores"])
+
+    def detail(d):
+        return "\n".join(
+            f"| {r['label']} ({r['where']}) | {r['wer']:.1%} | "
+            f"[{r['ci'][0]:.1%}, {r['ci'][1]:.1%}] | {r['sub']} | {r['del']} | {r['ins']} |"
+            for r in sorted(d["scores"].values(), key=lambda v: v["wer"]))
+
+    def sig(d, pairs):
+        return "\n".join(
+            f"| {k} | {v['lo']:+.1%} to {v['hi']:+.1%} | "
+            f"{'**yes**' if v['significant'] else 'no'} |"
+            for k, v in d["pairs"].items() if k in pairs)
+
+    keypairs = ["deepgram-nova-3 vs groq-turbo", "groq-turbo vs local-turbo",
+                "groq-large-v3 vs groq-turbo"]
 
     return f"""# Speech-to-Text Evaluation
 
 _Generated by `python -m eval.asr_eval` on {date.today().isoformat()}. Re-run to refresh._
 
-## The decision
+## Decision
 
-The audio path runs a **hosted Whisper endpoint** (Groq, `whisper-large-v3-turbo`), falling
-back to a **local Whisper model** when no key is configured. The local fallback is **turbo**.
-
-{_wrap('''The decisive argument is deployability, not accuracy. The hosted endpoint keeps the
-model off the server, and the local fallback needs roughly 1.5 GB of RAM that a free-tier
-instance does not have - so hosted is the only backend that can actually serve this
-application. On accuracy it is a tie: 16.6% against 17.5% for the best local configuration, a
-gap the bootstrap below cannot separate from sampling noise on a single recording. The fair
-claim is that moving to the hosted endpoint costs nothing in accuracy while removing the
-memory requirement.''')}
-
-{_wrap('''Between the two hosted models, `large-v3` scores 16.4% against turbo's 16.6% - again
-inside the noise - so turbo is the default on the tiebreak of running 1.8x faster. The local
-fallback is set to turbo, which reaches 17.5% against 28.8% for base; that gap is large enough
-to be real.''')}
+{_wrap('''Uploads are transcribed by **Deepgram Nova-3**, with **hosted Whisper** (Groq) as an
+automatic fallback. Deepgram is the more accurate of the two on both test meetings. Whisper
+stays configured because Deepgram's free tier is a one-off credit while Groq's resets daily, so
+the fallback is what keeps the feature alive once that credit is spent. Neither loads a model on
+the server, which is what makes the audio path fit a 512 MB instance.''')}
 
 ## Results
 
-Scored against the AMI manual transcript for ES2008a ({rows[0]['ref_words']} normalised
-reference words, 17.4 minutes, four speakers).
+Scored against the AMI manual transcripts. The two meetings differ in how much speech overlaps,
+which is the main thing that makes meeting audio hard.
 
-| Configuration | WER | 95% CI | Sub | Del | Ins | Time | Speed |
-|---|---|---|---|---|---|---|---|
-{table}
+| Model | Runs on | ES2008a (9.4% overlap) | ES2010a (19.3% overlap) | Time (17 min audio) |
+|---|---|---|---|---|
+{body}
 
-{notes}
+{_wrap('''Deepgram is ahead on both meetings and the paired bootstrap separates it from hosted
+Whisper both times. The three Whisper rows are not separable from each other: the ordering of
+hosted turbo and large-v3 even reverses between meetings, so treat them as tied.''')}
 
-## The same weights score 33.1% locally and 16.4% hosted
+## Why Deepgram wins: it drops less speech
 
-{_wrap('''The sharpest result in the table is that `large-v3` appears twice, sixteen points
-apart, running the same published weights. The local run fails by hallucination: its output
-contains 133 repeated 5-grams against 26 to 39 for every other single-channel configuration,
-including runs of repeated punctuation and one phrase emitted eight times. The hosted run of
-the same model contains 35, which is the normal range.''')}
+{_wrap(f'''Substitutions are almost identical - {a['scores']['deepgram-nova-3']['sub']} against
+{a['scores']['groq-turbo']['sub']} on ES2008a - so both models mishear at the same rate. The gap
+is deletions: {a['scores']['deepgram-nova-3']['del']} against
+{a['scores']['groq-turbo']['del']}. Deepgram recovers words Whisper never emits.''')}
 
-{_wrap('''The difference is therefore not in the weights but in what surrounds them - voice
-activity detection, how the audio is segmented, and whether decoding retries a segment when it
-degenerates. A hosted endpoint ships that scaffolding; `whisper.load_model(...).transcribe(...)`
-at its defaults does not. The practical lesson is that a bare local run understates what a model
-can do, so "large-v3 is worse than base" was a property of the local configuration and not of
-the model.''')}
+{_wrap('''That refines the limit rather than removing it. Roughly a tenth of the reference words
+are spoken while someone else is talking, and a single mixed channel plus a linear transcript
+cannot represent them. But the floor is set by segmentation, not model capacity: scaling Whisper
+from base to large-v3 never improved deletions, while a model with better voice-activity
+handling improved them by a third.''')}
 
-## How much these numbers support
+## One mis-heard name reached the task board
 
-{_wrap('''Every figure comes from one 17-minute recording, so the differences at the top of the
-table are smaller than the uncertainty. Resampling the reference in blocks of 50 words (2,000
-draws, seeded) gives the intervals above and the paired comparisons below. Paired means both
-systems are scored on the same resampled audio each draw, which is the right test for "is A
-better than B" - comparing two independent intervals would understate the evidence.''')}
+{_wrap('''Uploading ES2010a produced seven action items, all traceable to something actually
+said. One was assigned to "Vanilla", who does not exist: the participant is **Fenella**, and the
+transcriber substituted the name. The parser then used it faithfully.''')}
 
-| Comparison | Difference, 95% CI | Separable? |
+{_wrap('''This is the concrete cost of transcription error. It also shows where the confidence
+score earns its place - the two owners the audio never states scored 65%, while the one named
+outright ("the marketing person, that's Courtney") scored 85%.''')}
+
+## Hosted or local
+
+{_wrap('''The local backend is a development convenience, not an alternative. It needs roughly
+1.5 GB of RAM that a free-tier instance does not have, and the host's CPU is far slower than a
+laptop's: the same ffmpeg transcode measured 0.2s locally and 7.3s on the deployed instance.
+Whisper turbo took 212s on a laptop, so on the server it would run into the tens of minutes if
+it fit at all. A hosted endpoint is the only option that works there, and it returns in seconds.
+The local and hosted times below are therefore two deployments, not two models.''')}
+
+## Appendix A - full figures
+
+ES2008a ({a['scores']['deepgram-nova-3']['ref_words']} reference words, {MEETINGS['ES2008a']['minutes']} min)
+
+| Configuration | WER | 95% CI | Sub | Del | Ins |
+|---|---|---|---|---|---|
+{detail(a)}
+
+ES2010a ({b['scores']['deepgram-nova-3']['ref_words']} reference words, {MEETINGS['ES2010a']['minutes']} min)
+
+| Configuration | WER | 95% CI | Sub | Del | Ins |
+|---|---|---|---|---|---|
+{detail(b)}
+
+Intervals come from resampling the reference in 50-word blocks, 2,000 draws, seeded. Paired
+comparisons resample both systems on the same blocks:
+
+| Comparison (ES2008a) | Difference, 95% CI | Separable? |
 |---|---|---|
-{sig}
+{sig(a, keypairs)}
 
-{_wrap('''So the ranking is only partly real. Hosted turbo, hosted large-v3 and local turbo are
-statistically indistinguishable on this recording: the honest statement is that they tie. The
-larger gaps - hosted turbo against medium, and turbo against base - hold up. Choosing the
-hosted endpoint therefore rests on memory and latency, which are not in doubt, rather than on
-an accuracy win that this evaluation cannot demonstrate.''')}
+## Appendix B - Whisper model size (ES2008a, local)
 
-## Is hosted versus local a fair comparison?
+| Configuration | WER | Time | Note |
+|---|---|---|---|
+{ladder}
 
-{_wrap('''For accuracy, yes. Both read the same recording, are scored against the same
-reference with the same normaliser, and the audio the endpoint receives is 16 kHz mono FLAC -
-lossless, and the same resampling Whisper applies internally - so no information is lost that
-the local run keeps.''')}
+{_wrap('''Size is not a proxy for quality here. Local large-v3 has twenty times the parameters
+of base and scores worse, because it degenerates into hallucination loops: 133 repeated 5-grams
+against 26-39 for every other single-channel run. The same weights score 16.4% behind a hosted
+endpoint, so this is a property of the local decoding defaults, not of the model.''')}
 
-{_wrap('''For speed, no, and the table should be read with that in mind. The local times are
-CPU-only on an Apple M4; `whisper.load_model` selects CUDA or CPU and never the Metal backend,
-so the machine's GPU sat idle. The hosted times are a datacentre inference accelerator plus
-network transfer from a home connection. The comparison measures two deployments, not two
-models. It is still the number that matters for the product - a user waits 2 seconds instead of
-3.5 minutes - but it is not evidence that one model is faster than another.''')}
+## Method and limitations
 
-{_wrap('''One further caveat applies to accuracy. Hosted and local turbo run the same published
-weights, so their 0.9-point difference is not a difference between models at all; it is a
-difference between decoding stacks. The `large-v3` rows make this unmistakable - sixteen points
-apart on identical weights.''')}
-
-## What limits every configuration
-
-{_wrap('''Deletions dominate the error profile and barely improve with model size: 332 at base,
-290 at small, 311 at medium. Measuring the reference transcript explains why. **9.4% of the
-reference words (236 of 2,506) are spoken while another participant is also speaking.** The
-mixed recording collapses four microphones into one waveform and a transcript is linear, so
-overlapping speech cannot be represented at all. That sets a floor no amount of model capacity
-reaches.''')}
-
-{_wrap('''Transcribing the four individual headset channels separately was tested as a way to
-remove the limit. It recovered deletions as predicted, 237 down to 182, but microphone bleed
-means every channel also captures the other three speakers: the merged transcript repeated
-phrases four times, added 1,315 insertions and scored 66.9%. Recovering overlapped speech needs
-speaker-activity gating, not simply more audio channels.''')}
-
-## Limitations
-
-- **One meeting.** Every figure comes from AMI ES2008a, and the bootstrap above measures
-  sampling within that recording only. It cannot capture variation between meetings, speakers,
-  accents or recording conditions, which is likely the larger source of uncertainty. Separating
-  the top three configurations would need several more meetings, not more resamples of this one.
-- **Timing is not a controlled comparison.** Local rows are single CPU-only runs on an Apple M4;
-  hosted rows are the median of five calls including network transfer (turbo 1.9-2.5s,
-  large-v3 4.0-4.9s; both returned byte-identical transcripts every run). See the fairness
-  section above.
-- **Best-case audio.** The headset mix is the cleanest recording AMI publishes, with a
-  close-talking microphone per speaker. Laptop-microphone audio in a real room will be worse.
-- **Word error rate is not the product metric.** The system's output is action items, not words.
-  Whether a 16.6% transcript yields a different board from a 28.8% one is a separate
-  measurement, not yet made.
-
-## Method
-
-- Reference: the AMI manual transcription (NXT release 1.6.2), assembled from the four
-  per-speaker word files, ordered by start time, with punctuation and the non-speech
-  `vocalsound`, `disfmarker` and `gap` elements removed.
-- Both reference and hypothesis pass through Whisper's `EnglishTextNormalizer`, which reconciles
-  British and American spellings so a model is not penalised for "color" where AMI wrote
-  "colour".
-- Word error rate is Levenshtein distance over the normalised word sequences, reported with its
-  substitution, deletion and insertion split so the failure mode is visible rather than only the
-  total.
-- The hosted configurations are produced by `python -m eval.asr_transcribe groq-turbo`, which
-  calls the application's own `transcribe_audio()`. The compression, upload cap and API call are
-  the deployed code paths, so the figures describe the product and not a separate harness.
-- Transcripts are cached in `eval/asr_transcripts/`; scoring re-runs offline.
-  `eval/asr_results.json` holds the scored figures, `.timing.json` sidecars the measured
-  wall-clock for the hosted runs.
+- Reference: the AMI manual transcription (NXT 1.6.2), assembled by
+  `python -m eval.build_ami_reference <meeting> --annotations <zip>`, ordered by word start
+  time with punctuation and non-speech markup removed.
+- Both sides pass through Whisper's `EnglishTextNormalizer`, so British and American spellings
+  are not penalised. WER is Levenshtein over the normalised words, split into substitutions,
+  deletions and insertions.
+- Hosted runs go through the application's own `transcribe_audio()`, so every model receives
+  byte-identical audio and the figures describe the product rather than a separate harness.
+- **Two meetings, both AMI**, both close-talking headset mixes - the cleanest audio the corpus
+  publishes. Laptop-microphone audio in a real room will be worse.
+- **Timing is not controlled.** Hosted rows are medians of 3-5 calls including network transfer;
+  local rows are single CPU-only runs on an Apple M4.
+- **WER is not the product metric.** The output is action items, not words; whether a 13%
+  transcript yields a different board from a 17% one is a separate measurement.
 """
 
 
 def main() -> None:
     argparse.ArgumentParser(description="Score the speech-to-text configurations.").parse_args()
-    scores, pairs = score_all()
-    RESULTS.write_text(json.dumps({"scores": scores, "pairs": pairs}, indent=2) + "\n")
-    REPORT.write_text(render(scores, pairs))
-    print(f"{len(scores)} configurations scored")
+    data = score_all()
+    RESULTS.write_text(json.dumps(data, indent=2) + "\n")
+    REPORT.write_text(render(data))
+    total = sum(len(d["scores"]) for d in data.values())
+    print(f"{total} runs scored across {len(data)} meetings")
     print(f"wrote {RESULTS.relative_to(REPO)} and {REPORT.relative_to(REPO)}")
 
 

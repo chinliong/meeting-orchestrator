@@ -145,13 +145,13 @@ On LLM/API failure the meeting is returned with `status: "failed"` and an `error
 (still `201`), and no tasks.
 
 ### `POST /transcripts/audio`
-Submit an audio/video file (`multipart/form-data`). Transcribed with Whisper, then parsed.
+Submit an audio/video file (`multipart/form-data`). Transcribed, then parsed.
 Requires edit access to `project_id`.
 
 Form fields: `project_id` (int), `title` (string, optional), `file` (the upload).
 
 Responses: `201` (same shape as above) · `400` empty file · `403` no edit access ·
-`404` unknown project · `503` if no Whisper backend is configured.
+`404` unknown project · `503` if no transcription backend is configured.
 
 ### `GET /transcripts/{meeting_id}`
 Returns the meeting's status and its extracted tasks. Requires view access. `404` if not found.
