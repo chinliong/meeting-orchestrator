@@ -92,8 +92,7 @@ flowchart LR
   - **Deadline reminders** (`app/notifications.py`) — opt-in (off by default) per account, with
     per-project opt-in selection and a configurable "days before" threshold. `GET /internal/notify-due-tasks`
     (shared-secret protected) runs the daily check over HTTP, for a free external scheduler to
-    call once a day — Render has no built-in free scheduler and Render Cron Jobs are a paid
-    add-on. See "Deadline reminders" below.
+    call once a day. See "Deadline reminders" below.
   - **LLM parser** (`app/llm/parser.py`) — a reusable, framework-agnostic module: raw text in,
     validated `ExtractionResult` out, via Claude tool-use.
   - **Subtask generator** (`app/llm/subtasks.py`) — breaks a single task into an ordered checklist

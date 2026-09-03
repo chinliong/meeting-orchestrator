@@ -45,10 +45,9 @@ Each candidate carries a flaw that is specifically disqualifying for this produc
   For a meeting orchestrator a dropped action item is the worst available failure.
 
 **Recommendation: keep the with-guidance Claude Sonnet configuration.** It is the only option without a
-specific disqualifier. If cost later forces a change, Haiku is the most rescuable of the three - a
-constant offset is the kind of error a prompt change could plausibly remove, unlike a field the
-model declines to populate or recall it never had. That fix would need validating before a switch,
-not instead of one.
+specific disqualifier. If cost later forces a change, Haiku is the most rescuable of the three: its
+failure is a constant date offset rather than a field it declines to populate or recall it never
+had. That fix would need validating before a switch, not instead of one.
 
 ## Test set and method
 
