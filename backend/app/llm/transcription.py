@@ -154,9 +154,15 @@ _GEMINI_MAX_AUDIO_BYTES = 14 * 1024 * 1024
 # Hard ceiling on the whole chain. Transcription is a foreground request the user is waiting
 # on, and a Whisper fallback is usually configured, so an unbounded walk through every model is
 # worse than giving up early: in testing a six-minute chain of 503s exhausted the browser's
-# patience before the fallback ever ran. Two attempts per model, then move on.
+# patience before the fallback ever ran.
+#
+# The deadline, not the attempt count, is what bounds the wait. Gemini's audio endpoint sheds
+# load in bursts lasting seconds - measured by sending the same clip twice a few seconds apart
+# and getting 503 then success - and it rejects fast, in 6-10s. So attempts are set high enough
+# that the deadline is what stops the loop, which buys the most chances of catching a window
+# where capacity is available.
 _GEMINI_DEADLINE_SECONDS = float(os.getenv("GEMINI_CHAIN_DEADLINE_SECONDS", "100"))
-_GEMINI_ATTEMPTS_PER_MODEL = 2
+_GEMINI_ATTEMPTS_PER_MODEL = 3
 _GEMINI_PROMPT = (
     "Transcribe this meeting recording verbatim in English. Output only the transcript text, "
     "with no speaker labels, timestamps, commentary or headings. Include every spoken word, "
