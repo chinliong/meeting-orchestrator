@@ -1,32 +1,24 @@
 """Speech-to-text layer (Objective 4).
 
-Three interchangeable backends, tried in order:
+Two interchangeable backends, selected automatically:
 
 1. **Hosted Whisper API** (default in the cloud). If TRANSCRIPTION_API_KEY is set, audio is
-   sent to an OpenAI-compatible transcription endpoint (OpenAI by default, or Groq via
-   TRANSCRIPTION_BASE_URL). This works on memory-constrained hosts because no model runs
-   locally.
+   sent to an OpenAI-compatible transcription endpoint. This works on memory-constrained
+   hosts (e.g. Render free tier) because no model runs locally. It targets OpenAI's Whisper
+   by default, and Groq's OpenAI-compatible Whisper endpoint by setting TRANSCRIPTION_BASE_URL.
 
-2. **Local Whisper model** (offline). If no hosted key is set but `openai-whisper` is installed
-   (`pip install -r requirements-audio.txt`, pulls in PyTorch + needs ffmpeg), transcription
-   runs locally on CPU. No key, no network and no quota.
+2. **Local Whisper model** (dev convenience). If no API key is set but the `openai-whisper`
+   package is installed (`pip install -r requirements-audio.txt`, pulls in PyTorch + needs
+   ffmpeg), transcription runs locally on CPU.
 
-3. **Gemini**, used only when no Whisper backend is configured. It is the most accurate option
-   measured - 10.9-12.1% word error rate against 17.5% for the best Whisper model, see
-   docs/asr-evaluation.md - but its audio endpoint returns HTTP 503 in bursts that can outlast a
-   foreground request, so it is not the shipped default. The model chain exists because each
-   model carries its own small free daily allowance.
-
-If none is available the audio endpoint returns a clear 503 rather than crashing.
+If neither is available the audio endpoint returns a clear 503 rather than crashing.
 
 Environment variables:
-    GEMINI_API_KEY           API key for backend #1.
-    GEMINI_TRANSCRIBE_MODELS Comma-separated model chain. Default is the measured order.
-    TRANSCRIPTION_API_KEY    API key for the hosted Whisper endpoint (enables backend #2).
+    TRANSCRIPTION_API_KEY    API key for the hosted endpoint (enables backend #1).
     TRANSCRIPTION_BASE_URL   Override the API base URL. Unset = OpenAI. Groq example:
                              https://api.groq.com/openai/v1
     TRANSCRIPTION_MODEL      Model name. Default "whisper-1" (OpenAI); Groq: "whisper-large-v3".
-    WHISPER_MODEL_SIZE       Local model size for backend #3 (default "turbo").
+    WHISPER_MODEL_SIZE       Local model size for backend #2 (default "base").
 """
 from __future__ import annotations
 
@@ -41,8 +33,8 @@ from functools import lru_cache
 # uvicorn configures this logger at INFO, so these lines show up in the Render logs.
 log = logging.getLogger("uvicorn.error")
 
-# Local-model size (backend #3). "turbo" measured 17.5% word error rate against
-# 28.8% for "base" on the same recording, for ~3 extra minutes of CPU per meeting.
+# Local-model size (backend #2). "turbo" measured 17.5% word error rate against
+# 28.8% for "base" on the AMI reference recording, for a few extra minutes of CPU.
 WHISPER_MODEL_SIZE = os.getenv("WHISPER_MODEL_SIZE", "turbo")
 
 
@@ -71,27 +63,9 @@ def _local_whisper_installed() -> bool:
     return True
 
 
-def _gemini_key() -> str | None:
-    return os.getenv("GEMINI_API_KEY") or None
-
-
-def _gemini_models() -> list[str]:
-    """The model chain, best-measured first.
-
-    Ordered by the speed/accuracy frontier in docs/asr-evaluation.md: 3.7 Flash is the fastest
-    backend under 13% word error rate, 3.6 Flash is the most accurate. 3.8 Flash trails both and
-    prefaces its output with commentary (see _strip_preamble), so it serves last and only after
-    the other two have exhausted their daily allowances.
-    """
-    raw = os.getenv("GEMINI_TRANSCRIBE_MODELS",
-                    "gemini-3.7-flash,gemini-3.6-flash,gemini-3.8-flash")
-    return [m.strip() for m in raw.split(",") if m.strip()]
-
-
 def is_available() -> bool:
-    """True if any backend can run: a Gemini key, a hosted Whisper key, or local Whisper."""
-    return (_gemini_key() is not None or _api_key() is not None
-            or _local_whisper_installed())
+    """True if either a hosted API key is set or the local Whisper package is importable."""
+    return _api_key() is not None or _local_whisper_installed()
 
 
 # Stay under the hosted API's upload cap (Groq free tier is ~25 MB) with margin.
@@ -103,9 +77,6 @@ _BASE_FFMPEG_ARGS = ["-vn", "-ac", "1", "-ar", "16000"]
 # dominates transcode time on Render's throttled free core. It's larger than Opus but stays
 # under the cap for typical recordings (~38 min); longer audio falls back to Opus below.
 _FLAC_ARGS = ["-c:a", "flac"]
-# Gemini takes the audio inline as base64, which inflates it ~33%, so this targets a small
-# file rather than a cheap encode: 32 kbps mono is ~4 MB for a 17-minute meeting.
-_MP3_ARGS = ["-c:a", "libmp3lame", "-b:a", "32k"]
 # Opus 16 kbps is tiny (covers hours) but CPU-heavy to encode; used only as the size fallback.
 _OPUS_ARGS = ["-c:a", "libopus", "-b:a", "16k", "-application", "voip", "-compression_level", "0"]
 
@@ -147,125 +118,6 @@ def _compress_for_api(src_path: str) -> str | None:
         return flac
     os.unlink(flac)  # too long for FLAC to fit — fall back to Opus
     return _run_ffmpeg(src_path, _OPUS_ARGS, ".ogg")
-
-
-# Gemini's inline-data request cap; base64 expands the payload by about a third.
-_GEMINI_MAX_AUDIO_BYTES = 14 * 1024 * 1024
-# Hard ceiling on the whole chain. Transcription is a foreground request the user is waiting
-# on, and a Whisper fallback is usually configured, so an unbounded walk through every model is
-# worse than giving up early: in testing a six-minute chain of 503s exhausted the browser's
-# patience before the fallback ever ran.
-#
-# The deadline, not the attempt count, is what bounds the wait. Gemini's audio endpoint sheds
-# load in bursts lasting seconds - measured by sending the same clip twice a few seconds apart
-# and getting 503 then success - and it rejects fast, in 6-10s. So attempts are set high enough
-# that the deadline is what stops the loop, which buys the most chances of catching a window
-# where capacity is available.
-_GEMINI_DEADLINE_SECONDS = float(os.getenv("GEMINI_CHAIN_DEADLINE_SECONDS", "100"))
-_GEMINI_ATTEMPTS_PER_MODEL = 3
-_GEMINI_PROMPT = (
-    "Transcribe this meeting recording verbatim in English. Output only the transcript text, "
-    "with no speaker labels, timestamps, commentary or headings. Include every spoken word, "
-    "including filler words such as um and uh."
-)
-
-
-def _strip_preamble(text: str) -> str:
-    """Drop a leading block where the model narrates the task instead of transcribing it.
-
-    Gemini 3.8 Flash reliably prefaces its transcript by restating the audio duration and
-    quoting the prompt back, even with thinking disabled. Left in place that preamble would be
-    parsed as meeting content and could surface as a spurious action item, so it is removed
-    rather than trusted. Models that comply are unaffected: nothing matches.
-    """
-    markers = ("follow instructions:", "the audio is around", "the audio is approximately",
-               "here is the transcript", "transcript:")
-    lines = text.split("\n")
-    while lines and (not lines[0].strip()
-                     or any(m in lines[0].lower()[:120] for m in markers)):
-        lines.pop(0)
-    return "\n".join(lines).strip()
-
-
-def _transcribe_via_gemini(tmp_path: str) -> str:
-    """Backend #1: Gemini, trying each model in the chain until one answers.
-
-    Two upstream failures are handled differently because they mean different things. A 429 is
-    the daily allowance for that model being spent, so the chain advances immediately and does
-    not come back to it. A 503 is transient capacity pressure, which retries on the same model
-    first - in testing it usually succeeded on the second attempt.
-    """
-    import base64
-    import json as _json
-    import urllib.error
-    import urllib.request
-
-    compressed = _run_ffmpeg(tmp_path, _MP3_ARGS, ".mp3") if shutil.which("ffmpeg") else None
-    upload_path = compressed or tmp_path
-    try:
-        size = os.path.getsize(upload_path)
-        if size > _GEMINI_MAX_AUDIO_BYTES:
-            raise TranscriptionError(
-                "The recording is too long for the transcription service. Please upload a "
-                "shorter recording."
-            )
-        audio_b64 = base64.b64encode(open(upload_path, "rb").read()).decode()
-    finally:
-        if compressed:
-            os.unlink(compressed)
-
-    body = {
-        "contents": [{"role": "user", "parts": [
-            {"text": _GEMINI_PROMPT},
-            {"inline_data": {"mime_type": "audio/mp3" if compressed else "audio/wav",
-                             "data": audio_b64}}]}],
-        # temperature 0: a transcript should not vary between identical requests.
-        "generationConfig": {"maxOutputTokens": 32768, "temperature": 0},
-    }
-    payload = _json.dumps(body).encode()
-    last = "no Gemini model answered"
-    deadline = time.monotonic() + _GEMINI_DEADLINE_SECONDS
-    for model in _gemini_models():
-        for attempt in range(_GEMINI_ATTEMPTS_PER_MODEL):
-            if time.monotonic() > deadline:
-                log.warning("transcription: Gemini chain out of time after %.0fs, giving up",
-                            _GEMINI_DEADLINE_SECONDS)
-                raise TranscriptionError(f"Transcription timed out: {last}.")
-            url = (f"https://generativelanguage.googleapis.com/v1beta/models/"
-                   f"{model}:generateContent?key={_gemini_key()}")
-            req = urllib.request.Request(url, payload, {"Content-Type": "application/json"})
-            started = time.perf_counter()
-            try:
-                remaining = max(5.0, deadline - time.monotonic())
-                with urllib.request.urlopen(req, timeout=remaining) as resp:
-                    data = _json.loads(resp.read())
-            except urllib.error.HTTPError as exc:
-                last = f"HTTP {exc.code} from {model}"
-                if exc.code == 429:            # daily allowance spent - move on, do not retry
-                    log.info("transcription: %s quota exhausted, trying next model", model)
-                    break
-                log.info("transcription: %s HTTP %d (attempt %d)", model, exc.code, attempt + 1)
-                time.sleep(min(3.0, max(0.0, deadline - time.monotonic())))
-                continue
-            except urllib.error.URLError as exc:
-                last = f"could not reach Gemini: {exc.reason}"
-                time.sleep(min(3.0, max(0.0, deadline - time.monotonic())))
-                continue
-            candidates = data.get("candidates") or []
-            text = "".join(
-                part.get("text", "")
-                for part in (candidates[0].get("content", {}).get("parts") or [])
-            ) if candidates else ""
-            text = _strip_preamble(text)
-            if not text:
-                last = f"{model} returned no transcript"
-                break
-            # Which model served the request is logged: the chain means it varies between
-            # uploads, and a transcript that cannot be attributed cannot be explained later.
-            log.info("transcription: %s %.1fs (%d chars)",
-                     model, time.perf_counter() - started, len(text))
-            return text
-    raise TranscriptionError(f"Transcription failed: {last}.")
 
 
 def _transcribe_via_api(tmp_path: str) -> str:
@@ -319,23 +171,14 @@ def _transcribe_locally(tmp_path: str) -> str:
 def transcribe_audio(data: bytes, suffix: str = ".wav") -> str:
     """Transcribe raw audio/video bytes into text.
 
-    Prefers Whisper, and uses Gemini only when no Whisper backend is configured.
-
-    Gemini is the more accurate backend by a wide margin - 10.9-12.1% word error rate against
-    17.5% for the best Whisper model, see docs/asr-evaluation.md - but its audio endpoint sheds
-    load in bursts, returning HTTP 503 for stretches long enough to exhaust a foreground
-    request. Accuracy that is unavailable is worth less than accuracy that is merely lower, so
-    the ordering follows reliability rather than the benchmark. Set GEMINI_API_KEY without a
-    Whisper key to prefer Gemini.
-
-    Every backend reads from a file path, so the upload is written to a temp file that is
-    cleaned up afterwards.
+    Prefers the hosted API when TRANSCRIPTION_API_KEY is set; otherwise falls back to a
+    local Whisper model. Both read from a file path, so the upload is written to a temp
+    file that is cleaned up afterwards.
     """
     if not is_available():
         raise WhisperUnavailableError(
-            "Audio transcription is not configured. Set GEMINI_API_KEY, or TRANSCRIPTION_API_KEY "
-            "for a hosted Whisper API, or run `pip install -r requirements-audio.txt` for local "
-            "Whisper."
+            "Audio transcription is not configured. Set TRANSCRIPTION_API_KEY to use a hosted "
+            "Whisper API, or run `pip install -r requirements-audio.txt` for local Whisper."
         )
 
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
@@ -344,8 +187,6 @@ def transcribe_audio(data: bytes, suffix: str = ".wav") -> str:
     try:
         if _api_key() is not None:
             return _transcribe_via_api(tmp_path)
-        if _local_whisper_installed():
-            return _transcribe_locally(tmp_path)
-        return _transcribe_via_gemini(tmp_path)
+        return _transcribe_locally(tmp_path)
     finally:
         os.unlink(tmp_path)
