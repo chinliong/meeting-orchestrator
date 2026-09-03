@@ -1,24 +1,33 @@
 """Speech-to-text layer (Objective 4).
 
-Two interchangeable backends, selected automatically:
+Three backends, tried in order, each falling through to the next on failure:
 
-1. **Hosted Whisper API** (default in the cloud). If TRANSCRIPTION_API_KEY is set, audio is
-   sent to an OpenAI-compatible transcription endpoint. This works on memory-constrained
-   hosts (e.g. Render free tier) because no model runs locally. It targets OpenAI's Whisper
-   by default, and Groq's OpenAI-compatible Whisper endpoint by setting TRANSCRIPTION_BASE_URL.
+1. **Deepgram Nova-3** (preferred). The most accurate option measured: 13.0% and 15.3% word
+   error rate on the two AMI reference meetings, against 16.6% and 17.2% for hosted Whisper -
+   a gap the bootstrap separates on both. Its advantage is almost entirely fewer deletions
+   (181 against 269 on ES2008a), i.e. it drops less overlapping speech. See
+   docs/asr-evaluation.md.
 
-2. **Local Whisper model** (dev convenience). If no API key is set but the `openai-whisper`
-   package is installed (`pip install -r requirements-audio.txt`, pulls in PyTorch + needs
-   ffmpeg), transcription runs locally on CPU.
+2. **Hosted Whisper API** (fallback). An OpenAI-compatible endpoint - Groq by default. Slightly
+   less accurate but its free tier resets daily, where Deepgram's is a one-off credit, so this
+   is what keeps the app working once that credit is exhausted.
 
-If neither is available the audio endpoint returns a clear 503 rather than crashing.
+3. **Local Whisper model** (dev only). Needs `pip install -r requirements-audio.txt` (PyTorch +
+   ffmpeg) and roughly 1.5 GB of RAM, which a free-tier host does not have.
+
+Backends 1 and 2 run no model locally, which is what makes the audio path deployable on a
+memory-constrained host. If none is available the endpoint returns a clear 503 rather than
+crashing.
 
 Environment variables:
-    TRANSCRIPTION_API_KEY    API key for the hosted endpoint (enables backend #1).
+    DEEPGRAM_API_KEY         API key for Deepgram (enables backend #1).
+    DEEPGRAM_MODEL           Deepgram model. Default "nova-3".
+    TRANSCRIPTION_API_KEY    API key for the hosted Whisper endpoint (enables backend #2).
     TRANSCRIPTION_BASE_URL   Override the API base URL. Unset = OpenAI. Groq example:
                              https://api.groq.com/openai/v1
-    TRANSCRIPTION_MODEL      Model name. Default "whisper-1" (OpenAI); Groq: "whisper-large-v3".
-    WHISPER_MODEL_SIZE       Local model size for backend #2 (default "turbo").
+    TRANSCRIPTION_MODEL      Model name. Default "whisper-1" (OpenAI);
+                             Groq: "whisper-large-v3-turbo".
+    WHISPER_MODEL_SIZE       Local model size for backend #3 (default "turbo").
 """
 from __future__ import annotations
 
@@ -33,8 +42,10 @@ from functools import lru_cache
 # uvicorn configures this logger at INFO, so these lines show up in the Render logs.
 log = logging.getLogger("uvicorn.error")
 
-# Local-model size (backend #2). "turbo" measured 17.5% word error rate against
-# 28.8% for "base" on the AMI reference recording - see docs/asr-evaluation.md.
+# Local-model size (backend #2, dev only). "turbo" measured 17.5% word error rate against
+# 28.8% for "base" on the AMI reference recording. Avoid "large-v3": at library defaults it
+# hallucinates on meeting audio and scores 33.1%, though the same weights reach 16.4% behind a
+# hosted endpoint that adds voice-activity detection - see docs/asr-evaluation.md.
 WHISPER_MODEL_SIZE = os.getenv("WHISPER_MODEL_SIZE", "turbo")
 
 
@@ -55,6 +66,10 @@ def _api_key() -> str | None:
     return os.getenv("TRANSCRIPTION_API_KEY") or None
 
 
+def _deepgram_key() -> str | None:
+    return os.getenv("DEEPGRAM_API_KEY") or None
+
+
 def _local_whisper_installed() -> bool:
     try:
         import whisper  # type: ignore  # noqa: F401
@@ -64,8 +79,9 @@ def _local_whisper_installed() -> bool:
 
 
 def is_available() -> bool:
-    """True if either a hosted API key is set or the local Whisper package is importable."""
-    return _api_key() is not None or _local_whisper_installed()
+    """True if any backend is configured: a hosted key, or the local Whisper package."""
+    return (_deepgram_key() is not None or _api_key() is not None
+            or _local_whisper_installed())
 
 
 # Stay under the hosted API's upload cap (Groq free tier is ~25 MB) with margin.
@@ -151,6 +167,50 @@ def _transcribe_via_api(tmp_path: str) -> str:
     return result.text.strip()
 
 
+# Deepgram accepts raw bytes with a content type; these cover what _compress_for_api emits
+# plus the originals we might forward when ffmpeg is unavailable.
+_DEEPGRAM_URL = "https://api.deepgram.com/v1/listen"
+_MIME = {".flac": "audio/flac", ".ogg": "audio/ogg", ".wav": "audio/wav",
+         ".mp3": "audio/mpeg", ".m4a": "audio/mp4", ".mp4": "video/mp4",
+         ".webm": "audio/webm"}
+
+
+def _transcribe_via_deepgram(tmp_path: str) -> str:
+    """Backend #1: Deepgram, one synchronous POST of the compressed audio.
+
+    Reuses the same compression as the Whisper path so both backends see identical audio and
+    the endpoint stays within a sane upload size.
+    """
+    import httpx
+
+    compressed = _compress_for_api(tmp_path)
+    upload_path = compressed or tmp_path
+    model = os.getenv("DEEPGRAM_MODEL", "nova-3")
+    started = time.perf_counter()
+    try:
+        with open(upload_path, "rb") as audio:
+            resp = httpx.post(
+                _DEEPGRAM_URL,
+                params={"model": model, "smart_format": "true"},
+                headers={"Authorization": f"Token {_deepgram_key()}",
+                         "Content-Type": _MIME.get(os.path.splitext(upload_path)[1],
+                                                   "application/octet-stream")},
+                content=audio.read(), timeout=300)
+        if resp.status_code != 200:
+            raise TranscriptionError(
+                f"Deepgram rejected the request (HTTP {resp.status_code}).")
+        log.info("transcription: deepgram %s %.1fs", model, time.perf_counter() - started)
+        alt = resp.json()["results"]["channels"][0]["alternatives"][0]
+    except httpx.HTTPError as exc:
+        raise TranscriptionError(f"Could not reach Deepgram: {exc}") from exc
+    except (KeyError, IndexError, ValueError) as exc:
+        raise TranscriptionError("Deepgram returned an unexpected response.") from exc
+    finally:
+        if compressed:
+            os.unlink(compressed)
+    return alt["transcript"].strip()
+
+
 @lru_cache(maxsize=1)
 def _load_local_model():
     """Backend #2: load the local Whisper model once."""
@@ -171,22 +231,38 @@ def _transcribe_locally(tmp_path: str) -> str:
 def transcribe_audio(data: bytes, suffix: str = ".wav") -> str:
     """Transcribe raw audio/video bytes into text.
 
-    Prefers the hosted API when TRANSCRIPTION_API_KEY is set; otherwise falls back to a
-    local Whisper model. Both read from a file path, so the upload is written to a temp
-    file that is cleaned up afterwards.
+    Tries each configured backend in accuracy order and falls through on failure, so an
+    exhausted Deepgram credit or a provider outage degrades to a slightly less accurate
+    transcript instead of an error. Each backend is attempted once: a retry chain is what made
+    an earlier provider time out the whole request rather than fail over.
     """
     if not is_available():
         raise WhisperUnavailableError(
-            "Audio transcription is not configured. Set TRANSCRIPTION_API_KEY to use a hosted "
-            "Whisper API, or run `pip install -r requirements-audio.txt` for local Whisper."
+            "Audio transcription is not configured. Set DEEPGRAM_API_KEY or "
+            "TRANSCRIPTION_API_KEY to use a hosted service, or run "
+            "`pip install -r requirements-audio.txt` for local Whisper."
         )
+
+    backends = []
+    if _deepgram_key() is not None:
+        backends.append(("deepgram", _transcribe_via_deepgram))
+    if _api_key() is not None:
+        backends.append(("hosted whisper", _transcribe_via_api))
+    if _local_whisper_installed():
+        backends.append(("local whisper", _transcribe_locally))
 
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
         tmp.write(data)
         tmp_path = tmp.name
     try:
-        if _api_key() is not None:
-            return _transcribe_via_api(tmp_path)
-        return _transcribe_locally(tmp_path)
+        last: Exception | None = None
+        for name, call in backends:
+            try:
+                return call(tmp_path)
+            except (TranscriptionError, WhisperUnavailableError) as exc:
+                log.warning("transcription: %s failed (%s)", name, exc)
+                last = exc
+        raise last if last else WhisperUnavailableError(
+            "Audio transcription is not configured.")
     finally:
         os.unlink(tmp_path)

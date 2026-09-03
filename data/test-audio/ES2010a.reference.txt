@@ -1,0 +1,272 @@
+Speaker A: Okay. Hi everybody and welcome to our kick-off meeting um for our new product that we're gonna be designing. Um I'm Mandy and I'm the Project Manager. And I know all your names again, Courtney
+Speaker D: Yep.
+Speaker A: , Fenella and Amber
+Speaker B: Yep
+Speaker A: . Alright
+Speaker B: .
+Speaker A: . Okay, so first let's go through this PowerPoint. I wonder what button I press?
+Speaker C: Just do it on the arrow.
+Speaker A: Yeah, or how about I just click? Okay, here is our agenda for this meeting. Um we're gonna start with our opening which was our introductions. We're gonna get to know each other a little bit better. Um tool training, we're going to, I guess, figure out what to do on this project with our individual roles. Um we're gonna make a project plan and then have some time for discussion and close up the meeting. Okay, here is our project. We're gonna make a new remote control that's um original, trendy and also user-friendly. And how we are going to do it is each of us is going to um We're gonna have discuss the functional design first, how is it gonna be used, what's the actual goal here, it has to operate T_V_, blah blah blah. And we're going to do individual work on that and then meet. Same thing with conceptual design. Just the basic overview of the project and then we're going to do individual work, meet. That's pretty much the the whole process for today. And then the detailed design, just more in-depth, get the actual schematics of the remote. Okay. Alright. First we're gonna start off by using our tools. And the whiteboard thing, do you guys wanna give that a try even though the ink wasn't working or do you wanna do it on here.
+Speaker B: I think we should forgo the whiteboard since we
+Speaker D: We
+Speaker B: can't
+Speaker D: could
+Speaker B: actually see what we're writing
+Speaker D: Yeah
+Speaker B: .
+Speaker D: , we could on here.
+Speaker A: Alright, let's go forward then. Um right now so we're all gonna draw our favourite animal and then sum up our favourite characteristics of that animal. Even if you are not a good drawer like me. Alright
+Speaker B: Artistic
+Speaker A: .
+Speaker B: skills, nil.
+Speaker C: Fine.
+Speaker A: Um. Bless you.
+Speaker D: Oh, thanks.
+Speaker B: I draw like I'm in grade five.
+Speaker A: Oh do I. 'Kay, about one more minute. Okay. Okay. And who would like to start us off?
+Speaker D: I'll go
+Speaker A: Alright.
+Speaker D: . Um this is my picture. I drew fish I like fish, because uh, you know, their whole water-vascular system thing. It's pretty cool, and um they've got a pretty good habitat and they are pretty sometimes, sometimes vicious but that's okay. Yeah.
+Speaker A: Only if they're piranhas
+Speaker D: Yeah, they they're
+Speaker A: .
+Speaker D: easy, you know. Yeah.
+Speaker A: Alright. Who wants to go next?
+Speaker B: I'll go. I drew a kitty. It's pretty much impossible to tell that's a cat, but
+Speaker D: No I
+Speaker C: No
+Speaker B: I
+Speaker D: I
+Speaker C: , I kne
+Speaker D: see
+Speaker B: love
+Speaker C: I
+Speaker D: it
+Speaker A: No
+Speaker C: knew
+Speaker B: cats
+Speaker A: , it looks
+Speaker C: .
+Speaker A: like a cat
+Speaker B: .
+Speaker D: . Yeah, it
+Speaker A: .
+Speaker D: does look like a cat.
+Speaker B: I love cats because they're independent, uh they pretty much know what they want, they get it, they move on.
+Speaker A: I love cats, too
+Speaker C: Yeah
+Speaker A: . I'm a cat
+Speaker C: .
+Speaker A: person.
+Speaker D: I'm allergic to cats
+Speaker C: Ah
+Speaker A: Uh
+Speaker B: I'm allergic
+Speaker C: .
+Speaker B: to cats, too
+Speaker A: .
+Speaker D: . Oh, okay.
+Speaker A: If
+Speaker B: .
+Speaker C: In
+Speaker A: you're
+Speaker C: my next
+Speaker A: around one
+Speaker C: life
+Speaker A: I had a roommate
+Speaker C: .
+Speaker A: who was um allergic, but if she was around my cat forever she became used to
+Speaker D: Yeah
+Speaker A: it, you
+Speaker D: , yeah
+Speaker A: know
+Speaker D: , if you're
+Speaker A: , it's weird
+Speaker D: around them for
+Speaker A: .
+Speaker D: a long period of time
+Speaker B: I still
+Speaker A: Okay
+Speaker B: can't sleep with them in my room.
+Speaker A: .
+Speaker D: Oh, yeah, this summer I, oh I had to live with cats. It was crazy. Yeah
+Speaker A: Okay
+Speaker D: .
+Speaker A: , Fenella
+Speaker C: Um
+Speaker A: ?
+Speaker C: , I drew a badger.
+Speaker D: Cool
+Speaker B: Yay
+Speaker A: Badger
+Speaker B: .
+Speaker C: Well, yeah
+Speaker D: .
+Speaker A: . Good choice. Why a
+Speaker C: . Uh
+Speaker A: badger?
+Speaker C: I dunno, they're grumpy and nocturnal and
+Speaker B: Are you trying to suggest something?
+Speaker C: Well, a little bit like the Yes. Um. And then, if you know Wind in the Willows badger
+Speaker D: Oh, okay
+Speaker C: . Yeah
+Speaker D: .
+Speaker C: and then uh I don't know if you know Brian. He's Liverpudlian writer.
+Speaker A: Alright.
+Speaker C: Um, that kind of books. Badgers are cool in that one too.
+Speaker A: Okay. And I'm last. 'Kay. Look at my sad sad
+Speaker D: No
+Speaker A: giraffe
+Speaker D: , that's good
+Speaker A: . No
+Speaker D: .
+Speaker A: , no, no, it ends up looking like some kind of a dinosaur, but whatever. I don't know even much about giraffes, but I just love the way they look. They're just such odd creatures, you know. I I like that they're so unique and individual, I guess. I don't know much about their behaviour or anything, though. Only seen a couple
+Speaker D: You
+Speaker A: in
+Speaker D: don't
+Speaker A: zoos
+Speaker D: really have to, I
+Speaker A: . Yeah
+Speaker D: mean
+Speaker A: , but you can
+Speaker D: , if you
+Speaker A: appreciate
+Speaker D: like 'em
+Speaker A: the way they look. Okay. Alright. Guess we're getting straight back into business here. Um the selling price for our remote is going to be twenty-five Euro, and our profit aim is fifty million Euro. We're going to make this an international product marketed in the States, in Europe, in Asia. And um our production cost to make that profit is gonna be a max of twelve fifty Euro per remote. Okay. So we're gonna talk for a little while. Um here are some topics that we might be able to discuss. Expe our experiences with remote controls um, our first ideas about this new remote, anything that you can bring to the table for this project. So.
+Speaker C: Now?
+Speaker A: Yeah. You wanna start us off? Anybody have anything to offer?
+Speaker B: Well, we wanna make a multifunctional remote, right
+Speaker A: Right.
+Speaker B: ? One remote for everything.
+Speaker C: And
+Speaker D: Right
+Speaker C: everything
+Speaker D: .
+Speaker C: being Wait
+Speaker B: Um
+Speaker C: , we have
+Speaker B: .
+Speaker C: what, sound system, T_V_, D_V_D_, V_H_S_, uh
+Speaker B: I think they'll be phasing
+Speaker C: TiVo
+Speaker B: V_H_S_
+Speaker C: ?
+Speaker D: Yeah, TiVo
+Speaker B: out shortly
+Speaker D: .
+Speaker A: TiVo
+Speaker B: .
+Speaker A: .
+Speaker C: But it's still there, so
+Speaker B: Okay.
+Speaker C: if po if we're gonna do it
+Speaker D: It needs to be compatible 'cause universal remote controls are never universal
+Speaker A: They're never
+Speaker D: .
+Speaker A: universal. That's right. Esp e especially if you buy a a not big product, D_V_D_ player, say, usually it doesn't work
+Speaker C: Or if
+Speaker A: if
+Speaker C: it's
+Speaker A: it's
+Speaker C: not
+Speaker A: not
+Speaker C: like a
+Speaker A: one
+Speaker C: Sony
+Speaker A: of the
+Speaker C: , if it's like
+Speaker A: Yeah
+Speaker C: a I
+Speaker A: . Yeah
+Speaker C: don't know.
+Speaker A: . Something
+Speaker B: So
+Speaker A: from
+Speaker B: we'll have
+Speaker A: Sam's
+Speaker B: to figure
+Speaker A: club
+Speaker B: it
+Speaker A: .
+Speaker B: how to cover all the different variances in signals.
+Speaker A: Yeah
+Speaker D: And what
+Speaker A: .
+Speaker D: we need an insanely good instruction booklet, because you always have to reconfigure all your
+Speaker A: Yeah.
+Speaker D: contraptions to go with the remote anyways.
+Speaker A: 'Kay, and um another thing that I think is important is the d the design of the product, how it feels in your hand. If it's just flat and kind of boring th those don't Nobody wants to buy those any more. They want the ergonomic ones
+Speaker D: They want like the flashy
+Speaker A: . Yeah
+Speaker D: lights. Oh like this came
+Speaker A: . Ones
+Speaker D: from Las
+Speaker A: that
+Speaker D: Vegas
+Speaker A: ones
+Speaker D: .
+Speaker A: that look high-tech, too.
+Speaker C: But at the same time are simple.
+Speaker D: Mm
+Speaker A: Right
+Speaker D: yeah.
+Speaker A: . So that
+Speaker B: What
+Speaker A: people
+Speaker B: about something
+Speaker A: like my mother
+Speaker B: with the curvature
+Speaker A: can use it.
+Speaker B: like that matches the curvature of a hand?
+Speaker A: Yeah. 'Kay. Anybody have any experiences with remote controls that they can remember that
+Speaker C: Just bad ones
+Speaker A: Yeah
+Speaker C: .
+Speaker A: . That's true
+Speaker C: Um.
+Speaker A: .
+Speaker B: What kinda battery would we want to use? Because battery
+Speaker C: D
+Speaker B: changing is
+Speaker C: Double
+Speaker B: usually
+Speaker C: A_.
+Speaker D: Double A_.
+Speaker B: Okay.
+Speaker A: Do some of them use triple A_s though?
+Speaker D: Yeah some use triple A_s
+Speaker C: Some
+Speaker D: . So
+Speaker A: Okay
+Speaker C: but
+Speaker D: double
+Speaker A: .
+Speaker D: or triple?
+Speaker C: Yeah, I guess then it's If we need to do triple A_ we can, but most people usually have double A_s around.
+Speaker A: Okay. Yeah. But that has to do with the size of it too
+Speaker C: Right.
+Speaker B: Yeah
+Speaker A: . Well
+Speaker B: .
+Speaker A: , w as long as we know that issue is
+Speaker D: Yeah, if we
+Speaker A: Here
+Speaker D: want it
+Speaker A: we
+Speaker D: to
+Speaker A: can
+Speaker D: be more thin, then we'd probably wanna go with a triple
+Speaker A: Triple
+Speaker D: A_
+Speaker A: A
+Speaker D: .
+Speaker B: Can
+Speaker A: . But
+Speaker B: you with a small lithium battery?
+Speaker A: it's okay, we don't have to decide about it now, just as long as we remember battery type and size is important. Hey. Anything else? Alright. Moving along. Oh, we're closing the meeting. Next meeting is gonna start in thirty minutes. Here's what we're going to do. Um the I_D_, which is who? Okay, you're going to think about the working design. What do you think that means? Okay. And U_I_D_
+Speaker C: Mm-hmm.
+Speaker A: , the technical fun functions design, making sure it does everything that we need the remote to do, the functionality of it, operating all those different things. Okay. And the marketing person, that's Courtney, is going to do the user requirements specification. I guess that means specifying um what exactly the user is going to be looking for. Right
+Speaker D: Right
+Speaker A: ? I
+Speaker D: .
+Speaker A: would think so. Okay. And you're gonna get more specific instructions emailed to you in just a little while. Okay, so does anybody have anything they wanna say before we close the meeting? Okay. This meeting is officially over.

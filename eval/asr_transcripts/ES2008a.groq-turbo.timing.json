@@ -1,0 +1,12 @@
+{
+  "seconds": 2.35,
+  "runs": [
+    2.19,
+    2.43,
+    1.85,
+    2.35,
+    2.45
+  ],
+  "model": "whisper-large-v3-turbo",
+  "base_url": "https://api.groq.com/openai/v1"
+}

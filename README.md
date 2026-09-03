@@ -122,9 +122,14 @@ screen.
 
 ### 3. (Optional) Audio/video transcription
 
-Audio is transcribed by a hosted Whisper API by default — set `TRANSCRIPTION_API_KEY` (OpenAI, or
-Groq with `TRANSCRIPTION_BASE_URL`/`TRANSCRIPTION_MODEL`) in `.env`. This works on memory-limited
-hosts. Alternatively, run Whisper locally (heavier — pulls in PyTorch and needs `ffmpeg`):
+Audio is transcribed by a hosted service, tried in accuracy order with automatic fallback:
+**Deepgram Nova-3** (`DEEPGRAM_API_KEY`), then **hosted Whisper** on Groq
+(`TRANSCRIPTION_API_KEY` plus `TRANSCRIPTION_BASE_URL`/`TRANSCRIPTION_MODEL`). Deepgram measured
+13.0% and 15.3% word error rate on the two AMI reference meetings against 16.6% and 17.2% for
+Whisper; Groq stays configured because its free allowance resets daily where Deepgram's is a
+one-off credit ([docs/asr-evaluation.md](docs/asr-evaluation.md)). Neither loads a model into
+memory, which is what makes this work on a free-tier host. Both free tiers need no card.
+Alternatively, run Whisper locally (heavier — pulls in PyTorch and needs `ffmpeg`):
 
 ```bash
 # in backend/, with the venv active

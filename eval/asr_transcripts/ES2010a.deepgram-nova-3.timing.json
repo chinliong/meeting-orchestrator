@@ -1,0 +1,10 @@
+{
+  "seconds": 3.47,
+  "runs": [
+    3.47,
+    3.44,
+    5.78
+  ],
+  "model": "nova-3",
+  "base_url": "https://api.deepgram.com/v1/listen"
+}

@@ -36,10 +36,20 @@ services:
       # e.g. https://orchestrator-frontend.onrender.com
       - key: CORS_ORIGINS
         sync: false
-      # Hosted Whisper transcription (Objective 4). Set the key in the dashboard.
-      # Leave BASE_URL/MODEL unset for OpenAI; for Groq set BASE_URL to
-      # https://api.groq.com/openai/v1 and MODEL to whisper-large-v3-turbo
-      # (turbo is faster than whisper-large-v3 at near-identical accuracy).
+      # Speech-to-text (Objective 4). Deepgram is tried first and hosted Whisper is the
+      # fallback, so set both: Deepgram is more accurate (13.0%/15.3% word error rate against
+      # 16.6%/17.2% on the two AMI meetings) but its free tier is a one-off $200 credit, while
+      # Groq's 8 audio-hours reset daily and keep the app working once that credit is gone.
+      - key: DEEPGRAM_API_KEY
+        sync: false
+      # Hosted Whisper transcription, the fallback. Set all three in the dashboard.
+      # Groq is the measured choice (docs/asr-evaluation.md). Accuracy ties the best local
+      # model (16.6% vs 17.5%, inside the confidence interval) but it returns in ~2s rather
+      # than 212s and loads nothing into memory - the local fallback needs ~1.5 GB this
+      # instance does not have, which is the actual reason. Free tier, no card.
+      #   TRANSCRIPTION_BASE_URL = https://api.groq.com/openai/v1
+      #   TRANSCRIPTION_MODEL    = whisper-large-v3-turbo
+      # For OpenAI instead, set only the key and leave BASE_URL/MODEL unset.
       - key: TRANSCRIPTION_API_KEY
         sync: false
       - key: TRANSCRIPTION_BASE_URL
