@@ -18,7 +18,7 @@ Environment variables:
     TRANSCRIPTION_BASE_URL   Override the API base URL. Unset = OpenAI. Groq example:
                              https://api.groq.com/openai/v1
     TRANSCRIPTION_MODEL      Model name. Default "whisper-1" (OpenAI); Groq: "whisper-large-v3".
-    WHISPER_MODEL_SIZE       Local model size for backend #2 (default "base").
+    WHISPER_MODEL_SIZE       Local model size for backend #2 (default "turbo").
 """
 from __future__ import annotations
 
@@ -33,8 +33,9 @@ from functools import lru_cache
 # uvicorn configures this logger at INFO, so these lines show up in the Render logs.
 log = logging.getLogger("uvicorn.error")
 
-# Local-model size (backend #2); "base" is a good accuracy/speed trade-off on CPU.
-WHISPER_MODEL_SIZE = os.getenv("WHISPER_MODEL_SIZE", "base")
+# Local-model size (backend #2). "turbo" measured 17.5% word error rate against
+# 28.8% for "base" on the AMI reference recording - see docs/asr-evaluation.md.
+WHISPER_MODEL_SIZE = os.getenv("WHISPER_MODEL_SIZE", "turbo")
 
 
 class WhisperUnavailableError(RuntimeError):
