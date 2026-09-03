@@ -36,10 +36,11 @@ services:
       # e.g. https://orchestrator-frontend.onrender.com
       - key: CORS_ORIGINS
         sync: false
-      # Transcription (Objective 4). Backends are tried in order: Gemini, hosted Whisper,
-      # local Whisper. Gemini is preferred on measured word error rate - 10.9-12.1% against
-      # 17.5% for the best Whisper model - see docs/asr-evaluation.md. Set the key in the
-      # dashboard; without it the backend silently falls through to Whisper.
+      # Transcription (Objective 4). Backends are tried in order: hosted Whisper, local
+      # Whisper, then Gemini. Gemini measured more accurate (10.9-12.1% word error rate against
+      # 17.5%, see docs/asr-evaluation.md) but its audio endpoint sheds load in bursts of HTTP
+      # 503s long enough to fail a foreground request, so Whisper ships. Leave GEMINI_API_KEY
+      # unset unless you want Gemini as the only backend.
       - key: GEMINI_API_KEY
         sync: false # set manually in the dashboard (secret)
       # Optional override of the model chain; the default order is the measured one.

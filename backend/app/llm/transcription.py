@@ -2,20 +2,20 @@
 
 Three interchangeable backends, tried in order:
 
-1. **Gemini** (default in the cloud). If GEMINI_API_KEY is set, the recording is sent to a
-   chain of Gemini models. Chosen on measured word error rate against the AMI corpus - see
-   docs/asr-evaluation.md - where Gemini scored 10.9-12.1% against 17.5% for the best local
-   Whisper model and 28.8% for the previous default. The chain exists because each model
-   carries its own small free daily allowance, so exhausting one need not disable the feature.
+1. **Hosted Whisper API** (default in the cloud). If TRANSCRIPTION_API_KEY is set, audio is
+   sent to an OpenAI-compatible transcription endpoint (OpenAI by default, or Groq via
+   TRANSCRIPTION_BASE_URL). This works on memory-constrained hosts because no model runs
+   locally.
 
-2. **Hosted Whisper API**. If TRANSCRIPTION_API_KEY is set, audio is sent to an
-   OpenAI-compatible transcription endpoint (OpenAI by default, or Groq via
-   TRANSCRIPTION_BASE_URL).
+2. **Local Whisper model** (offline). If no hosted key is set but `openai-whisper` is installed
+   (`pip install -r requirements-audio.txt`, pulls in PyTorch + needs ffmpeg), transcription
+   runs locally on CPU. No key, no network and no quota.
 
-3. **Local Whisper model** (offline fallback). If neither key is set but `openai-whisper` is
-   installed (`pip install -r requirements-audio.txt`, pulls in PyTorch + needs ffmpeg),
-   transcription runs locally on CPU. No key, no network and no quota, at roughly 5 points
-   more word error rate than Gemini.
+3. **Gemini**, used only when no Whisper backend is configured. It is the most accurate option
+   measured - 10.9-12.1% word error rate against 17.5% for the best Whisper model, see
+   docs/asr-evaluation.md - but its audio endpoint returns HTTP 503 in bursts that can outlast a
+   foreground request, so it is not the shipped default. The model chain exists because each
+   model carries its own small free daily allowance.
 
 If none is available the audio endpoint returns a clear 503 rather than crashing.
 
@@ -319,13 +319,17 @@ def _transcribe_locally(tmp_path: str) -> str:
 def transcribe_audio(data: bytes, suffix: str = ".wav") -> str:
     """Transcribe raw audio/video bytes into text.
 
-    Prefers Gemini, then a hosted Whisper endpoint, then the local model, in descending order
-    of measured accuracy. Every backend reads from a file path, so the upload is written to a
-    temp file that is cleaned up afterwards.
+    Prefers Whisper, and uses Gemini only when no Whisper backend is configured.
 
-    If Gemini is configured but every model in its chain fails, this falls through to whatever
-    else is available rather than failing the upload: a transcript at 17.5% word error rate is
-    worth more to the user than an error page.
+    Gemini is the more accurate backend by a wide margin - 10.9-12.1% word error rate against
+    17.5% for the best Whisper model, see docs/asr-evaluation.md - but its audio endpoint sheds
+    load in bursts, returning HTTP 503 for stretches long enough to exhaust a foreground
+    request. Accuracy that is unavailable is worth less than accuracy that is merely lower, so
+    the ordering follows reliability rather than the benchmark. Set GEMINI_API_KEY without a
+    Whisper key to prefer Gemini.
+
+    Every backend reads from a file path, so the upload is written to a temp file that is
+    cleaned up afterwards.
     """
     if not is_available():
         raise WhisperUnavailableError(
@@ -338,16 +342,10 @@ def transcribe_audio(data: bytes, suffix: str = ".wav") -> str:
         tmp.write(data)
         tmp_path = tmp.name
     try:
-        if _gemini_key() is not None:
-            try:
-                return _transcribe_via_gemini(tmp_path)
-            except TranscriptionError as exc:
-                if _api_key() is None and not _local_whisper_installed():
-                    raise
-                log.warning("transcription: Gemini unavailable (%s), "
-                            "falling back to Whisper", exc)
         if _api_key() is not None:
             return _transcribe_via_api(tmp_path)
-        return _transcribe_locally(tmp_path)
+        if _local_whisper_installed():
+            return _transcribe_locally(tmp_path)
+        return _transcribe_via_gemini(tmp_path)
     finally:
         os.unlink(tmp_path)
