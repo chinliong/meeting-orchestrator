@@ -33,9 +33,8 @@ from functools import lru_cache
 # uvicorn configures this logger at INFO, so these lines show up in the Render logs.
 log = logging.getLogger("uvicorn.error")
 
-# Local-model size (backend #2). "turbo" measured 17.5% word error rate against
-# 28.8% for "base" on the AMI reference recording, for a few extra minutes of CPU.
-WHISPER_MODEL_SIZE = os.getenv("WHISPER_MODEL_SIZE", "turbo")
+# Local-model size (backend #2); "base" is a good accuracy/speed trade-off on CPU.
+WHISPER_MODEL_SIZE = os.getenv("WHISPER_MODEL_SIZE", "base")
 
 
 class WhisperUnavailableError(RuntimeError):

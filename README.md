@@ -261,7 +261,7 @@ This scores the cached predictions, writes `eval/results.json`, and refreshes **
 
 - **[docs/evaluation-report.md](docs/evaluation-report.md)** — the findings and the
   recommendation, two tables, readable in a couple of minutes. Start here.
-- **[docs/asr-evaluation.md](docs/asr-evaluation.md)** — Whisper model comparison and the transcription size choice.
+- **[docs/asr-evaluation.md](docs/asr-evaluation.md)** — speech-to-text backend comparison and the transcription model choice.
 - **[docs/evaluation-appendix.md](docs/evaluation-appendix.md)** — full methodology, every
   condition's precision / recall / F1, the confounds, and the corrections.
 
