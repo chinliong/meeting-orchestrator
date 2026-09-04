@@ -92,6 +92,9 @@ class TranscriptSubmit(BaseModel):
     project_id: int
     title: str = ""
     transcript_text: str
+    # The date the meeting took place; relative deadline cues resolve against it. Omitted
+    # means "today", which is right for a meeting being uploaded as it happens.
+    meeting_date: Optional[date] = None
 
 
 class TaskOut(BaseModel):
@@ -162,6 +165,7 @@ class MeetingOut(BaseModel):
     id: int
     project_id: int
     title: str
+    meeting_date: Optional[date] = None
     status: MeetingStatus
     error_message: Optional[str]
     created_at: datetime

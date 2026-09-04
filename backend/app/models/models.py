@@ -112,6 +112,10 @@ class Meeting(Base):
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
     title = Column(String, nullable=False)
     transcript_text = Column(Text, nullable=False)
+    # The date the meeting took place. Relative deadline cues ("by Friday") resolve against it,
+    # so a transcript of a past meeting does not anchor to whenever it was uploaded. Nullable
+    # for rows created before this column existed; those fall back to created_at.
+    meeting_date = Column(Date, nullable=True)
     status = Column(Enum(MeetingStatus), default=MeetingStatus.PENDING, nullable=False)
     error_message = Column(Text, nullable=True)
     created_at = Column(DateTime, server_default=func.now())

@@ -27,9 +27,29 @@ router = APIRouter(prefix="/transcripts", tags=["transcripts"])
 log = logging.getLogger("uvicorn.error")
 
 
-def _meeting_title(title: str) -> str:
+def _meeting_title(title: str, on: date) -> str:
     """Fall back to a dated label when the user leaves the title blank."""
-    return title.strip() or f"Meeting · {date.today():%b %d, %Y}"
+    return title.strip() or f"Meeting · {on:%b %d, %Y}"
+
+
+def _parse_form_date(value: str) -> Optional[date]:
+    """Read the multipart date field. Blank or malformed means 'not supplied'."""
+    try:
+        return date.fromisoformat(value.strip()) if value.strip() else None
+    except ValueError:
+        return None
+
+
+def _anchor(meeting: Meeting) -> date:
+    """The date relative deadline cues resolve against.
+
+    The supplied meeting date wins; otherwise the upload date, which is the best available
+    proxy. Deliberately never inferred from the transcript text - a date mentioned in passing
+    (a freeze date, a go-live) would anchor every deadline to the wrong day, silently.
+    """
+    if meeting.meeting_date:
+        return meeting.meeting_date
+    return meeting.created_at.date() if meeting.created_at else date.today()
 
 
 def _extract_and_store_tasks(meeting: Meeting, db: Session) -> None:
@@ -40,7 +60,8 @@ def _extract_and_store_tasks(meeting: Meeting, db: Session) -> None:
     """
     started = time.perf_counter()
     try:
-        extraction = TranscriptParser().parse(meeting.transcript_text)
+        extraction = TranscriptParser().parse(meeting.transcript_text,
+                                              meeting_date=_anchor(meeting))
         log.info("transcription: LLM parse %.1fs", time.perf_counter() - started)
     except Exception as exc:  # LLM/API failure: record it on the meeting, don't crash
         meeting.status = MeetingStatus.FAILED
@@ -66,7 +87,8 @@ def _extract_and_store_tasks(meeting: Meeting, db: Session) -> None:
     db.commit()
 
 
-def _process_transcript(project: Project, title: str, transcript_text: str, db: Session) -> Meeting:
+def _process_transcript(project: Project, title: str, transcript_text: str, db: Session,
+                        meeting_date: Optional[date] = None) -> Meeting:
     """Persist a text meeting, run the parser synchronously, and return the result.
 
     Used by the text endpoint, where parsing is fast enough to do within the request.
@@ -75,6 +97,7 @@ def _process_transcript(project: Project, title: str, transcript_text: str, db: 
         project_id=project.id,
         title=title,
         transcript_text=transcript_text,
+        meeting_date=meeting_date,
         status=MeetingStatus.PROCESSING,
     )
     db.add(meeting)
@@ -124,7 +147,9 @@ def submit_transcript(
     db: Session = Depends(get_db),
 ):
     project = require_project_edit(db, payload.project_id, user, x_workspace_token)
-    return _process_transcript(project, _meeting_title(payload.title), payload.transcript_text, db)
+    on = payload.meeting_date or date.today()
+    return _process_transcript(project, _meeting_title(payload.title, on),
+                               payload.transcript_text, db, meeting_date=on)
 
 
 @router.post("/audio", response_model=MeetingOut, status_code=201)
@@ -132,6 +157,7 @@ async def submit_audio(
     background_tasks: BackgroundTasks,
     project_id: int = Form(...),
     title: str = Form(""),
+    meeting_date: str = Form(""),
     file: UploadFile = File(...),
     user: Optional[User] = Depends(get_optional_user),
     x_workspace_token: Optional[str] = Header(None),
@@ -161,10 +187,12 @@ async def submit_audio(
         raise HTTPException(status_code=400, detail="Uploaded file is empty")
 
     suffix = "." + file.filename.rsplit(".", 1)[-1] if file.filename and "." in file.filename else ".wav"
+    on = _parse_form_date(meeting_date) or date.today()
     meeting = Meeting(
         project_id=project.id,
-        title=_meeting_title(title),
+        title=_meeting_title(title, on),
         transcript_text="",
+        meeting_date=on,
         status=MeetingStatus.PROCESSING,
     )
     db.add(meeting)
@@ -202,7 +230,7 @@ def rename_meeting(
     if meeting is None:
         raise HTTPException(status_code=404, detail="Meeting not found")
     require_project_edit(db, meeting.project_id, user, x_workspace_token)
-    meeting.title = _meeting_title(payload.title)
+    meeting.title = _meeting_title(payload.title, _anchor(meeting))
     db.commit()
     db.refresh(meeting)
     return meeting

@@ -94,7 +94,10 @@ flowchart LR
     (shared-secret protected) runs the daily check over HTTP, for a free external scheduler to
     call once a day. See "Deadline reminders" below.
   - **LLM parser** (`app/llm/parser.py`) — a reusable, framework-agnostic module: raw text in,
-    validated `ExtractionResult` out, via Claude tool-use.
+    validated `ExtractionResult` out, via Claude tool-use. Relative deadline cues ("by Friday")
+    resolve against the meeting's `meeting_date`, falling back to its upload date; the anchor is
+    never inferred from the transcript body, where a freeze or go-live date would be mistaken
+    for it.
   - **Subtask generator** (`app/llm/subtasks.py`) — breaks a single task into an ordered checklist
     via Claude tool-use, either from the task's own details or from user-supplied instructions.
   - **Transcription module** (`app/llm/transcription.py`) — optional, lazily imported. Tries

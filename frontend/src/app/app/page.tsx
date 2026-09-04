@@ -316,15 +316,15 @@ export default function DashboardPage() {
     }
   };
 
-  const handleTranscriptSubmit = async (title: string, transcriptText: string) => {
+  const handleTranscriptSubmit = async (title: string, transcriptText: string, meetingDate: string) => {
     if (!selectedProjectId) return;
-    await api.submitTranscript(selectedProjectId, title, transcriptText);
+    await api.submitTranscript(selectedProjectId, title, transcriptText, meetingDate);
     reloadTasks();
   };
 
-  const handleAudioSubmit = async (title: string, file: File) => {
+  const handleAudioSubmit = async (title: string, file: File, meetingDate: string) => {
     if (!selectedProjectId) return;
-    const meeting = await api.submitAudio(selectedProjectId, title, file);
+    const meeting = await api.submitAudio(selectedProjectId, title, file, meetingDate);
     const deadline = Date.now() + 5 * 60 * 1000;
     let current = meeting;
     while (current.status === "processing" || current.status === "pending") {

@@ -230,10 +230,16 @@ export const api = {
   },
 
   // --- transcripts ---
-  submitTranscript: (projectId: number, title: string, transcriptText: string) =>
+  submitTranscript: (projectId: number, title: string, transcriptText: string, meetingDate: string) =>
     request<Meeting>("/transcripts", {
       method: "POST",
-      body: JSON.stringify({ project_id: projectId, title, transcript_text: transcriptText }),
+      body: JSON.stringify({
+        project_id: projectId,
+        title,
+        transcript_text: transcriptText,
+        // Relative deadline cues ("by Friday") resolve against this date, not the upload date.
+        meeting_date: meetingDate || null,
+      }),
     }),
 
   getMeeting: (id: number) => request<Meeting>(`/transcripts/${id}`),
@@ -241,10 +247,11 @@ export const api = {
   updateMeeting: (id: number, title: string) =>
     request<Meeting>(`/transcripts/${id}`, { method: "PATCH", body: JSON.stringify({ title }) }),
 
-  submitAudio: async (projectId: number, title: string, file: File): Promise<Meeting> => {
+  submitAudio: async (projectId: number, title: string, file: File, meetingDate: string): Promise<Meeting> => {
     const form = new FormData();
     form.set("project_id", String(projectId));
     form.set("title", title);
+    form.set("meeting_date", meetingDate);
     form.set("file", file);
     // Note: no Content-Type header — the browser sets the multipart boundary itself.
     const headers: Record<string, string> = {};

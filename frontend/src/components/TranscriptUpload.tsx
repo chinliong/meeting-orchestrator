@@ -3,15 +3,21 @@
 import { useState } from "react";
 
 interface Props {
-  onSubmitText: (title: string, transcriptText: string) => Promise<void>;
-  onSubmitAudio: (title: string, file: File) => Promise<void>;
+  onSubmitText: (title: string, transcriptText: string, meetingDate: string) => Promise<void>;
+  onSubmitAudio: (title: string, file: File, meetingDate: string) => Promise<void>;
 }
 
 type Mode = "text" | "audio";
 
+/** Today in the browser's own timezone. `toISOString()` is UTC and can land a day off. */
+const today = () => new Date().toLocaleDateString("en-CA");
+
 export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props) {
   const [mode, setMode] = useState<Mode>("text");
   const [title, setTitle] = useState("");
+  // Deadline cues like "by Friday" resolve against this date. Defaulting to today is right for
+  // a meeting being uploaded as it happens; change it when uploading an older recording.
+  const [meetingDate, setMeetingDate] = useState(today());
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -26,13 +32,14 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
     setError(null);
     try {
       if (mode === "text") {
-        await onSubmitText(title, text);
+        await onSubmitText(title, text, meetingDate);
       } else if (file) {
-        await onSubmitAudio(title, file);
+        await onSubmitAudio(title, file, meetingDate);
       }
       setTitle("");
       setText("");
       setFile(null);
+      setMeetingDate(today());
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to process transcript");
     } finally {
@@ -84,12 +91,21 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
           </button>
         </div>
 
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Meeting title (optional)"
-          className="mb-3 w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-brand focus:bg-white/10 focus:ring-2 focus:ring-brand/30"
-        />
+        <div className="mb-3 flex gap-2">
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Meeting title (optional)"
+            className="min-w-0 flex-1 rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-brand focus:bg-white/10 focus:ring-2 focus:ring-brand/30"
+          />
+          <input
+            type="date"
+            value={meetingDate}
+            onChange={(e) => setMeetingDate(e.target.value)}
+            title="When the meeting took place — deadlines like &quot;by Friday&quot; are resolved from this date"
+            className="shrink-0 rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-slate-100 outline-none transition [color-scheme:dark] focus:border-brand focus:bg-white/10 focus:ring-2 focus:ring-brand/30"
+          />
+        </div>
 
         {mode === "text" ? (
           <textarea
@@ -108,7 +124,7 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
               {file ? file.name : "Click to choose an audio or video file"}
             </span>
             <span className="text-xs text-slate-400">
-              Transcribed with Whisper before parsing. Large files may take a minute.
+              Transcribed before parsing. Large files may take a minute.
             </span>
             <input
               type="file"

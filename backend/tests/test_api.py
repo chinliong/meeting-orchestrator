@@ -298,6 +298,71 @@ def test_submitted_tasks_carry_meeting_title(client, project, stub_parser):
     assert all(t["meeting_title"] == "Sprint Planning" for t in tasks)
 
 
+@pytest.fixture()
+def capture_anchor(monkeypatch):
+    """Record the meeting_date the parser is called with."""
+    seen = {}
+    extraction = ExtractionResult(decisions=[], action_items=[])
+
+    class RecordingParser:
+        def __init__(self, *a, **k):
+            pass
+
+        def parse(self, transcript_text, meeting_date=None):
+            seen["meeting_date"] = meeting_date
+            return extraction
+
+    monkeypatch.setattr("app.api.transcripts.TranscriptParser", RecordingParser)
+    return seen
+
+
+def test_supplied_meeting_date_anchors_the_parse(client, project, capture_anchor):
+    """A transcript of a past meeting must resolve deadlines against that meeting's date.
+
+    Regression: the parser previously defaulted to date.today(), so the same transcript
+    produced different deadlines depending on when it was uploaded.
+    """
+    body = client.post(
+        "/api/v1/transcripts",
+        json={"project_id": project["id"], "transcript_text": "...",
+              "meeting_date": "2026-06-18"},
+    ).json()
+    assert capture_anchor["meeting_date"] == date(2026, 6, 18)
+    assert body["meeting_date"] == "2026-06-18"
+
+
+def test_meeting_date_defaults_to_today(client, project, capture_anchor):
+    client.post(
+        "/api/v1/transcripts",
+        json={"project_id": project["id"], "transcript_text": "..."},
+    )
+    assert capture_anchor["meeting_date"] == date.today()
+
+
+def test_blank_title_uses_the_supplied_meeting_date(client, project, capture_anchor):
+    """The dated fallback title should name the meeting's date, not the upload date."""
+    body = client.post(
+        "/api/v1/transcripts",
+        json={"project_id": project["id"], "transcript_text": "...",
+              "meeting_date": "2026-06-18"},
+    ).json()
+    assert body["title"] == "Meeting · Jun 18, 2026"
+
+
+def test_date_in_transcript_text_does_not_override_the_supplied_date(client, project,
+                                                                    capture_anchor):
+    """The anchor is never inferred from the transcript body.
+
+    A date mentioned in passing - a go-live, a freeze date - must not become the anchor.
+    """
+    client.post(
+        "/api/v1/transcripts",
+        json={"project_id": project["id"], "meeting_date": "2026-06-18",
+              "transcript_text": "Date: 2020-01-01\nThe freeze date is July twentieth."},
+    )
+    assert capture_anchor["meeting_date"] == date(2026, 6, 18)
+
+
 def test_blank_title_gets_dated_default(client, project, stub_parser):
     body = client.post(
         "/api/v1/transcripts",

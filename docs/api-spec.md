@@ -110,6 +110,8 @@ Removes the project and cascades to its meetings and tasks. Requires edit access
 ### `POST /transcripts`
 Submit raw transcript text for parsing. Requires edit access to `project_id`. Synchronously runs
 the LLM and stores the extracted tasks. A blank `title` is given a dated default.
+`meeting_date` (optional, `YYYY-MM-DD`) is the date the meeting took place; relative deadline
+cues resolve against it. Omitted means today.
 
 Request:
 ```json
@@ -145,7 +147,7 @@ On LLM/API failure the meeting is returned with `status: "failed"` and an `error
 (still `201`), and no tasks.
 
 ### `POST /transcripts/audio`
-Submit an audio/video file (`multipart/form-data`). Transcribed, then parsed.
+Submit an audio/video file (`multipart/form-data`, fields `project_id`, `title`, `meeting_date`, `file`). Transcribed, then parsed.
 Requires edit access to `project_id`.
 
 Form fields: `project_id` (int), `title` (string, optional), `file` (the upload).
