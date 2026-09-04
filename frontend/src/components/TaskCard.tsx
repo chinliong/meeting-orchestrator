@@ -3,7 +3,14 @@
 import { useState } from "react";
 
 import type { Task } from "@/lib/types";
-import { avatarColor, confidenceColor, formatDate, initials, isOverdue } from "@/lib/format";
+import {
+  avatarColor,
+  confidenceColor,
+  formatDate,
+  initials,
+  isLowConfidence,
+  isOverdue,
+} from "@/lib/format";
 
 interface Props {
   task: Task;
@@ -231,26 +238,46 @@ export default function TaskCard({
           </span>
         )}
 
-        {task.meeting_id !== null && (
-          <span
-            className="ml-auto inline-flex items-center gap-1.5 rounded-md bg-slate-50 px-2 py-1 ring-1 ring-slate-200/70"
-            title={`AI confidence: how sure the AI is that this is a real action item (${Math.round(
-              task.confidence * 100
-            )}%). Lower means it's worth a quick double-check.`}
-          >
-            <svg
-              viewBox="0 0 20 20"
-              className={`h-3 w-3 ${confidenceColor(task.confidence)}`}
-              fill="currentColor"
+        {/* The score is not a calibrated probability, so a low one is shown as an instruction
+            rather than a number the reader has no way to interpret. Above the threshold the
+            percentage stays, where it reads as reassurance and needs no action. */}
+        {task.meeting_id !== null &&
+          (isLowConfidence(task.confidence) ? (
+            <span
+              className="ml-auto inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-1 ring-1 ring-amber-300/70"
+              title={`The AI was unsure about this one (${Math.round(
+                task.confidence * 100
+              )}% confidence). In evaluation, items scoring this low were usually wrong — check the owner and deadline before relying on it.`}
             >
-              <path d="M2 12a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1H3a1 1 0 01-1-1v-4zm6-4a1 1 0 011-1h2a1 1 0 011 1v8a1 1 0 01-1 1H9a1 1 0 01-1-1V8zm6-4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-            </svg>
-            <span className={`text-[11px] font-semibold tabular-nums ${confidenceColor(task.confidence)}`}>
-              {Math.round(task.confidence * 100)}%
+              <svg viewBox="0 0 20 20" className="h-3 w-3 text-amber-600" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span className="text-[11px] font-semibold text-amber-700">Check this</span>
             </span>
-            <span className="text-[10px] font-medium text-slate-400">confidence</span>
-          </span>
-        )}
+          ) : (
+            <span
+              className="ml-auto inline-flex items-center gap-1.5 rounded-md bg-slate-50 px-2 py-1 ring-1 ring-slate-200/70"
+              title={`The AI is confident this is a real action item (${Math.round(
+                task.confidence * 100
+              )}%). Items it is unsure about are flagged for review instead.`}
+            >
+              <svg
+                viewBox="0 0 20 20"
+                className={`h-3 w-3 ${confidenceColor(task.confidence)}`}
+                fill="currentColor"
+              >
+                <path d="M2 12a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1H3a1 1 0 01-1-1v-4zm6-4a1 1 0 011-1h2a1 1 0 011 1v8a1 1 0 01-1 1H9a1 1 0 01-1-1V8zm6-4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+              </svg>
+              <span className={`text-[11px] font-semibold tabular-nums ${confidenceColor(task.confidence)}`}>
+                {Math.round(task.confidence * 100)}%
+              </span>
+              <span className="text-[10px] font-medium text-slate-400">confidence</span>
+            </span>
+          ))}
       </div>
     </div>
   );

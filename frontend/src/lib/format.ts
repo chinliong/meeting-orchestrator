@@ -66,7 +66,22 @@ export function formatBytes(bytes: number): string {
  * high/medium/low still reads at a glance without a loud coloured pill.
  */
 export function confidenceColor(confidence: number): string {
-  if (confidence >= 0.85) return "text-emerald-600";
+  if (confidence >= LOW_CONFIDENCE) return "text-emerald-600";
   if (confidence >= 0.6) return "text-amber-600";
   return "text-slate-400";
+}
+
+/**
+ * Below this, a card is flagged for review rather than shown as a percentage.
+ *
+ * Measured, not chosen: against the annotated evaluation set every extracted item scoring under
+ * 0.80 turned out to be spurious, while items at 0.99 were genuine only 86% of the time. The
+ * score discriminates at the low end but is not a calibrated probability, so a raw percentage
+ * invites a reading it cannot support. 0.85 keeps a small margin over the measured 0.80.
+ * See docs/evaluation-appendix.md, "Is the confidence score meaningful?".
+ */
+export const LOW_CONFIDENCE = 0.85;
+
+export function isLowConfidence(confidence: number): boolean {
+  return confidence < LOW_CONFIDENCE;
 }
