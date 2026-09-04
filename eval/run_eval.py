@@ -663,6 +663,52 @@ def completeness(cache: dict) -> dict:
     return out
 
 
+CONFIDENCE_BUCKETS = [(0.0, 0.80), (0.80, 0.90), (0.90, 0.95), (0.95, 0.99), (0.99, 1.01)]
+
+
+def confidence_calibration(cache: dict, annotations: list[dict], cond: str = "prod") -> dict:
+    """Does a higher confidence score actually mean the item is more likely to be real?
+
+    The score is displayed on every card, so it is worth knowing whether it carries
+    information. There is no annotated confidence to compare against - the ground truth
+    records description, owner, deadline and status only - so correctness is taken from the
+    same overlap matcher used everywhere else: a prediction that matches an annotated item is
+    real, one that matches nothing is spurious.
+
+    Two properties are distinguished, because they are not the same thing. *Calibration* asks
+    whether 0.9 means right nine times in ten. *Discrimination* asks only whether lower scores
+    are more often wrong. A review flag needs the second; only a probability needs the first.
+    """
+    by_file = {e["transcript_file"]: e for e in annotations}
+    hits: list[float] = []
+    misses: list[float] = []
+    for run in runs_with(cache, cond):
+        for blk in scorable(run["conditions"][cond]):
+            expected = by_file[blk["transcript_file"]]["expected_action_items"]
+            predicted = blk["predicted"]
+            matched = {pi for _, pi, _ in _match_overlap(expected, predicted)}
+            for i, pred in enumerate(predicted):
+                c = pred.get("confidence")
+                if c is not None:
+                    (hits if i in matched else misses).append(float(c))
+    if not hits and not misses:
+        return {}
+
+    buckets = []
+    for lo, hi in CONFIDENCE_BUCKETS:
+        h = sum(1 for c in hits if lo <= c < hi)
+        m = sum(1 for c in misses if lo <= c < hi)
+        if h + m:
+            buckets.append({"lo": lo, "hi": hi, "n": h + m, "matched_rate": round(h / (h + m), 3)})
+    return {
+        "condition": cond,
+        "matched": {"n": len(hits), "mean": round(sum(hits) / len(hits), 3) if hits else None},
+        "spurious": {"n": len(misses),
+                     "mean": round(sum(misses) / len(misses), 3) if misses else None},
+        "buckets": buckets,
+    }
+
+
 def _models_used(cache: dict, overlap: dict) -> dict:
     """Provider -> the concrete model id(s) that produced the cached runs.
 
@@ -1184,8 +1230,9 @@ both columns; only the guidance text differs.
 {_wrap('''Without the descriptions the model periodically returns output that fails validation
 outright - usually a malformed date - and the application gets no record at all. With them, that did
 not happen once. The remaining rows are the fields the guidance explicitly asks for: the decision
-each task came from, and a confidence score that actually varies instead of sitting near-constant
-and therefore carrying no information.''')}
+each task came from, and a confidence score that actually varies instead of sitting near-constant.
+Varying is necessary but not sufficient - the appendix measures what that variation is worth, and
+finds it separates spurious items only at the low end.''')}
 
 ## What this does not show
 
@@ -1197,9 +1244,49 @@ set is scheduled for the next phase and is what would settle the accuracy questi
 """
 
 
+def _confidence_section(cal: dict) -> str:
+    """The confidence score is shown on every card; this reports whether it carries information."""
+    if not cal:
+        return ""
+    rows = "\n".join(
+        f"| {b['lo']:.2f} - {b['hi']:.2f} | {b['n']} | {b['matched_rate']:.0%} |"
+        for b in cal["buckets"])
+    top = cal["buckets"][-1]
+    low = cal["buckets"][0]
+    m, sp = cal["matched"], cal["spurious"]
+    return f"""
+## Is the confidence score meaningful?
+
+Every extracted item carries a confidence score, and the interface shows it, so it is worth
+asking whether it carries information. There is no annotated confidence to compare against, so
+correctness here means the same thing it does everywhere else in this report: a prediction that
+matches an annotated item is real, one that matches nothing is spurious.
+
+Real items average {m['mean']} confidence (n={m['n']}), spurious ones {sp['mean']} (n={sp['n']}) -
+a gap of {m['mean'] - sp['mean']:+.3f}.
+
+| Confidence | Items | Actually real |
+|---|---|---|
+{rows}
+
+Two properties have to be separated here. **Calibration** asks whether 0.9 means right nine times
+in ten; the score fails that, because items at {top['lo']:.2f}+ are real {top['matched_rate']:.0%}
+of the time, not {top['lo']:.0%}. **Discrimination** asks only whether low scores are more often
+wrong, and that holds at the bottom of the range: every item below {low['hi']:.2f} was spurious
+({low['n']} of them).
+
+The practical reading is that the score is a review flag, not a probability. It is not safe to
+present as a likelihood, and the interface accordingly uses it to colour items for attention
+rather than to assert one. The caveat is sample size: {sum(b['n'] for b in cal['buckets'][:2])}
+items fall below 0.90, so the low-end result is suggestive rather than established, and
+{top['n']} of {m['n'] + sp['n']} items sit in the top bucket where the score does not
+discriminate at all.
+"""
+
+
 def render_appendix(cache: dict, overlap: dict, judge: dict | None, n_transcripts: int,
                     n_items: int, comp: dict | None = None, counts: dict | None = None,
-                    offsets: dict | None = None) -> str:
+                    offsets: dict | None = None, cal: dict | None = None) -> str:
     """Render the technical appendix: every condition, every caveat, every correction.
 
     Structure is deliberate. Two studies are reported, each with one table, because their rows are
@@ -1262,7 +1349,7 @@ _Summary and recommendation: [evaluation-report.md](evaluation-report.md)._
 Gemini needs the tool schema translated into its OpenAPI subset (`eval/providers.py`); Mistral
 accepts JSON Schema unchanged. The translation is asserted to preserve fields, required list and
 enum, because a translation bug would surface as a model difference that is really a harness bug.
-{_study_one(overlap, comp, counts)}{_study_two(overlap, comp, counts, models)}{_deadline_section(offsets)}
+{_study_one(overlap, comp, counts)}{_study_two(overlap, comp, counts, models)}{_deadline_section(offsets)}{_confidence_section(cal or {})}
 ## Limitations
 
 - **The test set is synthetic.** The four transcripts were generated for this project and written
@@ -1392,11 +1479,12 @@ def main() -> None:
         comp = completeness(cache)
         counts = pooled_field_counts(cache, annotations)
         offsets = deadline_offsets(cache, annotations)
+        cal = confidence_calibration(cache, annotations)
         REPORT_MD.write_text(render_report(
             cache, overlap, len(annotations), n_items, comp=comp, offsets=offsets))
         APPENDIX_MD.write_text(render_appendix(
             cache, overlap, judge, len(annotations), n_items,
-            comp=comp, counts=counts, offsets=offsets))
+            comp=comp, counts=counts, offsets=offsets, cal=cal))
         print(f"Wrote {REPORT_MD.relative_to(REPO_ROOT)} (short) and "
               f"{APPENDIX_MD.relative_to(REPO_ROOT)} (detail)")
 

@@ -45,9 +45,10 @@ Each candidate carries a flaw that is specifically disqualifying for this produc
   For a meeting orchestrator a dropped action item is the worst available failure.
 
 **Recommendation: keep the with-guidance Claude Sonnet configuration.** It is the only option without a
-specific disqualifier. If cost later forces a change, Haiku is the most rescuable of the three: its
-failure is a constant date offset rather than a field it declines to populate or recall it never
-had. That fix would need validating before a switch, not instead of one.
+specific disqualifier. If cost later forces a change, Haiku is the most rescuable of the three - a
+constant offset is the kind of error a prompt change could plausibly remove, unlike a field the
+model declines to populate or recall it never had. That fix would need validating before a switch,
+not instead of one.
 
 ## Test set and method
 
@@ -161,6 +162,37 @@ week") consistently one day late, and no other model here produces that offset e
 consequences: its low exact-match rate overstates how badly it understands dates, and a constant
 offset is the kind of error a prompt change could plausibly remove. Unlike the F1 differences
 elsewhere in this report, 52% of 54 scored deadlines is well outside the noise.
+
+## Is the confidence score meaningful?
+
+Every extracted item carries a confidence score, and the interface shows it, so it is worth
+asking whether it carries information. There is no annotated confidence to compare against, so
+correctness here means the same thing it does everywhere else in this report: a prediction that
+matches an annotated item is real, one that matches nothing is spurious.
+
+Real items average 0.974 confidence (n=112), spurious ones 0.927 (n=21) -
+a gap of +0.047.
+
+| Confidence | Items | Actually real |
+|---|---|---|
+| 0.00 - 0.80 | 4 | 0% |
+| 0.80 - 0.90 | 4 | 75% |
+| 0.90 - 0.95 | 3 | 100% |
+| 0.95 - 0.99 | 80 | 88% |
+| 0.99 - 1.01 | 42 | 86% |
+
+Two properties have to be separated here. **Calibration** asks whether 0.9 means right nine times
+in ten; the score fails that, because items at 0.99+ are real 86%
+of the time, not 99%. **Discrimination** asks only whether low scores are more often
+wrong, and that holds at the bottom of the range: every item below 0.80 was spurious
+(4 of them).
+
+The practical reading is that the score is a review flag, not a probability. It is not safe to
+present as a likelihood, and the interface accordingly uses it to colour items for attention
+rather than to assert one. The caveat is sample size: 8
+items fall below 0.90, so the low-end result is suggestive rather than established, and
+42 of 133 items sit in the top bucket where the score does not
+discriminate at all.
 
 ## Limitations
 

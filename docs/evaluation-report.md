@@ -58,7 +58,8 @@ Without the descriptions the model periodically returns output that fails valida
 usually a malformed date - and the application gets no record at all. With them, that did not
 happen once. The remaining rows are the fields the guidance explicitly asks for: the decision
 each task came from, and a confidence score that actually varies instead of sitting near-
-constant and therefore carrying no information.
+constant. Varying is necessary but not sufficient - the appendix measures what that variation is
+worth, and finds it separates spurious items only at the low end.
 
 ## What this does not show
 
