@@ -91,20 +91,26 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
           </button>
         </div>
 
-        <div className="mb-3 flex gap-2">
+        {/* Stacked rather than side by side: the sidebar is 340px on desktop and narrower on
+            a phone, and a date input is wide enough to squeeze the title placeholder to
+            nothing. The date carries a visible label because a tooltip never reaches touch. */}
+        <div className="mb-3 space-y-2">
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Meeting title (optional)"
-            className="min-w-0 flex-1 rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-brand focus:bg-white/10 focus:ring-2 focus:ring-brand/30"
+            className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-brand focus:bg-white/10 focus:ring-2 focus:ring-brand/30"
           />
-          <input
-            type="date"
-            value={meetingDate}
-            onChange={(e) => setMeetingDate(e.target.value)}
-            title="When the meeting took place — deadlines like &quot;by Friday&quot; are resolved from this date"
-            className="shrink-0 rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-slate-100 outline-none transition [color-scheme:dark] focus:border-brand focus:bg-white/10 focus:ring-2 focus:ring-brand/30"
-          />
+          <label className="flex w-full items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 transition focus-within:border-brand focus-within:bg-white/10 focus-within:ring-2 focus-within:ring-brand/30">
+            <span className="shrink-0 text-xs text-slate-400">Meeting date</span>
+            <input
+              type="date"
+              value={meetingDate}
+              onChange={(e) => setMeetingDate(e.target.value)}
+              title={'When the meeting took place. Deadlines such as "by Friday" are resolved from this date.'}
+              className="min-w-0 flex-1 bg-transparent text-sm text-slate-100 outline-none [color-scheme:dark]"
+            />
+          </label>
         </div>
 
         {mode === "text" ? (
