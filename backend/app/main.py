@@ -58,7 +58,16 @@ def health():
 
     try:
         parser = TranscriptParser()
-        extraction = {"provider": parser.provider, "model": parser.model or "default"}
+        # Resolve the model the same way a request would, so this names what is actually
+        # running rather than only reporting whether an override happens to be configured.
+        if parser.model:
+            model = parser.model
+        elif parser.provider == "gemini":
+            from app.llm import gemini
+            model = gemini.DEFAULT_MODEL
+        else:
+            model = "unknown"
+        extraction = {"provider": parser.provider, "model": model}
     except Exception as exc:  # never let a diagnostic take down the health check
         extraction = {"provider": "unavailable", "error": type(exc).__name__}
     return {
