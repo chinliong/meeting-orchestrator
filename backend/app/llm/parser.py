@@ -3,6 +3,8 @@ from __future__ import annotations
 import os
 from datetime import date
 
+import logging
+
 import anthropic
 
 from app.schemas.schemas import ExtractionResult
@@ -106,6 +108,14 @@ class TranscriptParser:
         provider: str | None = None,
     ):
         self.provider = (provider or LLM_PROVIDER).strip().lower()
+        # Fall back rather than fail: a deployment that selects Gemini but has no Gemini key
+        # would otherwise 500 on every upload. Claude produces a slightly weaker extraction,
+        # which is a better outcome than none, and the log line says the switch happened.
+        if self.provider == "gemini" and not os.getenv("GEMINI_API_KEY"):
+            if os.getenv("ANTHROPIC_API_KEY"):
+                logging.getLogger("uvicorn.error").warning(
+                    "parser: GEMINI_API_KEY is not set - falling back to Claude")
+                self.provider = "anthropic"
         self.model = model or (
             os.getenv("GEMINI_MODEL") if self.provider == "gemini"
             else os.getenv("CLAUDE_MODEL", "claude-sonnet-4-6"))
