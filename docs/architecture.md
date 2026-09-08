@@ -117,7 +117,7 @@ flowchart LR
 - **LLM provider:** Gemini Flash for both extraction and subtask generation, structured output
   through a forced function call. The tool schema is defined once and translated into Gemini's
   OpenAPI subset (`app/llm/gemini.py`); the translation raises on anything it does not recognise
-  rather than dropping it silently, so a schema change cannot quietly weaken the contract.
+  rather than dropping it silently, so a schema change cannot weaken the contract unnoticed.
 - **Why Gemini:** it leads Claude Sonnet on recall, precision and F1 across eight runs per model,
   each separated by an exact permutation test (`docs/evaluation-report.md`). Subtask generation
   moved on a different basis — quality there is indistinguishable (p = 0.53), so the reason is

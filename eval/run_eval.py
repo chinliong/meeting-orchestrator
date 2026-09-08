@@ -20,7 +20,7 @@ Two questions are answered, by two different sets of conditions (see CONDITIONS)
    because the question is whether to replace it. Tiers and release dates differ and the
    mismatch runs both ways - Sonnet is a larger tier, Gemini Flash is a later release - so
    this is reported as a procurement decision for this project, not a vendor ranking. Haiku is
-   the tier-matched Claude entry that keeps the choice honest.
+   the tier-matched Claude entry, which is what makes this a comparison rather than vendor loyalty.
 
 Four design decisions worth knowing
 -----------------------------------
@@ -1014,7 +1014,7 @@ families failing the same way, and being fixed the same way, is the strongest ev
 but the net F1 effect has {signs} ({d_claude:+.3f} on Claude, {d_gemini:+.3f} on Gemini),
 {span}. The second model was added expecting the guidance to help *more*
 where the model is weaker; it did not, and that expectation is recorded here as refuted rather
-than quietly dropped.
+than dropped.
 
 {_precision_note(overlap)}
 
@@ -1371,7 +1371,7 @@ enum, because a translation bug would surface as a model difference that is real
 - **The test set is synthetic.** The four transcripts were generated for this project and written
   to be deliberately messy - interruptions, corrections, half-finished sentences and decisions
   revisited later - so that the parser is not only measured on tidy prose. They are still authored
-  text rather than a transcription of real speech, which is the honest caveat: generated dialogue
+  text rather than a transcription of real speech, which is the main caveat: generated dialogue
   may be more internally consistent than a genuine recording even when written to look untidy. The
   pipeline was separately exercised end to end on a real recording from the AMI meeting corpus, but
   that recording is not part of the scored test set.

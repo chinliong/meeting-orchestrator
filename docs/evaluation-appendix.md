@@ -101,7 +101,7 @@ same way, and being fixed the same way, is the strongest evidence here.
 but the net F1 effect has the same sign on both models (+0.139 on Claude, +0.045 on Gemini),
 both smaller than the ~0.15 run-to-run spread. The second model was added expecting the guidance
 to help *more* where the model is weaker; it did not, and that expectation is recorded here as
-refuted rather than quietly dropped.
+refuted rather than dropped.
 
 **Why precision falls.** Precision is the share of proposed items that turned out to be real.
 With the guidance the model proposes more of them - 276 against the control's 191 on Claude
@@ -200,7 +200,7 @@ discriminate at all.
 - **The test set is synthetic.** The four transcripts were generated for this project and written
   to be deliberately messy - interruptions, corrections, half-finished sentences and decisions
   revisited later - so that the parser is not only measured on tidy prose. They are still authored
-  text rather than a transcription of real speech, which is the honest caveat: generated dialogue
+  text rather than a transcription of real speech, which is the main caveat: generated dialogue
   may be more internally consistent than a genuine recording even when written to look untidy. The
   pipeline was separately exercised end to end on a real recording from the AMI meeting corpus, but
   that recording is not part of the scored test set.
