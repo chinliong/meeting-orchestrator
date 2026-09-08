@@ -35,15 +35,26 @@ represent them. But the floor is set by segmentation, not model capacity: scalin
 base to large-v3 never improved deletions, while a model with better voice-activity handling
 improved them by a third.
 
-## One mis-heard name reached the task board
+## What a mis-heard name did, and did not, reach
 
-Uploading ES2010a produced seven action items, all traceable to something actually said. One was
-assigned to "Vanilla", who does not exist: the participant is **Fenella**, and the transcriber
-substituted the name. The parser then used it faithfully.
+Deepgram transcribes the participant **Fenella** as "Vanilla" during the roll-call. Whether that
+error reaches the task board turns out to depend on the extraction model, which makes ES2010a a
+useful end-to-end case.
 
-This is the concrete cost of transcription error. It also shows where the confidence score earns
-its place - the two owners the audio never states scored 65%, while the one named outright ("the
-marketing person, that's Courtney") scored 85%.
+The meeting assigns work to three roles but names only one person: "The ID, which is who? Okay.
+You're going to think about the working design... And UID. The technical functions design... And
+the marketing person, Courtney, is going to do the user requirements specification." Claude
+Sonnet returned seven items and filled in owners for all three roles, attributing the working
+design to "Vanilla" and the technical functions to "Amber" - two names the transcript never
+connects to those roles, one of them a transcription error. Gemini Flash returned the four items
+the meeting actually commits to and left both unnamed roles unassigned.
+
+The confidence score separated the two cases. Both invented attributions fell below the 0.85
+review threshold and are flagged for checking; Courtney, the only person the transcript names
+for their own task, scored 0.85 and is not. On the Gemini board all four items scored 0.90 or
+above and none are flagged. So the transcription error is real and still present in the text,
+but on the shipped configuration it reaches the board only as a name nobody is assigned to, not
+as an owner.
 
 ## Hosted or local
 
