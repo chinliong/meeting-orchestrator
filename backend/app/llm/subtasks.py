@@ -5,17 +5,21 @@ Two modes, mirroring the UI's "Generate" menu:
   deadline, source meeting/decision).
 - *from your instructions* — the same, but steered by free-text instructions the user typed.
 
-Like app/llm/parser.py, this uses Anthropic tool-use to force a structured (JSON) response.
+Like app/llm/parser.py, this forces a structured (JSON) response through tool use, on
+whichever provider is selected.
 """
 from __future__ import annotations
 
-import os
-
 import logging
+import os
+import time
 
 import anthropic
 
 from app.models.models import Task
+
+# uvicorn configures this logger at INFO, so these lines show up in the Render logs.
+log = logging.getLogger("uvicorn.error")
 
 MAX_SUBTASKS = 8
 
@@ -85,8 +89,7 @@ class SubtaskGenerator:
                  provider: str | None = None):
         self.provider = (provider or os.getenv("SUBTASK_PROVIDER", "gemini")).strip().lower()
         if self.provider == "gemini" and not os.getenv("GEMINI_API_KEY"):
-            logging.getLogger("uvicorn.error").warning(
-                "subtasks: GEMINI_API_KEY is not set - falling back to Claude")
+            log.warning("subtasks: GEMINI_API_KEY is not set - falling back to Claude")
             self.provider = "anthropic"
         self.model = model or (
             os.getenv("GEMINI_MODEL") if self.provider == "gemini"
@@ -94,29 +97,41 @@ class SubtaskGenerator:
         self.client = (anthropic.Anthropic(api_key=api_key or os.getenv("ANTHROPIC_API_KEY"))
                        if self.provider != "gemini" else None)
 
+    def _resolved_model(self) -> str:
+        """The model a generation will actually use, including the client-side default.
+
+        `self.model` is None when no override is set, so logging it directly would say nothing
+        rather than naming what ran.
+        """
+        if self.model:
+            return self.model
+        if self.provider == "gemini":
+            from app.llm import gemini
+            return gemini.DEFAULT_MODEL
+        return "claude-sonnet-4-6"
+
     def generate(self, task: Task, instructions: str | None = None) -> list[str]:
         user_content = _task_context(task)
         if instructions and instructions.strip():
             user_content += f"\n\nUser instructions for the breakdown:\n{instructions.strip()}"
 
+        started = time.perf_counter()
         if self.provider == "gemini":
             from app.llm import gemini
             args = gemini.call_tool(SYSTEM_PROMPT, SUBTASK_TOOL, user_content, model=self.model)
             raw = args.get("subtasks", [])
-            titles = [t.strip() for t in raw if isinstance(t, str) and t.strip()]
-            return titles[:MAX_SUBTASKS]
-
-        message = self.client.messages.create(
-            model=self.model,
-            max_tokens=1024,
-            system=SYSTEM_PROMPT,
-            tools=[SUBTASK_TOOL],
-            tool_choice={"type": "tool", "name": "record_subtasks"},
-            messages=[{"role": "user", "content": user_content}],
-        )
-
-        tool_use = next(block for block in message.content if block.type == "tool_use")
-        raw = tool_use.input.get("subtasks", [])
+        else:
+            message = self.client.messages.create(
+                model=self.model,
+                max_tokens=1024,
+                system=SYSTEM_PROMPT,
+                tools=[SUBTASK_TOOL],
+                tool_choice={"type": "tool", "name": "record_subtasks"},
+                messages=[{"role": "user", "content": user_content}],
+            )
+            raw = next(b for b in message.content if b.type == "tool_use").input.get("subtasks", [])
+        log.info("subtasks: %s %s %.1fs", self.provider, self._resolved_model(),
+                 time.perf_counter() - started)
         # Defensive tidy-up: drop blanks, trim, and cap the count.
         titles = [t.strip() for t in raw if isinstance(t, str) and t.strip()]
         return titles[:MAX_SUBTASKS]
