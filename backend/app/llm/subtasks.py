@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import os
 
+import logging
+
 import anthropic
 
 from app.models.models import Task
@@ -72,14 +74,37 @@ def _task_context(task: Task) -> str:
 
 
 class SubtaskGenerator:
-    def __init__(self, api_key: str | None = None, model: str | None = None):
-        self.client = anthropic.Anthropic(api_key=api_key or os.getenv("ANTHROPIC_API_KEY"))
-        self.model = model or os.getenv("CLAUDE_MODEL", "claude-sonnet-4-6")
+    """Breaks a task into a checklist, on either model family.
+
+    Subtask generation is a different problem from extraction - open-ended decomposition rather
+    than faithful reporting - so the provider is selected independently of the parser's and on
+    its own evidence (docs/subtask-evaluation-report.md), not inherited from it.
+    """
+
+    def __init__(self, api_key: str | None = None, model: str | None = None,
+                 provider: str | None = None):
+        self.provider = (provider or os.getenv("SUBTASK_PROVIDER", "gemini")).strip().lower()
+        if self.provider == "gemini" and not os.getenv("GEMINI_API_KEY"):
+            logging.getLogger("uvicorn.error").warning(
+                "subtasks: GEMINI_API_KEY is not set - falling back to Claude")
+            self.provider = "anthropic"
+        self.model = model or (
+            os.getenv("GEMINI_MODEL") if self.provider == "gemini"
+            else os.getenv("CLAUDE_MODEL", "claude-sonnet-4-6"))
+        self.client = (anthropic.Anthropic(api_key=api_key or os.getenv("ANTHROPIC_API_KEY"))
+                       if self.provider != "gemini" else None)
 
     def generate(self, task: Task, instructions: str | None = None) -> list[str]:
         user_content = _task_context(task)
         if instructions and instructions.strip():
             user_content += f"\n\nUser instructions for the breakdown:\n{instructions.strip()}"
+
+        if self.provider == "gemini":
+            from app.llm import gemini
+            args = gemini.call_tool(SYSTEM_PROMPT, SUBTASK_TOOL, user_content, model=self.model)
+            raw = args.get("subtasks", [])
+            titles = [t.strip() for t in raw if isinstance(t, str) and t.strip()]
+            return titles[:MAX_SUBTASKS]
 
         message = self.client.messages.create(
             model=self.model,
