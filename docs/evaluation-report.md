@@ -19,7 +19,7 @@ model changes.
 
 | Model | Action items found | F1 | Deadlines correct | Context captured | Cost |
 |---|---|---|---|---|---|
-| Claude Sonnet | 88% | 0.855 | 82% | 100% | paid, ~$3/$15 per M tokens; extraction fallback, and runs the subtask generator |
+| Claude Sonnet | 88% | 0.855 | 82% | 100% | paid, ~$3/$15 per M tokens |
 | Claude Haiku | 67% | 0.781 | 26% | 100% | paid, ~$1/$5 per M tokens |
 | **Gemini Flash** | 97% | 0.929 | 89% | 100% | paid, ~$0.30/$2.50 per M tokens; selected for extraction |
 
@@ -33,9 +33,8 @@ exact permutation test. It was previously rejected for leaving the source-decisi
 on most items, but that proved to be a prompt defect rather than a model weakness - the schema
 called the field optional and the prompt never asked for it. With the prompt corrected every
 model fills it on 100% of items, so the earlier comparison was partly measuring prompt
-ambiguity. Claude Haiku carries the date bug above. Claude Sonnet is second on every measure
-with no disqualifying failure and stays in the system, as the extraction fallback and as the
-model behind the subtask generator.
+ambiguity. Claude Haiku carries the date bug above. Claude Sonnet is second on every measure,
+with no disqualifying failure of its own.
 
 > These models sit at different price tiers *and* different release dates - Sonnet is a larger
 > tier than the other two, while Gemini Flash is a later release than Sonnet. The confound runs

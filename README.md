@@ -72,7 +72,7 @@ for the full API.
 | Backend | FastAPI, Pydantic v2, SQLAlchemy 2 |
 | Auth | Email/password (bcrypt via passlib), JWT access tokens, capability-link sharing |
 | Email | Brevo transactional API (HTTPS) for password resets and deadline reminders; SMTP fallback for local dev |
-| LLM | Gemini Flash, forced function calling for structured output; Claude Sonnet as the automatic fallback |
+| LLM | Gemini Flash, forced function calling for structured output |
 | Speech-to-text | Whisper — hosted API (OpenAI/Groq) by default, optional local model |
 | Database | SQLite (dev) / PostgreSQL (prod; e.g. Neon) |
 | Deployment | Render blueprint — backend (Docker web service) + frontend (static site) + external Postgres |
@@ -92,7 +92,7 @@ for the full API.
 
 ### Prerequisites
 - Python 3.9+ and Node.js 18+
-- A Gemini API key (an Anthropic key is optional, for the fallback)
+- A Gemini API key
 
 ### 1. Backend
 
@@ -122,13 +122,11 @@ screen.
 
 ### 3. (Optional) Audio/video transcription
 
-Audio is transcribed by a hosted service, tried in accuracy order with automatic fallback:
-**Deepgram Nova-3** (`DEEPGRAM_API_KEY`), then **hosted Whisper** on Groq
-(`TRANSCRIPTION_API_KEY` plus `TRANSCRIPTION_BASE_URL`/`TRANSCRIPTION_MODEL`). Deepgram measured
-13.0% and 15.3% word error rate on the two AMI reference meetings against 16.6% and 17.2% for
-Whisper; Groq stays configured because its free allowance resets daily where Deepgram's is a
-one-off credit ([docs/asr-evaluation.md](docs/asr-evaluation.md)). Neither loads a model into
-memory, which is what makes this work on a free-tier host. Both free tiers need no card.
+Audio is transcribed by **Deepgram Nova-3** (`DEEPGRAM_API_KEY`), which measured 13.0% and
+15.3% word error rate on the two AMI reference meetings against 16.6% and 17.2% for hosted
+Whisper ([docs/asr-evaluation.md](docs/asr-evaluation.md)). It runs as a hosted service, so
+nothing loads into memory — which is what makes this work on a free-tier host, and the free
+tier needs no card.
 Alternatively, run Whisper locally (heavier — pulls in PyTorch and needs `ffmpeg`):
 
 ```bash

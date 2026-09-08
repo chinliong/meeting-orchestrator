@@ -30,7 +30,7 @@ one *fails* still matters more than where it sits in the table:
 
 | Model | Recall | Deadlines exact | `source_decision` | Cost |
 |---|---|---|---|---|
-| Claude Sonnet | 0.875 | 97/119 | 100% | paid, ~$3/$15 per M tokens; extraction fallback, and runs the subtask generator |
+| Claude Sonnet | 0.875 | 97/119 | 100% | paid, ~$3/$15 per M tokens |
 | Claude Haiku | 0.67 | 28/109 | 100% | paid, ~$1/$5 per M tokens |
 | Gemini Flash | 0.966 | 107/120 | 100% | paid, ~$0.30/$2.50 per M tokens; selected for extraction |
 
@@ -44,8 +44,9 @@ one *fails* still matters more than where it sits in the table:
 
 **Recommendation: run extraction on Gemini Flash.** It leads all three headline metrics by a
 margin this test set can separate, and no longer carries the completeness gap that ruled it out.
-Claude Sonnet stays configured as the fallback and continues to run the subtask generator, which
-this comparison does not cover - a parser result is not evidence about a different task.
+Subtask generation was measured separately on its own rubric, because open-ended
+decomposition is a different problem from extraction and a parser result is not evidence about
+it.
 
 ## Test set and method
 

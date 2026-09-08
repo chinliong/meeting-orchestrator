@@ -742,7 +742,7 @@ def _models_used(cache: dict, overlap: dict) -> dict:
 # numbers deliberately: on a test set this small the accuracy columns are nearly tied, so quota
 # and price are what actually separate the options.
 _MODEL_NOTES = {
-    "prod": "paid, ~$3/$15 per M tokens; extraction fallback, and runs the subtask generator",
+    "prod": "paid, ~$3/$15 per M tokens",
     "haiku_prod": "paid, ~$1/$5 per M tokens",
     # Both are ordinary paid models. Their vendors grant a small daily allowance of free
     # requests, and this evaluation stayed inside it - a billing arrangement, not a different
@@ -886,8 +886,9 @@ one *fails* still matters more than where it sits in the table:
 
 **Recommendation: run extraction on Gemini Flash.** It leads all three headline metrics by a
 margin this test set can separate, and no longer carries the completeness gap that ruled it out.
-Claude Sonnet stays configured as the fallback and continues to run the subtask generator, which
-this comparison does not cover - a parser result is not evidence about a different task.
+Subtask generation was measured separately on its own rubric, because open-ended
+decomposition is a different problem from extraction and a parser result is not evidence about
+it.
 """
 
 
@@ -1213,9 +1214,8 @@ exact permutation test. It was previously rejected for leaving the source-decisi
 most items, but that proved to be a prompt defect rather than a model weakness - the schema called
 the field optional and the prompt never asked for it. With the prompt corrected every model fills
 it on 100% of items, so the earlier comparison was partly measuring prompt ambiguity. Claude Haiku
-carries the date bug above. Claude Sonnet is second on every measure with no disqualifying failure
-and stays in the system, as the extraction fallback and as the model behind the subtask
-generator.''')}
+carries the date bug above. Claude Sonnet is second on every measure, with no disqualifying
+failure of its own.''')}
 
 > {_wrap('''These models sit at different price tiers *and* different release dates - Sonnet is a
 larger tier than the other two, while Gemini Flash is a later release than Sonnet. The confound

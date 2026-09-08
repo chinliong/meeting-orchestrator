@@ -116,11 +116,9 @@ flowchart LR
   request after the free backend wakes from sleep fails with "SSL connection has been closed
   unexpectedly"; pre-ping validates and reconnects transparently instead.
 - **LLM provider:** Gemini Flash for both extraction and subtask generation, structured output
-  through a forced function call. Claude Sonnet is the automatic fallback: if `GEMINI_API_KEY` is
-  absent, both paths log the switch and continue on Claude rather than failing. The two backends
-  share one system prompt and one tool schema — Gemini receives the schema translated into its
-  OpenAPI subset (`app/llm/gemini.py`), and the translation raises on anything it does not
-  recognise rather than dropping it silently.
+  through a forced function call. The tool schema is defined once and translated into Gemini's
+  OpenAPI subset (`app/llm/gemini.py`); the translation raises on anything it does not recognise
+  rather than dropping it silently, so a schema change cannot quietly weaken the contract.
 - **Why Gemini:** it leads Claude Sonnet on recall, precision and F1 across eight runs per model,
   each separated by an exact permutation test (`docs/evaluation-report.md`). Subtask generation
   moved on a different basis — quality there is indistinguishable (p = 0.53), so the reason is
