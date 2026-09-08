@@ -27,14 +27,17 @@ model changes.
 from the correct one - it reads "by Friday" as the following day, consistently. Every reminder
 scheduled from it would fire a day late.
 
-**Gemini Flash is selected: it leads every measure, and the gaps are separable.** Over eight
-runs per model it beats Claude Sonnet on recall, precision and F1, each significant under an
-exact permutation test. It was previously rejected for leaving the source-decision field empty
-on most items, but that proved to be a prompt defect rather than a model weakness - the schema
-called the field optional and the prompt never asked for it. With the prompt corrected every
-model fills it on 100% of items, so the earlier comparison was partly measuring prompt
-ambiguity. Claude Haiku carries the date bug above. Claude Sonnet is second on every measure,
-with no disqualifying failure of its own.
+**Gemini Flash is selected: it leads on every measure in this table, and the gaps are
+separable.** Over eight runs per model it beats Claude Sonnet on recall, precision and F1, each
+significant under an exact permutation test. It was previously rejected for leaving the source-
+decision field empty on most items, but that proved to be a prompt defect rather than a model
+weakness - the schema called the field optional and the prompt never asked for it. With the
+prompt corrected every model fills it on 100% of items, so the earlier comparison was partly
+measuring prompt ambiguity. Claude Haiku carries the date bug above. Claude Sonnet is second on
+each of these measures, with no disqualifying failure of its own. Precision is not in this table
+because it is not a selection criterion on its own: Haiku is the most precise model at 0.937,
+but only by proposing a third fewer items - which is exactly what the F1 column already accounts
+for.
 
 > These models sit at different price tiers *and* different release dates - Sonnet is a larger
 > tier than the other two, while Gemini Flash is a later release than Sonnet. The confound runs

@@ -8,8 +8,8 @@
 2. The user submits a meeting — pasted transcript text or an uploaded audio/video file.
 3. The frontend calls the FastAPI backend (`POST /transcripts` for text, `POST /transcripts/audio`
    for files). Write endpoints require edit access to the target board.
-4. For audio, the backend first transcribes the file with a hosted service (Deepgram, falling
-   back to hosted Whisper) to obtain the transcript text.
+4. For audio, the backend first transcribes the file with a hosted service (Deepgram Nova-3) to
+   obtain the transcript text.
 5. The backend sends the transcript to Gemini with a forced function-call schema; the response
    is validated into decisions, action items, owners, deadlines, and confidence via Pydantic.
 6. The structured data is persisted to the relational database (a `Meeting` plus its `Task` rows).
@@ -104,10 +104,9 @@ flowchart LR
     different problem from extraction and was measured on its own rubric.
   - **Gemini client** (`app/llm/gemini.py`) — the forced function call plus the JSON-Schema to
     OpenAPI translation both LLM modules share, so the tool schema is defined once.
-  - **Transcription module** (`app/llm/transcription.py`) — optional, lazily imported. Tries
-    Deepgram, then hosted Whisper, then a local model, so a provider outage or an exhausted free
-    tier degrades the transcript instead of failing, and the core app runs without the heavy
-    local dependency. Model choice is measured in `docs/asr-evaluation.md`.
+  - **Transcription module** (`app/llm/transcription.py`) — optional, lazily imported. Uses
+    Deepgram Nova-3, a hosted service, so nothing loads into memory and the core app runs without
+    the heavy local dependency. Model choice is measured in `docs/asr-evaluation.md`.
 - **Database:** PostgreSQL (prod) / SQLite (dev), via SQLAlchemy. Tables: `users`, `projects`,
   `meetings`, `stakeholders`, `tasks`, `subtasks`, `attachments`, `password_resets`. Attachment
   bytes are stored in the `attachments` row (the deploy target has an ephemeral filesystem and no

@@ -878,14 +878,19 @@ one *fails* still matters more than where it sits in the table:
 
 - **Claude Haiku** resolves relative dates a day late on most deadlines, so every reminder would
   fire late. The cheapest model is the one whose failure most directly breaks the core feature.
-- **Gemini Flash** leads every measure and records `source_decision` on every item. Its previous
-  disqualifier was a prompt defect, not a model weakness: the schema called the field optional and
-  the system prompt never asked for it. Correcting that raised all three models to 100%, which
-  means the earlier comparison was partly measuring prompt ambiguity.
-- **Claude Sonnet** is second on every measure, with no disqualifying failure of its own.
+- **Gemini Flash** leads on recall, deadline accuracy and F1, and records `source_decision` on
+  every item. Its previous disqualifier was a prompt defect, not a model weakness: the schema
+  called the field optional and the system prompt never asked for it. Correcting that raised all
+  three models to 100%, which means the earlier comparison was partly measuring prompt ambiguity.
+  The one column it does not lead is precision, where Claude Haiku reaches 0.937 against 0.895 -
+  but only by proposing roughly a third fewer items. Precision on its own rewards a model for
+  staying silent, which is what F1 accounts for and Gemini Flash leads.
+- **Claude Sonnet** is second on recall, deadline accuracy and F1, with no disqualifying failure
+  of its own. It is last on precision.
 
-**Recommendation: run extraction on Gemini Flash.** It leads all three headline metrics by a
-margin this test set can separate, and no longer carries the completeness gap that ruled it out.
+**Recommendation: run extraction on Gemini Flash.** It leads Claude Sonnet on all three
+headline metrics by a margin this test set can separate, and no longer carries the completeness
+gap that ruled it out.
 Subtask generation was measured separately on its own rubric, because open-ended
 decomposition is a different problem from extraction and a parser result is not evidence about
 it.
@@ -1208,14 +1213,17 @@ model changes.
 
 {bias}
 
-{_wrap('''**Gemini Flash is selected: it leads every measure, and the gaps are separable.** Over
+{_wrap('''**Gemini Flash is selected: it leads on every measure in this table, and the gaps are
+separable.** Over
 eight runs per model it beats Claude Sonnet on recall, precision and F1, each significant under an
 exact permutation test. It was previously rejected for leaving the source-decision field empty on
 most items, but that proved to be a prompt defect rather than a model weakness - the schema called
 the field optional and the prompt never asked for it. With the prompt corrected every model fills
 it on 100% of items, so the earlier comparison was partly measuring prompt ambiguity. Claude Haiku
-carries the date bug above. Claude Sonnet is second on every measure, with no disqualifying
-failure of its own.''')}
+carries the date bug above. Claude Sonnet is second on each of these measures, with no
+disqualifying failure of its own. Precision is not in this table because it is not a selection
+criterion on its own: Haiku is the most precise model at 0.937, but only by proposing a third
+fewer items - which is exactly what the F1 column already accounts for.''')}
 
 > {_wrap('''These models sit at different price tiers *and* different release dates - Sonnet is a
 larger tier than the other two, while Gemini Flash is a later release than Sonnet. The confound

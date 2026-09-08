@@ -36,14 +36,19 @@ one *fails* still matters more than where it sits in the table:
 
 - **Claude Haiku** resolves relative dates a day late on most deadlines, so every reminder would
   fire late. The cheapest model is the one whose failure most directly breaks the core feature.
-- **Gemini Flash** leads every measure and records `source_decision` on every item. Its previous
-  disqualifier was a prompt defect, not a model weakness: the schema called the field optional and
-  the system prompt never asked for it. Correcting that raised all three models to 100%, which
-  means the earlier comparison was partly measuring prompt ambiguity.
-- **Claude Sonnet** is second on every measure, with no disqualifying failure of its own.
+- **Gemini Flash** leads on recall, deadline accuracy and F1, and records `source_decision` on
+  every item. Its previous disqualifier was a prompt defect, not a model weakness: the schema
+  called the field optional and the system prompt never asked for it. Correcting that raised all
+  three models to 100%, which means the earlier comparison was partly measuring prompt ambiguity.
+  The one column it does not lead is precision, where Claude Haiku reaches 0.937 against 0.895 -
+  but only by proposing roughly a third fewer items. Precision on its own rewards a model for
+  staying silent, which is what F1 accounts for and Gemini Flash leads.
+- **Claude Sonnet** is second on recall, deadline accuracy and F1, with no disqualifying failure
+  of its own. It is last on precision.
 
-**Recommendation: run extraction on Gemini Flash.** It leads all three headline metrics by a
-margin this test set can separate, and no longer carries the completeness gap that ruled it out.
+**Recommendation: run extraction on Gemini Flash.** It leads Claude Sonnet on all three
+headline metrics by a margin this test set can separate, and no longer carries the completeness
+gap that ruled it out.
 Subtask generation was measured separately on its own rubric, because open-ended
 decomposition is a different problem from extraction and a parser result is not evidence about
 it.

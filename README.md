@@ -3,7 +3,7 @@
 A full-stack web application that turns raw, messy meeting transcripts into structured,
 trackable project work. It uses a Large Language Model (Gemini Flash) to extract **decisions** and
 **action items** — with owners, inferred deadlines, and confidence scores — and presents them
-on an auto-generated Kanban board. An optional Whisper speech-to-text layer accepts audio/video
+on an auto-generated Kanban board. An optional speech-to-text layer accepts audio/video
 recordings for end-to-end processing.
 
 > ICT4011 Capstone Project.
@@ -40,8 +40,8 @@ recordings for end-to-end processing.
 - **Shareable boards** — every board has a permanent **view link** and **edit link**; anyone
   with a link can open it (no account needed). View links are read-only; the UI hides every
   editing affordance on a view-only board.
-- **Optional audio/video input** — upload a recording; it is transcribed with Whisper (a hosted
-  Whisper API by default, or a local model) before parsing.
+- **Optional audio/video input** — upload a recording; it is transcribed with Deepgram Nova-3
+  before parsing.
 - **Evaluation harnesses** — scores transcript-extraction quality against an annotated test set,
   measured with and without the structured guidance layer
   (see [docs/evaluation-report.md](docs/evaluation-report.md)); a separate LLM-as-judge rubric
@@ -54,7 +54,7 @@ Next.js / React frontend  ──HTTP──>  FastAPI backend  ──>  Gemini AP
    Kanban + calendar views,           REST API,             decisions + action items
    filters, search, undo, share       JWT auth + share
    transcript / audio upload          tokens, SQLAlchemy
-                                       Whisper (optional)
+                                       Deepgram (optional audio)
                                               │
                                               v
                                      SQLite (dev) / PostgreSQL (prod)
@@ -73,7 +73,7 @@ for the full API.
 | Auth | Email/password (bcrypt via passlib), JWT access tokens, capability-link sharing |
 | Email | Brevo transactional API (HTTPS) for password resets and deadline reminders; SMTP fallback for local dev |
 | LLM | Gemini Flash, forced function calling for structured output |
-| Speech-to-text | Whisper — hosted API (OpenAI/Groq) by default, optional local model |
+| Speech-to-text | Deepgram Nova-3 (hosted); local Whisper available for offline development |
 | Database | SQLite (dev) / PostgreSQL (prod; e.g. Neon) |
 | Deployment | Render blueprint — backend (Docker web service) + frontend (static site) + external Postgres |
 
@@ -264,7 +264,7 @@ This scores the cached predictions, writes `eval/results.json`, and refreshes **
 
 - **[docs/evaluation-report.md](docs/evaluation-report.md)** — the findings and the
   recommendation, two tables, readable in a couple of minutes. Start here.
-- **[docs/asr-evaluation.md](docs/asr-evaluation.md)** — Whisper model comparison and the transcription size choice.
+- **[docs/asr-evaluation.md](docs/asr-evaluation.md)** — speech-to-text model comparison and the transcription choice.
 - **[docs/evaluation-appendix.md](docs/evaluation-appendix.md)** — full methodology, every
   condition's precision / recall / F1, the confounds, and the corrections.
 
