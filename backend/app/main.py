@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import attachments, auth, internal, projects, stakeholders, subtasks, tasks, transcripts
 from app.db import Base, engine
+from app.llm import transcription
 from app.models import models  # noqa: F401  (ensures models are registered before create_all)
 
 Base.metadata.create_all(bind=engine)
@@ -45,4 +46,23 @@ app.include_router(internal.router, prefix="/api/v1")
 
 @app.get("/api/v1/health")
 def health():
-    return {"status": "ok"}
+    """Liveness, plus which model the extraction path will actually use.
+
+    The provider is resolved at request time rather than read from the environment, so this
+    reports the effective backend including the fallback that engages when LLM_PROVIDER selects
+    Gemini but no Gemini key is present. Without it there is no way to tell from outside which
+    model a deployment is running - only the logs would say, and only while they are retained.
+    Names the model, never a key.
+    """
+    from app.llm.parser import TranscriptParser
+
+    try:
+        parser = TranscriptParser()
+        extraction = {"provider": parser.provider, "model": parser.model or "default"}
+    except Exception as exc:  # never let a diagnostic take down the health check
+        extraction = {"provider": "unavailable", "error": type(exc).__name__}
+    return {
+        "status": "ok",
+        "extraction": extraction,
+        "transcription": {"available": transcription.is_available()},
+    }

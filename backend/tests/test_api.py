@@ -1,4 +1,5 @@
 """End-to-end API tests with the LLM stubbed out."""
+import json
 from datetime import date
 
 import pytest
@@ -29,7 +30,17 @@ def stub_parser(monkeypatch):
 
 
 def test_health(client):
-    assert client.get("/api/v1/health").json() == {"status": "ok"}
+    """Health reports liveness and which model extraction will actually use.
+
+    The provider matters operationally: LLM_PROVIDER can select Gemini while the key is
+    missing, and the endpoint must show the backend that would really run, not the one
+    configured. It must never leak a key.
+    """
+    body = client.get("/api/v1/health").json()
+    assert body["status"] == "ok"
+    assert body["extraction"]["provider"] in {"gemini", "anthropic", "unavailable"}
+    assert "transcription" in body
+    assert "key" not in json.dumps(body).lower()
 
 
 # --- accounts ---
