@@ -1,7 +1,7 @@
 # AI-Powered Meeting & Workflow Orchestrator
 
 A full-stack web application that turns raw, messy meeting transcripts into structured,
-trackable project work. It uses a Large Language Model (Claude) to extract **decisions** and
+trackable project work. It uses a Large Language Model (Gemini Flash) to extract **decisions** and
 **action items** — with owners, inferred deadlines, and confidence scores — and presents them
 on an auto-generated Kanban board. An optional Whisper speech-to-text layer accepts audio/video
 recordings for end-to-end processing.
@@ -50,7 +50,7 @@ recordings for end-to-end processing.
 ## Architecture
 
 ```
-Next.js / React frontend  ──HTTP──>  FastAPI backend  ──>  Claude API (structured output)
+Next.js / React frontend  ──HTTP──>  FastAPI backend  ──>  Gemini API (structured output)
    Kanban + calendar views,           REST API,             decisions + action items
    filters, search, undo, share       JWT auth + share
    transcript / audio upload          tokens, SQLAlchemy
@@ -72,7 +72,7 @@ for the full API.
 | Backend | FastAPI, Pydantic v2, SQLAlchemy 2 |
 | Auth | Email/password (bcrypt via passlib), JWT access tokens, capability-link sharing |
 | Email | Brevo transactional API (HTTPS) for password resets and deadline reminders; SMTP fallback for local dev |
-| LLM | Claude (Anthropic) via `anthropic` SDK, tool-use structured output |
+| LLM | Gemini Flash, forced function calling for structured output; Claude Sonnet as the automatic fallback |
 | Speech-to-text | Whisper — hosted API (OpenAI/Groq) by default, optional local model |
 | Database | SQLite (dev) / PostgreSQL (prod; e.g. Neon) |
 | Deployment | Render blueprint — backend (Docker web service) + frontend (static site) + external Postgres |
@@ -92,7 +92,7 @@ for the full API.
 
 ### Prerequisites
 - Python 3.9+ and Node.js 18+
-- An Anthropic API key
+- A Gemini API key (an Anthropic key is optional, for the fallback)
 
 ### 1. Backend
 
@@ -100,7 +100,7 @@ for the full API.
 cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env          # paste your ANTHROPIC_API_KEY; set AUTH_SECRET for production
+cp .env.example .env          # paste your GEMINI_API_KEY; set AUTH_SECRET for production
 python -m app.seed            # create tables + seed sample data and a demo account
 uvicorn app.main:app --reload --port 8000
 ```
@@ -159,7 +159,7 @@ settings to verify delivery. See `backend/.env.example` for all email vars and
 ## Run with Docker
 
 ```bash
-cp .env.example .env          # set ANTHROPIC_API_KEY (and AUTH_SECRET)
+cp .env.example .env          # set GEMINI_API_KEY (and AUTH_SECRET)
 docker compose up --build
 ```
 
@@ -179,7 +179,7 @@ expiry window.
 2. In Render: **New → Blueprint**, point at the repo. It reads [render.yaml](render.yaml).
 3. Fill in the `sync: false` env vars (Render names services predictably as
    `https://<name>.onrender.com`):
-   - backend `ANTHROPIC_API_KEY` = your key
+   - backend `GEMINI_API_KEY` = your key
    - backend `DATABASE_URL` = your Postgres connection string
      (`postgresql://…/<db>?sslmode=require`; `db.py` normalises `postgres://` URLs)
    - backend `CORS_ORIGINS` = the frontend's exact origin, e.g. `https://orchestrator-frontend.onrender.com`
@@ -279,35 +279,35 @@ It answers **two** questions with two sets of conditions.
 | | Basic guidance | Improved guidance |
 |---|---|---|
 | | one-line prompt, shape-only schema | full prompt rules, fully described schema |
-| **Claude Sonnet** (`CLAUDE_MODEL`) | `naive` | `prod` — what ships |
-| **Gemini Flash** (`GEMINI_MODEL`) | `gemini_naive` | `gemini_prod` |
+| **Claude Sonnet** (`CLAUDE_MODEL`) | `naive` | `prod` |
+| **Gemini Flash** (`GEMINI_MODEL`) | `gemini_naive` | `gemini_prod` — what ships |
 
 Within a model the two arms differ *only* in guidance text — identical fields, types, enum and
-required list. The second model is there because the guidance effect on Claude alone is smaller
-than the run-to-run spread.
+required list. Both families are measured so the guidance effect is shown to replicate rather
+than being a quirk of one model.
 
 > These two rows are **not** a provider ranking — the cached models are a generation apart. Only
 > the within-model Basic/Improved contrast is a fair comparison.
 
-**2. Which model should the project use?** Claude Haiku, Gemini Flash and Mistral Small on the
-shipped config only (`haiku_prod`, `gemini_prod`, `mistral_prod`). Tier-matched — all three are
-the small/fast tier of their family — so it compares vendors rather than model size. Sonnet is
-excluded for that reason.
+**2. Which model should the project use?** Claude Sonnet, Claude Haiku and Gemini Flash on the
+shipped config only (`prod`, `haiku_prod`, `gemini_prod`). Over eight runs each, Gemini leads
+Sonnet on recall, precision and F1, every gap separated by an exact permutation test — so
+extraction runs on Gemini. Subtask generation moved with it on a different basis: quality is
+indistinguishable from Claude (p = 0.53), so the reason is cost and a single provider.
 
 Predictions are matched to the annotated ground truth by two independent matchers — word overlap
 (deterministic, no model) and an LLM judge — and both are reported.
 
-`--parse` runs one model group at a time. Only `claude` and `haiku` **spend Anthropic credit**:
+`--parse` runs one model group at a time. `claude` and `haiku` **spend Anthropic credit**:
 
 ```bash
 python -m eval.run_eval --parse --provider gemini  --runs 3   # free (20 req/day/model)
-python -m eval.run_eval --parse --provider mistral --runs 3   # free tier
 python -m eval.run_eval --parse --provider haiku   --runs 3   # ~$0.04/run
 python -m eval.run_eval --parse --provider claude  --runs 1   # Sonnet 2x2
 python -m eval.run_eval --rescore-judge                       # LLM-judge column
 ```
 
-Gemini and Mistral need `GEMINI_API_KEY` / `MISTRAL_API_KEY` in `backend/.env`.
+Gemini needs `GEMINI_API_KEY` in `backend/.env`.
 
 Because each run holds one group, adding runs for a free model cannot disturb another model's
 cached figures. Judge scores are cached **per condition** for the same reason — conditions

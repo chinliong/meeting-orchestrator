@@ -10,8 +10,8 @@
    for files). Write endpoints require edit access to the target board.
 4. For audio, the backend first transcribes the file with a hosted service (Deepgram, falling
    back to hosted Whisper) to obtain the transcript text.
-5. The backend sends the transcript to Claude with a forced tool-use schema; the response is
-   validated into decisions, action items, owners, deadlines, and confidence via Pydantic.
+5. The backend sends the transcript to Gemini with a forced function-call schema; the response
+   is validated into decisions, action items, owners, deadlines, and confidence via Pydantic.
 6. The structured data is persisted to the relational database (a `Meeting` plus its `Task` rows).
 7. The frontend fetches the task list and renders it two ways — a **Kanban board** (drag-and-drop
    status changes) and a **month calendar** (tasks plotted by deadline, drag-to-reschedule) — both
@@ -39,7 +39,7 @@ flowchart LR
     end
 
     DB[(SQLite / PostgreSQL)]
-    C[Claude API]
+    C[Gemini API]
 
     A -->|POST /auth/signup, /auth/login| AU
     U -->|POST /transcripts and /transcripts/audio| T
@@ -94,12 +94,16 @@ flowchart LR
     (shared-secret protected) runs the daily check over HTTP, for a free external scheduler to
     call once a day. See "Deadline reminders" below.
   - **LLM parser** (`app/llm/parser.py`) — a reusable, framework-agnostic module: raw text in,
-    validated `ExtractionResult` out, via Claude tool-use. Relative deadline cues ("by Friday")
+    validated `ExtractionResult` out, via a forced function call. Relative deadline cues ("by Friday")
     resolve against the meeting's `meeting_date`, falling back to its upload date; the anchor is
     never inferred from the transcript body, where a freeze or go-live date would be mistaken
     for it.
-  - **Subtask generator** (`app/llm/subtasks.py`) — breaks a single task into an ordered checklist
-    via Claude tool-use, either from the task's own details or from user-supplied instructions.
+  - **Subtask generator** (`app/llm/subtasks.py`) — breaks a single task into an ordered checklist,
+    either from the task's own details or from user-supplied instructions. Provider is selected
+    separately from the parser's (`SUBTASK_PROVIDER`), because open-ended decomposition is a
+    different problem from extraction and was measured on its own rubric.
+  - **Gemini client** (`app/llm/gemini.py`) — the forced function call plus the JSON-Schema to
+    OpenAPI translation both LLM modules share, so the tool schema is defined once.
   - **Transcription module** (`app/llm/transcription.py`) — optional, lazily imported. Tries
     Deepgram, then hosted Whisper, then a local model, so a provider outage or an exhausted free
     tier degrades the transcript instead of failing, and the core app runs without the heavy
@@ -111,7 +115,16 @@ flowchart LR
   `pool_recycle`) because serverless Postgres (Neon) drops idle connections — without it, the first
   request after the free backend wakes from sleep fails with "SSL connection has been closed
   unexpectedly"; pre-ping validates and reconnects transparently instead.
-- **LLM provider:** Claude (Anthropic), structured output through a forced `record_extraction` tool.
+- **LLM provider:** Gemini Flash for both extraction and subtask generation, structured output
+  through a forced function call. Claude Sonnet is the automatic fallback: if `GEMINI_API_KEY` is
+  absent, both paths log the switch and continue on Claude rather than failing. The two backends
+  share one system prompt and one tool schema — Gemini receives the schema translated into its
+  OpenAPI subset (`app/llm/gemini.py`), and the translation raises on anything it does not
+  recognise rather than dropping it silently.
+- **Why Gemini:** it leads Claude Sonnet on recall, precision and F1 across eight runs per model,
+  each separated by an exact permutation test (`docs/evaluation-report.md`). Subtask generation
+  moved on a different basis — quality there is indistinguishable (p = 0.53), so the reason is
+  cost and keeping the system on one provider.
 
 ## Access model
 

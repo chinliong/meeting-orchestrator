@@ -262,7 +262,7 @@ success — the number of digest emails sent. The reminder window's notion of "t
 
 ## LLM extraction schema
 
-The parser forces Claude to call a `record_extraction` tool with this shape (validated by Pydantic):
+The parser forces the model to call a `record_extraction` tool with this shape (validated by Pydantic). The same schema is used on both backends; Gemini receives it translated into its OpenAPI subset:
 ```json
 {
   "decisions": ["string"],
