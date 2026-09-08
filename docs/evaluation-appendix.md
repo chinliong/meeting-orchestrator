@@ -23,31 +23,29 @@ _Summary and recommendation: [evaluation-report.md](evaluation-report.md)._
 
 ### Recommendation
 
-The F1 spread across the three candidate models is **0.148**, against a run-to-run spread of
-~0.15. **This evaluation does not rank them on accuracy**, and presenting it as though it did
-would be reporting noise. What it does resolve is how each one *fails*:
+Over eight runs per model, Gemini Flash leads Claude Sonnet on recall (+0.091), precision
+(+0.058) and F1 (+0.074). Each gap is separated by an exact permutation test at p < 0.01, so
+unlike the earlier four-run comparison this one does distinguish the models on accuracy. How each
+one *fails* still matters more than where it sits in the table:
 
 | Model | Recall | Deadlines exact | `source_decision` | Cost |
 |---|---|---|---|---|
-| Claude Sonnet | 0.875 | 97/119 | 100% | paid, ~$3/$15 per M tokens; current model |
+| Claude Sonnet | 0.875 | 97/119 | 100% | paid, ~$3/$15 per M tokens; extraction fallback, and runs the subtask generator |
 | Claude Haiku | 0.67 | 28/109 | 100% | paid, ~$1/$5 per M tokens |
-| Gemini Flash | 0.966 | 107/120 | 100% | paid; evaluated within its free daily request allowance |
-
-Each candidate carries a flaw that is specifically disqualifying for this product:
+| Gemini Flash | 0.966 | 107/120 | 100% | paid, ~$0.30/$2.50 per M tokens; selected for extraction |
 
 - **Claude Haiku** resolves relative dates a day late on most deadlines, so every reminder would
   fire late. The cheapest model is the one whose failure most directly breaks the core feature.
-- **Gemini Flash** extracts the most and reads dates best, but leaves `source_decision` empty on
-  most items - a field the schema defines and the application uses. That is the whole case
-  against it; its billing is not part of the argument.
-- **Mistral Small** proposes almost nothing wrong, but misses roughly a third of the real work.
-  For a meeting orchestrator a dropped action item is the worst available failure.
+- **Gemini Flash** leads every measure and records `source_decision` on every item. Its previous
+  disqualifier was a prompt defect, not a model weakness: the schema called the field optional and
+  the system prompt never asked for it. Correcting that raised all three models to 100%, which
+  means the earlier comparison was partly measuring prompt ambiguity.
+- **Claude Sonnet** is second on every measure, with no disqualifying failure of its own.
 
-**Recommendation: keep the with-guidance Claude Sonnet configuration.** It is the only option without a
-specific disqualifier. If cost later forces a change, Haiku is the most rescuable of the three - a
-constant offset is the kind of error a prompt change could plausibly remove, unlike a field the
-model declines to populate or recall it never had. That fix would need validating before a switch,
-not instead of one.
+**Recommendation: run extraction on Gemini Flash.** It leads all three headline metrics by a
+margin this test set can separate, and no longer carries the completeness gap that ruled it out.
+Claude Sonnet stays configured as the fallback and continues to run the subtask generator, which
+this comparison does not cover - a parser result is not evidence about a different task.
 
 ## Test set and method
 
@@ -70,8 +68,8 @@ not instead of one.
 A semantic LLM-judge matcher is available via `--rescore-judge` but has not been run on the
 current cache.
 
-Gemini needs the tool schema translated into its OpenAPI subset (`eval/providers.py`); Mistral
-accepts JSON Schema unchanged. The translation is asserted to preserve fields, required list and
+Gemini needs the tool schema translated into its OpenAPI subset (`eval/providers.py`), while
+Anthropic accepts JSON Schema unchanged. The translation is asserted to preserve fields, required list and
 enum, because a translation bug would surface as a model difference that is really a harness bug.
 
 ## Study 1 - does the guidance layer help?
@@ -208,7 +206,7 @@ discriminate at all.
   This is the binding limitation and it bounds every number above. More runs on a larger, noisier
   test set is the single highest-value improvement.
 - **Run counts are capped by cost and quota**, not chosen for statistical power: the Claude runs
-  are billed, and the Gemini and Mistral keys have a small daily allowance of free requests.
+  are billed, and the Gemini key has a small daily allowance of free requests.
   Each condition is averaged over its own runs and the count is printed in the results table,
   so an unequal batch would be visible rather than silently pooled.
 - **The Study 1 models are a generation apart** (`claude-sonnet-4-6` vs `gemini-3.6-flash`), so nothing

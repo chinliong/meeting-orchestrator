@@ -19,32 +19,35 @@ model changes.
 
 | Model | Action items found | F1 | Deadlines correct | Context captured | Cost |
 |---|---|---|---|---|---|
-| **Claude Sonnet** | 88% | 0.855 | 82% | 100% | paid, ~$3/$15 per M tokens; current model |
+| Claude Sonnet | 88% | 0.855 | 82% | 100% | paid, ~$3/$15 per M tokens; extraction fallback, and runs the subtask generator |
 | Claude Haiku | 67% | 0.781 | 26% | 100% | paid, ~$1/$5 per M tokens |
-| Gemini Flash | 97% | 0.929 | 89% | 100% | paid; evaluated within its free daily request allowance |
+| **Gemini Flash** | 97% | 0.929 | 89% | 100% | paid, ~$0.30/$2.50 per M tokens; selected for extraction |
 
 **Claude Haiku has a systematic date bug.** 52% of the deadlines it produced land exactly +1 day
 from the correct one - it reads "by Friday" as the following day, consistently. Every reminder
 scheduled from it would fire a day late.
 
-**No model wins outright, and Claude Sonnet was chosen because it is the only one with no
-disqualifying failure.** Gemini Flash actually finds more action items and reads dates better,
-but leaves the source-decision field empty on most of them, so its tasks arrive without the
-context the board and the subtask generator depend on. Mistral Small proposes almost nothing
-wrong but misses roughly a third of the real work, and a dropped action item is the worst
-failure this application can have - nothing on the board indicates that it is missing. Claude
-Haiku carries the date bug above.
+**Gemini Flash is selected: it leads every measure, and the gaps are separable.** Over eight
+runs per model it beats Claude Sonnet on recall, precision and F1, each significant under an
+exact permutation test. It was previously rejected for leaving the source-decision field empty
+on most items, but that proved to be a prompt defect rather than a model weakness - the schema
+called the field optional and the prompt never asked for it. With the prompt corrected every
+model fills it on 100% of items, so the earlier comparison was partly measuring prompt
+ambiguity. Claude Haiku carries the date bug above. Claude Sonnet is second on every measure
+with no disqualifying failure and stays in the system, as the extraction fallback and as the
+model behind the subtask generator.
 
 > These models sit at different price tiers *and* different release dates - Sonnet is a larger
-> tier than the other three, while Gemini Flash is a later release than Sonnet. The confound
-> runs in both directions, which is why this table is a cost decision for this project rather
-> than a ranking of vendors.
+> tier than the other two, while Gemini Flash is a later release than Sonnet. The confound runs
+> in both directions, which is why this table is a cost decision for this project rather than a
+> ranking of vendors.
 
 ## Step 2 - what the prompt and schema engineering adds
 
-Having chosen Claude Sonnet, the same model is run with and without the structured guidance layer -
-the refined prompt rules plus the fully described JSON schema. The output contract is identical in
-both columns; only the guidance text differs.
+Each model is run with and without the structured guidance layer - the refined prompt rules plus
+the fully described JSON schema. The output contract is identical in both columns; only the
+guidance text differs. The figures below are Claude Sonnet; Gemini Flash replicates the pattern
+and is reported in the appendix.
 
 | Metric | Without guidance | With guidance |
 |---|---|---|
@@ -63,7 +66,9 @@ worth, and finds it separates spurious items only at the low end.
 ## What this does not show
 
 The test set is small (4 transcripts, 33 items), and repeat runs of the *same* configuration
-vary by more than the accuracy gaps between models. **Neither table establishes an accuracy
-ranking** and neither should be read as one. What they do support is the reliability and
-completeness differences: valid output, captured context, and the date bug. A larger annotated
-test set is scheduled for the next phase and is what would settle the accuracy question.
+vary by more than most of the gaps between them. The Gemini-versus-Sonnet difference does
+survive an exact permutation test over eight runs, so that one comparison is established; the
+rest are not, and no wider ranking should be read into either table. What they support more
+strongly is the reliability and completeness differences: valid output, captured context, and
+the date bug. A larger annotated test set is scheduled for the next phase and would settle how
+far the accuracy result generalises beyond these four transcripts.

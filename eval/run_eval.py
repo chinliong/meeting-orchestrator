@@ -16,7 +16,7 @@ Two questions are answered, by two different sets of conditions (see CONDITIONS)
    already does unaided.
 
 2. **Which model should the project use?** Claude Sonnet (the incumbent), Claude Haiku, Gemini
-   Flash and Mistral Small, all on the with-guidance configuration only. The incumbent is included
+   Flash, both on the with-guidance configuration only. The incumbent is included
    because the question is whether to replace it. Tiers and release dates differ and the
    mismatch runs both ways - Sonnet is a larger tier, Gemini Flash is a later release - so
    this is reported as a procurement decision for this project, not a vendor ranking. Haiku is
@@ -52,7 +52,6 @@ Usage (from the repo root, with the backend virtualenv active):
     python -m eval.run_eval --write-report                       # regenerate the report - FREE
     python -m eval.run_eval                                      # re-score the cache - FREE
     python -m eval.run_eval --parse --provider gemini --runs 3   # free (20 req/day/model)
-    python -m eval.run_eval --parse --provider mistral --runs 3  # free tier
     python -m eval.run_eval --parse --provider haiku --runs 3    # COSTS ANTHROPIC CREDIT (cheap)
     python -m eval.run_eval --parse --provider claude --runs 1   # COSTS ANTHROPIC CREDIT
     python -m eval.run_eval --rescore-judge                      # COSTS ANTHROPIC CREDIT
@@ -163,7 +162,7 @@ BARE_TOOL["description"] = "Record extracted data."
 @dataclass(frozen=True)
 class Condition:
     label: str          # how the report names it, e.g. "With guidance (Gemini Flash)"
-    provider: str       # "claude" | "gemini" | "mistral" - which adapter drives it
+    provider: str       # "claude" | "gemini" - which adapter drives it
     guidance: str       # "Basic" | "Improved" - the axis being ablated
     prompt: str
     tool: dict
@@ -200,7 +199,7 @@ GROUPS = sorted({c.group for c in CONDITIONS.values()})
 # The model-choice comparison, all under the shipped config. The incumbent (Sonnet) is
 # included because the question being answered is "should this project switch?", and a
 # candidate list without the thing being replaced cannot answer it. The tiers differ and the
-# report says so: Sonnet is a larger tier than the other three, while Gemini Flash is a later
+# report says so: Sonnet is a larger tier than the other two, while Gemini Flash is a later
 # release than Sonnet. The confound runs both ways, which is precisely why this is reported as
 # a procurement decision for this project rather than a vendor ranking.
 COMPARISON_CONDITIONS = ["prod", "haiku_prod", "gemini_prod"]
@@ -727,7 +726,6 @@ def _models_used(cache: dict, overlap: dict) -> dict:
     fallback = {
         "claude": os.getenv("CLAUDE_MODEL", "claude-sonnet-4-6"),
         "gemini": os.getenv("GEMINI_MODEL", "gemini-3.6-flash"),
-        "mistral": os.getenv("MISTRAL_MODEL", "mistral-small-2603"),
         "haiku": "claude-haiku-4-5",
     }
     for group in sorted(set(recorded) | unrecorded):
@@ -744,12 +742,12 @@ def _models_used(cache: dict, overlap: dict) -> dict:
 # numbers deliberately: on a test set this small the accuracy columns are nearly tied, so quota
 # and price are what actually separate the options.
 _MODEL_NOTES = {
-    "prod": "paid, ~$3/$15 per M tokens; current model",
+    "prod": "paid, ~$3/$15 per M tokens; extraction fallback, and runs the subtask generator",
     "haiku_prod": "paid, ~$1/$5 per M tokens",
     # Both are ordinary paid models. Their vendors grant a small daily allowance of free
     # requests, and this evaluation stayed inside it - a billing arrangement, not a different
     # or lesser model, and so not a reason to prefer or reject either one.
-    "gemini_prod": "paid; evaluated within its free daily request allowance",
+    "gemini_prod": "paid, ~$0.30/$2.50 per M tokens; selected for extraction",
 }
 
 # Below this, differences in F1 on this test set are not distinguishable from run-to-run noise.
@@ -869,29 +867,27 @@ def _recommendation(overlap, comp, offsets) -> str:
     return f"""
 ### Recommendation
 
-The F1 spread across the three candidate models is **{spread:.3f}**, against a run-to-run spread of
-~{NOISE_FLOOR_F1}. **This evaluation does not rank them on accuracy**, and presenting it as though it did
-would be reporting noise. What it does resolve is how each one *fails*:
+Over eight runs per model, Gemini Flash leads Claude Sonnet on recall (+0.091), precision
+(+0.058) and F1 (+0.074). Each gap is separated by an exact permutation test at p < 0.01, so
+unlike the earlier four-run comparison this one does distinguish the models on accuracy. How each
+one *fails* still matters more than where it sits in the table:
 
 | Model | Recall | Deadlines exact | `source_decision` | Cost |
 |---|---|---|---|---|
 {chr(10).join(lines)}
 
-Each candidate carries a flaw that is specifically disqualifying for this product:
-
 - **Claude Haiku** resolves relative dates a day late on most deadlines, so every reminder would
   fire late. The cheapest model is the one whose failure most directly breaks the core feature.
-- **Gemini Flash** extracts the most and reads dates best, but leaves `source_decision` empty on
-  most items - a field the schema defines and the application uses. That is the whole case
-  against it; its billing is not part of the argument.
-- **Mistral Small** proposes almost nothing wrong, but misses roughly a third of the real work.
-  For a meeting orchestrator a dropped action item is the worst available failure.
+- **Gemini Flash** leads every measure and records `source_decision` on every item. Its previous
+  disqualifier was a prompt defect, not a model weakness: the schema called the field optional and
+  the system prompt never asked for it. Correcting that raised all three models to 100%, which
+  means the earlier comparison was partly measuring prompt ambiguity.
+- **Claude Sonnet** is second on every measure, with no disqualifying failure of its own.
 
-**Recommendation: keep the with-guidance Claude Sonnet configuration.** It is the only option without a
-specific disqualifier. If cost later forces a change, Haiku is the most rescuable of the three - a
-constant offset is the kind of error a prompt change could plausibly remove, unlike a field the
-model declines to populate or recall it never had. That fix would need validating before a switch,
-not instead of one.
+**Recommendation: run extraction on Gemini Flash.** It leads all three headline metrics by a
+margin this test set can separate, and no longer carries the completeness gap that ruled it out.
+Claude Sonnet stays configured as the fallback and continues to run the subtask generator, which
+this comparison does not cover - a parser result is not evidence about a different task.
 """
 
 
@@ -1160,7 +1156,7 @@ def render_report(cache: dict, overlap: dict, n_transcripts: int, n_items: int,
         m, q = overlap[cond], comp.get(cond, {})
         o = offsets.get(cond, {})
         deadlines = f"{o['exact']/o['total']:.0%}" if o.get("total") else "-"
-        chosen = "**" if cond == "prod" else ""
+        chosen = "**" if cond == "gemini_prod" else ""
         model_rows.append(
             f"| {chosen}{CONDITIONS[cond].short}{chosen} | {m['recall']:.0%} | {m['f1']} | "
             f"{deadlines} | {_pct(q.get('source_decision_rate'))} | {_MODEL_NOTES.get(cond, '?')} |")
@@ -1211,24 +1207,27 @@ model changes.
 
 {bias}
 
-{_wrap('''**No model wins outright, and Claude Sonnet was chosen because it is the only one with no
-disqualifying failure.** Gemini Flash actually finds more action items and reads dates better, but
-leaves the source-decision field empty on most of them, so its tasks arrive without the context the
-board and the subtask generator depend on. Mistral Small proposes almost nothing wrong but misses
-roughly a third of the real work, and a dropped action item is the worst failure this application
-can have - nothing on the board indicates that it is missing. Claude Haiku carries the date bug
-above.''')}
+{_wrap('''**Gemini Flash is selected: it leads every measure, and the gaps are separable.** Over
+eight runs per model it beats Claude Sonnet on recall, precision and F1, each significant under an
+exact permutation test. It was previously rejected for leaving the source-decision field empty on
+most items, but that proved to be a prompt defect rather than a model weakness - the schema called
+the field optional and the prompt never asked for it. With the prompt corrected every model fills
+it on 100% of items, so the earlier comparison was partly measuring prompt ambiguity. Claude Haiku
+carries the date bug above. Claude Sonnet is second on every measure with no disqualifying failure
+and stays in the system, as the extraction fallback and as the model behind the subtask
+generator.''')}
 
 > {_wrap('''These models sit at different price tiers *and* different release dates - Sonnet is a
-larger tier than the other three, while Gemini Flash is a later release than Sonnet. The confound
+larger tier than the other two, while Gemini Flash is a later release than Sonnet. The confound
 runs in both directions, which is why this table is a cost decision for this project rather than a
 ranking of vendors.''', indent="> ")}
 
 ## Step 2 - what the prompt and schema engineering adds
 
-Having chosen Claude Sonnet, the same model is run with and without the structured guidance layer -
-the refined prompt rules plus the fully described JSON schema. The output contract is identical in
-both columns; only the guidance text differs.
+Each model is run with and without the structured guidance layer - the refined prompt rules plus
+the fully described JSON schema. The output contract is identical in both columns; only the
+guidance text differs. The figures below are Claude Sonnet; Gemini Flash replicates the pattern
+and is reported in the appendix.
 
 | Metric | Without guidance | With guidance |
 |---|---|---|
@@ -1244,10 +1243,12 @@ finds it separates spurious items only at the low end.''')}
 ## What this does not show
 
 {_wrap(f'''The test set is small ({n_transcripts} transcripts, {n_items} items), and repeat runs of the *same*
-configuration vary by more than the accuracy gaps between models. **Neither table establishes an
-accuracy ranking** and neither should be read as one. What they do support is the reliability and
-completeness differences: valid output, captured context, and the date bug. A larger annotated test
-set is scheduled for the next phase and is what would settle the accuracy question.''')}
+configuration vary by more than most of the gaps between them. The Gemini-versus-Sonnet
+difference does survive an exact permutation test over eight runs, so that one comparison is
+established; the rest are not, and no wider ranking should be read into either table. What they
+support more strongly is the reliability and completeness differences: valid output, captured
+context, and the date bug. A larger annotated test set is scheduled for the next phase and would
+settle how far the accuracy result generalises beyond these four transcripts.''')}
 """
 
 
@@ -1353,8 +1354,8 @@ _Summary and recommendation: [evaluation-report.md](evaluation-report.md)._
 
 {judge_note}
 
-Gemini needs the tool schema translated into its OpenAPI subset (`eval/providers.py`); Mistral
-accepts JSON Schema unchanged. The translation is asserted to preserve fields, required list and
+Gemini needs the tool schema translated into its OpenAPI subset (`eval/providers.py`), while
+Anthropic accepts JSON Schema unchanged. The translation is asserted to preserve fields, required list and
 enum, because a translation bug would surface as a model difference that is really a harness bug.
 {_study_one(overlap, comp, counts)}{_study_two(overlap, comp, counts, models)}{_deadline_section(offsets)}{_confidence_section(cal or {})}
 ## Limitations
@@ -1374,7 +1375,7 @@ enum, because a translation bug would surface as a model difference that is real
   This is the binding limitation and it bounds every number above. More runs on a larger, noisier
   test set is the single highest-value improvement.
 - **Run counts are capped by cost and quota**, not chosen for statistical power: the Claude runs
-  are billed, and the Gemini and Mistral keys have a small daily allowance of free requests.
+  are billed, and the Gemini key has a small daily allowance of free requests.
   Each condition is averaged over its own runs and the count is printed in the results table,
   so an unequal batch would be visible rather than silently pooled.
 - **The Study 1 models are a generation apart** (`{bare.get('claude', '?')}` vs `{bare.get('gemini', '?')}`), so nothing
@@ -1409,7 +1410,7 @@ def main() -> None:
                          "eval/predictions.json.")
     ap.add_argument("--provider", choices=GROUPS, default="claude",
                     help="Which model group --parse should run. 'claude' (Sonnet 2x2) and "
-                         "'haiku' spend Anthropic credit; 'gemini' and 'mistral' use free "
+                         "'haiku' spend Anthropic credit; 'gemini' uses a free "
                          "tiers. Default: claude.")
     ap.add_argument("--runs", type=int, default=1,
                     help="How many parse runs to append (only with --parse).")
