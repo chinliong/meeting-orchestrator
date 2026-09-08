@@ -19,7 +19,16 @@ signed-in user return `401`.
 ## Health
 
 ### `GET /health`
-Returns `{ "status": "ok" }`.
+Liveness, plus which model the extraction path will actually use. The provider and model are
+resolved the way a real request resolves them, so this reports what a deployment is running
+rather than what its environment variables were set to. Never returns a key.
+```json
+{
+  "status": "ok",
+  "extraction": { "provider": "gemini", "model": "gemini-3.6-flash" },
+  "transcription": { "available": true }
+}
+```
 
 ## Auth
 
@@ -98,9 +107,17 @@ the signed-in user, or unowned (guest) if anonymous.
 Resolves a share link to its board at the level the token grants (`edit` or `view`). `404` if the
 token matches nothing.
 
+### `GET /projects/{project_id}`
+Returns one board. Requires view access; `403` without it, `404` if the board does not exist.
+
 ### `PATCH /projects/{project_id}`
 Update `name` / `description` / `notify_enabled`. Requires edit access. Returns the project;
 `404`/`403` as above.
+
+### `POST /projects/{project_id}/rotate-token`
+Issues a new `edit_token`, invalidating every edit link previously circulated for the board. The
+`view_token` is left untouched, so read-only links keep working. Requires edit access. Returns
+the project with its new token.
 
 ### `DELETE /projects/{project_id}`
 Removes the project and cascades to its meetings and tasks. Requires edit access. `204`.
