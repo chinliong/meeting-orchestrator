@@ -1,5 +1,4 @@
 import logging
-import time
 from datetime import date
 from typing import Optional
 
@@ -58,11 +57,10 @@ def _extract_and_store_tasks(meeting: Meeting, db: Session) -> None:
     On LLM/API failure the meeting is marked FAILED with the error recorded rather than
     raising, so callers (sync request or background job) always leave a coherent meeting row.
     """
-    started = time.perf_counter()
     try:
+        # TranscriptParser.parse logs the provider, model and elapsed time itself.
         extraction = TranscriptParser().parse(meeting.transcript_text,
                                               meeting_date=_anchor(meeting))
-        log.info("transcription: LLM parse %.1fs", time.perf_counter() - started)
     except Exception as exc:  # LLM/API failure: record it on the meeting, don't crash
         meeting.status = MeetingStatus.FAILED
         meeting.error_message = str(exc)

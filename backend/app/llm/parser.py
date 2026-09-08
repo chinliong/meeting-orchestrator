@@ -4,6 +4,7 @@ import os
 from datetime import date
 
 import logging
+import time
 
 import anthropic
 
@@ -98,6 +99,9 @@ Always respond by calling the record_extraction tool."""
 # variable is the model.
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini").strip().lower()
 
+# uvicorn configures this logger at INFO, so these lines show up in the Render logs.
+log = logging.getLogger("uvicorn.error")
+
 
 class TranscriptParser:
     def __init__(
@@ -126,34 +130,49 @@ class TranscriptParser:
         self.client = (anthropic.Anthropic(api_key=api_key or os.getenv("ANTHROPIC_API_KEY"))
                        if self.provider != "gemini" else None)
 
+    def _resolved_model(self) -> str:
+        """The model a parse will actually use, including the client-side default.
+
+        `self.model` is None when no override is set, so logging it directly would say
+        "default" rather than naming what ran. The deployed logs are the only record of which
+        model produced a given board, so they name it.
+        """
+        if self.model:
+            return self.model
+        if self.provider == "gemini":
+            from app.llm import gemini
+            return gemini.DEFAULT_MODEL
+        return "claude-sonnet-4-6"
+
     def parse(self, transcript_text: str, meeting_date: date | None = None) -> ExtractionResult:
         meeting_date = meeting_date or date.today()
+        started = time.perf_counter()
         if self.provider == "gemini":
             from app.llm import gemini
             args = gemini.call_tool(
                 self.system_prompt, EXTRACTION_TOOL,
                 gemini.user_text(transcript_text, meeting_date), model=self.model)
-            return ExtractionResult.model_validate(args)
-
-        message = self.client.messages.create(
-            model=self.model,
-            max_tokens=4096,
-            system=self.system_prompt,
-            tools=[EXTRACTION_TOOL],
-            tool_choice={"type": "tool", "name": "record_extraction"},
-            messages=[
-                {
-                    "role": "user",
-                    "content": (
-                        f"Meeting date: {meeting_date.isoformat()}\n\n"
-                        f"Transcript:\n{transcript_text}"
-                    ),
-                }
-            ],
-        )
-
-        tool_use = next(block for block in message.content if block.type == "tool_use")
-        return ExtractionResult.model_validate(tool_use.input)
+        else:
+            message = self.client.messages.create(
+                model=self.model,
+                max_tokens=4096,
+                system=self.system_prompt,
+                tools=[EXTRACTION_TOOL],
+                tool_choice={"type": "tool", "name": "record_extraction"},
+                messages=[
+                    {
+                        "role": "user",
+                        "content": (
+                            f"Meeting date: {meeting_date.isoformat()}\n\n"
+                            f"Transcript:\n{transcript_text}"
+                        ),
+                    }
+                ],
+            )
+            args = next(b for b in message.content if b.type == "tool_use").input
+        log.info("parser: %s %s %.1fs", self.provider, self._resolved_model(),
+                 time.perf_counter() - started)
+        return ExtractionResult.model_validate(args)
 
 
 def parse_transcript(transcript_text: str, meeting_date: date | None = None) -> ExtractionResult:
