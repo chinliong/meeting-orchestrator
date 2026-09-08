@@ -12,6 +12,17 @@ services:
     plan: free
     healthCheckPath: /api/v1/health
     envVars:
+      # Transcript extraction runs on Gemini: it leads Claude Sonnet on recall, precision and
+      # F1 over eight runs, each separated by an exact permutation test (docs/evaluation-report.md).
+      - key: GEMINI_API_KEY
+        sync: false # set manually in the dashboard (secret)
+      - key: GEMINI_MODEL
+        value: gemini-3.6-flash
+      # Set to "anthropic" to run extraction on Claude instead; the prompt and schema are shared.
+      - key: LLM_PROVIDER
+        value: gemini
+      # Still required: the subtask generator runs on Claude, which the model comparison did
+      # not cover, so it was not switched on the strength of a parser result.
       - key: ANTHROPIC_API_KEY
         sync: false # set manually in the dashboard (secret)
       - key: CLAUDE_MODEL

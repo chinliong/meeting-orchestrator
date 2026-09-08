@@ -190,8 +190,6 @@ CONDITIONS = {
     "haiku_prod":   Condition("With guidance (Claude Haiku)", "claude", "Improved",
                               SYSTEM_PROMPT, EXTRACTION_TOOL, group="haiku",
                               short="Claude Haiku", model="claude-haiku-4-5"),
-    "mistral_prod": Condition("With guidance (Mistral Small)", "mistral", "Improved",
-                              SYSTEM_PROMPT, EXTRACTION_TOOL, group="mistral", short="Mistral Small"),
 }
 
 LABELS = {key: cond.label for key, cond in CONDITIONS.items()}
@@ -205,7 +203,7 @@ GROUPS = sorted({c.group for c in CONDITIONS.values()})
 # report says so: Sonnet is a larger tier than the other three, while Gemini Flash is a later
 # release than Sonnet. The confound runs both ways, which is precisely why this is reported as
 # a procurement decision for this project rather than a vendor ranking.
-COMPARISON_CONDITIONS = ["prod", "haiku_prod", "gemini_prod", "mistral_prod"]
+COMPARISON_CONDITIONS = ["prod", "haiku_prod", "gemini_prod"]
 
 
 def runs_with(cache: dict, cond: str) -> list[dict]:
@@ -449,9 +447,6 @@ def _make_parser(cond: Condition):
     if cond.provider == "gemini":
         from eval.providers import GeminiParser
         return GeminiParser(cond.prompt, cond.tool, model=cond.model), None
-    if cond.provider == "mistral":
-        from eval.providers import MistralParser
-        return MistralParser(cond.prompt, cond.tool, model=cond.model), None
     return TranscriptParser(system_prompt=cond.prompt, model=cond.model), cond.tool
 
 
@@ -755,7 +750,6 @@ _MODEL_NOTES = {
     # requests, and this evaluation stayed inside it - a billing arrangement, not a different
     # or lesser model, and so not a reason to prefer or reject either one.
     "gemini_prod": "paid; evaluated within its free daily request allowance",
-    "mistral_prod": "paid; evaluated within its free daily request allowance",
 }
 
 # Below this, differences in F1 on this test set are not distinguishable from run-to-run noise.
@@ -941,6 +935,19 @@ def _precision_note(overlap: dict) -> str:
     gpb, gmb = totals("gemini_naive")
     gpi, gmi = totals("gemini_prod")
     g_extra, g_hit = gpi - gpb, gmi - gmb
+
+    if pb == 0:
+        # The control returned nothing scorable - every parse failed validation - so there is no
+        # precision trade to decompose here. Say that instead of dividing by zero.
+        parses = sum(r["parses"] for r in overlap["naive"]["runs"]) if \
+            "parses" in overlap["naive"]["runs"][0] else len(overlap["naive"]["runs"]) * 4
+        return _wrap(f"""**No precision trade to report on this model.** The control produced no
+scorable output at all - every one of its {parses} parses failed schema validation - so it
+proposed zero items, and its precision, recall and F1 are zero by construction rather than by
+performance. On this model the comparison is not "more items, slightly less precise" but
+"output or no output". Gemini Flash, whose control does return items, still shows the trade:
+{gpi} proposed with guidance against {gpb} without, of which {g_hit} of the {g_extra} extra
+matched an annotated item.""")
 
     return _wrap(f"""**Why precision falls.** Precision is the share of proposed items that turned
 out to be real. With the guidance the model proposes more of them - {pi} against the control's

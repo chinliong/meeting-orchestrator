@@ -55,7 +55,11 @@ EXTRACTION_TOOL = {
                         },
                         "source_decision": {
                             "type": ["string", "null"],
-                            "description": "The decision or context this action item stems from, if any.",
+                            "description": "The decision or discussion this action item stems from, quoted "
+                                           "or briefly paraphrased. Fill this "
+                                           "whenever the origin is identifiable "
+                                           "in the transcript; null only when it "
+                                           "genuinely is not.",
                         },
                     },
                     "required": ["description", "status", "confidence"],
@@ -76,10 +80,21 @@ relative to the meeting date provided. If no cue exists, leave the deadline null
 - Determine the status from the transcript: "done" if the work is described as finished, \
 completed, or confirmed; "in_progress" if it is being worked on, partially complete, or \
 currently running; "todo" if it has not been started. Default to "todo" when there is no cue.
+- Record the decision or discussion the item stems from in source_decision. This is what lets a \
+task on the board be traced back to the meeting, so fill it whenever the transcript makes the \
+origin identifiable; leave it null only when the item genuinely has no identifiable source.
 - Do not invent action items that are not implied by the transcript.
 - Give a confidence score reflecting how explicit the transcript was about this item.
 
 Always respond by calling the record_extraction tool."""
+
+
+# Which model family runs the extraction. Gemini is the default because it leads Claude Sonnet
+# on recall, precision and F1 over eight runs, each separated by an exact permutation test - see
+# docs/evaluation-report.md. Set LLM_PROVIDER=anthropic to fall back to Claude; both backends
+# receive the same system prompt, the same tool schema and the same user turn, so the only
+# variable is the model.
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini").strip().lower()
 
 
 class TranscriptParser:
@@ -88,14 +103,28 @@ class TranscriptParser:
         api_key: str | None = None,
         model: str | None = None,
         system_prompt: str | None = None,
+        provider: str | None = None,
     ):
-        self.client = anthropic.Anthropic(api_key=api_key or os.getenv("ANTHROPIC_API_KEY"))
-        self.model = model or os.getenv("CLAUDE_MODEL", "claude-sonnet-4-6")
+        self.provider = (provider or LLM_PROVIDER).strip().lower()
+        self.model = model or (
+            os.getenv("GEMINI_MODEL") if self.provider == "gemini"
+            else os.getenv("CLAUDE_MODEL", "claude-sonnet-4-6"))
         # Overridable so the evaluation harness can compare prompt variants.
         self.system_prompt = system_prompt or SYSTEM_PROMPT
+        # The Anthropic client is only constructed when it is the selected backend, so a
+        # Gemini-only deployment does not need ANTHROPIC_API_KEY set.
+        self.client = (anthropic.Anthropic(api_key=api_key or os.getenv("ANTHROPIC_API_KEY"))
+                       if self.provider != "gemini" else None)
 
     def parse(self, transcript_text: str, meeting_date: date | None = None) -> ExtractionResult:
         meeting_date = meeting_date or date.today()
+        if self.provider == "gemini":
+            from app.llm import gemini
+            args = gemini.call_tool(
+                self.system_prompt, EXTRACTION_TOOL,
+                gemini.user_text(transcript_text, meeting_date), model=self.model)
+            return ExtractionResult.model_validate(args)
+
         message = self.client.messages.create(
             model=self.model,
             max_tokens=4096,
