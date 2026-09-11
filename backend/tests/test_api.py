@@ -145,6 +145,62 @@ def test_forgot_and_reset_password(client, account, monkeypatch):
     assert reuse.status_code == 400
 
 
+def _request_reset_code(client, monkeypatch, email="owner@example.com"):
+    """Trigger a reset email and return the six-digit code it carried."""
+    import re
+
+    sent = {}
+    monkeypatch.setattr("app.api.auth.send_email", lambda to, subject, body: sent.update(body=body))
+    assert client.post("/api/v1/auth/forgot-password", json={"email": email}).status_code == 204
+    return re.search(r"\b(\d{6})\b", sent["body"]).group(1)
+
+
+def test_reset_code_expires(client, db_session, account, monkeypatch):
+    """An expired code is refused even when it is the right code."""
+    from datetime import datetime, timedelta, timezone
+
+    from app.models.models import PasswordReset
+
+    code = _request_reset_code(client, monkeypatch)
+
+    # db_session is the same session the app is using, per the client fixture.
+    reset = db_session.query(PasswordReset).order_by(PasswordReset.created_at.desc()).first()
+    # Stored naive-UTC, which is what the endpoint compares against.
+    reset.expires_at = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(minutes=1)
+    db_session.commit()
+
+    expired = client.post(
+        "/api/v1/auth/reset-password",
+        json={"email": "owner@example.com", "code": code, "new_password": "fresh123"},
+    )
+    assert expired.status_code == 400
+    # The original password still works, so nothing was changed.
+    assert client.post("/api/v1/auth/login", json={"email": "owner@example.com", "password": "pw12345"}).status_code == 200
+
+
+def test_reset_code_burns_after_too_many_wrong_attempts(client, account, monkeypatch):
+    """RESET_MAX_ATTEMPTS wrong guesses invalidate the code, so the real one stops working."""
+    from app.api.auth import RESET_MAX_ATTEMPTS
+
+    code = _request_reset_code(client, monkeypatch)
+    wrong = "654321" if code != "654321" else "123456"
+
+    for _ in range(RESET_MAX_ATTEMPTS):
+        bad = client.post(
+            "/api/v1/auth/reset-password",
+            json={"email": "owner@example.com", "code": wrong, "new_password": "fresh123"},
+        )
+        assert bad.status_code == 400
+
+    # The correct code is now dead, and the old password still stands.
+    burned = client.post(
+        "/api/v1/auth/reset-password",
+        json={"email": "owner@example.com", "code": code, "new_password": "fresh123"},
+    )
+    assert burned.status_code == 400
+    assert client.post("/api/v1/auth/login", json={"email": "owner@example.com", "password": "pw12345"}).status_code == 200
+
+
 def test_forgot_password_unknown_email_is_silent(client, monkeypatch):
     calls = []
     monkeypatch.setattr("app.api.auth.send_email", lambda **kw: calls.append(kw))
