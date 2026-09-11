@@ -114,10 +114,11 @@ Returns one board. Requires view access; `403` without it, `404` if the board do
 Update `name` / `description` / `notify_enabled`. Requires edit access. Returns the project;
 `404`/`403` as above.
 
-### `POST /projects/{project_id}/rotate-token`
-Issues a new `edit_token`, invalidating every edit link previously circulated for the board. The
-`view_token` is left untouched, so read-only links keep working. Requires edit access. Returns
-the project with its new token.
+### `POST /projects/{project_id}/rotate-token?which=view|edit`
+Mints a fresh token for the chosen share link, invalidating every copy of the old link of that
+kind; the other link keeps working. Owner-only: a guest holding the edit link gets `403`. The
+owner reaches the board through their account rather than the token, so rotation never locks
+them out. Returns the project with its new token.
 
 ### `DELETE /projects/{project_id}`
 Removes the project and cascades to its meetings and tasks. Requires edit access. `204`.
