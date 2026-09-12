@@ -1,10 +1,16 @@
-"""Non-Anthropic provider adapters, used only by the evaluation harness.
+"""Provider adapters for the evaluation harness.
 
 Why this exists
 ---------------
-The shipped application talks to Claude and only Claude (`backend/app/llm/parser.py`). This
-module is deliberately kept out of the product code: it exists so the *evaluation* can compare
-model families without adding a second provider dependency to the thing that actually ships.
+The harness has to reach model families the product does not carry a dependency on, so their
+adapters live here rather than in `backend/app/`. The shipped Gemini path has its own
+translation of the same tool schema in `backend/app/llm/gemini.py`; this module is the
+measurement-side counterpart, and keeps provider code out of the product for anything the
+product does not ship.
+
+Not every adapter here is part of the reported evaluation: `run_eval.CONDITIONS` defines the
+five conditions the reports use (Claude Sonnet and Gemini Flash with and without guidance, plus
+Claude Haiku with guidance). `MistralParser` is reachable only if a condition is added for it.
 
 Each adapter exposes the same surface as `TranscriptParser` - `.parse(text, meeting_date)`
 returning an `ExtractionResult` - so `run_eval.parse_run` treats every provider identically and
