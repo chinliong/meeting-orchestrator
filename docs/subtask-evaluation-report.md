@@ -33,9 +33,11 @@ The judge was Claude in both arms. That means Claude assessed its own output in 
 
 ## Per-task detail
 
+Rel, Act, Cov and NR are the four rubric dimensions, each scored 1-5. Subtasks is the number of steps the generator produced, which is a count and not a score.
+
 Gemini Flash, averaged over 5 runs:
 
-| Task | # | Rel | Act | Cov | NR |
+| Task | Subtasks | Rel | Act | Cov | NR |
 | --- | --- | --- | --- | --- | --- |
 | finish the APAC cost center hierarchy mapping | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
 | send the new cost center codes to Daniel | 4.4 | 4.6 | 4.2 | 4.8 | 4.4 |
@@ -52,7 +54,7 @@ Gemini Flash, averaged over 5 runs:
 
 Claude Sonnet, averaged over 5 runs:
 
-| Task | # | Rel | Act | Cov | NR |
+| Task | Subtasks | Rel | Act | Cov | NR |
 | --- | --- | --- | --- | --- | --- |
 | finish the APAC cost center hierarchy mapping | 5.8 | 5.0 | 5.0 | 5.0 | 4.8 |
 | send the new cost center codes to Daniel | 4.2 | 5.0 | 4.4 | 5.0 | 5.0 |

@@ -330,11 +330,13 @@ def render_report(res: dict) -> str:
     # Averaged over runs rather than taken from one of them: a single run is a noisy sample,
     # and picking the first would quietly report whichever run happened to score best. Both
     # arms get the same treatment, so the per-task view is comparable like the tables above.
-    lines += ["", "## Per-task detail", ""]
+    lines += ["", "## Per-task detail", "",
+              "Rel, Act, Cov and NR are the four rubric dimensions, each scored 1-5. Subtasks is "
+              "the number of steps the generator produced, which is a count and not a score.", ""]
     for a in ([ship, other] if other else [ship]):
         runs = a["per_task_runs"]
         lines += [f"{a['label']}, averaged over {len(runs)} runs:", "",
-                  "| Task | # | Rel | Act | Cov | NR |",
+                  "| Task | Subtasks | Rel | Act | Cov | NR |",
                   "| --- | --- | --- | --- | --- | --- |"]
         for first in runs[0]:
             name = first["task"]
