@@ -31,7 +31,9 @@ The judge was Claude in both arms. That means Claude assessed its own output in 
 | Gemini Flash | 4.88, 4.86, 4.75, 4.75, 4.69 | 4.786 | 0.081 | 4.69-4.88 |
 | Claude Sonnet | 4.88, 4.94, 4.83, 4.67, 4.79 | 4.822 | 0.102 | 4.67-4.94 |
 
-## Per-task detail (Gemini Flash, averaged over 5 runs)
+## Per-task detail
+
+Gemini Flash, averaged over 5 runs:
 
 | Task | # | Rel | Act | Cov | NR |
 | --- | --- | --- | --- | --- | --- |
@@ -47,6 +49,24 @@ The judge was Claude in both arms. That means Claude assessed its own output in 
 | chase the vendor for a firm barcode firmware patch… | 4.8 | 5.0 | 5.0 | 5.0 | 5.0 |
 | draft a one-page risk note on the scanner delay fo… | 4.8 | 5.0 | 4.8 | 5.0 | 5.0 |
 | update the cutover runbook to reflect the degraded… | 4.4 | 5.0 | 4.4 | 4.4 | 5.0 |
+
+Claude Sonnet, averaged over 5 runs:
+
+| Task | # | Rel | Act | Cov | NR |
+| --- | --- | --- | --- | --- | --- |
+| finish the APAC cost center hierarchy mapping | 5.8 | 5.0 | 5.0 | 5.0 | 4.8 |
+| send the new cost center codes to Daniel | 4.2 | 5.0 | 4.4 | 5.0 | 5.0 |
+| loop in the banking team for next week's integrati… | 4.4 | 5.0 | 4.6 | 4.8 | 4.4 |
+| review the open items report and flag duplicate po… | 5.0 | 5.0 | 4.8 | 5.0 | 4.6 |
+| clear the eleven duplicate postings from the syste… | 6.0 | 5.0 | 4.4 | 5.0 | 4.6 |
+| send the change request for additional consulting … | 4.2 | 5.0 | 4.8 | 5.0 | 4.6 |
+| complete the EMEA cost center mapping | 6.0 | 5.0 | 5.0 | 5.0 | 4.8 |
+| diagnose the root cause of the bank statement uplo… | 5.6 | 4.8 | 4.2 | 5.0 | 4.0 |
+| fix the MT940 parser config for multi-currency sta… | 6.0 | 4.6 | 4.2 | 5.0 | 4.6 |
+| chase the vendor for a firm barcode firmware patch… | 5.4 | 5.0 | 5.0 | 5.0 | 5.0 |
+| draft a one-page risk note on the scanner delay fo… | 6.0 | 5.0 | 4.6 | 5.0 | 4.8 |
+| update the cutover runbook to reflect the degraded… | 5.8 | 5.0 | 5.0 | 5.0 | 5.0 |
+
 
 > **Caveat:** scores come from a single LLM judge applying a rubric, so they indicate quality trends rather than an absolute metric. The judge is Claude and the implemented generator is Gemini, so the judge is independent of it. The sample is the first 12 annotated items in file order, which covers the finance and logistics workshops but not the security or data-migration ones.
 

@@ -328,18 +328,24 @@ def render_report(res: dict) -> str:
         lines.append(f"| **overall** | **{ship['overall_mean']}** |")
 
     # Averaged over runs rather than taken from one of them: a single run is a noisy sample,
-    # and picking the first would quietly report whichever run happened to score best.
-    runs = ship["per_task_runs"]
-    lines += ["", f"## Per-task detail ({ship['label']}, averaged over {len(runs)} runs)", "",
-              "| Task | # | Rel | Act | Cov | NR |", "| --- | --- | --- | --- | --- | --- |"]
-    for first in runs[0]:
-        name = first["task"]
-        rows = [m for run in runs for m in run if m["task"] == name]
-        dims = {d: st.mean(r["scores"][d] for r in rows) for d in DIMENSIONS}
-        nsub = st.mean(r["n_subtasks"] for r in rows)
-        task = name[:50] + ("…" if len(name) > 50 else "")
-        lines.append(f"| {task} | {nsub:.1f} | {dims['relevance']:.1f} | {dims['actionability']:.1f} "
-                     f"| {dims['coverage']:.1f} | {dims['non_redundancy']:.1f} |")
+    # and picking the first would quietly report whichever run happened to score best. Both
+    # arms get the same treatment, so the per-task view is comparable like the tables above.
+    lines += ["", "## Per-task detail", ""]
+    for a in ([ship, other] if other else [ship]):
+        runs = a["per_task_runs"]
+        lines += [f"{a['label']}, averaged over {len(runs)} runs:", "",
+                  "| Task | # | Rel | Act | Cov | NR |",
+                  "| --- | --- | --- | --- | --- | --- |"]
+        for first in runs[0]:
+            name = first["task"]
+            rows = [m for run in runs for m in run if m["task"] == name]
+            dims = {d: st.mean(r["scores"][d] for r in rows) for d in DIMENSIONS}
+            nsub = st.mean(r["n_subtasks"] for r in rows)
+            task = name[:50] + ("…" if len(name) > 50 else "")
+            lines.append(f"| {task} | {nsub:.1f} | {dims['relevance']:.1f} "
+                         f"| {dims['actionability']:.1f} | {dims['coverage']:.1f} "
+                         f"| {dims['non_redundancy']:.1f} |")
+        lines.append("")
     lines += [
         "",
         "> **Caveat:** scores come from a single LLM judge applying a rubric, so they indicate "
