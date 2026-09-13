@@ -327,13 +327,19 @@ def render_report(res: dict) -> str:
             lines.append(f"| {dim.replace('_', ' ')} | {ship['mean_scores'][dim]} |")
         lines.append(f"| **overall** | **{ship['overall_mean']}** |")
 
-    lines += ["", f"## Per-task detail ({ship['label']}, first run)", "",
+    # Averaged over runs rather than taken from one of them: a single run is a noisy sample,
+    # and picking the first would quietly report whichever run happened to score best.
+    runs = ship["per_task_runs"]
+    lines += ["", f"## Per-task detail ({ship['label']}, averaged over {len(runs)} runs)", "",
               "| Task | # | Rel | Act | Cov | NR |", "| --- | --- | --- | --- | --- | --- |"]
-    for r in ship["per_task_runs"][0]:
-        s = r["scores"]
-        task = r["task"][:50] + ("…" if len(r["task"]) > 50 else "")
-        lines.append(f"| {task} | {r['n_subtasks']} | {s['relevance']} | {s['actionability']} "
-                     f"| {s['coverage']} | {s['non_redundancy']} |")
+    for first in runs[0]:
+        name = first["task"]
+        rows = [m for run in runs for m in run if m["task"] == name]
+        dims = {d: st.mean(r["scores"][d] for r in rows) for d in DIMENSIONS}
+        nsub = st.mean(r["n_subtasks"] for r in rows)
+        task = name[:50] + ("…" if len(name) > 50 else "")
+        lines.append(f"| {task} | {nsub:.1f} | {dims['relevance']:.1f} | {dims['actionability']:.1f} "
+                     f"| {dims['coverage']:.1f} | {dims['non_redundancy']:.1f} |")
     lines += [
         "",
         "> **Caveat:** scores come from a single LLM judge applying a rubric, so they indicate "
