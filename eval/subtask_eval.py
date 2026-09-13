@@ -287,7 +287,7 @@ def render_report(res: dict) -> str:
         verdict = ("separable" if c["p_value"] < 0.05 else "indistinguishable on quality")
         lead = other["label"] if other["overall_mean"] > ship["overall_mean"] else ship["label"]
         lines += [
-            f"**Why this model.** Both families were scored on the same {c['n_tasks']} tasks with "
+            f"**Why this model.** Both models were scored on the same {c['n_tasks']} tasks with "
             f"the same judge, {ship['runs']} runs each. {ship['label']} averaged "
             f"{ship['overall_mean']} and {other['label']} {other['overall_mean']}; an exact paired "
             f"permutation test over the per-task means gives p = {c['p_value']}, so the two are "
