@@ -950,10 +950,10 @@ performance. On this model the comparison is not "more items, slightly less prec
 matched an annotated item.""")
 
     return _wrap(f"""**Why precision falls.** Precision is the share of proposed items that turned
-out to be real. With the guidance the model proposes more of them - {pi} against the control's
-{pb} on Claude Sonnet - so there is simply more to be wrong about. The extra proposals are almost
-as good as the ones the control already made: {hit} of the {extra} extra matched an annotated
-item, a match rate of {hit / extra:.0%} against the control's {mb / pb:.0%}. That is why precision
+out to be real. With the guidance the model proposes more of them - {pi} against {pb} without it
+on Claude Sonnet - so there is simply more to be wrong about. The extra proposals are almost
+as good as the ones the without-guidance arm already made: {hit} of the {extra} extra matched an annotated
+item, a match rate of {hit / extra:.0%} against {mb / pb:.0%} without it. That is why precision
 barely moves ({overlap['naive']['precision']} -> {overlap['prod']['precision']}) while recall
 moves a lot ({overlap['naive']['recall']} -> {overlap['prod']['recall']}): {hit} real tasks
 recovered for {extra - hit} spurious ones. Gemini Flash makes the same trade on a smaller
@@ -1022,7 +1022,7 @@ than dropped.
 only {_pct(g_n.get('source_decision_rate'))} -> {_pct(g_p.get('source_decision_rate'))} on Gemini.
 The schema asks both models for the same field; only Claude acts on it. Claude also varies its
 confidence score as instructed ({c_p.get('confidence_min')}-{c_p.get('confidence_max')},
-{c_p.get('confidence_distinct')} distinct values) where the control emits a near-constant one
+{c_p.get('confidence_distinct')} distinct values) where the without-guidance arm emits a near-constant
 ({c_n.get('confidence_min')}-{c_n.get('confidence_max')}, {c_n.get('confidence_distinct')} values)
 that cannot be filtered on.""")
 
@@ -1402,7 +1402,7 @@ enum, because a translation bug would appear as a model difference that is reall
 - Ambiguous deadline phrases are annotated as single dates. Anchoring them during annotation, or
   capturing a range, would make the exact-match metric more precise.
 - **A correction worth recording.** An earlier `BARE_TOOL` stripped every key named `description`,
-  which also removed the *field* named "description" from the property map, leaving the control
+  which also removed the *field* named "description" from the property map, leaving the without-guidance arm
   requiring a field it did not define. That inflated its validation failures and depressed its
   scores. The stripper now preserves field names and removes only annotation text, and
   `eval/test_matching.py` has a regression test. All figures above are from a post-fix re-run.
