@@ -16,7 +16,7 @@ the generator and returns structured scores via tool-use.
 
 Caveat (worth stating in the report): the judge is a single LLM applying a rubric, so the scores
 indicate quality trends rather than an absolute accuracy figure. The judge is held fixed as Claude
-across both arms, so it is independent of the shipped Gemini generator but assesses Claude's own
+across both arms, so it is independent of the implemented Gemini generator but assesses Claude's own
 output in the comparison arm - an asymmetry that runs against the conclusion drawn, not for it.
 
 Usage (from the repo root, with the backend virtualenv active and ANTHROPIC_API_KEY set):
@@ -249,7 +249,7 @@ def aggregate(arm_runs: dict[str, list[dict]]) -> dict:
     out = {
         "judge_model": next(iter(arm_runs.values()))[0]["judge_model"],
         "sample_size": next(iter(arm_runs.values()))[0]["sample_size"],
-        "shipped_arm": "gemini",
+        "implemented_arm": "gemini",
         "arms": arms,
     }
     if {"gemini", "anthropic"} <= set(arm_runs):
@@ -262,8 +262,8 @@ def aggregate(arm_runs: dict[str, list[dict]]) -> dict:
 
 def render_report(res: dict) -> str:
     today = date.today().isoformat()
-    ship = res["arms"][res["shipped_arm"]]
-    other = res["arms"].get("anthropic" if res["shipped_arm"] == "gemini" else "gemini")
+    ship = res["arms"][res["implemented_arm"]]
+    other = res["arms"].get("anthropic" if res["implemented_arm"] == "gemini" else "gemini")
     lines = [
         "# Subtask Generation — Evaluation Report",
         "",
@@ -271,13 +271,13 @@ def render_report(res: dict) -> str:
         "transcript parsing, this is **open-ended generation with no ground truth**, so it is "
         "assessed qualitatively with an LLM-as-judge rubric rather than precision/recall.",
         "",
-        f"- Shipped generator: `{ship['model']}` ({ship['provider']})",
+        f"- Implemented generator: `{ship['model']}` ({ship['provider']})",
         f"- Judge model: `{res['judge_model']}` (held fixed across both arms)",
         f"- Sample size: {res['sample_size']} tasks, drawn from the annotated action-item set",
         f"- Runs per arm: {ship['runs']}",
         f"- Average subtasks per task: {ship['avg_subtasks_per_task']}",
         "",
-        f"**Headline.** Over {ship['runs']} runs the shipped generator scores "
+        f"**Headline.** Over {ship['runs']} runs the implemented generator scores "
         f"**{ship['overall_mean']}** out of 5 overall "
         f"(range {ship['overall_min']}-{ship['overall_max']}, sd {ship['overall_sd']}).",
         "",
@@ -337,7 +337,7 @@ def render_report(res: dict) -> str:
     lines += [
         "",
         "> **Caveat:** scores come from a single LLM judge applying a rubric, so they indicate "
-        "quality trends rather than an absolute metric. The judge is Claude and the shipped "
+        "quality trends rather than an absolute metric. The judge is Claude and the implemented "
         "generator is Gemini, so the judge is independent of it. The sample is the first "
         f"{res['sample_size']} annotated items in file order, which covers the finance and "
         "logistics workshops but not the security or data-migration ones.",

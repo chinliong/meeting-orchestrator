@@ -290,7 +290,7 @@ unassigned.''')}
 below the 0.85 review threshold and are flagged for checking; Courtney, the only person the
 transcript names for their own task, scored 0.85 and is not. On the Gemini board all four items
 scored 0.90 or above and none are flagged. So the transcription error is real and still present
-in the text, but on the shipped configuration it reaches the board only as a name nobody is
+in the text, but on the implemented configuration it reaches the board only as a name nobody is
 assigned to, not as an owner.''')}
 
 ## Hosted or local

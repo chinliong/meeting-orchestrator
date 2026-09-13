@@ -1069,7 +1069,7 @@ def _study_two(overlap, comp, counts, models) -> str:
     return f"""
 ## Study 2 - which model should the project use?
 
-Every row runs the **with-guidance configuration** - the one the project ships; only the
+Every row runs the **with-guidance configuration** - the one the project implements; only the
 model changes. The incumbent (Claude
 Sonnet) is included because the question is whether to replace it, and a candidate list without
 the thing being replaced cannot answer that.
@@ -1204,7 +1204,7 @@ The transcript parser is scored against **{n_transcripts} synthetic SAP meeting 
 
 ## Step 1 - choosing the model
 
-Every row runs the same with-guidance configuration - the one the project ships; only the
+Every row runs the same with-guidance configuration - the one the project implements; only the
 model changes.
 
 | Model | Action items found | F1 | Deadlines correct | Context captured | Cost |
