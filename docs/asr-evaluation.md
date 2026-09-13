@@ -31,7 +31,7 @@ same rate. The gap is deletions: 181 against 269. Deepgram recovers words Whispe
 
 That refines the limit rather than removing it. Roughly a tenth of the reference words are
 spoken while someone else is talking, and a single mixed channel plus a linear transcript cannot
-represent them. But the floor is set by segmentation, not model capacity: scaling Whisper from
+represent them. But the limit is set by segmentation, not model capacity: scaling Whisper from
 base to large-v3 never improved deletions, while a model with better voice-activity handling
 improved them by a third.
 

@@ -16,17 +16,17 @@ _Summary and recommendation: [evaluation-report.md](evaluation-report.md)._
    to-run spread. What does move consistently is the trade: recall up, precision down, on both
    models. Any claim of an accuracy gain would need a larger test set than this one.
 
-3. **Claude Haiku has a systematic date bias.** 52% of its deadlines land exactly +1 day from
+3. **Claude Haiku has a systematic date bias.** 52% of its deadlines fall exactly +1 day from
    the annotated one - no other model produces that offset once. Unlike the F1 differences, this
-   is far outside the noise, and it matters directly: deadlines drive this product's reminder
-   scheduling.
+   is far outside the noise, and it matters directly: deadlines determine this product's
+   reminder scheduling.
 
 ### Recommendation
 
 Over eight runs per model, Gemini Flash leads Claude Sonnet on recall (+0.091), precision
 (+0.058) and F1 (+0.074). Each gap is separated by an exact permutation test at p < 0.01, so
 unlike the earlier four-run comparison this one does distinguish the models on accuracy. How each
-one *fails* still matters more than where it sits in the table:
+one *fails* still matters more than where it ranks in the table:
 
 | Model | Recall | Deadlines exact | `source_decision` | Cost |
 |---|---|---|---|---|
@@ -42,12 +42,12 @@ one *fails* still matters more than where it sits in the table:
   three models to 100%, which means the earlier comparison was partly measuring prompt ambiguity.
   The one column it does not lead is precision, where Claude Haiku reaches 0.937 against 0.895 -
   but only by proposing roughly a third fewer items. Precision on its own rewards a model for
-  staying silent, which is what F1 accounts for and Gemini Flash leads.
+  proposing fewer items, which is what F1 accounts for and Gemini Flash leads.
 - **Claude Sonnet** is second on recall, deadline accuracy and F1, with no disqualifying failure
   of its own. It is last on precision.
 
 **Recommendation: run extraction on Gemini Flash.** It leads Claude Sonnet on all three
-headline metrics by a margin this test set can separate, and no longer carries the completeness
+headline metrics by a margin this test set can separate, and no longer has the completeness
 gap that ruled it out.
 Subtask generation was measured separately on its own rubric, because open-ended
 decomposition is a different problem from extraction and a parser result is not evidence about
@@ -63,7 +63,7 @@ it.
   over content words, threshold 0.18) - deterministic, no model involved. Matched pairs are then
   scored field by field.
 - **precision** = matched / predicted, **recall** = matched / expected, **F1** their harmonic
-  mean. Owner, status and deadline accuracy are computed over *matched* items only, so they sit
+  mean. Owner, status and deadline accuracy are computed over *matched* items only, so they are computed
   on different denominators per condition and are reported with counts.
 - Runs are independent and averaged; both models are non-deterministic and run counts differ by
   condition, so each is stated rather than assumed.
@@ -76,7 +76,7 @@ current cache.
 
 Gemini needs the tool schema translated into its OpenAPI subset (`eval/providers.py`), while
 Anthropic accepts JSON Schema unchanged. The translation is asserted to preserve fields, required list and
-enum, because a translation bug would surface as a model difference that is really a harness bug.
+enum, because a translation bug would appear as a model difference that is really a harness bug.
 
 ## Study 1 - does the guidance layer help?
 
@@ -106,14 +106,14 @@ refuted rather than dropped.
 **Why precision falls.** Precision is the share of proposed items that turned out to be real.
 With the guidance the model proposes more of them - 276 against the control's 191 on Claude
 Sonnet - so there is simply more to be wrong about. The extra proposals are almost as good as
-the ones the control already made: 67 of the 85 extra matched an annotated item, a hit rate of
+the ones the control already made: 67 of the 85 extra matched an annotated item, a match rate of
 79% against the control's 86%. That is why precision barely moves (0.861 -> 0.837) while recall
 moves a lot (0.621 -> 0.875): 67 real tasks recovered for 18 spurious ones. Gemini Flash makes
-the same trade less well - 25 of 32 - so its precision falls further. Neither drop is larger
-than the run-to-run variation inside that same arm (0.103 on Claude, 0.053 on Gemini), so
-neither is separable from noise. For this application the trade is the right way round in any
-case: a spurious task sits on the board where someone can delete it, while a missed one leaves
-no trace at all.
+the same trade on a smaller scale - 25 of 32 extra, against a much larger base - so its
+precision falls less. Neither drop is larger than the run-to-run variation inside that same arm
+(0.103 on Claude, 0.053 on Gemini), so neither is separable from noise. For this application the
+trade is the right way round in any case: a spurious task is visible on the board and can be
+deleted, while a missed one is invisible.
 
 **Record quality - Claude only.** Source-decision capture rose 44% -> 100% on Claude but only
 16% -> 100% on Gemini. The schema asks both models for the same field; only Claude acts on it.
@@ -132,9 +132,9 @@ Sonnet) is included because the question is whether to replace it, and a candida
 the thing being replaced cannot answer that.
 
 The tiers are not matched, and the mismatch runs both ways: Sonnet is a larger tier than the other
-three, while Gemini Flash is a later release than Sonnet. So this table is a procurement decision
+two, while Gemini Flash is a later release than Sonnet. So this table is a procurement decision
 for this project - where price and quota are legitimate inputs - and not a ranking of vendors.
-Haiku is the tier-matched Claude entry, which is what makes "Sonnet was chosen" a comparison
+Haiku is the tier-matched Claude entry, which is what makes "Gemini Flash was chosen" a comparison
 rather than vendor loyalty.
 
 | Model | Model id | Runs | Precision | Recall | F1 | Validation failures | `source_decision` | Status |
@@ -148,7 +148,7 @@ Every condition is averaged over its own 8 runs, never pooled across models.
 ## Deadline errors - systematic or random?
 
 Exact-match accuracy cannot tell a model that is *randomly* wrong about dates from one that is
-wrong by a *constant* amount, and those mean very different things - the second is a resolution
+wrong by a *constant* amount, and those mean different things - the second is a resolution
 bug a prompt could fix, and it shifts every reminder this product sends.
 
 | Model | Deadlines scored | Exact | Most common error |
@@ -157,10 +157,10 @@ bug a prompt could fix, and it shifts every reminder this product sends.
 | Claude Haiku | 109 | 28/109 (26%) | +1 day (52%) |
 | Gemini Flash | 120 | 107/120 (89%) | omitted (6%) |
 
-**Claude Haiku is systematically biased, not confused.** 52% of its matched deadlines land
+**Claude Haiku is systematically biased, not confused.** 52% of its matched deadlines fall
 exactly +1 day from the annotated one - it resolves relative cues ("by Friday", "end of next
 week") consistently one day late, and no other model here produces that offset even once. Two
-consequences: its low exact-match rate overstates how badly it understands dates, and a constant
+consequences: its low exact-match rate overstates how badly it resolves dates, and a constant
 offset is the kind of error a prompt change could plausibly remove. Unlike the F1 differences
 elsewhere in this report, 52% of 109 scored deadlines is well outside the noise.
 
@@ -192,7 +192,7 @@ The practical reading is that the score is a review flag, not a probability. It 
 present as a likelihood, and the interface accordingly uses it to colour items for attention
 rather than to assert one. The caveat is sample size: 17
 items fall below 0.90, so the low-end result is suggestive rather than established, and
-85 of 276 items sit in the top bucket where the score does not
+85 of 276 items fall in the top bucket where the score does not
 discriminate at all.
 
 ## Limitations
@@ -202,7 +202,7 @@ discriminate at all.
   revisited later - so that the parser is not only measured on tidy prose. They are still authored
   text rather than a transcription of real speech, which is the main caveat: generated dialogue
   may be more internally consistent than a genuine recording even when written to look untidy. The
-  pipeline was separately exercised end to end on a real recording from the AMI meeting corpus, but
+  pipeline was separately tested end to end on a real recording from the AMI meeting corpus, but
   that recording is not part of the scored test set.
 - **One annotator, no second opinion.** The answer key was labelled by the project author, so there
   is no inter-annotator agreement figure and no independent check on what counts as an action item.
@@ -224,7 +224,7 @@ discriminate at all.
 - The judge matcher shares a model family with the Claude parser, so it is not fully independent;
   reporting deterministic word overlap as the primary matcher is the mitigation.
 - Ambiguous deadline phrases are annotated as single dates. Anchoring them during annotation, or
-  capturing a range, would sharpen the exact-match metric.
+  capturing a range, would make the exact-match metric more precise.
 - **A correction worth recording.** An earlier `BARE_TOOL` stripped every key named `description`,
   which also removed the *field* named "description" from the property map, leaving the control
   requiring a field it did not define. That inflated its validation failures and depressed its

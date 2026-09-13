@@ -23,9 +23,9 @@ model changes.
 | Claude Haiku | 67% | 0.781 | 26% | 100% | paid, ~$1/$5 per M tokens |
 | **Gemini Flash** | 97% | 0.929 | 89% | 100% | paid, ~$0.30/$2.50 per M tokens; selected for extraction |
 
-**Claude Haiku has a systematic date bug.** 52% of the deadlines it produced land exactly +1 day
-from the correct one - it reads "by Friday" as the following day, consistently. Every reminder
-scheduled from it would fire a day late.
+**Claude Haiku has a systematic date bug.** 52% of the deadlines it produced fall exactly +1 day
+from the correct one - it resolves "by Friday" to the following day, consistently. Every
+reminder scheduled from it would fire a day late.
 
 **Gemini Flash is selected: it leads on every measure in this table, and the gaps are
 separable.** Over eight runs per model it beats Claude Sonnet on recall, precision and F1, each
@@ -33,13 +33,13 @@ significant under an exact permutation test. It was previously rejected for leav
 decision field empty on most items, but that proved to be a prompt defect rather than a model
 weakness - the schema called the field optional and the prompt never asked for it. With the
 prompt corrected every model fills it on 100% of items, so the earlier comparison was partly
-measuring prompt ambiguity. Claude Haiku carries the date bug above. Claude Sonnet is second on
-each of these measures, with no disqualifying failure of its own. Precision is not in this table
+measuring prompt ambiguity. Claude Haiku has the date bug above. Claude Sonnet is second on each
+of these measures, with no disqualifying failure of its own. Precision is not in this table
 because it is not a selection criterion on its own: Haiku is the most precise model at 0.937,
 but only by proposing a third fewer items - which is exactly what the F1 column already accounts
 for.
 
-> These models sit at different price tiers *and* different release dates - Sonnet is a larger
+> These models are at different price tiers *and* different release dates - Sonnet is a larger
 > tier than the other two, while Gemini Flash is a later release than Sonnet. The confound runs
 > in both directions, which is why this table is a cost decision for this project rather than a
 > ranking of vendors.
@@ -61,7 +61,7 @@ and is reported in the appendix.
 Without the descriptions the model periodically returns output that fails validation outright -
 usually a malformed date - and the application gets no record at all. With them, that did not
 happen once. The remaining rows are the fields the guidance explicitly asks for: the decision
-each task came from, and a confidence score that actually varies instead of sitting near-
+each task came from, and a confidence score that actually varies instead of remaining near-
 constant. Varying is necessary but not sufficient - the appendix measures what that variation is
 worth, and finds it separates spurious items only at the low end.
 
