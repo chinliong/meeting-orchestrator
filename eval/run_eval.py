@@ -950,8 +950,8 @@ performance. On this model the comparison is not "more items, slightly less prec
 matched an annotated item.""")
 
     return _wrap(f"""**Why precision falls.** Precision is the share of proposed items that turned
-out to be real. With the guidance the model proposes more of them - {pi} against {pb} without it
-on Claude Sonnet - so there is simply more to be wrong about. The extra proposals are almost
+out to be real. With the guidance the model proposes more of them - {pi} against {pb} without it, on Claude
+Sonnet - so there is simply more to be wrong about. The extra proposals are almost
 as good as the ones the without-guidance arm already made: {hit} of the {extra} extra matched an annotated
 item, a match rate of {hit / extra:.0%} against {mb / pb:.0%} without it. That is why precision
 barely moves ({overlap['naive']['precision']} -> {overlap['prod']['precision']}) while recall
@@ -1022,7 +1022,7 @@ than dropped.
 only {_pct(g_n.get('source_decision_rate'))} -> {_pct(g_p.get('source_decision_rate'))} on Gemini.
 The schema asks both models for the same field; only Claude acts on it. Claude also varies its
 confidence score as instructed ({c_p.get('confidence_min')}-{c_p.get('confidence_max')},
-{c_p.get('confidence_distinct')} distinct values) where the without-guidance arm emits a near-constant
+{c_p.get('confidence_distinct')} distinct values) where the without-guidance arm emits a near-constant one
 ({c_n.get('confidence_min')}-{c_n.get('confidence_max')}, {c_n.get('confidence_distinct')} values)
 that cannot be filtered on.""")
 

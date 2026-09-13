@@ -103,7 +103,7 @@ to help *more* where the model is weaker; it did not, and that expectation is re
 refuted rather than dropped.
 
 **Why precision falls.** Precision is the share of proposed items that turned out to be real.
-With the guidance the model proposes more of them - 276 against 191 without it on Claude Sonnet
+With the guidance the model proposes more of them - 276 against 191 without it, on Claude Sonnet
 - so there is simply more to be wrong about. The extra proposals are almost as good as the ones
 the without-guidance arm already made: 67 of the 85 extra matched an annotated item, a match
 rate of 79% against 86% without it. That is why precision barely moves (0.861 -> 0.837) while
@@ -117,7 +117,7 @@ deleted, while a missed one is invisible.
 **Record quality - Claude only.** Source-decision capture rose 44% -> 100% on Claude but only
 16% -> 100% on Gemini. The schema asks both models for the same field; only Claude acts on it.
 Claude also varies its confidence score as instructed (0.78-0.99, 13 distinct values) where the
-without-guidance arm emits a near-constant (0.85-1.0, 9 values) that cannot be filtered on.
+without-guidance arm emits a near-constant one (0.85-1.0, 9 values) that cannot be filtered on.
 
 > Gemini Flash is here as a replication check, not as a competitor: the question is whether the
 > guidance effect is a property of the schema or a quirk of one vendor's tool use. The model
