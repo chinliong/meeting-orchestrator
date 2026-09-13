@@ -1,228 +1,2250 @@
 {
-  "provider": "gemini",
-  "model": "gemini-3.6-flash",
   "judge_model": "claude-sonnet-4-6",
   "sample_size": 12,
-  "avg_subtasks_per_task": 4.7,
-  "mean_scores": {
-    "relevance": 4.83,
-    "actionability": 4.33,
-    "coverage": 4.75,
-    "non_redundancy": 4.58
-  },
-  "overall_mean": 4.62,
-  "per_task": [
-    {
-      "task": "finish the APAC cost center hierarchy mapping",
-      "subtasks": [
-        "Gather current APAC cost center structures across all regional entities",
-        "Map legacy cost centers to the target S/4HANA global hierarchy",
-        "Verify hierarchy alignment with parallel ledger cutover requirements",
-        "Review proposed mapping with APAC regional finance leads for sign-off",
-        "Upload finalized cost center hierarchy mapping into the SAP system"
+  "shipped_arm": "gemini",
+  "arms": {
+    "gemini": {
+      "label": "Gemini Flash",
+      "provider": "gemini",
+      "model": "gemini-3.6-flash",
+      "runs": 5,
+      "overall_per_run": [
+        4.88,
+        4.86,
+        4.75,
+        4.75,
+        4.69
       ],
-      "n_subtasks": 5,
-      "scores": {
-        "relevance": 5,
-        "actionability": 5,
-        "coverage": 5,
-        "non_redundancy": 5
+      "overall_mean": 4.786,
+      "overall_sd": 0.081,
+      "overall_min": 4.69,
+      "overall_max": 4.88,
+      "mean_scores": {
+        "relevance": 4.88,
+        "actionability": 4.72,
+        "coverage": 4.78,
+        "non_redundancy": 4.75
       },
-      "comment": "Every subtask is directly tied to the parent task, follows a logical end-to-end sequence (gather \u2192 map \u2192 verify \u2192 review \u2192 upload), each step is concrete and doable, together they fully complete the mapping exercise, and there is no meaningful overlap between steps."
+      "avg_subtasks_per_task": 4.74,
+      "per_task_runs": [
+        [
+          {
+            "task": "finish the APAC cost center hierarchy mapping",
+            "subtasks": [
+              "Review existing APAC legacy cost center structures",
+              "Map legacy cost centers to SAP global hierarchy template",
+              "Review draft mapping with regional APAC finance leads",
+              "Align cost center hierarchy with parallel ledger cutover rules",
+              "Upload and validate mapping in the SAP test environment"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to APAC cost center hierarchy mapping, follow a logical end-to-end sequence (discovery \u2192 mapping \u2192 review \u2192 alignment \u2192 validation), are concrete and doable, cover the full lifecycle without gaps, and are clearly distinct from one another."
+          },
+          {
+            "task": "send the new cost center codes to Daniel",
+            "subtasks": [
+              "Compile the updated cost center codes from APAC mapping",
+              "Validate the codes against parallel ledger requirements",
+              "Format the cost center list into a shareable document",
+              "Email the cost center codes to Daniel",
+              "Confirm receipt and address any questions with Daniel"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly tied to the parent task, each is a concrete and distinct step, they cover the full lifecycle from data gathering to confirmation, and there is no meaningful overlap between any of them."
+          },
+          {
+            "task": "loop in the banking team for next week's integration session",
+            "subtasks": [
+              "Identify key contacts on the banking team",
+              "Prepare integration session agenda focusing on parallel ledger cutover",
+              "Send calendar invitation and pre-reading materials to banking team",
+              "Confirm attendee availability and finalize session agenda"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks are tightly relevant and concrete, covering the full loop-in workflow end to end, though \"Confirm attendee availability and finalize session agenda\" partially overlaps with both sending the invite and preparing the agenda steps."
+          },
+          {
+            "task": "review the open items report and flag duplicate postings",
+            "subtasks": [
+              "Pull current open items report for APAC parallel ledgers",
+              "Filter line items by reference key, amount, and date",
+              "Identify and flag potential duplicate postings in the report",
+              "Document mapping origins and references for flagged duplicates",
+              "Share flagged duplicates report with APAC finance team for resolution"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks are highly relevant and cover the full end-to-end workflow from data retrieval to resolution handoff, with mostly concrete steps, though \"Document mapping origins and references\" is slightly vague and could overlap with the flagging step."
+          },
+          {
+            "task": "clear the eleven duplicate postings from the system",
+            "subtasks": [
+              "Identify and document the eleven duplicate posting entries",
+              "Verify duplicate entries against source transaction records",
+              "Execute reversal or deletion of the duplicate postings",
+              "Reconcile affected ledger accounts to verify correct balances",
+              "Log the clearing actions for audit and compliance records"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to clearing duplicate postings, each step is concrete and executable, the sequence covers the full end-to-end workflow from identification through audit logging, and no two steps meaningfully overlap."
+          },
+          {
+            "task": "send the change request for additional consulting days to Wei Lin",
+            "subtasks": [
+              "Calculate required additional consulting days and budget impact",
+              "Draft the formal change request document",
+              "Review change request details with internal stakeholders",
+              "Email the finalized change request to Wei Lin"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are directly relevant, concretely actionable, collectively cover the full end-to-end workflow from calculation to delivery, and are clearly distinct with no overlap."
+          },
+          {
+            "task": "complete the EMEA cost center mapping",
+            "subtasks": [
+              "Review legacy EMEA cost center structures and data",
+              "Map legacy EMEA cost centers to S/4HANA target hierarchy",
+              "Validate draft mapping with EMEA regional finance stakeholders",
+              "Align mapping rules with APAC parallel ledger requirements",
+              "Upload and verify mapped cost centers in SAP test environment"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 4,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks cover the end-to-end mapping lifecycle well, but \"Align mapping rules with APAC parallel ledger requirements\" weakly fits an EMEA-scoped task and slightly dilutes relevance and non-redundancy."
+          },
+          {
+            "task": "diagnose the root cause of the bank statement upload test failure",
+            "subtasks": [
+              "Replicate the upload failure and gather error logs",
+              "Verify bank statement file formatting against updated APAC mappings",
+              "Inspect parallel ledger configuration and GL account assignments",
+              "Document root cause findings and recommended remediation steps"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are directly relevant, concrete, and distinct \u2014 spanning reproduction, file format validation, system configuration inspection, and documentation \u2014 providing thorough end-to-end coverage of a root cause diagnosis with no meaningful overlap."
+          },
+          {
+            "task": "fix the MT940 parser config for multi-currency statements",
+            "subtasks": [
+              "Identify MT940 tag mapping issues for multi-currency statements",
+              "Update parser configuration for multi-currency headers and lines",
+              "Test updated parser against sample APAC bank statements",
+              "Verify statement posting accuracy in the parallel ledger",
+              "Document configuration changes for the APAC finance team"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to the MT940 multi-currency fix, each represents a distinct, concrete phase (diagnose, configure, test, verify, document) that together cover the full fix lifecycle with no overlap."
+          },
+          {
+            "task": "chase the vendor for a firm barcode firmware patch date",
+            "subtasks": [
+              "Review existing vendor communications on the firmware issue",
+              "Contact vendor representative to request a committed patch date",
+              "Explain urgency and impact on the warehouse retest timeline",
+              "Log the vendor response and confirmed patch delivery date",
+              "Share updated timeline with the logistics testing team"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to chasing a vendor patch date, each step is concrete and executable, the sequence covers the full end-to-end chase cycle from context review to internal communication of the outcome, and no two steps overlap."
+          },
+          {
+            "task": "draft a one-page risk note on the scanner delay for the steering committee",
+            "subtasks": [
+              "Gather firmware timeline and degraded mode impact details",
+              "Outline key operational risks and mitigation strategies",
+              "Draft the one-page risk note for the steering committee",
+              "Review the draft with logistics and warehouse leads",
+              "Finalize and submit the risk note to committee members"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to the scanner delay risk note, each represents a distinct and concrete step (gather \u2192 outline \u2192 draft \u2192 review \u2192 finalize/submit), and together they cover the full end-to-end workflow with no meaningful overlap."
+          },
+          {
+            "task": "update the cutover runbook to reflect the degraded-mode plan",
+            "subtasks": [
+              "Review meeting decisions on degraded-mode testing",
+              "Update readiness test steps to exclude barcode scanning",
+              "Add manual entry fallback procedures for degraded mode",
+              "Insert post-firmware patch retesting instructions",
+              "Share updated cutover runbook with logistics leads for review"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly tied to updating the cutover runbook for degraded-mode, each is a concrete and distinct action (review, update, add, insert, share), together they cover the full lifecycle from input-gathering to stakeholder sign-off, and there is no meaningful overlap between any of the steps."
+          }
+        ],
+        [
+          {
+            "task": "finish the APAC cost center hierarchy mapping",
+            "subtasks": [
+              "Collect legacy APAC cost center data and requirements",
+              "Draft the APAC cost center hierarchy mapping structure",
+              "Review draft mapping with local APAC finance stakeholders",
+              "Align hierarchy mapping with parallel ledger cutover rules",
+              "Obtain final sign-off and submit mapping for system configuration"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly tied to the parent task, each represents a concrete and distinct step, and together they cover the full lifecycle from data collection through stakeholder review, ledger alignment, sign-off, and system submission with no meaningful overlap."
+          },
+          {
+            "task": "send the new cost center codes to Daniel",
+            "subtasks": [
+              "Obtain the finalized APAC cost center codes",
+              "Verify codes against parallel ledger requirements",
+              "Format the cost center code mapping list",
+              "Send the cost center code document to Daniel",
+              "Confirm receipt and follow up on any questions"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All subtasks are clearly relevant and distinct, covering the full end-to-end flow from obtaining to confirming delivery, though \"Verify codes against parallel ledger requirements\" assumes context not stated in the parent task, slightly reducing actionability for a general audience."
+          },
+          {
+            "task": "loop in the banking team for next week's integration session",
+            "subtasks": [
+              "Identify key representatives from the banking team",
+              "Prepare session agenda aligning parallel ledger and APAC mapping topics",
+              "Send calendar invitations with session context and pre-reads",
+              "Confirm banking team attendance and collect pre-session inputs"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are directly tied to looping in the banking team, each is concrete and doable, they flow end-to-end from identifying participants to confirming attendance, and there is no meaningful overlap between steps."
+          },
+          {
+            "task": "review the open items report and flag duplicate postings",
+            "subtasks": [
+              "Export the latest open items report across active ledgers",
+              "Cross-check open items against APAC mapping rules",
+              "Identify and flag duplicate postings with line-item details",
+              "Share flagged duplicate items with the finance team for resolution"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 4,
+              "actionability": 4,
+              "coverage": 4,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks form a solid, logical end-to-end flow for the task, but the APAC mapping rules step feels region-specific and not universally implied by the parent task, slightly reducing relevance and introducing a mildly out-of-scope element; otherwise, steps are concrete, distinct, and cover the task well from export to resolution handoff."
+          },
+          {
+            "task": "clear the eleven duplicate postings from the system",
+            "subtasks": [
+              "Identify and extract the eleven duplicate postings from the ledger",
+              "Verify duplicate transaction details with the APAC finance team",
+              "Execute reversal or clearing entries in SAP S/4HANA",
+              "Reconcile ledger balances to confirm accuracy",
+              "Document the cleared postings in the cutover log"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to clearing duplicate postings, each step is concrete and system-specific (SAP S/4HANA, APAC finance team, cutover log), the sequence covers the full end-to-end workflow from identification to documentation, and no two steps overlap in scope."
+          },
+          {
+            "task": "send the change request for additional consulting days to Wei Lin",
+            "subtasks": [
+              "Calculate required additional consulting days and estimated cost",
+              "Draft the change request document for parallel ledger support",
+              "Review and finalize the change request draft",
+              "Send the change request to Wei Lin for approval",
+              "Log the change request in the project tracker"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly tied to the parent task, each is a concrete and distinct step, and together they cover the full end-to-end workflow from scoping the request through to logging it after submission."
+          },
+          {
+            "task": "complete the EMEA cost center mapping",
+            "subtasks": [
+              "Extract existing EMEA legacy cost center data",
+              "Draft EMEA cost center mapping matrix aligned with APAC structure",
+              "Incorporate parallel ledger cutover mapping requirements",
+              "Review draft mapping with EMEA finance stakeholders",
+              "Validate mapping rules in the SAP test environment",
+              "Obtain final sign-off on EMEA cost center mapping"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to EMEA cost center mapping, each step is concrete and doable, the sequence covers the full lifecycle from data extraction to sign-off, and there is no meaningful overlap between steps."
+          },
+          {
+            "task": "diagnose the root cause of the bank statement upload test failure",
+            "subtasks": [
+              "Obtain error logs and test failure reports for the bank statement upload",
+              "Review statement file format against updated APAC mapping rules",
+              "Replicate the upload failure in the SAP test environment",
+              "Analyze interface configuration and data mapping for root cause",
+              "Document findings and propose remedial action steps"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks are tightly relevant and concrete, covering the full diagnostic lifecycle from log retrieval to documentation, though steps 4 and 2 overlap slightly in scope (both touch data mapping analysis)."
+          },
+          {
+            "task": "fix the MT940 parser config for multi-currency statements",
+            "subtasks": [
+              "Review current MT940 parser configuration and error logs",
+              "Update currency code mappings and field parsing rules",
+              "Adjust parser format specs for APAC bank statement structures",
+              "Test parser with multi-currency sample statement files",
+              "Verify posting accuracy against the parallel ledger"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All subtasks are tightly scoped to MT940 multi-currency parsing, flow logically end-to-end from diagnosis to validation, and are distinct with no meaningful overlap; the APAC-specific step slightly assumes regional context not stated in the parent task, slightly reducing actionability."
+          },
+          {
+            "task": "chase the vendor for a firm barcode firmware patch date",
+            "subtasks": [
+              "Review outstanding barcode scanner firmware issue details",
+              "Contact vendor to request a committed patch delivery date",
+              "Evaluate vendor timeline against the warehouse retest schedule",
+              "Update project log with confirmed firmware patch date",
+              "Share confirmed patch date with logistics stakeholders"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to the parent goal, each step is concretely doable, the sequence covers the full lifecycle from issue review through stakeholder communication, and no two steps meaningfully overlap."
+          },
+          {
+            "task": "draft a one-page risk note on the scanner delay for the steering committee",
+            "subtasks": [
+              "Gather firmware timeline and degraded mode impact details",
+              "Outline operational risks and mitigation strategies",
+              "Draft the one-page risk note",
+              "Review draft with warehouse and logistics leads",
+              "Finalize and submit note to steering committee"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to the scanner delay risk note, follow a logical end-to-end sequence (gather \u2192 outline \u2192 draft \u2192 review \u2192 submit), are concrete and doable, and contain no overlapping steps."
+          },
+          {
+            "task": "update the cutover runbook to reflect the degraded-mode plan",
+            "subtasks": [
+              "Identify runbook steps impacted by barcode scanning",
+              "Document degraded-mode manual procedures for warehouse testing",
+              "Define retest trigger and steps following firmware patch deployment",
+              "Update runbook task owners, timelines, and dependencies",
+              "Review revised runbook with logistics leads for approval"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to updating the cutover runbook for degraded-mode, each is a concrete doable step, together they cover the full end-to-end update lifecycle (identify \u2192 document \u2192 define triggers \u2192 update metadata \u2192 approve), and there is no meaningful overlap between them."
+          }
+        ],
+        [
+          {
+            "task": "finish the APAC cost center hierarchy mapping",
+            "subtasks": [
+              "Gather legacy APAC cost center structures and requirements",
+              "Draft the updated SAP S4HANA APAC cost center mapping",
+              "Verify alignment between APAC cost centers and parallel ledger requirements",
+              "Review mapping with APAC finance leads for sign-off",
+              "Upload and test the cost center hierarchy in SAP"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to the APAC cost center hierarchy mapping, progress logically from data gathering through drafting, validation, stakeholder sign-off, and system testing, cover the end-to-end workflow with no meaningful gaps, and are clearly distinct from one another with no overlapping steps."
+          },
+          {
+            "task": "send the new cost center codes to Daniel",
+            "subtasks": [
+              "Obtain latest APAC cost center mapping list",
+              "Validate cost center codes against parallel ledger setup",
+              "Compile codes into a summary document",
+              "Email updated cost center codes to Daniel"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 4,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "The subtasks are logically sequenced and collectively cover the end-to-end flow well, though the validation step against a \"parallel ledger setup\" introduces an assumption not grounded in the parent task, slightly reducing relevance."
+          },
+          {
+            "task": "loop in the banking team for next week's integration session",
+            "subtasks": [
+              "Identify key banking team representatives",
+              "Confirm session schedule and integration scope",
+              "Prepare briefing notes on APAC mapping and parallel ledger alignment",
+              "Send calendar invitation and session agenda to the banking team"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 4,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are directly relevant, concrete, and distinct, covering identification, scheduling, preparation, and communication \u2014 though a follow-up/confirmation step post-invite could strengthen end-to-end coverage."
+          },
+          {
+            "task": "review the open items report and flag duplicate postings",
+            "subtasks": [
+              "Export the latest open items report for APAC ledgers",
+              "Filter open items by posting date, account, and reference numbers",
+              "Cross-reference entries across parallel ledgers to identify duplicate postings",
+              "Flag and document duplicate postings in the report",
+              "Share flagged duplicates with the APAC finance team for reconciliation"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "The subtasks map cleanly onto the parent task end-to-end with no overlap, though \"Filter open items\" could be slightly more specific about the tool or criteria threshold used to be fully actionable."
+          },
+          {
+            "task": "clear the eleven duplicate postings from the system",
+            "subtasks": [
+              "Identify and document the eleven duplicate postings",
+              "Cross-check duplicate entries against source documents",
+              "Obtain authorization to post transaction reversals",
+              "Execute reversal postings in SAP S/4HANA",
+              "Reconcile ledger balances to confirm resolution"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to clearing duplicate postings, each representing a distinct, concrete phase\u2014identification, validation, authorization, execution, and reconciliation\u2014that together form a complete end-to-end workflow with no overlap."
+          },
+          {
+            "task": "send the change request for additional consulting days to Wei Lin",
+            "subtasks": [
+              "Draft change request specifying required consulting days",
+              "Review document details and budget impact",
+              "Send the change request to Wei Lin",
+              "Follow up to confirm receipt and approval status"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks are clearly relevant and together cover the full lifecycle of sending a change request end-to-end, though \"Review document details and budget impact\" is slightly vague and could overlap with the drafting step."
+          },
+          {
+            "task": "complete the EMEA cost center mapping",
+            "subtasks": [
+              "Extract legacy EMEA cost center data and hierarchy structures",
+              "Align EMEA mapping format with APAC cost center standards",
+              "Draft legacy-to-SAP EMEA cost center mapping matrix",
+              "Validate mapping against parallel ledger cutover requirements",
+              "Review mapping with EMEA finance leads and secure sign-off"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 4,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks are clearly relevant and concrete, covering extraction through sign-off end-to-end, though the APAC alignment step slightly overlaps with the mapping matrix draft, and a final upload/system-load step is missing to fully close out the task."
+          },
+          {
+            "task": "diagnose the root cause of the bank statement upload test failure",
+            "subtasks": [
+              "Review test execution logs and error details",
+              "Reproduce the failure in a test environment",
+              "Inspect statement file format against APAC mapping",
+              "Check SAP EBS configuration and ledger mapping",
+              "Document the root cause and remediation steps"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly tied to diagnosing a test failure, each is a concrete investigative or documentation step, together they cover the full diagnostic lifecycle from log review to remediation, and none overlap meaningfully with one another."
+          },
+          {
+            "task": "fix the MT940 parser config for multi-currency statements",
+            "subtasks": [
+              "Review current MT940 parser config and error logs",
+              "Update tag mapping and currency conversion rules in the parser",
+              "Test parser logic with multi-currency APAC sample statements",
+              "Verify GL postings and parallel ledger currency entries"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 4,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are tightly scoped to the MT940 multi-currency fix, each is a concrete step (review\u2192update\u2192test\u2192verify), and they are fully distinct, though a deployment/release step and broader regression testing are missing for full end-to-end coverage."
+          },
+          {
+            "task": "chase the vendor for a firm barcode firmware patch date",
+            "subtasks": [
+              "Review recent correspondence with the scanner vendor",
+              "Contact the vendor representative to request a committed patch date",
+              "Evaluate the proposed patch date against the retest schedule",
+              "Update project logs and notify the warehouse testing team"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are tightly scoped to the parent task, each is a concrete doable step (review, contact, evaluate, update/notify), together they cover the full chase-to-closure lifecycle with no overlapping steps."
+          },
+          {
+            "task": "draft a one-page risk note on the scanner delay for the steering committee",
+            "subtasks": [
+              "Gather firmware patch timelines and scanner delay details",
+              "Summarize operational risks of degraded mode testing",
+              "Draft the one-page risk note for the steering committee",
+              "Review the draft with key logistics stakeholders"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are clearly relevant and logically sequenced end-to-end\u2014from data gathering through drafting to stakeholder review\u2014with no meaningful overlap, though \"summarize operational risks\" could be slightly more specific about what output format or criteria to apply."
+          },
+          {
+            "task": "update the cutover runbook to reflect the degraded-mode plan",
+            "subtasks": [
+              "Review existing warehouse readiness steps in the cutover runbook",
+              "Document degraded-mode procedures excluding barcode scanning",
+              "Add the post-firmware patch retesting schedule and criteria",
+              "Circulate updated runbook section for stakeholder review and sign-off"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 4,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are clearly relevant and distinct, covering review, documentation, scheduling, and sign-off, though \"Document degraded-mode procedures excluding barcode scanning\" could benefit from slightly more specificity on what the degraded-mode plan entails, and coverage is missing an explicit step for integrating/publishing the final updated runbook."
+          }
+        ],
+        [
+          {
+            "task": "finish the APAC cost center hierarchy mapping",
+            "subtasks": [
+              "Gather legacy APAC cost center data and structures",
+              "Draft APAC cost center hierarchy mapping for S4HANA",
+              "Review draft mapping with APAC finance stakeholders",
+              "Align hierarchy mapping with parallel ledger cutover requirements",
+              "Obtain formal sign-off on the completed mapping"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to the APAC cost center hierarchy mapping task, each represents a concrete and distinct phase (gather, draft, review, align, sign-off) that together form a complete end-to-end workflow with no meaningful overlap."
+          },
+          {
+            "task": "send the new cost center codes to Daniel",
+            "subtasks": [
+              "Gather the finalized APAC cost center codes",
+              "Validate the codes against parallel ledger requirements",
+              "Format the cost center mapping documentation",
+              "Send the cost center codes to Daniel"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks are highly relevant and cover the task end-to-end from gathering to sending, but \"gather\" and \"format\" could slightly overlap in practice, and the validation step assumes domain-specific context (parallel ledger) that may not always apply, slightly limiting actionability for a general reader."
+          },
+          {
+            "task": "loop in the banking team for next week's integration session",
+            "subtasks": [
+              "Identify key contacts from the banking team",
+              "Confirm the agenda and schedule for the integration session",
+              "Prepare briefing notes on the parallel ledger cutover alignment",
+              "Send meeting invitations and background materials to banking stakeholders",
+              "Confirm banking team attendance prior to the session"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks are highly relevant and concrete, covering the full loop-in workflow end to end, though \"Send meeting invitations and background materials\" and \"Confirm banking team attendance\" have a slight overlap in stakeholder outreach."
+          },
+          {
+            "task": "review the open items report and flag duplicate postings",
+            "subtasks": [
+              "Extract the current open items report across relevant ledgers",
+              "Cross-reference transactions by document date, amount, and reference ID",
+              "Flag identified duplicate postings directly within the report",
+              "Validate flagged duplicates against source documents and ledger entries",
+              "Share the finalized duplicate items log with the cutover team"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly tied to the parent task, each is a concrete and executable step, they collectively cover the full end-to-end workflow from extraction to handoff, and no two steps meaningfully overlap."
+          },
+          {
+            "task": "clear the eleven duplicate postings from the system",
+            "subtasks": [
+              "Identify the eleven duplicate posting transaction IDs",
+              "Verify duplicate postings against source documents",
+              "Draft reversal or correction entries",
+              "Post the reversals in the system",
+              "Reconcile affected ledger balances"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly relevant, concrete, and distinct, and together they form a complete end-to-end workflow\u2014from identifying duplicates through verification, correction drafting, posting reversals, and final reconciliation\u2014with no overlapping steps."
+          },
+          {
+            "task": "send the change request for additional consulting days to Wei Lin",
+            "subtasks": [
+              "Calculate required additional consulting days and cost impact",
+              "Draft the formal change request document",
+              "Review the draft change request with internal project stakeholders",
+              "Send the change request document to Wei Lin for approval"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are directly relevant, concrete, and sequential \u2014 from quantifying scope to drafting, internal review, and final delivery \u2014 covering the full end-to-end workflow with no overlap."
+          },
+          {
+            "task": "complete the EMEA cost center mapping",
+            "subtasks": [
+              "Gather legacy EMEA cost center structures and details",
+              "Review APAC cost center mapping and parallel ledger rules",
+              "Draft the EMEA to S/4HANA cost center mapping file",
+              "Validate mapped cost centers with local EMEA finance leads",
+              "Load and verify cost center mapping in SAP staging environment"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 3,
+              "actionability": 4,
+              "coverage": 4,
+              "non_redundancy": 4
+            },
+            "comment": "Most subtasks are concrete and cover the mapping lifecycle end-to-end, but reviewing APAC cost center mapping is off-target for an EMEA-specific task, dragging down relevance and introducing a mildly redundant cross-region detour."
+          },
+          {
+            "task": "diagnose the root cause of the bank statement upload test failure",
+            "subtasks": [
+              "Review error logs and test execution reports",
+              "Replicate the statement upload failure in the QA environment",
+              "Inspect APAC bank statement mapping and posting rules",
+              "Verify parallel ledger settings for bank account postings",
+              "Document the root cause findings and recommended fix"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 4,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks are well-targeted and concrete, covering the full diagnostic lifecycle from log review to documentation, though the scope is slightly narrow (e.g., APAC-specific mapping and parallel ledger checks may not apply universally) and there is mild overlap between replicating the failure and reviewing logs."
+          },
+          {
+            "task": "fix the MT940 parser config for multi-currency statements",
+            "subtasks": [
+              "Review MT940 parser configuration and multi-currency error logs",
+              "Map APAC multi-currency format requirements to parser fields",
+              "Update parsing rules for multi-currency MT940 statements",
+              "Test parser using sample multi-currency MT940 files",
+              "Validate parsed statements against parallel ledger mappings"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to the MT940 multi-currency config fix, each represents a concrete and distinct phase (diagnose \u2192 specify \u2192 implement \u2192 test \u2192 validate) that together cover the full end-to-end remediation lifecycle with no meaningful overlap."
+          },
+          {
+            "task": "chase the vendor for a firm barcode firmware patch date",
+            "subtasks": [
+              "Review current vendor support ticket and communication history",
+              "Contact vendor representative to request a committed patch delivery date",
+              "Highlight warehouse retesting dependencies to escalate priority",
+              "Obtain written confirmation of the firm firmware release date",
+              "Update project tracker and notify the warehouse testing team"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to vendor chasing for a firmware patch date, each step is concrete and executable, the sequence covers the full end-to-end flow from reviewing history to confirming in writing and notifying stakeholders, and no two steps meaningfully overlap."
+          },
+          {
+            "task": "draft a one-page risk note on the scanner delay for the steering committee",
+            "subtasks": [
+              "Gather timeline details on the scanner firmware patch",
+              "Document operational impacts of degraded mode testing",
+              "Draft the one-page risk note for steering committee",
+              "Review draft with logistics lead and test manager",
+              "Finalize risk note and submit to committee"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to the parent task, progress logically from information gathering through drafting, review, and submission, cover the full end-to-end workflow without gaps, and are clearly distinct from one another with no meaningful overlap."
+          },
+          {
+            "task": "update the cutover runbook to reflect the degraded-mode plan",
+            "subtasks": [
+              "Review meeting decisions on degraded-mode warehouse testing",
+              "Document manual fallback steps for operating without barcode scanning",
+              "Add retest criteria and procedures for post-firmware patch deployment",
+              "Review updated cutover runbook with key logistics stakeholders"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 4,
+              "non_redundancy": 5
+            },
+            "comment": "All subtasks are squarely on-topic and distinct, covering discovery, documentation, testing criteria, and stakeholder review; coverage is slightly limited as explicit steps for actually editing/publishing the runbook artifact are absent, and \"review meeting decisions\" could be more concrete (e.g., specifying which decisions to extract)."
+          }
+        ],
+        [
+          {
+            "task": "finish the APAC cost center hierarchy mapping",
+            "subtasks": [
+              "Gather legacy APAC cost center data and structural requirements",
+              "Draft the APAC cost center hierarchy mapping matrix",
+              "Validate mapping logic against parallel ledger requirements",
+              "Review draft hierarchy with APAC regional finance leads",
+              "Finalize mapping template and secure finance sign-off"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly relevant, concrete, and sequentially cover the full end-to-end workflow\u2014from data gathering through drafting, validation, stakeholder review, and formal sign-off\u2014with no meaningful overlap between steps."
+          },
+          {
+            "task": "send the new cost center codes to Daniel",
+            "subtasks": [
+              "Locate the updated APAC cost center code list",
+              "Verify cost center codes against parallel ledger requirements",
+              "Draft email to Daniel with cost center codes attached",
+              "Send the email with cost center codes to Daniel"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 4,
+              "actionability": 4,
+              "coverage": 4,
+              "non_redundancy": 3
+            },
+            "comment": "The subtasks are mostly relevant and concrete, but \"Draft email\" and \"Send the email\" are heavily overlapping steps that could be merged, and the APAC-specific scoping and parallel ledger verification feel like assumptions not grounded in the parent task."
+          },
+          {
+            "task": "loop in the banking team for next week's integration session",
+            "subtasks": [
+              "Identify key representatives from the banking team",
+              "Draft agenda highlighting parallel ledger cutover and APAC mapping",
+              "Send calendar invites for the integration session",
+              "Share pre-read materials and context with participants"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 4,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are clearly relevant, concrete, and distinct, covering the end-to-end coordination flow well, though a confirmation/follow-up step (e.g., confirming attendance) is missing for full coverage."
+          },
+          {
+            "task": "review the open items report and flag duplicate postings",
+            "subtasks": [
+              "Extract the latest open items report",
+              "Filter transactions by amount, vendor, and posting date",
+              "Cross-reference potential duplicates against APAC mapping records",
+              "Mark confirmed duplicate postings in the report",
+              "Share flagged duplicates with the finance team for reconciliation"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 4,
+              "actionability": 4,
+              "coverage": 4,
+              "non_redundancy": 5
+            },
+            "comment": "The subtasks form a logical, mostly actionable end-to-end workflow, but the third step introduces APAC-specific mapping records that may not be universally applicable to the parent task, slightly reducing relevance and coverage scores."
+          },
+          {
+            "task": "clear the eleven duplicate postings from the system",
+            "subtasks": [
+              "Identify and document the eleven duplicate posting records",
+              "Cross-reference duplicates against source documents and ledger mappings",
+              "Secure approval for transaction reversals from finance management",
+              "Post reversal entries in SAP to clear duplicate items",
+              "Perform post-reversal ledger reconciliation to confirm accuracy"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks map directly to the parent task, each is a concrete and distinct operational step, and together they form a complete end-to-end workflow \u2014 from identifying duplicates through approval, reversal, and post-reconciliation confirmation \u2014 with no meaningful overlap between steps."
+          },
+          {
+            "task": "send the change request for additional consulting days to Wei Lin",
+            "subtasks": [
+              "Determine required consulting days and cost impact",
+              "Draft the formal change request document",
+              "Review the change request draft with stakeholders",
+              "Send the change request to Wei Lin",
+              "Log submission in the project change register"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly relevant, concrete, and collectively cover the full lifecycle of preparing and sending the change request \u2014 from scoping and drafting through stakeholder review, delivery, and record-keeping \u2014 with no overlapping steps."
+          },
+          {
+            "task": "complete the EMEA cost center mapping",
+            "subtasks": [
+              "Extract current legacy EMEA cost center data",
+              "Map legacy EMEA cost centers to S/4HANA target structure",
+              "Review cost center mapping with regional finance leads",
+              "Upload mapping rules into S/4HANA migration environment",
+              "Validate mapping accuracy and obtain sign-off"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to EMEA cost center mapping, follows a logical end-to-end sequence (extract \u2192 map \u2192 review \u2192 upload \u2192 validate/sign-off), with no overlap between steps and each step being a concrete, independently executable action."
+          },
+          {
+            "task": "diagnose the root cause of the bank statement upload test failure",
+            "subtasks": [
+              "Replicate the test failure in the test environment",
+              "Review error logs and system diagnostic messages",
+              "Inspect bank statement payload and mapping rules",
+              "Verify alignment with updated APAC mapping standards",
+              "Document root cause findings and recommended remediation"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks are well-scoped and logically ordered for a root cause analysis, covering replication, log review, payload inspection, standards verification, and documentation \u2014 though \"Review error logs\" and \"Replicate the failure\" have a slight overlap in diagnostic intent, and \"Verify alignment with APAC mapping standards\" could be seen as a sub-step of \"Inspect bank statement payload and mapping rules\" rather than a fully independent task."
+          },
+          {
+            "task": "fix the MT940 parser config for multi-currency statements",
+            "subtasks": [
+              "Review current MT940 parser settings and error logs",
+              "Update currency mapping rules for multi-currency APAC statements",
+              "Configure MT940 tag handling for non-local currency fields",
+              "Test parsing with sample multi-currency MT940 bank files",
+              "Validate statement postings against the APAC parallel ledger"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 4,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks are highly relevant and concrete, covering diagnosis through validation, though \"Update currency mapping rules\" and \"Configure MT940 tag handling\" overlap slightly, and post-fix deployment/documentation steps are missing."
+          },
+          {
+            "task": "chase the vendor for a firm barcode firmware patch date",
+            "subtasks": [
+              "Review current status of vendor firmware patch ticket",
+              "Contact vendor lead for a committed patch release date",
+              "Highlight dependency on warehouse readiness retest timeline",
+              "Escalate to vendor management if firm date is delayed",
+              "Update project schedule with confirmed patch delivery date"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to chasing a firm patch date, each step is concrete and executable, together they cover the full chase cycle from status review through escalation to schedule update, and there is no meaningful overlap between steps."
+          },
+          {
+            "task": "draft a one-page risk note on the scanner delay for the steering committee",
+            "subtasks": [
+              "Gather firmware delay timeline and operational impact details",
+              "Outline key risks, mitigations, and retest criteria",
+              "Draft the one-page risk note for steering committee",
+              "Review draft with warehouse operations lead for feedback",
+              "Finalize and submit the note to the committee"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to the deliverable, progress logically from information gathering through drafting, review, and submission, cover the full end-to-end workflow without overlap, and each step is a concrete, independently executable action."
+          },
+          {
+            "task": "update the cutover runbook to reflect the degraded-mode plan",
+            "subtasks": [
+              "Review existing warehouse readiness steps in the cutover runbook",
+              "Document degraded-mode procedures excluding barcode scanning",
+              "Add retest steps scheduled for post-firmware patch deployment",
+              "Share updated runbook with logistics stakeholders for review"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 4,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are clearly tied to updating the runbook for degraded-mode, are distinct and concrete, and together cover the end-to-end update cycle (review \u2192 document \u2192 add retest steps \u2192 share for review), though a final \"publish/version the updated runbook\" step would make coverage airtight."
+          }
+        ]
+      ]
     },
-    {
-      "task": "send the new cost center codes to Daniel",
-      "subtasks": [
-        "Obtain the finalized APAC cost center mapping list",
-        "Verify cost center codes against parallel ledger requirements",
-        "Format the cost center codes into a shareable document",
-        "Send the cost center codes to Daniel"
+    "anthropic": {
+      "label": "Claude Sonnet",
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-6",
+      "runs": 5,
+      "overall_per_run": [
+        4.88,
+        4.94,
+        4.83,
+        4.67,
+        4.79
       ],
-      "n_subtasks": 4,
-      "scores": {
-        "relevance": 5,
-        "actionability": 4,
-        "coverage": 5,
-        "non_redundancy": 4
+      "overall_mean": 4.822,
+      "overall_sd": 0.102,
+      "overall_min": 4.67,
+      "overall_max": 4.94,
+      "mean_scores": {
+        "relevance": 4.95,
+        "actionability": 4.67,
+        "coverage": 4.98,
+        "non_redundancy": 4.68
       },
-      "comment": "The subtasks are all relevant and cover the end-to-end flow well, but \"Obtain the finalized APAC cost center mapping list\" introduces a geographic assumption (APAC) not present in the parent task, and the final subtask is essentially a restatement of the parent task itself, slightly reducing non-redundancy."
-    },
-    {
-      "task": "loop in the banking team for next week's integration session",
-      "subtasks": [
-        "Identify key stakeholders from the banking team",
-        "Draft the agenda highlighting APAC mapping and parallel ledger context",
-        "Send calendar invites with background materials to the banking team",
-        "Confirm attendance and address preliminary questions prior to the session"
-      ],
-      "n_subtasks": 4,
-      "scores": {
-        "relevance": 5,
-        "actionability": 5,
-        "coverage": 5,
-        "non_redundancy": 5
-      },
-      "comment": "All four subtasks are directly relevant, concrete, and form a logical end-to-end sequence\u2014from identifying who to invite, to preparing materials, sending invites, and confirming attendance\u2014with no meaningful overlap between steps."
-    },
-    {
-      "task": "review the open items report and flag duplicate postings",
-      "subtasks": [
-        "Export the current open items report",
-        "Filter entries by posting date, amount, and reference",
-        "Cross-reference items against APAC mapping records",
-        "Flag identified duplicate postings with supporting notes",
-        "Share flagged list with Finance team for remediation"
-      ],
-      "n_subtasks": 5,
-      "scores": {
-        "relevance": 4,
-        "actionability": 4,
-        "coverage": 4,
-        "non_redundancy": 5
-      },
-      "comment": "The subtasks form a solid, distinct end-to-end workflow, but the APAC mapping cross-reference step feels overly specific and unexplained for a general duplicate-flagging task, slightly limiting relevance and coverage of the duplicate-detection logic."
-    },
-    {
-      "task": "clear the eleven duplicate postings from the system",
-      "subtasks": [
-        "Identify and list the 11 duplicate postings",
-        "Verify posting details against APAC mapping rules",
-        "Reverse the duplicate entries in SAP S4HANA",
-        "Reconcile ledger balances to confirm cleanup"
-      ],
-      "n_subtasks": 4,
-      "scores": {
-        "relevance": 4,
-        "actionability": 3,
-        "coverage": 4,
-        "non_redundancy": 4
-      },
-      "comment": "The subtasks follow a logical end-to-end flow, but \"Verify posting details against APAC mapping rules\" is somewhat domain-specific and unexplained, and some steps (like identification and reversal) could be more concretely specified (e.g., who does it, in which system, by when)."
-    },
-    {
-      "task": "send the change request for additional consulting days to Wei Lin",
-      "subtasks": [
-        "Determine additional consulting days required for parallel ledger alignment",
-        "Draft change request document with supporting rationale",
-        "Review draft change request with relevant project leads",
-        "Send change request to Wei Lin for approval",
-        "Track change request submission in project register"
-      ],
-      "n_subtasks": 5,
-      "scores": {
-        "relevance": 5,
-        "actionability": 5,
-        "coverage": 5,
-        "non_redundancy": 5
-      },
-      "comment": "All five subtasks are directly relevant, concrete, and sequentially cover the full end-to-end workflow\u2014from scoping the need, drafting, reviewing, sending, and logging\u2014with no overlap between steps."
-    },
-    {
-      "task": "complete the EMEA cost center mapping",
-      "subtasks": [
-        "Gather EMEA cost center data and APAC mapping template",
-        "Draft mapping from legacy EMEA cost centers to S/4HANA",
-        "Validate mapping against parallel ledger cutover requirements",
-        "Review draft cost center mapping with EMEA finance leads",
-        "Finalize cost center mapping and upload to SAP S/4HANA"
-      ],
-      "n_subtasks": 5,
-      "scores": {
-        "relevance": 5,
-        "actionability": 4,
-        "coverage": 5,
-        "non_redundancy": 4
-      },
-      "comment": "The subtasks form a solid end-to-end workflow for the EMEA cost center mapping, but referencing the APAC template in step 1 introduces a slight irrelevancy, and steps 3 and 4 (validate vs. review) have some conceptual overlap that could be tightened."
-    },
-    {
-      "task": "diagnose the root cause of the bank statement upload test failure",
-      "subtasks": [
-        "Review error logs and test failure output",
-        "Replicate bank statement upload failure in test environment",
-        "Verify APAC mapping rules and parallel ledger setup",
-        "Pinpoint root cause in data format or configuration",
-        "Document findings and recommended fix"
-      ],
-      "n_subtasks": 5,
-      "scores": {
-        "relevance": 5,
-        "actionability": 4,
-        "coverage": 5,
-        "non_redundancy": 4
-      },
-      "comment": "The subtasks are highly relevant and collectively cover the full diagnostic lifecycle end-to-end, though \"Verify APAC mapping rules and parallel ledger setup\" is somewhat domain-specific and assumptive (not all upload failures relate to APAC/ledger config), and \"Pinpoint root cause\" slightly overlaps with the earlier log review and replication steps rather than being a fully distinct action."
-    },
-    {
-      "task": "fix the MT940 parser config for multi-currency statements",
-      "subtasks": [
-        "Review current MT940 parser configuration and error logs",
-        "Align multi-currency tag parsing with APAC mapping rules",
-        "Update parser configuration for multi-currency statement handling",
-        "Run test imports with sample multi-currency MT940 files",
-        "Validate statement postings in the parallel ledger"
-      ],
-      "n_subtasks": 5,
-      "scores": {
-        "relevance": 5,
-        "actionability": 4,
-        "coverage": 5,
-        "non_redundancy": 4
-      },
-      "comment": "The subtasks are all genuinely relevant and together cover the full fix cycle end-to-end (diagnose \u2192 align rules \u2192 update config \u2192 test \u2192 validate), though \"Align multi-currency tag parsing with APAC mapping rules\" partially overlaps with \"Update parser configuration for multi-currency statement handling,\" and both actionability and distinctness could be sharpened by clarifying that the alignment step is analysis/design while the update step is the actual implementation change."
-    },
-    {
-      "task": "chase the vendor for a firm barcode firmware patch date",
-      "subtasks": [
-        "Review existing vendor communications and firmware issue details",
-        "Send written request to vendor for a firm patch release date",
-        "Escalate via phone call if no response within agreed SLA",
-        "Secure written confirmation of the firmware patch delivery date",
-        "Update the warehouse readiness test schedule with the confirmed date"
-      ],
-      "n_subtasks": 5,
-      "scores": {
-        "relevance": 5,
-        "actionability": 5,
-        "coverage": 5,
-        "non_redundancy": 5
-      },
-      "comment": "All five subtasks are tightly scoped to chasing a firm patch date, each step is concrete and doable, they flow end-to-end from context review through escalation to calendar update, and no two steps overlap meaningfully."
-    },
-    {
-      "task": "draft a one-page risk note on the scanner delay for the steering committee",
-      "subtasks": [
-        "Gather details on scanner delay and firmware patch timeline",
-        "Outline risks and operational impact of degraded mode testing",
-        "Draft the one-page risk note for the steering committee",
-        "Review draft with logistics and testing leads",
-        "Finalize and submit the note to the steering committee"
-      ],
-      "n_subtasks": 5,
-      "scores": {
-        "relevance": 5,
-        "actionability": 5,
-        "coverage": 5,
-        "non_redundancy": 5
-      },
-      "comment": "All five subtasks are directly relevant, concrete, and sequential\u2014covering information gathering, risk analysis, drafting, stakeholder review, and final submission\u2014with no overlap between steps."
-    },
-    {
-      "task": "update the cutover runbook to reflect the degraded-mode plan",
-      "subtasks": [
-        "Review existing warehouse readiness procedures in the runbook",
-        "Add degraded-mode testing steps without barcode scanning",
-        "Define post-firmware patch retest triggers and steps",
-        "Share updated runbook with logistics stakeholders for review"
-      ],
-      "n_subtasks": 4,
-      "scores": {
-        "relevance": 5,
-        "actionability": 4,
-        "coverage": 4,
-        "non_redundancy": 5
-      },
-      "comment": "All four subtasks are tightly scoped to the cutover runbook update, each is a distinct and concrete step, and together they cover the full lifecycle from review through stakeholder sign-off, though a final approval/merge step would make end-to-end coverage airtight."
+      "avg_subtasks_per_task": 5.36,
+      "per_task_runs": [
+        [
+          {
+            "task": "finish the APAC cost center hierarchy mapping",
+            "subtasks": [
+              "Gather current APAC cost center list from finance stakeholders",
+              "Map each APAC cost center to the correct hierarchy node in S/4HANA",
+              "Validate mappings with APAC regional finance leads",
+              "Resolve any gaps or conflicts in the hierarchy structure",
+              "Load finalized cost center hierarchy into the SAP S/4HANA system",
+              "Confirm parallel ledger cutover readiness aligned to completed mapping"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the mapping effort, each step is concrete and executable, the sequence covers the full lifecycle from data gathering to system load and cutover readiness, and no two steps overlap meaningfully."
+          },
+          {
+            "task": "send the new cost center codes to Daniel",
+            "subtasks": [
+              "Obtain the finalised new cost center codes from the APAC mapping output",
+              "Verify the codes are complete and aligned with the parallel ledger cutover decision",
+              "Compile the cost center codes into a clear, shareable format (e.g. spreadsheet or document)",
+              "Send the cost center codes to Daniel with relevant context from Finance Workshop 01"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "The subtasks are highly relevant and collectively cover the task end-to-end (obtain \u2192 verify \u2192 compile \u2192 send), with no meaningful overlap, though \"verify alignment with the parallel ledger cutover decision\" assumes specific contextual knowledge that may not be universally actionable without further guidance."
+          },
+          {
+            "task": "loop in the banking team for next week's integration session",
+            "subtasks": [
+              "Identify the relevant banking team contacts to invite",
+              "Draft a brief context summary referencing the parallel ledger cutover and APAC mapping alignment decision",
+              "Send meeting invite or message to the banking team for next week's integration session",
+              "Confirm attendance and flag any conflicts to Aisha"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are directly relevant, concrete, and sequentially cover the full loop-in workflow from identifying contacts to confirming attendance, with no meaningful overlap between steps."
+          },
+          {
+            "task": "review the open items report and flag duplicate postings",
+            "subtasks": [
+              "Pull the latest open items report from the SAP system",
+              "Identify and list all potential duplicate postings across ledgers",
+              "Cross-reference duplicates against the APAC mapping completion data",
+              "Flag confirmed duplicate postings with clear annotations",
+              "Summarize findings and share flagged report with the Finance Workshop team"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks are tightly relevant, concrete, and cover the full workflow end-to-end; the only minor overlap is between \"identify/list potential duplicates\" and \"cross-reference against APAC mapping data,\" which could arguably be one analytical step, but they are distinct enough in purpose to justify separation."
+          },
+          {
+            "task": "clear the eleven duplicate postings from the system",
+            "subtasks": [
+              "Identify and list all eleven duplicate postings in the system",
+              "Investigate the root cause of the duplicates linked to the parallel ledger cutover change",
+              "Obtain approval from relevant stakeholders before deletion",
+              "Reverse or void each of the eleven duplicate postings",
+              "Reconcile affected ledger accounts to confirm clean balances",
+              "Document the resolution and archive for the SAP S/4HANA Go-Live Programme audit trail"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to clearing duplicate postings, each step is concrete and executable, the sequence covers identification through to audit documentation with no overlap between steps."
+          },
+          {
+            "task": "send the change request for additional consulting days to Wei Lin",
+            "subtasks": [
+              "Draft the change request document detailing the additional consulting days needed",
+              "Reference the parallel ledger cutover and APAC mapping alignment decision as justification",
+              "Review the change request with Daniel before sending",
+              "Send the finalized change request to Wei Lin by 2026-06-18"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are directly relevant, concrete, and logically sequenced\u2014drafting, justifying, reviewing, and sending\u2014covering the full end-to-end workflow with no overlapping steps."
+          },
+          {
+            "task": "complete the EMEA cost center mapping",
+            "subtasks": [
+              "Extract current EMEA cost center list from the legacy system",
+              "Obtain completed APAC cost center mapping as a reference template",
+              "Map each EMEA cost center to the corresponding S/4HANA parallel ledger structure",
+              "Validate mappings with EMEA finance stakeholders for accuracy",
+              "Resolve any gaps or conflicts identified during validation",
+              "Deliver final EMEA cost center mapping to Daniel for sign-off"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to EMEA cost center mapping, each step is concrete and doable, the sequence covers the full end-to-end workflow from data extraction to final sign-off, and there is no meaningful overlap between steps."
+          },
+          {
+            "task": "diagnose the root cause of the bank statement upload test failure",
+            "subtasks": [
+              "Retrieve the failing bank statement upload test logs and error messages",
+              "Identify the specific step in the upload process where the failure occurs",
+              "Cross-reference the failure against the APAC mapping configuration and parallel ledger cutover alignment",
+              "Isolate whether the root cause is data mapping, system configuration, or timing/sequencing",
+              "Document the root cause findings with supporting evidence",
+              "Share diagnosis report with the Finance Workshop 01 stakeholders and propose a fix"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks are well-scoped and directly relevant to root cause diagnosis, covering the full lifecycle from log retrieval to stakeholder reporting, though step 3 introduces enterprise-specific context (APAC mapping, ledger cutover) that slightly overlaps with step 4's isolation work, and \"propose a fix\" in step 6 mildly drifts beyond pure diagnosis."
+          },
+          {
+            "task": "fix the MT940 parser config for multi-currency statements",
+            "subtasks": [
+              "Review current MT940 parser config and identify multi-currency parsing failures",
+              "Gather sample multi-currency MT940 statement files for testing",
+              "Update parser configuration to handle multi-currency fields correctly",
+              "Validate updated parser against APAC and other regional currency mappings",
+              "Run end-to-end test with multi-currency statements in the S/4HANA environment",
+              "Confirm fix with Daniel and document configuration changes"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the MT940 parser fix, each step is concrete and executable, the sequence covers diagnosis through sign-off and documentation with no overlapping steps."
+          },
+          {
+            "task": "chase the vendor for a firm barcode firmware patch date",
+            "subtasks": [
+              "Locate vendor contact details and open support ticket reference for the barcode firmware issue",
+              "Draft a formal chase email referencing the firmware patch and requesting a firm delivery date",
+              "Send the email to the vendor and copy in relevant stakeholders (e.g. Marcus, project lead)",
+              "Log the outreach in the SAP S/4HANA Go-Live Programme tracker with the deadline noted",
+              "Escalate to vendor account manager if no response is received within agreed SLA",
+              "Update the Logistics Workshop 02 action log once a confirmed patch date is obtained"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask maps directly to chasing a vendor for a patch date, each step is concrete and executable (locate contacts, draft, send, log, escalate, update), together they cover the full lifecycle from initiation to resolution, and there is no meaningful overlap between any of the six steps."
+          },
+          {
+            "task": "draft a one-page risk note on the scanner delay for the steering committee",
+            "subtasks": [
+              "Gather background details on the scanner delay and firmware patch status",
+              "Outline the risk note structure (issue, impact, mitigation, owner, timeline)",
+              "Draft the one-page risk note referencing the degraded-mode test decision from Logistics Workshop 02",
+              "Include risk rating, affected workstreams, and recommended actions for the steering committee",
+              "Review and refine the note for clarity and executive audience suitability",
+              "Share the draft with Marcus for approval before the 2026-06-23 deadline"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks are tightly relevant and together cover the full lifecycle from research through approval; minor redundancy exists between subtasks 3 and 4 (both address drafting content), and subtask 2's \"outline\" step borders on vague, but overall the breakdown is solid and actionable end-to-end."
+          },
+          {
+            "task": "update the cutover runbook to reflect the degraded-mode plan",
+            "subtasks": [
+              "Pull the current cutover runbook for the SAP S/4HANA Go-Live",
+              "Add a degraded-mode section documenting the plan to run the warehouse readiness test without barcode scanning",
+              "Flag all barcode-scanning-dependent steps in the runbook as deferred pending the firmware patch",
+              "Document the retest trigger condition \u2014 firmware patch landing \u2014 and the retest steps required",
+              "Note the decision origin (Logistics Workshop 02) and owner (Aisha) in the runbook change log",
+              "Circulate the updated runbook to stakeholders for review and sign-off"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to the runbook update, concretely actionable (retrieve, add, flag, document, log, circulate), covers the full lifecycle from retrieval to stakeholder sign-off, and there is no meaningful overlap between any of the six steps."
+          }
+        ],
+        [
+          {
+            "task": "finish the APAC cost center hierarchy mapping",
+            "subtasks": [
+              "Gather current APAC cost center list from SAP legacy system",
+              "Identify parent-child hierarchy relationships across all APAC entities",
+              "Map each cost center to the correct S/4HANA hierarchy node",
+              "Validate mapping with APAC finance stakeholders for accuracy",
+              "Load finalized hierarchy mapping into SAP S/4HANA",
+              "Confirm parallel ledger cutover alignment with completed APAC mapping"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are directly relevant, concrete, and sequentially cover the full end-to-end lifecycle of the mapping effort\u2014from data extraction through stakeholder validation, system loading, and cutover alignment\u2014with no meaningful overlap between steps."
+          },
+          {
+            "task": "send the new cost center codes to Daniel",
+            "subtasks": [
+              "Obtain the finalised new cost center codes from the APAC mapping output",
+              "Confirm Daniel's contact details and preferred delivery method",
+              "Compile the cost center codes into a clear, shareable format (e.g. spreadsheet or document)",
+              "Send the cost center codes to Daniel with context referencing the parallel ledger cutover decision",
+              "Confirm Daniel has received and acknowledged the codes"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to the parent task, each is a concrete and distinct step, together they cover the full end-to-end flow from sourcing the codes to confirming receipt, with no meaningful overlap between steps."
+          },
+          {
+            "task": "loop in the banking team for next week's integration session",
+            "subtasks": [
+              "Identify the relevant banking team contacts and stakeholders",
+              "Draft a meeting invite or briefing note summarising the parallel ledger cutover decision",
+              "Share context from Finance Workshop 01 and the APAC mapping alignment decision with the banking team",
+              "Send the invite for next week's integration session to the banking team",
+              "Confirm attendance and flag any conflicts to Aisha"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks are highly relevant and concrete end-to-end, but steps 2 and 3 overlap slightly\u2014sharing context could reasonably be folded into the briefing note rather than treated as a fully separate action."
+          },
+          {
+            "task": "review the open items report and flag duplicate postings",
+            "subtasks": [
+              "Pull the latest open items report from the SAP system",
+              "Identify and compare entries for potential duplicate postings across parallel ledgers",
+              "Cross-reference flagged duplicates against the APAC mapping completion data",
+              "Mark and annotate confirmed duplicate postings in the report",
+              "Share flagged report with Priya and the Finance Workshop team for review"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks map directly to the parent task, are concrete and tool/person-specific, form a complete end-to-end workflow (extract \u2192 detect \u2192 validate \u2192 annotate \u2192 share), and have no meaningful overlap with one another."
+          },
+          {
+            "task": "clear the eleven duplicate postings from the system",
+            "subtasks": [
+              "Identify and list all eleven duplicate postings in the system",
+              "Investigate root cause of duplication tied to parallel ledger cutover",
+              "Obtain approval to reverse or delete the duplicate postings",
+              "Reverse or delete each of the eleven duplicate postings",
+              "Reconcile affected accounts to confirm balances are correct",
+              "Document the resolution and notify relevant Finance stakeholders"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to clearing duplicate postings, progresses logically from identification through root-cause, approval, removal, reconciliation, and closure, covers the full end-to-end workflow without gaps, and contains no overlapping steps."
+          },
+          {
+            "task": "send the change request for additional consulting days to Wei Lin",
+            "subtasks": [
+              "Draft the change request document outlining the additional consulting days needed",
+              "Link the change request to the parallel ledger cutover and APAC mapping completion decision",
+              "Review and finalize the change request with Daniel as owner",
+              "Send the finalized change request to Wei Lin before 2026-06-18"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are tightly scoped to the parent task, each represents a concrete and distinct action (draft, contextualize, review, send), and together they form a complete end-to-end workflow with no meaningful overlap."
+          },
+          {
+            "task": "complete the EMEA cost center mapping",
+            "subtasks": [
+              "Gather existing APAC cost center mapping as reference template",
+              "Identify all EMEA cost centers requiring mapping in SAP S/4HANA",
+              "Map each EMEA cost center to the corresponding parallel ledger structure",
+              "Validate EMEA mappings with Daniel and finance stakeholders",
+              "Load approved EMEA cost center mappings into SAP S/4HANA",
+              "Confirm EMEA mapping completion is aligned with parallel ledger cutover readiness"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks are directly relevant and concrete, covering the full end-to-end lifecycle from reference gathering to cutover confirmation, with only slight overlap between the final validation and confirmation steps."
+          },
+          {
+            "task": "diagnose the root cause of the bank statement upload test failure",
+            "subtasks": [
+              "Reproduce the bank statement upload test failure in the test environment",
+              "Review test logs and error messages to identify failure patterns",
+              "Cross-check the bank statement mapping configuration against APAC ledger mapping specs",
+              "Assess whether the parallel ledger cutover dependency is contributing to the failure",
+              "Document the identified root cause and its link to the APAC mapping alignment decision",
+              "Share findings with stakeholders and recommend a fix or remediation path"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are tightly scoped to the diagnostic goal, progress logically from reproduction through root cause identification to communication, cover the full investigative lifecycle end-to-end, and are clearly distinct with no overlapping steps."
+          },
+          {
+            "task": "fix the MT940 parser config for multi-currency statements",
+            "subtasks": [
+              "Review current MT940 parser config and identify multi-currency handling gaps",
+              "Gather sample multi-currency MT940 statement files for testing",
+              "Update parser config to correctly handle multi-currency fields and tags",
+              "Validate updated config against APAC currency mapping requirements",
+              "Run end-to-end tests with multi-currency sample statements",
+              "Confirm fix with Daniel and sign off for parallel ledger cutover readiness"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the MT940 multi-currency fix, each step is concrete and doable, together they form a complete diagnostic-to-sign-off pipeline, and no two steps meaningfully overlap."
+          },
+          {
+            "task": "chase the vendor for a firm barcode firmware patch date",
+            "subtasks": [
+              "Locate vendor contact details and open support ticket reference for the barcode firmware issue",
+              "Draft a chaser message referencing the Go-Live deadline and the need for a confirmed patch date",
+              "Send the chaser to the vendor and request a written commitment on the patch release date",
+              "Escalate to vendor account manager if no response is received within agreed SLA",
+              "Log the vendor's confirmed patch date in the SAP S/4HANA Go-Live Programme tracker",
+              "Notify the team so the warehouse retest can be scheduled once the patch date is confirmed"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to the chasing workflow, progresses logically from locating contacts through to team notification, covers the full end-to-end loop including escalation, and contains no overlap between steps."
+          },
+          {
+            "task": "draft a one-page risk note on the scanner delay for the steering committee",
+            "subtasks": [
+              "Gather context on the scanner delay root cause and firmware patch timeline",
+              "Outline the risk note structure (risk description, impact, likelihood, mitigation, owner)",
+              "Draft the one-page risk note referencing the degraded-mode test decision from Logistics Workshop 02",
+              "Incorporate SAP S/4HANA Go-Live Programme framing and steering committee language",
+              "Review and refine with Marcus before the 2026-06-23 deadline",
+              "Distribute the finalised risk note to the steering committee"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are tightly scoped to the risk note task, progress logically from research through drafting to distribution, cover the full end-to-end lifecycle without overlap, and are mostly concrete \u2014 though \"Outline the risk note structure\" edges slightly toward a process step that could be folded into drafting, keeping actionability just below a 5."
+          },
+          {
+            "task": "update the cutover runbook to reflect the degraded-mode plan",
+            "subtasks": [
+              "Pull the current cutover runbook from the project repository",
+              "Add a degraded-mode section documenting the plan to run the warehouse readiness test without barcode scanning",
+              "Flag all barcode-scanning-dependent steps in the runbook as deferred pending the firmware patch",
+              "Document the retest trigger condition (firmware patch landing) and retest steps in the runbook",
+              "Update the runbook's assumptions and risks register to reflect degraded-mode operation",
+              "Circulate the updated runbook to the Logistics Workshop 02 stakeholders for review and sign-off"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to the degraded-mode runbook update, each step is concrete and executable, the sequence covers retrieval through stakeholder sign-off end-to-end, and there is no meaningful overlap between steps."
+          }
+        ],
+        [
+          {
+            "task": "finish the APAC cost center hierarchy mapping",
+            "subtasks": [
+              "Gather current APAC cost center list from Finance team",
+              "Map each APAC cost center to the correct hierarchy node in SAP S/4HANA",
+              "Validate mapping against APAC organizational structure with Daniel",
+              "Align parallel ledger cutover plan to reflect completed APAC mapping",
+              "Submit finalized hierarchy mapping for sign-off"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks form a strong, end-to-end breakdown with concrete steps, though \"Align parallel ledger cutover plan\" feels slightly tangential and edges toward a separate workstream rather than a direct part of finishing the hierarchy mapping itself."
+          },
+          {
+            "task": "send the new cost center codes to Daniel",
+            "subtasks": [
+              "Obtain the finalized new cost center codes from the APAC mapping output",
+              "Verify the codes are accurate and aligned with the parallel ledger cutover decision",
+              "Compose an email to Daniel summarizing the new cost center codes and relevant context",
+              "Send the email to Daniel and confirm receipt"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are directly relevant, concrete, and together cover the full end-to-end flow\u2014from obtaining and verifying the codes to composing and confirming delivery\u2014with no overlapping steps."
+          },
+          {
+            "task": "loop in the banking team for next week's integration session",
+            "subtasks": [
+              "Identify the relevant banking team contacts and stakeholders",
+              "Draft a summary of the parallel ledger cutover decision and its link to APAC mapping completion",
+              "Send a meeting invite to the banking team for next week's integration session",
+              "Share the Finance Workshop 01 context and decision background with the banking team ahead of the session"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 4,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks are clearly relevant and concrete, covering contact identification, context prep, calendar action, and pre-read sharing, though the pre-read and summary steps slightly overlap and a post-invite confirmation or agenda step is missing for full end-to-end coverage."
+          },
+          {
+            "task": "review the open items report and flag duplicate postings",
+            "subtasks": [
+              "Pull the latest open items report from the SAP system",
+              "Identify and cross-reference entries for potential duplicate postings",
+              "Flag duplicate postings with clear annotations or status markers",
+              "Document findings with relevant posting details (document number, amount, date)",
+              "Share flagged report with Priya for review and sign-off"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to the parent task, each is a concrete executable step, they chain together to cover the full end-to-end workflow (pull \u2192 identify \u2192 flag \u2192 document \u2192 hand off), and there is no meaningful overlap between any of them."
+          },
+          {
+            "task": "clear the eleven duplicate postings from the system",
+            "subtasks": [
+              "Identify and list the eleven duplicate postings in the system",
+              "Investigate root cause of duplication to prevent recurrence",
+              "Obtain approval from relevant stakeholders before deletion",
+              "Reverse or delete each duplicate posting in the system",
+              "Verify ledger balances are correct after removal",
+              "Document the cleanup and link it to the parallel ledger cutover decision"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are directly relevant and form a logical end-to-end flow \u2014 identify, investigate, approve, delete, verify, and document \u2014 with no meaningful overlap, though \"Obtain approval\" and \"Investigate root cause\" could be slightly more specific about who/what is involved to fully earn top actionability marks."
+          },
+          {
+            "task": "send the change request for additional consulting days to Wei Lin",
+            "subtasks": [
+              "Draft the change request document outlining the additional consulting days needed",
+              "Reference the parallel ledger cutover decision and APAC mapping alignment as justification",
+              "Review the change request internally with Daniel for accuracy and approval",
+              "Send the finalized change request to Wei Lin via the appropriate channel"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All subtasks are directly relevant and distinct, covering the full end-to-end workflow from drafting to sending, though \"Reference the parallel ledger cutover decision...\" could be slightly more actionable by specifying how/where to include it in the document."
+          },
+          {
+            "task": "complete the EMEA cost center mapping",
+            "subtasks": [
+              "Gather existing APAC cost center mapping as reference template",
+              "Identify all EMEA cost centers requiring mapping in S/4HANA",
+              "Map each EMEA cost center to the corresponding parallel ledger structure",
+              "Validate EMEA mappings with regional finance stakeholders",
+              "Reconcile any discrepancies flagged during validation",
+              "Deliver finalized EMEA cost center mapping to the parallel ledger cutover team"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are tightly scoped to EMEA cost center mapping, each represents a distinct and concrete step forming a clean end-to-end workflow from reference gathering through final delivery, with no overlap between steps."
+          },
+          {
+            "task": "diagnose the root cause of the bank statement upload test failure",
+            "subtasks": [
+              "Reproduce the bank statement upload test failure in the test environment",
+              "Review test logs and error messages for the failed upload",
+              "Trace the failure to APAC mapping configuration or ledger cutover alignment",
+              "Identify the specific root cause linking the failure to the parallel ledger cutover dependency",
+              "Document findings and proposed fix with supporting evidence"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks are well-scoped and logically sequenced end-to-end, but steps 3 and 4 overlap slightly (tracing to a specific cause vs. identifying the root cause), and step 3 presupposes a hypothesis (APAC mapping/ledger cutover) that may reduce actionability if the actual cause differs."
+          },
+          {
+            "task": "fix the MT940 parser config for multi-currency statements",
+            "subtasks": [
+              "Review current MT940 parser config and identify multi-currency parsing failures",
+              "Gather sample multi-currency MT940 statement files for testing",
+              "Update parser config to correctly handle multi-currency field mappings",
+              "Validate updated config against APAC currency mappings for parallel ledger alignment",
+              "Run end-to-end tests with multi-currency MT940 statements",
+              "Deploy and confirm fix in the SAP S/4HANA environment"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are tightly scoped to the MT940 multi-currency fix, each represents a concrete, distinct phase (diagnose \u2192 gather data \u2192 fix \u2192 validate \u2192 test \u2192 deploy), together covering the full delivery lifecycle with no meaningful overlap."
+          },
+          {
+            "task": "chase the vendor for a firm barcode firmware patch date",
+            "subtasks": [
+              "Locate the vendor's support contact and open ticket details for the barcode firmware issue",
+              "Draft a chaser message referencing the outstanding firmware patch and the SAP Go-Live deadline",
+              "Send the chaser to the vendor and request a firm patch delivery date in writing",
+              "Log the vendor's response and confirmed patch date in the project tracker",
+              "Notify the team of the confirmed date so the barcode scanning retest can be scheduled"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to the chasing workflow, each step is concrete and executable, the sequence covers the full end-to-end flow from finding contact details to team notification, and there is no meaningful overlap between steps."
+          },
+          {
+            "task": "draft a one-page risk note on the scanner delay for the steering committee",
+            "subtasks": [
+              "Gather context on the scanner delay root cause and firmware patch timeline",
+              "Outline the risk note structure (risk description, impact, likelihood, mitigation, owner)",
+              "Draft the one-page risk note referencing the degraded-mode test decision from Logistics Workshop 02",
+              "Incorporate SAP S/4HANA Go-Live Programme context and link to warehouse readiness workstream",
+              "Review and refine the draft with Marcus for accuracy and completeness",
+              "Finalise and format the risk note for steering committee presentation by 2026-06-23"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask maps directly to the parent task, each is a concrete named step (including specific stakeholders, artefacts, and a hard deadline), together they cover the full end-to-end lifecycle from information gathering to final formatted output, and no two subtasks overlap meaningfully."
+          },
+          {
+            "task": "update the cutover runbook to reflect the degraded-mode plan",
+            "subtasks": [
+              "Locate the current cutover runbook in the SAP S/4HANA Go-Live Programme documentation",
+              "Add a degraded-mode section detailing the plan to run the warehouse readiness test without barcode scanning",
+              "Flag all barcode-scanning-dependent steps in the runbook as deferred pending the firmware patch",
+              "Document the retest trigger condition and criteria once the firmware patch is applied",
+              "Note the decision origin (Logistics Workshop 02) and owner (Aisha) in the runbook's change log",
+              "Circulate the updated runbook to relevant stakeholders for review and sign-off"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to updating the cutover runbook for degraded-mode, each step is concrete and distinct (locate, add section, flag steps, document retest trigger, log decision provenance, circulate), and together they cover the full lifecycle from finding the document to stakeholder sign-off with no meaningful overlap."
+          }
+        ],
+        [
+          {
+            "task": "finish the APAC cost center hierarchy mapping",
+            "subtasks": [
+              "Collect the current APAC cost center list from source systems",
+              "Map each APAC cost center to the corresponding S/4HANA hierarchy node",
+              "Validate mappings with APAC finance stakeholders for accuracy",
+              "Resolve any gaps or conflicts in the cost center hierarchy",
+              "Load the finalized hierarchy mapping into SAP S/4HANA",
+              "Confirm parallel ledger cutover alignment with completed APAC mapping"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to APAC cost center hierarchy mapping, follows a logical end-to-end sequence (extract \u2192 map \u2192 validate \u2192 resolve \u2192 load \u2192 confirm cutover alignment), and none of the steps overlap meaningfully."
+          },
+          {
+            "task": "send the new cost center codes to Daniel",
+            "subtasks": [
+              "Obtain the finalised new cost center codes from the APAC mapping output",
+              "Verify the codes are complete and aligned with the parallel ledger cutover decision",
+              "Compile the cost center codes into a clear, shareable format (e.g. spreadsheet or document)",
+              "Send the cost center codes to Daniel with relevant context from Finance Workshop 01"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "The subtasks are tightly relevant and collectively cover the full end-to-end flow from sourcing to delivery, with no meaningful overlap, though \"compile into a shareable format\" could be slightly more specific about tooling or naming conventions to push actionability to a full 5."
+          },
+          {
+            "task": "loop in the banking team for next week's integration session",
+            "subtasks": [
+              "Identify the relevant banking team contacts and stakeholders",
+              "Draft a summary of the parallel ledger cutover decision and its link to APAC mapping completion",
+              "Send a meeting invite to the banking team for next week's integration session",
+              "Share the Finance Workshop 01 context and decision rationale in the invite or a pre-read attachment",
+              "Confirm attendance and flag any conflicts to Aisha"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks clearly belong to the parent task and together cover the full loop-in workflow end to end, though subtasks 2 and 4 partially overlap in that both involve summarizing context/rationale that would likely appear in the same artifact."
+          },
+          {
+            "task": "review the open items report and flag duplicate postings",
+            "subtasks": [
+              "Pull the latest open items report from the SAP system",
+              "Identify duplicate postings across parallel ledger entries",
+              "Cross-reference duplicates against APAC mapping completion status",
+              "Flag and annotate confirmed duplicate postings in the report",
+              "Share flagged report with Finance Workshop stakeholders for review"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks are well-aligned with the parent task and cover the end-to-end workflow clearly, though the APAC mapping cross-reference step feels somewhat context-specific and mildly tangential, and \"identify\" vs \"flag and annotate\" subtasks have a slight overlap in purpose."
+          },
+          {
+            "task": "clear the eleven duplicate postings from the system",
+            "subtasks": [
+              "Identify and list all eleven duplicate postings in the system",
+              "Investigate root cause of duplication linked to parallel ledger cutover",
+              "Back up or document each duplicate posting before removal",
+              "Reverse or delete the eleven duplicate postings in the system",
+              "Reconcile affected ledger entries to confirm clean balances",
+              "Verify no further duplicates remain and validate data integrity"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks are all clearly relevant and cover the full lifecycle end-to-end (identify \u2192 investigate \u2192 back up \u2192 remove \u2192 reconcile \u2192 verify), but \"investigate root cause\" leans slightly advisory rather than strictly required to complete the clearing task, and the final verification step partially overlaps with the reconciliation step."
+          },
+          {
+            "task": "send the change request for additional consulting days to Wei Lin",
+            "subtasks": [
+              "Draft the change request document outlining the additional consulting days needed",
+              "Reference the parallel ledger cutover alignment decision as the basis for the change",
+              "Specify scope, effort estimate, and timeline impact in the change request",
+              "Route the change request through Daniel for review and sign-off",
+              "Send the finalized change request to Wei Lin before 2026-06-18"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks are highly relevant and concrete, covering the full workflow from drafting to delivery, though steps 1 and 3 slightly overlap as both relate to composing the change request document's content."
+          },
+          {
+            "task": "complete the EMEA cost center mapping",
+            "subtasks": [
+              "Export current EMEA cost center list from legacy system",
+              "Obtain completed APAC cost center mapping as reference template",
+              "Map each EMEA cost center to the corresponding S/4HANA chart of accounts",
+              "Validate mappings with EMEA finance stakeholders for accuracy",
+              "Resolve any gaps or conflicts flagged during validation",
+              "Submit completed EMEA mapping to Daniel for sign-off"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are directly relevant, concretely actionable, form a complete end-to-end workflow (extract \u2192 reference \u2192 map \u2192 validate \u2192 resolve \u2192 sign-off), and are fully distinct with no overlap."
+          },
+          {
+            "task": "diagnose the root cause of the bank statement upload test failure",
+            "subtasks": [
+              "Retrieve the failing bank statement upload test logs and error messages",
+              "Review the APAC mapping configuration for any misalignments with the parallel ledger cutover setup",
+              "Identify whether the failure is linked to the ledger alignment dependency introduced by the cutover decision",
+              "Reproduce the test failure in a controlled environment to isolate the root cause",
+              "Document the root cause findings and link them to the APAC mapping or ledger configuration gap",
+              "Share diagnosis report with Daniel and relevant Finance Workshop 01 stakeholders"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 4,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 3
+            },
+            "comment": "The subtasks cover the diagnostic workflow well end-to-end, but there is noticeable overlap between steps 3 (identify ledger alignment link) and 2 (review APAC mapping/cutover config), and step 5 (document findings) partially restates the conclusion of step 3, making a few steps feel redundant rather than truly distinct."
+          },
+          {
+            "task": "fix the MT940 parser config for multi-currency statements",
+            "subtasks": [
+              "Review current MT940 parser config and identify multi-currency parsing failures",
+              "Gather sample multi-currency MT940 statement files for testing",
+              "Update parser config to correctly handle multi-currency field mappings",
+              "Validate updated config against APAC currency mappings from parallel ledger cutover alignment",
+              "Run end-to-end tests with multi-currency MT940 statements",
+              "Deploy and confirm fix in the SAP S/4HANA environment"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 4,
+              "actionability": 3,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks cover the fix end-to-end well and are mostly distinct, but step 4 introduces a vague, jargon-heavy dependency (\"APAC currency mappings from parallel ledger cutover alignment\") that is not actionable without further clarification, slightly dragging down both relevance and actionability scores."
+          },
+          {
+            "task": "chase the vendor for a firm barcode firmware patch date",
+            "subtasks": [
+              "Locate the vendor's support contact and open ticket reference for the barcode firmware issue",
+              "Draft a chaser message referencing the outstanding firmware patch and its impact on the SAP S/4HANA go-live",
+              "Send the chaser to the vendor and request a firm, committed patch delivery date",
+              "Log the vendor's response and confirmed patch date in the project tracker",
+              "Notify the project team of the confirmed date so the warehouse retest can be scheduled"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is a concrete, distinct action that maps directly to the parent task, and together they cover the full lifecycle from contacting the vendor through to scheduling downstream retest work \u2014 no overlaps or gaps."
+          },
+          {
+            "task": "draft a one-page risk note on the scanner delay for the steering committee",
+            "subtasks": [
+              "Gather background details on the scanner delay and firmware patch status",
+              "Outline the risk note structure (risk description, impact, likelihood, mitigation, owner)",
+              "Draft the one-page risk note referencing the degraded-mode decision from Logistics Workshop 02",
+              "Include recommended actions and next steps tied to the firmware patch retest",
+              "Review and align content with Marcus before submission",
+              "Finalise and submit the risk note to the steering committee ahead of 2026-06-23"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to the risk note deliverable, moves through a logical end-to-end sequence (gather \u2192 outline \u2192 draft \u2192 enrich \u2192 review \u2192 submit) with no overlapping steps, and each step is concrete and independently executable."
+          },
+          {
+            "task": "update the cutover runbook to reflect the degraded-mode plan",
+            "subtasks": [
+              "Pull the current cutover runbook and locate warehouse readiness test section",
+              "Document the degraded-mode plan, noting that barcode scanning will be disabled during initial testing",
+              "Add a conditional retest step triggered by the firmware patch landing",
+              "Update any dependencies, timelines, or go/no-go criteria affected by the degraded-mode approach",
+              "Have Aisha review and sign off on the revised runbook"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to the parent task, each is a concrete and distinct step (retrieve, document, add conditional logic, update dependencies, get sign-off), and together they cover the full lifecycle of revising and approving the runbook with no meaningful overlap."
+          }
+        ],
+        [
+          {
+            "task": "finish the APAC cost center hierarchy mapping",
+            "subtasks": [
+              "Gather current APAC cost center list from Finance team",
+              "Map each APAC cost center to the correct hierarchy node in SAP S/4HANA",
+              "Validate mapping with APAC finance controllers for accuracy",
+              "Resolve any gaps or conflicts identified during validation",
+              "Load finalized cost center hierarchy into the SAP system",
+              "Confirm mapping completion with Daniel and align parallel ledger cutover schedule"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are tightly scoped to the APAC cost center mapping effort, each represents a concrete and distinct step (gather \u2192 map \u2192 validate \u2192 resolve \u2192 load \u2192 confirm), and together they cover the full end-to-end lifecycle with no meaningful overlap."
+          },
+          {
+            "task": "send the new cost center codes to Daniel",
+            "subtasks": [
+              "Obtain the finalised new cost center codes from the APAC mapping output",
+              "Verify the codes are accurate and approved for distribution",
+              "Compile the codes into a clearly formatted document or file",
+              "Send the cost center codes to Daniel with context referencing the parallel ledger cutover decision"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are directly relevant and logically sequenced end-to-end, with no overlap; actionability is slightly penalized because \"verify the codes are accurate and approved\" could be more specific about who approves and how."
+          },
+          {
+            "task": "loop in the banking team for next week's integration session",
+            "subtasks": [
+              "Identify the relevant banking team contacts for the integration session",
+              "Draft a meeting invite or message summarising the parallel ledger cutover decision and APAC mapping alignment",
+              "Send the invite to the banking team for next week's integration session",
+              "Confirm attendance and flag any conflicts to Aisha"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are directly relevant, concrete, and sequentially cover the full workflow from identifying contacts to confirming attendance, with no meaningful overlap between steps."
+          },
+          {
+            "task": "review the open items report and flag duplicate postings",
+            "subtasks": [
+              "Pull the latest open items report from the SAP system",
+              "Identify and cross-reference entries with matching posting criteria (date, amount, account, document type)",
+              "Flag confirmed duplicate postings with a clear annotation or status marker",
+              "Document findings in a summary noting each duplicate pair and its source",
+              "Share flagged report with Priya for review and sign-off"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask maps directly to the parent task, each step is concrete and executable, the sequence covers the full workflow from data pull to stakeholder sign-off, and there is no meaningful overlap between any of the steps."
+          },
+          {
+            "task": "clear the eleven duplicate postings from the system",
+            "subtasks": [
+              "Identify and list all eleven duplicate postings in the system",
+              "Investigate root cause of duplication tied to parallel ledger cutover",
+              "Back up or document each duplicate posting before removal",
+              "Reverse or void each of the eleven duplicate postings",
+              "Reconcile affected ledger entries to confirm balances are correct",
+              "Confirm with Finance team that all duplicates are fully cleared"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks are highly relevant and cover the full end-to-end workflow from identification to confirmation, but the root-cause investigation step feels slightly tangential to the immediate clearing task, and the backup/document step partially overlaps with the identification step."
+          },
+          {
+            "task": "send the change request for additional consulting days to Wei Lin",
+            "subtasks": [
+              "Draft the change request document citing the parallel ledger cutover decision",
+              "Include justification referencing the APAC mapping completion alignment",
+              "Review and approve the change request draft internally with Daniel",
+              "Send the finalized change request for additional consulting days to Wei Lin"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks are clearly relevant and concrete, covering the full workflow from drafting to sending, though subtasks 1 and 2 slightly overlap as both relate to composing the change request document and could reasonably be merged."
+          },
+          {
+            "task": "complete the EMEA cost center mapping",
+            "subtasks": [
+              "Export current EMEA cost center list from legacy system",
+              "Obtain completed APAC cost center mapping as reference template",
+              "Map each EMEA cost center to the corresponding S/4HANA general ledger account",
+              "Validate mappings with EMEA finance stakeholders for accuracy",
+              "Resolve any gaps or conflicts flagged during validation",
+              "Submit finalised EMEA mapping to Daniel for sign-off"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are directly relevant, concretely actionable, cover the full end-to-end workflow from data export through stakeholder sign-off, and are clearly distinct from one another with no meaningful overlap."
+          },
+          {
+            "task": "diagnose the root cause of the bank statement upload test failure",
+            "subtasks": [
+              "Retrieve the failed bank statement upload test logs and error messages",
+              "Reproduce the test failure in the dev or test environment",
+              "Cross-reference the failure against the APAC mapping configuration to identify misalignments",
+              "Isolate the root cause and document findings with evidence",
+              "Share root cause report with the Finance Workshop team and relevant stakeholders"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks are well-scoped and logically sequenced from evidence gathering to reporting, with strong end-to-end coverage, though \"reproduce the failure\" and \"retrieve logs\" slightly overlap in investigative intent, and the APAC mapping reference adds specificity that assumes a known context not guaranteed to be universal."
+          },
+          {
+            "task": "fix the MT940 parser config for multi-currency statements",
+            "subtasks": [
+              "Review current MT940 parser configuration and identify multi-currency parsing failures",
+              "Gather sample multi-currency MT940 statement files for testing",
+              "Update parser config to correctly handle multi-currency field mappings",
+              "Validate updated config against APAC currency mappings from parallel ledger cutover alignment",
+              "Run end-to-end tests with multi-currency MT940 statements in the SAP S/4HANA environment",
+              "Hand off verified config to Daniel and document changes made"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 4,
+              "actionability": 3,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks cover the task end-to-end well, but step 4 introduces a vague, jargon-heavy dependency (\"APAC currency mappings from parallel ledger cutover alignment\") that reduces actionability and relevance, and the final handoff step conflates two distinct actions (documentation and handoff) that could stand alone."
+          },
+          {
+            "task": "chase the vendor for a firm barcode firmware patch date",
+            "subtasks": [
+              "Locate the vendor's support contact and open ticket reference for the barcode firmware issue",
+              "Draft a chaser message referencing the outstanding firmware patch and the Go-Live deadline",
+              "Send the chaser to the vendor via email and phone, escalating to account manager if needed",
+              "Log the vendor's response and any committed patch date in the project tracker",
+              "Share the confirmed patch date with the Logistics Workshop team and update the retest schedule"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to chasing a firmware patch date, follows a logical end-to-end sequence (locate \u2192 draft \u2192 send/escalate \u2192 log \u2192 communicate), and each step is concrete and distinct with no meaningful overlap."
+          },
+          {
+            "task": "draft a one-page risk note on the scanner delay for the steering committee",
+            "subtasks": [
+              "Gather background details on the scanner delay and firmware patch status",
+              "Outline the risk note structure (risk description, impact, likelihood, mitigations, owner)",
+              "Draft the one-page risk note referencing the degraded-mode warehouse readiness test decision",
+              "Include context from Logistics Workshop 02 and link to the SAP S/4HANA Go-Live Programme",
+              "Review and refine the note for steering committee audience and conciseness",
+              "Send the final risk note to Marcus for approval before the 2026-06-23 deadline"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are tightly scoped to the risk note deliverable, each represents a distinct and concrete step (gather, outline, draft, enrich with context, refine, approve/send), and together they cover the full end-to-end workflow from research through final sign-off with no meaningful overlap."
+          },
+          {
+            "task": "update the cutover runbook to reflect the degraded-mode plan",
+            "subtasks": [
+              "Locate the current cutover runbook in the SAP S/4HANA Go-Live Programme repository",
+              "Add a degraded-mode section documenting the plan to run the warehouse readiness test without barcode scanning",
+              "Flag all barcode-scanning-dependent steps in the runbook as suspended pending firmware patch",
+              "Define and document the retest trigger criteria tied to the firmware patch landing",
+              "Note the decision origin (Logistics Workshop 02) and rationale in the runbook's change log",
+              "Circulate the updated runbook to stakeholders for review and sign-off"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to the runbook update, progresses logically from location \u2192 content edits \u2192 flagging \u2192 criteria \u2192 audit trail \u2192 sign-off, with no overlap and concrete, doable steps throughout."
+          }
+        ]
+      ]
     }
-  ]
+  },
+  "comparison": {
+    "metric": "Gemini - Claude, mean per-task rubric score",
+    "difference": -0.0375,
+    "p_value": 0.652,
+    "n_tasks": 12
+  }
 }

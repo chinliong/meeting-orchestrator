@@ -2,44 +2,52 @@
 
 The AI subtask feature breaks a single action item into an ordered checklist. Unlike transcript parsing, this is **open-ended generation with no ground truth**, so it is assessed qualitatively with an LLM-as-judge rubric rather than precision/recall.
 
-- Generator: `gemini-3.6-flash` (gemini)
-- Judge model: `claude-sonnet-4-6`
-- Sample size: 12 tasks (drawn from the annotated action-item set)
-- Average subtasks per task: 4.7
+- Shipped generator: `gemini-3.6-flash` (gemini)
+- Judge model: `claude-sonnet-4-6` (held fixed across both arms)
+- Sample size: 12 tasks, drawn from the annotated action-item set
+- Runs per arm: 5
+- Average subtasks per task: 4.74
 
-**Why this model.** Both families were scored on the same tasks with the same judge. Claude Sonnet averaged 4.81 and Gemini Flash 4.88; a paired permutation test over the 12 tasks gives p = 0.53, so the two are indistinguishable on quality. They differ in shape rather than standard - Claude produced 5.6 subtasks per task and scored higher on coverage, Gemini produced 4.7 and scored higher on non-redundancy. Gemini is used because it costs roughly a tenth as much per token and keeps the system on a single provider, not because it generates better breakdowns.
+**Headline.** Over 5 runs the shipped generator scores **4.786** out of 5 overall (range 4.69-4.88, sd 0.081).
 
-Every figure here is a single run, and the run-to-run spread is wider than the gap between the models: repeating the Gemini arm scored 4.62 against the 4.88 quoted above. The table below is therefore one sample of a noisy measure, which is the second reason not to read a quality difference into the choice.
+**Why this model.** Both families were scored on the same 12 tasks with the same judge, 5 runs each. Gemini Flash averaged 4.786 and Claude Sonnet 4.822; an exact paired permutation test over the per-task means gives p = 0.652, so the two are indistinguishable on quality. The run-to-run spread within each arm (Gemini Flash 4.69-4.88, Claude Sonnet 4.67-4.94) is wider than the 0.036 between them, and Claude Sonnet leads only nominally. They differ in shape rather than standard: Claude Sonnet produced 5.36 subtasks per task against Gemini Flash's 4.74, scoring higher on coverage where Gemini Flash scores higher on non-redundancy. Gemini is used because it costs roughly a tenth as much per token and keeps the system on a single provider, not because it generates better breakdowns.
 
-The judge was Claude in both arms. That means Claude assessed its own output in one arm and a competitor's in the other, an asymmetry that favours Claude - so the tie is not an artefact of a partial judge.
+The judge was Claude in both arms. That means Claude assessed its own output in one arm and a competitor's in the other, an asymmetry that favours Claude - and Claude still does not separate from Gemini, so the tie is not an artefact of a partial judge.
 
-## Mean scores (1–5)
+## Mean scores (1–5), averaged over all runs
 
-| Dimension | Mean |
-| --- | --- |
-| relevance | 4.83 |
-| actionability | 4.33 |
-| coverage | 4.75 |
-| non redundancy | 4.58 |
-| **overall** | **4.62** |
+| Dimension | Gemini Flash | Claude Sonnet |
+| --- | --- | --- |
+| relevance | 4.88 | 4.95 |
+| actionability | 4.72 | 4.67 |
+| coverage | 4.78 | 4.98 |
+| non redundancy | 4.75 | 4.68 |
+| **overall** | **4.786** | 4.822 |
 
-## Per-task detail
+## Overall score per run
+
+| Arm | Runs | Mean | SD | Range |
+| --- | --- | --- | --- | --- |
+| Gemini Flash | 4.88, 4.86, 4.75, 4.75, 4.69 | 4.786 | 0.081 | 4.69-4.88 |
+| Claude Sonnet | 4.88, 4.94, 4.83, 4.67, 4.79 | 4.822 | 0.102 | 4.67-4.94 |
+
+## Per-task detail (Gemini Flash, first run)
 
 | Task | # | Rel | Act | Cov | NR |
 | --- | --- | --- | --- | --- | --- |
 | finish the APAC cost center hierarchy mapping | 5 | 5 | 5 | 5 | 5 |
-| send the new cost center codes to Daniel | 4 | 5 | 4 | 5 | 4 |
-| loop in the banking team for next week's integrati… | 4 | 5 | 5 | 5 | 5 |
-| review the open items report and flag duplicate po… | 5 | 4 | 4 | 4 | 5 |
-| clear the eleven duplicate postings from the syste… | 4 | 4 | 3 | 4 | 4 |
-| send the change request for additional consulting … | 5 | 5 | 5 | 5 | 5 |
-| complete the EMEA cost center mapping | 5 | 5 | 4 | 5 | 4 |
-| diagnose the root cause of the bank statement uplo… | 5 | 5 | 4 | 5 | 4 |
-| fix the MT940 parser config for multi-currency sta… | 5 | 5 | 4 | 5 | 4 |
+| send the new cost center codes to Daniel | 5 | 5 | 5 | 5 | 5 |
+| loop in the banking team for next week's integrati… | 4 | 5 | 5 | 5 | 4 |
+| review the open items report and flag duplicate po… | 5 | 5 | 4 | 5 | 4 |
+| clear the eleven duplicate postings from the syste… | 5 | 5 | 5 | 5 | 5 |
+| send the change request for additional consulting … | 4 | 5 | 5 | 5 | 5 |
+| complete the EMEA cost center mapping | 5 | 4 | 4 | 5 | 4 |
+| diagnose the root cause of the bank statement uplo… | 4 | 5 | 5 | 5 | 5 |
+| fix the MT940 parser config for multi-currency sta… | 5 | 5 | 5 | 5 | 5 |
 | chase the vendor for a firm barcode firmware patch… | 5 | 5 | 5 | 5 | 5 |
 | draft a one-page risk note on the scanner delay fo… | 5 | 5 | 5 | 5 | 5 |
-| update the cutover runbook to reflect the degraded… | 4 | 5 | 4 | 4 | 5 |
+| update the cutover runbook to reflect the degraded… | 5 | 5 | 5 | 5 | 5 |
 
-> **Caveat:** scores come from a single LLM judge applying a rubric, so they indicate quality trends rather than an absolute metric. The judge is Claude and the shipped generator is Gemini, so the judge is independent of it.
+> **Caveat:** scores come from a single LLM judge applying a rubric, so they indicate quality trends rather than an absolute metric. The judge is Claude and the shipped generator is Gemini, so the judge is independent of it. The sample is the first 12 annotated items in file order, which covers the finance and logistics workshops but not the security or data-migration ones.
 
-_Generated by `python -m eval.subtask_eval --write-report` on 2026-09-08. Re-run to refresh._
+_Generated by `python -m eval.subtask_eval --write-report` on 2026-09-13. Re-run to refresh._
