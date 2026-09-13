@@ -1381,7 +1381,8 @@ enum, because a translation bug would appear as a model difference that is reall
   pipeline was separately tested end to end on a real recording from the AMI meeting corpus, but
   that recording is not part of the scored test set.
 - **One annotator, no second opinion.** The answer key was labelled by the project author, so there
-  is no inter-annotator agreement figure and no independent check on what counts as an action item.
+  is no second labeller to measure agreement against, and no independent check on what counts as
+  an action item.
   On a four-transcript set a single ambiguous judgement moves the reported rates measurably.
 - **Small test set** ({n_transcripts} transcripts, {n_items} annotated items) and few runs per condition. Individual
   runs of the same configuration varied by up to ~{NOISE_FLOOR_F1} F1 - larger than most gaps reported here.

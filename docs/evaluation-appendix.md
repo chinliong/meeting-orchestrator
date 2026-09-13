@@ -204,7 +204,8 @@ discriminate at all.
   pipeline was separately tested end to end on a real recording from the AMI meeting corpus, but
   that recording is not part of the scored test set.
 - **One annotator, no second opinion.** The answer key was labelled by the project author, so there
-  is no inter-annotator agreement figure and no independent check on what counts as an action item.
+  is no second labeller to measure agreement against, and no independent check on what counts as
+  an action item.
   On a four-transcript set a single ambiguous judgement moves the reported rates measurably.
 - **Small test set** (4 transcripts, 33 annotated items) and few runs per condition. Individual
   runs of the same configuration varied by up to ~0.15 F1 - larger than most gaps reported here.
