@@ -32,22 +32,30 @@ flowchart LR
         AU[auth router]
         T[transcripts router]
         TK[tasks router]
+        SB[subtasks / attachments routers]
         P[projects / stakeholders routers]
+        IN[internal router: daily reminder trigger]
         AC[access control: owner JWT or workspace token]
         W[transcription module]
         L[LLM parser module]
+        S[subtask generator]
+        N[reminder module]
+        M[email module]
     end
 
     DB[(SQLite / PostgreSQL)]
     C[Gemini API]
+    X[External scheduler]
 
     A -->|POST /auth/signup, /auth/login| AU
     U -->|POST /transcripts and /transcripts/audio| T
     K -->|GET /tasks, PATCH /tasks/id| TK
+    K -->|subtasks, attachments| SB
     K -->|GET /projects, GET /projects/by-token| P
     AU --> DB
     T --> AC
     TK --> AC
+    SB --> AC
     P --> AC
     AC --> DB
     T -->|audio bytes| W
@@ -55,7 +63,14 @@ flowchart LR
     T -->|transcript text| L
     L -->|tool-use request| C
     C -->|structured JSON| L
+    SB -->|generate request| S
+    S -->|tool-use request| C
     T -->|persist meeting + tasks| DB
+    X -->|shared secret, once a day| IN
+    IN --> N
+    N -->|due tasks| DB
+    N -->|digest| M
+    AU -->|reset code| M
 ```
 
 ## Components
@@ -66,22 +81,32 @@ flowchart LR
   transcript-and-audio upload, and a share dialog exposing view/edit links. A small session layer
   persists the account token and guest boards in `localStorage`. Talks to the backend via
   `src/lib/api.ts`, which attaches the `Authorization` bearer and `X-Workspace-Token` headers.
-- **Backend (FastAPI):**
+- **Backend (FastAPI):** every route below is mounted under `/api/v1` (so `POST /auth/signup` is
+  served at `/api/v1/auth/signup`). The complete surface, with request and response shapes, is in
+  [api-spec.md](api-spec.md).
   - `POST /auth/signup` (with optional guest-board claim), `POST /auth/login`, `GET /auth/me`,
     `POST /auth/password` (change password), `DELETE /auth/me` (delete account; owned boards are
     orphaned to guest boards), and `POST /auth/forgot-password` + `POST /auth/reset-password`
     (emailed 6-digit reset code).
-  - `GET|POST /projects`, `GET /projects/by-token/{token}` (open a share link),
-    `PATCH|DELETE /projects/{id}`.
+  - `GET|POST /projects`, `GET /projects/{id}`, `GET /projects/by-token/{token}` (open a share
+    link), `PATCH|DELETE /projects/{id}`, `POST /projects/{id}/rotate-token` (owner-only; replaces
+    the view or edit token, invalidating every copy of the old one while the other keeps working).
   - `POST /transcripts`, `POST /transcripts/audio`, `GET /transcripts/{id}`,
     `PATCH /transcripts/{id}` (rename a meeting; reflected on its tasks).
   - `GET|POST /tasks`, `PATCH /tasks/{id}`, `DELETE /tasks/{id}` (returns a snapshot for undo),
     `POST /tasks/restore` (recreate a deleted task with its original id). `GET /tasks` filters by
     `project_id`, `owner`, `status`, `due_before`, `due_after`; with no `project_id` an
     authenticated user gets tasks across all boards they own.
+  - `GET|POST /tasks/{id}/subtasks`, `POST /tasks/{id}/subtasks/generate` (LLM breakdown from the
+    task's own details or from typed instructions), `PATCH|DELETE /subtasks/{id}`.
+  - `GET|POST /tasks/{id}/attachments`, `GET|DELETE /attachments/{id}`. Bytes are streamed back
+    behind the same credential headers as every other call, so an attachment is not reachable
+    through a bare unauthenticated link.
   - `GET|POST /stakeholders`.
   - `PATCH /auth/notifications` (set deadline-reminder preferences), `POST /auth/notifications/test`
     (send a one-off preview digest).
+  - `GET /health` — liveness, plus the extraction model the deployment will actually use and
+    whether transcription is configured. Names the model, never a key.
   - **Auth & access control** (`app/auth.py`) — bcrypt password hashing, JWT issue/verify, and
     `project_access_level()` which resolves a request to `edit` / `view` / no-access from the
     bearer user (owner) or the `X-Workspace-Token` (edit/view token).
@@ -104,9 +129,12 @@ flowchart LR
     different problem from extraction and was measured on its own rubric.
   - **Gemini client** (`app/llm/gemini.py`) — the forced function call plus the JSON-Schema to
     OpenAPI translation both LLM modules share, so the tool schema is defined once.
-  - **Transcription module** (`app/llm/transcription.py`) — optional, lazily imported. Uses
-    Deepgram Nova-3, a hosted service, so nothing loads into memory and the core app runs without
-    the heavy local dependency. Model choice is measured in `docs/asr-evaluation.md`.
+  - **Transcription module** (`app/llm/transcription.py`) — optional, lazily imported, resolved by
+    configuration in three tiers: Deepgram Nova-3 first, then any OpenAI-compatible endpoint via
+    `TRANSCRIPTION_BASE_URL` (Groq, OpenAI), then an optional local Whisper install. The first two
+    are hosted, so nothing loads into memory and the core app runs without the heavy local
+    dependency; with none configured the audio endpoint returns a clear unavailable status rather
+    than failing at import. Model choice is measured in [asr-evaluation.md](asr-evaluation.md).
 - **Database:** PostgreSQL (prod) / SQLite (dev), via SQLAlchemy. Tables: `users`, `projects`,
   `meetings`, `stakeholders`, `tasks`, `subtasks`, `attachments`, `password_resets`. Attachment
   bytes are stored in the `attachments` row (the deploy target has an ephemeral filesystem and no
@@ -120,8 +148,8 @@ flowchart LR
   rather than dropping it silently, so a schema change cannot weaken the contract unnoticed.
 - **Why Gemini:** it leads Claude Sonnet on recall, precision and F1 across eight runs per model,
   each separated by an exact permutation test (`docs/evaluation-report.md`). Subtask generation
-  moved on a different basis — quality there is indistinguishable (p = 0.53), so the reason is
-  cost and keeping the system on one provider.
+  moved on a different basis — quality there is indistinguishable over five runs
+  per configuration (p = 0.652), so the reason is cost and keeping the system on one provider.
 
 ## Access model
 
@@ -234,7 +262,10 @@ erDiagram
 ```
 
 A task exposes its source meeting's title (`meeting_title`) for display; manually-added tasks have
-no `meeting_id` and carry full confidence.
+no `meeting_id` and carry full confidence. `stakeholders` deliberately has no foreign key to
+`tasks`: a task's `owner` is a plain name string, matched against `stakeholders.name` only for the
+owner filter, because the people who own action items in a meeting are usually not users of the
+tool and requiring each of them to hold an account would make the extraction unusable.
 
 ## Reliability notes
 
@@ -244,5 +275,5 @@ no `meeting_id` and carry full confidence.
   with an actionable message instead of failing at import time.
 - The schema is created on startup via `create_all`, which adds missing tables but never alters
   existing ones. New tables (e.g. `subtasks`, `attachments`) appear automatically; a new column on
-  an existing table needs an additive migration (`app/migrate_add_notifications.py`,
-  `app/migrate_reminder_optin.py`). `python -m app.reset_db` rebuilds and re-seeds from scratch.
+  an existing table needs an additive migration (`app/migrate_add_meeting_date.py`,
+  `app/migrate_add_notifications.py`, `app/migrate_reminder_optin.py`). `python -m app.reset_db` rebuilds and re-seeds from scratch.
