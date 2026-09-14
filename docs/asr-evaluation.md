@@ -125,7 +125,7 @@ so this is a property of the local decoding defaults, not of the model.
   are not penalised. WER is Levenshtein over the normalised words, split into substitutions,
   deletions and insertions.
 - Hosted runs go through the application's own `transcribe_audio()`, so every model receives
-  byte-identical audio and the figures describe the product rather than a separate harness.
+  byte-identical audio and the figures describe the product rather than a separate framework.
 - **Two meetings, both AMI**, both close-talking headset mixes - the cleanest audio the corpus
   publishes. Laptop-microphone audio in a real room will be worse.
 - **Timing is not controlled.** Hosted rows are medians of 3-5 calls including network transfer;

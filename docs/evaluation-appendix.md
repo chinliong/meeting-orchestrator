@@ -36,7 +36,7 @@ one *fails* still matters more than where it ranks in the table:
 | Gemini Flash | 0.966 | 107/120 | 100% | paid, ~$0.30/$2.50 per M tokens; selected for extraction |
 
 - **Claude Haiku** resolves relative dates a day late on most deadlines, so every reminder would
-  fire late. The cheapest model is the one whose failure most directly breaks the core feature.
+  be sent late. The cheapest model is the one whose failure most directly breaks the core feature.
 - **Gemini Flash** leads on recall, deadline accuracy and F1, and records `source_decision` on
   every item. Its previous disqualifier was a prompt defect, not a model weakness: the schema
   called the field optional and the system prompt never asked for it. Correcting that raised all
@@ -75,7 +75,7 @@ current cache.
 
 Gemini needs the tool schema translated into its OpenAPI subset (`eval/providers.py`), while
 Anthropic accepts JSON Schema unchanged. The translation is asserted to preserve fields, required list and
-enum, because a translation bug would appear as a model difference that is really a harness bug.
+enum, because a translation bug would appear as a model difference that is really a framework bug.
 
 ## Study 1 - does the guidance layer help?
 
@@ -192,7 +192,7 @@ The practical reading is that the score is a review flag, not a probability. It 
 present as a likelihood, and the interface accordingly uses it to colour items for attention
 rather than to assert one. The caveat is sample size: 17
 items fall below 0.90, so the low-end result is suggestive rather than established, and
-85 of 276 items fall in the top bucket where the score does not
+85 of 276 items fall in the top band where the score does not
 discriminate at all.
 
 ## Limitations

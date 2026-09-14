@@ -34,7 +34,7 @@ model changes.
 
 **Claude Haiku has a systematic date bug.** 52% of the deadlines it produced fall exactly +1 day
 from the correct one - it resolves "by Friday" to the following day, consistently. Every
-reminder scheduled from it would fire a day late.
+reminder scheduled from it would be sent a day late.
 
 Gemini Flash was previously rejected for leaving the source-decision field empty on most items,
 but that proved to be a prompt defect rather than a model weakness - the schema called the field

@@ -1,9 +1,9 @@
-"""Evaluation harness for the LLM transcript-parsing pipeline (Objective 5).
+"""Evaluation framework for the LLM transcript-parsing pipeline (Objective 5).
 
 What this measures
 ------------------
 The pipeline is given a meeting transcript and must return structured action items. This
-harness scores that output against a hand-annotated answer key: action-item precision /
+framework scores that output against a hand-annotated answer key: action-item precision /
 recall / F1, plus owner, status and deadline accuracy on the items that matched.
 
 Two questions are answered, by two different sets of conditions (see CONDITIONS):
@@ -29,7 +29,7 @@ Four design decisions worth knowing
    to the scoring step also re-samples the model, and on a 33-item test set that noise is larger
    than most effects worth measuring. Caching also makes re-scoring free and repeatable.
 
-2. **The baseline had to include the tool schema.** An earlier version of this harness swapped
+2. **The baseline had to include the tool schema.** An earlier version of this framework swapped
    only the system prompt and left EXTRACTION_TOOL in place for both variants. That was not a
    control: the tool's field descriptions already state the owner / deadline / status rules, so
    the "baseline" was still receiving all of them. The two variants scored within noise of each
@@ -877,7 +877,7 @@ one *fails* still matters more than where it ranks in the table:
 {chr(10).join(lines)}
 
 - **Claude Haiku** resolves relative dates a day late on most deadlines, so every reminder would
-  fire late. The cheapest model is the one whose failure most directly breaks the core feature.
+  be sent late. The cheapest model is the one whose failure most directly breaks the core feature.
 - **Gemini Flash** leads on recall, deadline accuracy and F1, and records `source_decision` on
   every item. Its previous disqualifier was a prompt defect, not a model weakness: the schema
   called the field optional and the system prompt never asked for it. Correcting that raised all
@@ -1170,7 +1170,7 @@ def render_report(cache: dict, overlap: dict, n_transcripts: int, n_items: int,
     bias = _wrap(
         f"**{CONDITIONS[worst].short} has a systematic date bug.** {o['dominant_share']:.0%} of the deadlines it "
         f"produced fall exactly {o['dominant_offset']:+d} day from the correct one - it resolves \"by Friday\" to the "
-        f"following day, consistently. Every reminder scheduled from it would fire a day late."
+        f"following day, consistently. Every reminder scheduled from it would be sent a day late."
     ) if worst else "No model showed a systematic date bias."
 
     # Step 2 - what the guidance bought on the chosen model. Mirrors the slide exactly.
@@ -1299,7 +1299,7 @@ The practical reading is that the score is a review flag, not a probability. It 
 present as a likelihood, and the interface accordingly uses it to colour items for attention
 rather than to assert one. The caveat is sample size: {sum(b['n'] for b in cal['buckets'][:2])}
 items fall below 0.90, so the low-end result is suggestive rather than established, and
-{top['n']} of {m['n'] + sp['n']} items fall in the top bucket where the score does not
+{top['n']} of {m['n'] + sp['n']} items fall in the top band where the score does not
 discriminate at all.
 """
 
@@ -1369,7 +1369,7 @@ _Speech-to-text: [asr-evaluation.md](asr-evaluation.md). Subtask generation: [su
 
 Gemini needs the tool schema translated into its OpenAPI subset (`eval/providers.py`), while
 Anthropic accepts JSON Schema unchanged. The translation is asserted to preserve fields, required list and
-enum, because a translation bug would appear as a model difference that is really a harness bug.
+enum, because a translation bug would appear as a model difference that is really a framework bug.
 {_study_one(overlap, comp, counts)}{_study_two(overlap, comp, counts, models)}{_deadline_section(offsets)}{_confidence_section(cal or {})}
 ## Limitations
 

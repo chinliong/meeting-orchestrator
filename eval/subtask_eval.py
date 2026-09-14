@@ -2,7 +2,7 @@
 
 Unlike transcript parsing (see eval/run_eval.py), subtask generation is *open-ended*: there is
 no single correct way to break a task down, so there is no ground truth to score precision/
-recall against. Instead this harness measures quality with an LLM-as-judge rubric — each
+recall against. Instead this framework measures quality with an LLM-as-judge rubric — each
 generated breakdown is scored 1-5 on four dimensions:
 
   - relevance       — do the subtasks actually belong to this task?
