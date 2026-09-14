@@ -20,57 +20,54 @@
 
 ## Component diagram
 
+The request path. Every router resolves access through one dependency before touching the
+database; the routers themselves are listed in full under **Components** below.
+
 ```mermaid
 flowchart LR
     subgraph Client[Next.js / React frontend]
-        A[Auth gate / share-link open]
+        direction TB
+        A[Auth gate and share links]
         U[Transcript / audio upload]
-        K[Board + calendar views, filters, search, undo, share]
+        K[Board, calendar, filters,<br/>search, undo]
     end
 
     subgraph API[FastAPI backend]
-        AU[auth router]
-        T[transcripts router]
-        TK[tasks router]
-        SB[subtasks / attachments routers]
-        P[projects / stakeholders routers]
-        IN[internal router: daily reminder trigger]
-        AC[access control: owner JWT or workspace token]
-        W[transcription module]
-        L[LLM parser module]
-        S[subtask generator]
-        N[reminder module]
-        M[email module]
+        direction TB
+        R[API routers<br/>auth, projects, transcripts, tasks,<br/>subtasks, attachments, stakeholders]
+        AC[Access control<br/>owner JWT or workspace token]
+        L[LLM module<br/>parser + subtask generator]
+        W[Transcription module]
     end
 
     DB[(SQLite / PostgreSQL)]
-    C[Gemini API]
-    X[External scheduler]
+    G[Gemini API]
+    D[Deepgram API]
 
-    A -->|POST /auth/signup, /auth/login| AU
-    U -->|POST /transcripts and /transcripts/audio| T
-    K -->|GET /tasks, PATCH /tasks/id| TK
-    K -->|subtasks, attachments| SB
-    K -->|GET /projects, GET /projects/by-token| P
-    AU --> DB
-    T --> AC
-    TK --> AC
-    SB --> AC
-    P --> AC
-    AC --> DB
-    T -->|audio bytes| W
-    W -->|transcript text| T
-    T -->|transcript text| L
-    L -->|tool-use request| C
-    C -->|structured JSON| L
-    SB -->|generate request| S
-    S -->|tool-use request| C
-    T -->|persist meeting + tasks| DB
-    X -->|shared secret, once a day| IN
-    IN --> N
-    N -->|due tasks| DB
-    N -->|digest| M
-    AU -->|reset code| M
+    A -->|JWT or workspace token| R
+    U -->|transcript text or audio| R
+    K -->|board reads and writes| R
+    R --> AC
+    AC -->|edit / view / none| DB
+    R -->|audio bytes| W
+    W -->|transcript text| R
+    W --> D
+    R -->|transcript + meeting date| L
+    L -->|forced tool use| G
+    G -->|structured JSON| L
+    L -->|validated result| R
+```
+
+The daily reminder pass runs on its own path, triggered from outside rather than by a user.
+
+```mermaid
+flowchart LR
+    X[External scheduler<br/>once a day] -->|shared secret| I[internal router]
+    I --> N[Reminder module]
+    DB[(Database)] -->|tasks entering their window| N
+    N -->|one digest per user| M[Email module]
+    AU[auth router] -->|password reset code| M
+    M -->|Brevo HTTPS, SMTP, or log| OUT[Recipient]
 ```
 
 ## Components
