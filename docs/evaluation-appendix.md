@@ -79,7 +79,7 @@ enum, because a translation bug would appear as a model difference that is reall
 
 ## Study 1 - does the guidance layer help?
 
-Within each model the two arms differ **only** in guidance text; the JSON contract is identical.
+Within each model the two configurations differ **only** in guidance text; the JSON contract is identical.
 `eval/test_matching.py` asserts this for Claude, `eval/test_providers.py` for Gemini after schema
 translation.
 
@@ -105,19 +105,20 @@ refuted rather than dropped.
 **Why precision falls.** Precision is the share of proposed items that turned out to be real.
 With the guidance the model proposes more of them - 276 against 191 without it, on Claude Sonnet
 - so there is simply more to be wrong about. The extra proposals are almost as good as the ones
-the without-guidance arm already made: 67 of the 85 extra matched an annotated item, a match
-rate of 79% against 86% without it. That is why precision barely moves (0.861 -> 0.837) while
-recall moves a lot (0.621 -> 0.875): 67 real tasks recovered for 18 spurious ones. Gemini Flash
-makes the same trade on a smaller scale - 25 of 32 extra, against a much larger base - so its
-precision falls less. Neither drop is larger than the run-to-run variation inside that same arm
-(0.103 on Claude, 0.053 on Gemini), so neither is separable from noise. For this application the
-trade is the right way round in any case: a spurious task is visible on the board and can be
-deleted, while a missed one is invisible.
+the without-guidance configuration already made: 67 of the 85 extra matched an annotated item, a
+match rate of 79% against 86% without it. That is why precision barely moves (0.861 -> 0.837)
+while recall moves a lot (0.621 -> 0.875): 67 real tasks recovered for 18 spurious ones. Gemini
+Flash makes the same trade on a smaller scale - 25 of 32 extra, against a much larger base - so
+its precision falls less. Neither drop is larger than the run-to-run variation inside that same
+configuration (0.103 on Claude, 0.053 on Gemini), so neither is separable from noise. For this
+application the trade is the right way round in any case: a spurious task is visible on the
+board and can be deleted, while a missed one is invisible.
 
 **Record quality - Claude only.** Source-decision capture rose 44% -> 100% on Claude but only
 16% -> 100% on Gemini. The schema asks both models for the same field; only Claude acts on it.
 Claude also varies its confidence score as instructed (0.78-0.99, 13 distinct values) where the
-without-guidance arm emits a near-constant one (0.85-1.0, 9 values) that cannot be filtered on.
+without-guidance configuration emits a near-constant one (0.85-1.0, 9 values) that cannot be
+filtered on.
 
 > Gemini Flash is here as a replication check, not as a competitor: the question is whether the
 > guidance effect is a property of the schema or a quirk of one vendor's tool use. The model
@@ -226,7 +227,7 @@ discriminate at all.
 - Ambiguous deadline phrases are annotated as single dates. Anchoring them during annotation, or
   capturing a range, would make the exact-match metric more precise.
 - **A correction worth recording.** An earlier `BARE_TOOL` stripped every key named `description`,
-  which also removed the *field* named "description" from the property map, leaving the without-guidance arm
+  which also removed the *field* named "description" from the property map, leaving the without-guidance configuration
   requiring a field it did not define. That inflated its validation failures and depressed its
   scores. The stripper now preserves field names and removes only annotation text, and
   `eval/test_matching.py` has a regression test. All figures above are from a post-fix re-run.
