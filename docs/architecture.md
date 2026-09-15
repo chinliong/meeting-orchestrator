@@ -2,10 +2,10 @@
 
 ## High-level flow
 
-1. The user authenticates via the Next.js frontend — sign in, create an account, or continue as
+1. The user authenticates via the Next.js frontend: sign in, create an account, or continue as
    a guest. Logged-in users carry a JWT; guests and link recipients carry a board's capability
    token. Either is attached to subsequent requests.
-2. The user submits a meeting — pasted transcript text or an uploaded audio/video file.
+2. The user submits a meeting: pasted transcript text or an uploaded audio/video file.
 3. The frontend calls the FastAPI backend (`POST /transcripts` for text, `POST /transcripts/audio`
    for files). Write endpoints require edit access to the target board.
 4. For audio, the backend first transcribes the file with a hosted service (Deepgram Nova-3) to
@@ -13,8 +13,8 @@
 5. The backend sends the transcript to Gemini with a forced function-call schema; the response
    is validated into decisions, action items, owners, deadlines, and confidence via Pydantic.
 6. The structured data is persisted to the relational database (a `Meeting` plus its `Task` rows).
-7. The frontend fetches the task list and renders it two ways — a **Kanban board** (drag-and-drop
-   status changes) and a **month calendar** (tasks plotted by deadline, drag-to-reschedule) — both
+7. The frontend fetches the task list and renders it two ways: a **Kanban board** (drag-and-drop
+   status changes) and a **month calendar** (tasks plotted by deadline, drag-to-reschedule), both
    with search and owner filtering. Edits are written back with `PATCH /tasks/{id}`; deletes return
    a snapshot so an **Undo** action (button + ⌘Z/Ctrl+Z) can restore via `POST /tasks/restore`.
 
@@ -102,31 +102,31 @@ flowchart LR
   - `GET|POST /stakeholders`.
   - `PATCH /auth/notifications` (set deadline-reminder preferences), `POST /auth/notifications/test`
     (send a one-off preview digest).
-  - `GET /health` — liveness, plus the extraction model the deployment will actually use and
+  - `GET /health`: liveness, plus the extraction model the deployment will actually use and
     whether transcription is configured. Names the model, never a key.
-  - **Auth & access control** (`app/auth.py`) — bcrypt password hashing, JWT issue/verify, and
+  - **Auth & access control** (`app/auth.py`): bcrypt password hashing, JWT issue/verify, and
     `project_access_level()` which resolves a request to `edit` / `view` / no-access from the
     bearer user (owner) or the `X-Workspace-Token` (edit/view token).
-  - **Email sender** (`app/email.py`) — sends password-reset codes and deadline reminders. Prefers
+  - **Email sender** (`app/email.py`): sends password-reset codes and deadline reminders. Prefers
     Brevo's HTTPS API (`BREVO_API_KEY`) so it works on hosts that block outbound SMTP (e.g. Render's
     free tier), falls back to SMTP, and otherwise logs the message. Reset emails are dispatched via
     FastAPI background tasks so a slow send never holds the request open.
-  - **Deadline reminders** (`app/notifications.py`) — opt-in (off by default) per account, with
+  - **Deadline reminders** (`app/notifications.py`): opt-in (off by default) per account, with
     per-project opt-in selection and a configurable "days before" threshold. `GET /internal/notify-due-tasks`
     (shared-secret protected) runs the daily check over HTTP, for a free external scheduler to
     call once a day. See "Deadline reminders" below.
-  - **LLM parser** (`app/llm/parser.py`) — a reusable, framework-agnostic module: raw text in,
+  - **LLM parser** (`app/llm/parser.py`): a reusable, framework-agnostic module: raw text in,
     validated `ExtractionResult` out, via a forced function call. Relative deadline cues ("by Friday")
     resolve against the meeting's `meeting_date`, falling back to its upload date; the anchor is
     never inferred from the transcript body, where a freeze or go-live date would be mistaken
     for it.
-  - **Subtask generator** (`app/llm/subtasks.py`) — breaks a single task into an ordered checklist,
+  - **Subtask generator** (`app/llm/subtasks.py`): breaks a single task into an ordered checklist,
     either from the task's own details or from user-supplied instructions. Provider is selected
     separately from the parser's (`SUBTASK_PROVIDER`), because open-ended decomposition is a
     different problem from extraction and was measured on its own rubric.
-  - **Gemini client** (`app/llm/gemini.py`) — the forced function call plus the JSON-Schema to
+  - **Gemini client** (`app/llm/gemini.py`): the forced function call plus the JSON-Schema to
     OpenAPI translation both LLM modules share, so the tool schema is defined once.
-  - **Transcription module** (`app/llm/transcription.py`) — optional, lazily imported, resolved by
+  - **Transcription module** (`app/llm/transcription.py`): optional, lazily imported, resolved by
     configuration in three tiers: Deepgram Nova-3 first, then any OpenAI-compatible endpoint via
     `TRANSCRIPTION_BASE_URL` (Groq, OpenAI), then an optional local Whisper install. The first two
     are hosted, so nothing loads into memory and the core app runs without the heavy local
@@ -136,7 +136,7 @@ flowchart LR
   `meetings`, `stakeholders`, `tasks`, `subtasks`, `attachments`, `password_resets`. Attachment
   bytes are stored in the `attachments` row (the deploy target has an ephemeral filesystem and no
   object storage), size-capped in the API. The engine is created with `pool_pre_ping` (and a 5-min
-  `pool_recycle`) because serverless Postgres (Neon) drops idle connections — without it, the first
+  `pool_recycle`) because serverless Postgres (Neon) drops idle connections; without it, the first
   request after the free backend wakes from sleep fails with "SSL connection has been closed
   unexpectedly"; pre-ping validates and reconnects transparently instead.
 - **LLM provider:** Gemini Flash for both extraction and subtask generation, structured output
@@ -145,7 +145,7 @@ flowchart LR
   rather than dropping it silently, so a schema change cannot weaken the contract unnoticed.
 - **Why Gemini:** it leads Claude Sonnet on recall, precision and F1 across eight runs per model,
   each separated by an exact permutation test (`docs/evaluation-report.md`). Subtask generation
-  moved on a different basis — quality there is indistinguishable over five runs
+  moved on a different basis: quality there is indistinguishable over five runs
   per configuration (p = 0.652), so the reason is cost and keeping the system on one provider.
 
 ## Access model
@@ -163,20 +163,20 @@ flowchart LR
   `notify_days_before`, plus per-project opt-in (`Project.notify_enabled`, default off): a board
   is reminded only when both the account flag and that board's flag are on. The user picks which
   boards remind them from the project checklist in Account settings.
-- `app/notifications.py` finds tasks inside their reminder window — from `notify_days_before`
-  days out through one day past the deadline (a one-time overdue nudge, not a repeat) — and
+- `app/notifications.py` finds tasks inside their reminder window, from `notify_days_before`
+  days out through one day past the deadline (a one-time overdue nudge, not a repeat), and
   emails each affected account holder a single digest covering every newly-due task across their
   reminder-enabled projects.
 - Idempotency: `Task.last_notified_for` records the deadline last notified for, so re-running the
   same day, or after the deadline, never double-sends. Rescheduling a task's deadline clears the
   match, re-opening the window.
 - The window is date-based, so "today" is computed in `REMINDER_TIMEZONE` (IANA zone, default UTC).
-  The server clock is UTC, which would otherwise put a reminder a day off for users elsewhere — a
+  The server clock is UTC, which would otherwise put a reminder a day off for users elsewhere: a
   task due "Jun 24" with a one-day lead enters its window at 08:00 SGT on Jun 23 under plain UTC.
 - Two ways to trigger a pass: `python -m app.notify_due_tasks` (a CLI script, useful for a local
   cron entry or manual runs) and `GET /internal/notify-due-tasks` (the same logic over HTTP,
   guarded by a shared secret `CRON_SECRET` instead of a user session). The latter is meant for a
-  free external scheduler (e.g. cron-job.org) hitting it once a day — Render has no built-in free
+  free external scheduler (e.g. cron-job.org) hitting it once a day: Render has no built-in free
   scheduler and Render Cron Jobs are a paid add-on, so this avoids that cost entirely.
 - `POST /auth/notifications/test` runs the same logic on demand for one signed-in user, useful for
   confirming the email channel works without waiting for the daily trigger.

@@ -8,8 +8,8 @@ All request/response bodies are JSON unless noted. Dates are ISO 8601 (`YYYY-MM-
 
 Two credentials are accepted, together or alone:
 
-- `Authorization: Bearer <jwt>` — identifies a signed-in user, who owns the boards they create.
-- `X-Workspace-Token: <token>` — a board's capability token from a share link. An **edit** token
+- `Authorization: Bearer <jwt>` identifies a signed-in user, who owns the boards they create.
+- `X-Workspace-Token: <token>` is a board's capability token from a share link. An **edit** token
   grants read/write; a **view** token grants read-only.
 
 For a given board, access resolves to `edit`, `view`, or none. Reads require `view`; writes
@@ -34,7 +34,7 @@ rather than what its environment variables were set to. Never returns a key.
 
 ### `POST /auth/signup`
 Body `{ "email": "string", "password": "string", "claim_tokens": ["edit_token", ...] }`.
-`claim_tokens` is optional — edit tokens of guest boards to adopt into the new account.
+`claim_tokens` is optional, the edit tokens of guest boards to adopt into the new account.
 Returns `201` `{ "token": "<jwt>", "user": { "id", "email", "created_at", "notify_email", "notify_days_before" } }`.
 `409` if the email already exists.
 
@@ -56,7 +56,7 @@ Update the signed-in user's deadline-reminder preferences. Requires bearer. Body
 Off (`notify_email: false`) by default for every new account.
 
 ### `POST /auth/notifications/test`
-Send a one-off preview digest to the signed-in user's own email — whatever tasks would currently
+Send a one-off preview digest to the signed-in user's own email: whatever tasks would currently
 trigger a reminder, or a "nothing due" confirmation if none do. Requires bearer and
 `notify_email` already enabled (`400` otherwise).
 
@@ -66,8 +66,8 @@ Delete the signed-in user's account. Requires bearer. The user's owned boards ar
 by their share links. `204`.
 
 ### `POST /auth/forgot-password`
-Request a password-reset code. Body `{ "email": "string" }`. Always returns `204` — whether or not
-the email matches an account — so the endpoint can't be used to probe which addresses are
+Request a password-reset code. Body `{ "email": "string" }`. Always returns `204`, whether or not
+the email matches an account, so the endpoint can't be used to probe which addresses are
 registered. If the email exists, a single-use 6-digit code (valid 15 minutes) is generated and
 emailed in the background; any earlier outstanding codes for that user are invalidated.
 
@@ -140,7 +140,7 @@ Request:
 }
 ```
 
-Response `201 Created` — a meeting object with its extracted tasks:
+Response `201 Created`, a meeting object with its extracted tasks:
 ```json
 {
   "id": 12,
@@ -208,7 +208,7 @@ was removed, so the client can offer an **undo**:
 ```
 
 ### `POST /tasks/restore`
-Recreates a previously deleted task from a `DELETE` snapshot — powers undo. Body is the snapshot
+Recreates a previously deleted task from a `DELETE` snapshot; it powers undo. Body is the snapshot
 above (`{ "task": { ... } }`). The task is restored with its **original id** (so references stay
 valid). Requires edit access to the task's board. `201` with the restored task; `409` if a task
 with that id already exists. A dangling `meeting_id` (its meeting was deleted meanwhile) is cleared.
@@ -228,7 +228,7 @@ Requires edit access.
 
 ### `POST /tasks/{task_id}/subtasks/generate`
 Have the LLM break the task down and append the suggestions as real subtasks. Body
-`{ "instructions": "string | null" }` — when `instructions` is non-empty the model is steered by
+`{ "instructions": "string | null" }`. When `instructions` is non-empty the model is steered by
 that text ("from your instructions"), otherwise it works from the task's own details ("from task
 details"). Returns `201` with the newly-created subtasks. `502` if the model call fails or returns
 nothing. Requires edit access.
@@ -242,7 +242,7 @@ Removes the subtask. Requires edit access. `204`. `404` if not found.
 ## Attachments
 
 A file attached to a task. Metadata object: `{ "id", "task_id", "filename", "content_type",
-"size", "created_at" }` — the bytes themselves are stored in the database and streamed only by the
+"size", "created_at" }`. The bytes themselves are stored in the database and streamed only by the
 download route. Attachments cascade-delete with their task.
 
 ### `GET /tasks/{task_id}/attachments`
@@ -271,11 +271,11 @@ Body `{ "name": "string", "email": "string (optional)" }` → `201` stakeholder 
 
 ### `GET /internal/notify-due-tasks`
 Runs one deadline-reminder pass (see [architecture.md](architecture.md#deadline-reminders)).
-Meant to be called once a day by an external scheduler rather than a logged-in client — there's
+Meant to be called once a day by an external scheduler rather than a logged-in client: there's
 no bearer/workspace token, so it's protected by a shared secret (`CRON_SECRET`) instead, passed
 as either an `X-Cron-Secret` header or a `?secret=` query param. `503` if `CRON_SECRET` isn't
 configured on the server; `403` if the secret is missing or wrong. `200` `{ "sent": <int> }` on
-success — the number of digest emails sent. The reminder window's notion of "today" follows
+success, the number of digest emails sent. The reminder window's notion of "today" follows
 `REMINDER_TIMEZONE` (IANA zone, default UTC), so the run time should suit that zone.
 
 ## LLM extraction schema
