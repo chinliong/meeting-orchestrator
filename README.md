@@ -2,7 +2,7 @@
 
 A full-stack web application that turns raw, messy meeting transcripts into structured,
 trackable project work. It uses a Large Language Model (Gemini Flash) to extract **decisions** and
-**action items** — with owners, inferred deadlines, and confidence scores — and presents them
+**action items**, with owners, inferred deadlines, and confidence scores, and presents them
 on an auto-generated Kanban board. An optional speech-to-text layer accepts audio/video
 recordings for end-to-end processing.
 
@@ -10,39 +10,38 @@ recordings for end-to-end processing.
 
 ## Features
 
-- **Transcript parsing** — paste raw meeting text; the LLM returns structured decisions and
+- **Transcript parsing**: paste raw meeting text; the LLM returns structured decisions and
   action items via a forced tool-use schema (validated with Pydantic).
-- **Owner & deadline inference** — owners assigned only when explicitly stated; deadlines
+- **Owner & deadline inference**: owners assigned only when explicitly stated; deadlines
   inferred from contextual cues ("by this Friday") relative to the meeting date.
-- **Two views — Kanban & calendar** — a Kanban board (auto-generated cards in To Do / In Progress
+- **Two views, Kanban and calendar**: a Kanban board (auto-generated cards in To Do / In Progress
   / Done with drag-and-drop status changes) and a month calendar that plots tasks by their deadline
   with drag-to-reschedule (drag onto a "no deadline" tray to clear it). Both support owner filtering
   and a search across task text, owners, and source meetings; cards show extraction confidence.
-- **Task detail — AI subtasks & attachments** — open any task to break it into a checklist of
+- **Task detail, AI subtasks and attachments**: open any task to break it into a checklist of
   subtasks (add them by hand, or have the LLM generate them from the task's own details or from
   your free-text instructions) and to attach files (stored in the database, up to 10 MB each).
   Card fields and both lists **save automatically** as you go; cards show subtask progress
   (e.g. `2/5`) and an attachment count.
-- **Undo** — an Undo button (in the toolbar and inside the task card) and ⌘Z / Ctrl+Z reverse
+- **Undo**: an Undo button (in the toolbar and inside the task card) and ⌘Z / Ctrl+Z reverse
   status changes, field edits, reschedules, and deletes; a deleted task is restored with its
   original id.
-- **Manual & sourced tasks** — tasks are usually extracted from a meeting (the source meeting
+- **Manual & sourced tasks**: tasks are usually extracted from a meeting (the source meeting
   title shows on each card and can be renamed inline), but you can also add tasks by hand for
   work raised outside a captured meeting.
-- **Accounts & guest mode** — sign up to keep your boards under an account, or continue as a
+- **Accounts & guest mode**: sign up to keep your boards under an account, or continue as a
   guest (guest boards are kept on the device and can be carried into an account on sign-up).
-- **Account self-service** — change your password, reset a forgotten one with a 6-digit code
+- **Account self-service**: change your password, reset a forgotten one with a 6-digit code
   emailed to you, or delete your account (owned boards are released as guest boards rather than
   destroyed, so existing share links keep working).
-- **Deadline email reminders** — opt-in (off by default) digest emails for tasks about to be due
-  or just gone overdue, with a configurable "remind me N days before" and **per-project selection**
-  — in Account settings you pick exactly which of your boards should remind you.
-- **Shareable boards** — every board has a permanent **view link** and **edit link**; anyone
+- **Deadline email reminders**: opt-in (off by default) digest emails for tasks about to be due
+  or just gone overdue, with a configurable "remind me N days before" and **per-project selection**. In Account settings you pick exactly which of your boards should remind you.
+- **Shareable boards**: every board has a permanent **view link** and **edit link**; anyone
   with a link can open it (no account needed). View links are read-only; the UI hides every
-  editing affordance on a view-only board.
-- **Optional audio/video input** — upload a recording; it is transcribed with Deepgram Nova-3
+  editing control on a view-only board.
+- **Optional audio/video input**: upload a recording; it is transcribed with Deepgram Nova-3
   before parsing.
-- **Evaluation harnesses** — scores transcript-extraction quality against an annotated test set,
+- **Evaluation frameworks**: scores transcript-extraction quality against an annotated test set,
   measured with and without the structured guidance layer
   (see [docs/evaluation-report.md](docs/evaluation-report.md)); a separate LLM-as-judge rubric
   qualitatively scores the open-ended AI subtask generation.
@@ -75,7 +74,7 @@ for the full API.
 | LLM | Gemini Flash, forced function calling for structured output |
 | Speech-to-text | Deepgram Nova-3 (hosted); local Whisper available for offline development |
 | Database | SQLite (dev) / PostgreSQL (prod; e.g. Neon) |
-| Deployment | Render blueprint — backend (Docker web service) + frontend (static site) + external Postgres |
+| Deployment | Render blueprint: backend (Docker web service) + frontend (static site) + external Postgres |
 
 ## Access model (accounts, guests, sharing)
 
@@ -83,7 +82,7 @@ for the full API.
 - **Capability links** are the sharing mechanism: each project carries a permanent `view_token`
   and `edit_token`. The frontend sends a board's token in an `X-Workspace-Token` header; an edit
   token grants read/write, a view token grants read-only.
-- **Guests** have no account — they reach boards purely by capability link, and their boards are
+- **Guests** have no account; they reach boards purely by capability link, and their boards are
   remembered in the browser. On sign-up, guest boards are claimed into the new account.
 - Links are **permanent and not revocable** by design (documented in the share dialog); treat
   them like passwords.
@@ -117,7 +116,7 @@ cp .env.local.example .env.local
 npm run dev
 ```
 
-Open http://localhost:3000. You'll land on the **Sign in / Create account / Continue as guest**
+Open http://localhost:3000. You will see the **Sign in / Create account / Continue as guest**
 screen.
 
 ### 3. (Optional) Audio/video transcription
@@ -125,9 +124,9 @@ screen.
 Audio is transcribed by **Deepgram Nova-3** (`DEEPGRAM_API_KEY`), which measured 13.0% and
 15.3% word error rate on the two AMI reference meetings against 16.6% and 17.2% for hosted
 Whisper ([docs/asr-evaluation.md](docs/asr-evaluation.md)). It runs as a hosted service, so
-nothing loads into memory — which is what makes this work on a free-tier host, and the free
+nothing loads into memory, which is what makes this work on a free-tier host, and the free
 tier needs no card.
-Alternatively, run Whisper locally (heavier — pulls in PyTorch and needs `ffmpeg`):
+Alternatively, run Whisper locally (heavier; pulls in PyTorch and needs `ffmpeg`):
 
 ```bash
 # in backend/, with the venv active
@@ -140,15 +139,15 @@ With neither configured, the audio endpoint returns a clear `503` and the text p
 ### 4. (Optional) Email delivery
 
 Password-reset codes and deadline reminders both go through `app/email.py`. **If no provider is
-configured, the message is logged instead** — enough for local testing. To send for real:
+configured, the message is logged instead**, enough for local testing. To send for real:
 
 - **Brevo HTTPS API** (recommended; required on hosts that block SMTP, like Render's free tier):
   create a free [Brevo](https://www.brevo.com) account, verify a sender, generate an API key, then
   set `BREVO_API_KEY` and `SMTP_FROM` (the verified sender).
-- **SMTP**: set `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASSWORD`/`SMTP_FROM` — e.g. Gmail with
+- **SMTP**: set `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASSWORD`/`SMTP_FROM`, e.g. Gmail with
   an App Password.
 
-Deadline reminders are opt-in per account (off by default — toggle in Account settings) and only
+Deadline reminders are opt-in per account (off by default; toggle in Account settings) and only
 send when a daily check runs: locally, run `python -m app.notify_due_tasks` (or schedule it via
 cron); on Render, see step 5 of the deploy steps below. Use the "Send test email" button in Account
 settings to verify delivery. See `backend/.env.example` for all email vars and
@@ -168,7 +167,7 @@ the default image; build with `--build-arg INSTALL_AUDIO=true` to include local 
 
 The blueprint provisions a backend **web service** and a frontend **static site** on the free tier.
 The frontend is client-only, so it exports to static HTML (`output: "export"` → `out/`) served from
-Render's CDN — free, never sleeps, and it doesn't consume instance-hours, which keeps the whole
+Render's CDN: free, never sleeps, and it doesn't consume instance-hours, which keeps the whole
 750-hour free pool available for the backend. The database is an **external Postgres** (e.g. a free
 [Neon](https://neon.tech) project) referenced by `DATABASE_URL`, so it isn't subject to a managed-DB
 expiry window.
@@ -181,15 +180,15 @@ expiry window.
    - backend `DATABASE_URL` = your Postgres connection string
      (`postgresql://…/<db>?sslmode=require`; `db.py` normalises `postgres://` URLs)
    - backend `CORS_ORIGINS` = the frontend's exact origin, e.g. `https://orchestrator-frontend.onrender.com`
-     (scheme + host only — no trailing slash, no path; defaults to `*` if left unset)
+     (scheme + host only, no trailing slash, no path; defaults to `*` if left unset)
    - frontend `NEXT_PUBLIC_API_BASE` = `https://orchestrator-backend.onrender.com/api/v1`
    - backend `BREVO_API_KEY` + `SMTP_FROM` (optional) = enable password-reset and deadline-reminder
-     emails — see "Email delivery" above. **Render's free tier blocks outbound SMTP**, so the
+     emails; see "Email delivery" above. **Render's free tier blocks outbound SMTP**, so the
      Brevo HTTPS API is required there; the `SMTP_*` host/port/user/password vars won't work.
 
    `AUTH_SECRET` and `CRON_SECRET` are generated automatically by the blueprint, and
    `REMINDER_TIMEZONE` is preset to `Asia/Singapore` (the IANA zone the reminder window is measured
-   in — change it to your audience's zone, or unset for UTC). `NEXT_PUBLIC_API_BASE` is baked in at
+   in; change it to your audience's zone, or unset for UTC). `NEXT_PUBLIC_API_BASE` is baked in at
    build time, so changing it requires a frontend rebuild.
 4. Apply. The schema is created automatically on first startup against an empty database.
 5. (Optional) To enable automatic deadline reminders, copy the generated `CRON_SECRET` from the
@@ -200,7 +199,7 @@ expiry window.
    suits that zone. Because the free backend sleeps after ~15 min idle, the daily call would
    otherwise hit a ~30–50s cold start; add a second cron job pinging `/api/v1/health` every ~10 min
    to keep it warm. (Free schedulers cap their request timeout near 30s, so a cold first request can
-   show as a failure — a steady keep-alive avoids ever being cold. The static frontend uses no
+   show as a failure, and a steady keep-alive avoids ever being cold. The static frontend uses no
    instance-hours, so the backend can stay warm within the free 750h.)
 
 Seeding sample data: Render's web shell is a paid feature, so run the seed from your own machine
@@ -214,7 +213,7 @@ DATABASE_URL="<your Postgres connection string>" python -m app.seed
 ### Schema changes on an existing database
 
 The startup `create_all` **adds missing tables** but never alters existing ones, so it picks up
-brand-new tables (e.g. `subtasks`, `attachments`) automatically on the next deploy — but a new
+brand-new tables (e.g. `subtasks`, `attachments`) automatically on the next deploy, but a new
 **column** on an existing table needs a one-off, additive migration. Run these from your machine
 against the deployed `DATABASE_URL` (idempotent, non-destructive):
 
@@ -225,10 +224,10 @@ DATABASE_URL="<your Postgres connection string>" python -m app.migrate_reminder_
 ```
 
 > Deploying the opt-in-reminders change to a database that predates it **requires**
-> `migrate_reminder_optin` — without `projects.notify_enabled` the projects API will error. It
+> `migrate_reminder_optin`: without `projects.notify_enabled` the projects API will error. It
 > seeds the new flag from the old one so boards that were being reminded keep being reminded.
 
-To rebuild from scratch instead (drops, recreates, re-seeds — **destructive**), run
+To rebuild from scratch instead (drops, recreates, re-seeds; **destructive**), run
 `python -m app.reset_db` against that `DATABASE_URL`.
 
 Note on the free tier: the **backend** web service spins down after ~15 min idle and cold-starts in
@@ -262,39 +261,41 @@ python -m eval.run_eval --write-report      # FREE - no API calls, no key needed
 
 This scores the cached predictions, writes `eval/results.json`, and refreshes **two** documents:
 
-- **[docs/evaluation-report.md](docs/evaluation-report.md)** — the findings and the
+- **[docs/evaluation-report.md](docs/evaluation-report.md)**: the findings and the
   recommendation, two tables, readable in a couple of minutes. Start here.
-- **[docs/asr-evaluation.md](docs/asr-evaluation.md)** — speech-to-text model comparison and the transcription choice.
-- **[docs/evaluation-appendix.md](docs/evaluation-appendix.md)** — full methodology, every
+- **[docs/asr-evaluation.md](docs/asr-evaluation.md)**: speech-to-text model comparison and the transcription choice.
+- **[docs/evaluation-appendix.md](docs/evaluation-appendix.md)**: full methodology, every
   condition's precision / recall / F1, the confounds, and the corrections.
 
 Both are generated from the same cached predictions, so they cannot disagree.
 
 It answers **two** questions with two sets of conditions.
 
-**1. Does the guidance layer help?** A 2×2 — guidance level crossed with model family:
+**1. Does the guidance layer help?** A 2×2: guidance level crossed with model family:
 
-| | Basic guidance | Improved guidance |
+| | Without guidance | With guidance |
 |---|---|---|
 | | one-line prompt, shape-only schema | full prompt rules, fully described schema |
 | **Claude Sonnet** (`CLAUDE_MODEL`) | `naive` | `prod` |
-| **Gemini Flash** (`GEMINI_MODEL`) | `gemini_naive` | `gemini_prod` — what ships |
+| **Gemini Flash** (`GEMINI_MODEL`) | `gemini_naive` | `gemini_prod`, implemented |
 
-Within a model the two arms differ *only* in guidance text — identical fields, types, enum and
+Within a model the two configurations differ *only* in guidance text: identical fields, types, enum and
 required list. Both families are measured so the guidance effect is shown to replicate rather
 than being a quirk of one model.
 
-> These two rows are **not** a provider ranking — the cached models are a generation apart. Only
-> the within-model Basic/Improved contrast is a fair comparison.
+> These two rows are **not** a provider ranking: the cached models are a generation apart. Only
+> the within-model with/without-guidance contrast is a fair comparison.
 
 **2. Which model should the project use?** Claude Sonnet, Claude Haiku and Gemini Flash on the
-shipped config only (`prod`, `haiku_prod`, `gemini_prod`). Over eight runs each, Gemini leads
-Sonnet on recall, precision and F1, every gap separated by an exact permutation test — so
-extraction runs on Gemini. Subtask generation moved with it on a different basis: quality is
+implemented configuration only (`prod`, `haiku_prod`, `gemini_prod`). Over eight runs each, Gemini leads
+Sonnet on recall, precision and F1, every gap separated by an exact permutation test,
+so extraction runs on Gemini. Subtask generation moved with it on a different basis: quality is
 indistinguishable from Claude (p = 0.53), so the reason is cost and a single provider.
 
-Predictions are matched to the annotated ground truth by two independent matchers — word overlap
-(deterministic, no model) and an LLM judge — and both are reported.
+Predictions are matched to the annotated ground truth by word overlap: deterministic, with no
+model involved, so scoring is repeatable. A semantic LLM-judge matcher is available behind
+`--rescore-judge` but has not been run against the current cache, so no judge figures are
+reported.
 
 `--parse` runs one model group at a time. `claude` and `haiku` **spend Anthropic credit**:
 
@@ -308,11 +309,11 @@ python -m eval.run_eval --rescore-judge                       # LLM-judge column
 Gemini needs `GEMINI_API_KEY` in `backend/.env`.
 
 Because each run holds one group, adding runs for a free model cannot disturb another model's
-cached figures. Judge scores are cached **per condition** for the same reason — conditions
+cached figures. Judge scores are cached **per condition** for the same reason: conditions
 without them print as `-` until `--rescore-judge` is passed. Requests that never completed (rate
 limit, capacity) are recorded as API failures and excluded from scoring, so an exhausted quota is
 never counted as the model failing to find items. Each run records which model produced it. Keep
-`eval/predictions.json` — without it the report can only be rebuilt by re-parsing.
+`eval/predictions.json`: without it the report can only be rebuilt by re-parsing.
 
 The AI **subtask** generator is open-ended (no single correct breakdown, so no ground truth):
 it's assessed qualitatively with an LLM-as-judge rubric (relevance, actionability, coverage,
@@ -332,7 +333,7 @@ evaluation there is no cache, so every run calls the model twice per task (gener
 backend/      FastAPI app (api/, llm/, models/, schemas/, auth.py, email.py, notifications.py), tests, Dockerfile
 frontend/     Next.js app (src/app, src/components, src/lib); Dockerfile for local compose, Render hosts it as a static export (out/)
 data/         synthetic-transcripts/ (inputs) + annotated-test-set/ (ground truth)
-eval/         evaluation harness, cached predictions (predictions.json), matcher tests
+eval/         evaluation framework, cached predictions (predictions.json), matcher tests
 docs/         architecture, API spec, evaluation report
 render.yaml   Render deployment blueprint
 ```
@@ -341,6 +342,6 @@ render.yaml   Render deployment blueprint
 
 Per the project brief, **real-time** multi-user collaboration (live presence / simultaneous
 co-editing) is out of scope, as are live enterprise integrations (SAP/Jira/Outlook) and a mobile
-app. The accounts and capability-link sharing added here are **asynchronous** — others see changes
+app. The accounts and capability-link sharing added here are **asynchronous**: others see changes
 on reload, with last-write-wins and no live conflict resolution. Test data is synthetic meeting
 transcripts representing realistic enterprise project scenarios.
