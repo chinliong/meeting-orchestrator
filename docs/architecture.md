@@ -258,8 +258,9 @@ erDiagram
     }
 ```
 
-A task exposes its source meeting's title (`meeting_title`) for display; manually-added tasks have
-no `meeting_id` and carry full confidence. `stakeholders` deliberately has no foreign key to
+A task exposes its source meeting's title and date (`meeting_title`, `meeting_date`) for display,
+so meetings in a series that share a title stay distinguishable on the board; manually-added tasks
+have no `meeting_id` and carry full confidence. `stakeholders` deliberately has no foreign key to
 `tasks`: a task's `owner` is a plain name string, matched against `stakeholders.name` only for the
 owner filter, because the people who own action items in a meeting are usually not users of the
 tool and requiring each of them to hold an account would make the extraction unusable.

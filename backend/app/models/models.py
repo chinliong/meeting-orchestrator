@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import enum
 import secrets
+from datetime import date
 
 from sqlalchemy import (
     Boolean,
@@ -162,6 +163,19 @@ class Task(Base):
     def meeting_title(self) -> str | None:
         """Title of the source meeting, or None for manually-added tasks."""
         return self.meeting.title if self.meeting else None
+
+    @property
+    def meeting_date(self) -> date | None:
+        """Date of the source meeting, or None for manually-added tasks.
+
+        Shown beside the title so meetings that share a title stay distinguishable. Meetings
+        created before `meeting_date` existed fall back to their upload date.
+        """
+        if self.meeting is None:
+            return None
+        if self.meeting.meeting_date:
+            return self.meeting.meeting_date
+        return self.meeting.created_at.date() if self.meeting.created_at else None
 
 
 class Subtask(Base):

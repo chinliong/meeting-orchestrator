@@ -365,6 +365,36 @@ def test_submitted_tasks_carry_meeting_title(client, project, stub_parser):
     assert all(t["meeting_title"] == "Sprint Planning" for t in tasks)
 
 
+def test_same_titled_meetings_are_distinguished_by_date(client, project, stub_parser):
+    """Two meetings of a series can share a title; each task carries its own meeting's date."""
+    for on in ("2026-08-04", "2026-08-11"):
+        client.post(
+            "/api/v1/transcripts",
+            json={"project_id": project["id"], "title": "Weekly SAP sync",
+                  "transcript_text": "...", "meeting_date": on},
+        )
+    tasks = client.get(f"/api/v1/tasks?project_id={project['id']}").json()
+    assert all(t["meeting_title"] == "Weekly SAP sync" for t in tasks)
+    assert sorted({t["meeting_date"] for t in tasks}) == ["2026-08-04", "2026-08-11"]
+
+
+def test_meeting_without_a_date_falls_back_to_its_upload_date(client, project, stub_parser,
+                                                              db_session):
+    """Meetings created before meeting_date existed still show a date on their tasks."""
+    from app.models.models import Meeting
+
+    meeting = client.post(
+        "/api/v1/transcripts",
+        json={"project_id": project["id"], "title": "Legacy", "transcript_text": "..."},
+    ).json()
+    row = db_session.get(Meeting, meeting["id"])
+    row.meeting_date = None
+    db_session.commit()
+
+    tasks = client.get(f"/api/v1/tasks?project_id={project['id']}").json()
+    assert all(t["meeting_date"] == row.created_at.date().isoformat() for t in tasks)
+
+
 @pytest.fixture()
 def capture_anchor(monkeypatch):
     """Record the meeting_date the parser is called with."""
@@ -451,6 +481,7 @@ def test_create_task_manually(client, project):
     assert body["confidence"] == 1.0
     assert body["meeting_id"] is None
     assert body["meeting_title"] is None
+    assert body["meeting_date"] is None
 
 
 def test_create_task_unknown_project(client):

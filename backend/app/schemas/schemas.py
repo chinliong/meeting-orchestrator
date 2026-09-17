@@ -104,6 +104,7 @@ class TaskOut(BaseModel):
     project_id: int
     meeting_id: Optional[int]
     meeting_title: Optional[str] = None
+    meeting_date: Optional[date] = None
     description: str
     owner: Optional[str]
     deadline: Optional[date]
@@ -139,7 +140,7 @@ class DeletedTask(BaseModel):
 
 
 class TaskRestoreData(BaseModel):
-    # Extra fields from a TaskOut snapshot (meeting_title, created_at) are ignored.
+    # Extra fields from a TaskOut snapshot (meeting_title, meeting_date, created_at) are ignored.
     id: int
     project_id: int
     meeting_id: Optional[int] = None

@@ -39,6 +39,20 @@ export function formatDate(iso: string): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
+/**
+ * Meeting date as "Aug 04, 2026", the same format the backend uses in untitled meeting names.
+ * With `short`, the year is dropped when it is the current year ("Aug 04").
+ */
+export function formatMeetingDate(iso: string, short = false): string {
+  const d = new Date(`${iso}T00:00:00`);
+  const sameYear = d.getFullYear() === new Date().getFullYear();
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    ...(short && sameYear ? {} : { year: "numeric" }),
+  });
+}
+
 /** True if the deadline is strictly before today (local time). */
 export function isOverdue(iso: string): boolean {
   const d = new Date(`${iso}T00:00:00`);

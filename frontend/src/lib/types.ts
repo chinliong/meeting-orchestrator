@@ -32,6 +32,8 @@ export interface Task {
   project_id: number;
   meeting_id: number | null;
   meeting_title: string | null;
+  // Date of the source meeting, so meetings that share a title stay distinguishable.
+  meeting_date: string | null;
   description: string;
   owner: string | null;
   deadline: string | null;

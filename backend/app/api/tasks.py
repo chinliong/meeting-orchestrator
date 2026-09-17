@@ -23,7 +23,8 @@ def list_tasks(
     x_workspace_token: Optional[str] = Header(None),
     db: Session = Depends(get_db),
 ):
-    # Eager-load the meeting so serialising `meeting_title` doesn't fire a query per task.
+    # Eager-load the meeting so serialising `meeting_title` and `meeting_date` doesn't fire a
+    # query per task.
     query = db.query(Task).options(joinedload(Task.meeting))
     if project_id is not None:
         require_project_view(db, project_id, user, x_workspace_token)

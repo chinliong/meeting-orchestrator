@@ -7,6 +7,7 @@ import {
   avatarColor,
   confidenceColor,
   formatDate,
+  formatMeetingDate,
   initials,
   isLowConfidence,
   isOverdue,
@@ -34,6 +35,14 @@ export default function TaskCard({
   onRenameMeeting,
 }: Props) {
   const overdue = task.deadline && task.status !== "done" && isOverdue(task.deadline);
+
+  // Shown beside the meeting title so a series of same-named meetings stays distinguishable.
+  // Untitled meetings are already named "Meeting · <date>", so the date isn't repeated.
+  const meetingDate = task.meeting_date ? formatMeetingDate(task.meeting_date) : null;
+  const showMeetingDate = meetingDate !== null && !task.meeting_title?.includes(meetingDate);
+  const meetingLabel = showMeetingDate ? `${task.meeting_title} · ${meetingDate}` : task.meeting_title;
+  // On the card itself the year is dropped for the current year, leaving room for the title.
+  const shortMeetingDate = task.meeting_date ? formatMeetingDate(task.meeting_date, true) : null;
 
   const [expanded, setExpanded] = useState(false);
   const [renaming, setRenaming] = useState(false);
@@ -117,12 +126,13 @@ export default function TaskCard({
         !canEdit ? (
           <div
             className="mb-1.5 flex items-center gap-1 pr-12 text-[11px] font-medium text-slate-400"
-            title={`From meeting: ${task.meeting_title}`}
+            title={`From meeting: ${meetingLabel}`}
           >
             <svg viewBox="0 0 20 20" className="h-3 w-3 shrink-0" fill="currentColor">
               <path d="M4 4a2 2 0 012-2h5.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 5a.75.75 0 000 1.5h6a.75.75 0 000-1.5H7zm0 3a.75.75 0 000 1.5h4a.75.75 0 000-1.5H7z" />
             </svg>
             <span className="truncate">{task.meeting_title}</span>
+            {showMeetingDate && <span className="shrink-0">· {shortMeetingDate}</span>}
           </div>
         ) : renaming ? (
           <div className="mb-1.5 flex items-center gap-1 pr-1">
@@ -142,13 +152,14 @@ export default function TaskCard({
         ) : (
           <button
             onClick={startRename}
-            title={`From meeting: ${task.meeting_title}\nClick to rename (updates all its tasks)`}
+            title={`From meeting: ${meetingLabel}\nClick to rename (updates all its tasks)`}
             className="group/title mb-1.5 flex max-w-full items-center gap-1 rounded pr-12 text-[11px] font-medium text-slate-400 transition hover:text-slate-600"
           >
             <svg viewBox="0 0 20 20" className="h-3 w-3 shrink-0" fill="currentColor">
               <path d="M4 4a2 2 0 012-2h5.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 5a.75.75 0 000 1.5h6a.75.75 0 000-1.5H7zm0 3a.75.75 0 000 1.5h4a.75.75 0 000-1.5H7z" />
             </svg>
             <span className="truncate">{task.meeting_title}</span>
+            {showMeetingDate && <span className="shrink-0">· {shortMeetingDate}</span>}
             <svg
               viewBox="0 0 20 20"
               className="h-3 w-3 shrink-0 opacity-0 transition group-hover/title:opacity-100"

@@ -152,7 +152,7 @@ Response `201 Created`, a meeting object with its extracted tasks:
   "tasks": [
     {
       "id": 40, "project_id": 1, "meeting_id": 12,
-      "meeting_title": "SAP FI/CO Finance Workshop #4",
+      "meeting_title": "SAP FI/CO Finance Workshop #4", "meeting_date": "2026-06-17",
       "description": "Finish the APAC cost center hierarchy mapping",
       "owner": "Daniel", "deadline": "2026-06-19", "status": "todo",
       "confidence": 0.95, "source_decision": null,
@@ -182,8 +182,8 @@ meeting. Requires edit access. `404` if not found.
 
 ## Tasks
 
-A task object includes `meeting_title` (the source meeting's title, `null` for manually-added
-tasks) and three read-only rollup counts: `subtask_total`, `subtask_done`, and `attachment_count`.
+A task object includes `meeting_title` and `meeting_date` (the source meeting's title and date,
+both `null` for manually-added tasks; a meeting stored without a date reports its upload date) and three read-only rollup counts: `subtask_total`, `subtask_done`, and `attachment_count`.
 
 ### `GET /tasks`
 Query params (all optional): `project_id`, `owner`, `status` (`todo|in_progress|done`),
