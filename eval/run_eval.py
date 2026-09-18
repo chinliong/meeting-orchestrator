@@ -1010,7 +1010,7 @@ def _summary_rows(res: dict) -> list[str]:
         v = [_standing(res[n]["tests"][key]["f1"]) for n in ("short", "long", "all")]
         if v[0] == v[1] == "ahead":
             return "Holds on both"
-        return "Combined data only" if v[2] == "ahead" else "Not shown"
+        return "Significant only with both sets combined" if v[2] == "ahead" else "Not shown"
 
     def model_conclusion(key, metric, name):
         v = [_standing(res[n]["tests"][key][metric]) for n in ("short", "long")]

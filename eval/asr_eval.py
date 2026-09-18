@@ -256,8 +256,8 @@ which is the main thing that makes meeting audio hard.
 {body}
 
 {_wrap('''Deepgram is ahead on both meetings and the paired bootstrap separates it from hosted
-Whisper both times. The three Whisper rows are not separable from each other: the ordering of
-hosted turbo and large-v3 even reverses between meetings, so treat them as tied.''')}
+Whisper both times. The three Whisper rows are not separable on ES2008a. On ES2010a hosted turbo
+is ahead of the other two, so the two hosted Whisper models swap order between the meetings.''')}
 
 ## Why Deepgram wins: it drops less speech
 
@@ -266,11 +266,12 @@ hosted turbo and large-v3 even reverses between meetings, so treat them as tied.
 is deletions: {a['scores']['deepgram-nova-3']['del']} against
 {a['scores']['groq-turbo']['del']}. Deepgram recovers words Whisper never emits.''')}
 
-{_wrap('''That refines the limit rather than removing it. Roughly a tenth of the reference words
-are spoken while someone else is talking, and a single mixed channel plus a linear transcript
-cannot represent them. But the limit is set by segmentation, not model capacity: scaling Whisper
-from base to large-v3 never improved deletions, while a model with better voice-activity
-handling improved them by a third.''')}
+{_wrap(f'''That refines the limit rather than removing it. Roughly a tenth of the reference words
+in ES2008a are spoken while someone else is talking, and a single mixed channel plus a linear
+transcript cannot represent them. Model size does not steadily reduce deletions: local Whisper
+base drops {a['scores']['local-base']['del']} words and large-v3
+{a['scores']['local-large-v3']['del']}, while a model with better voice-activity handling drops a
+third fewer than hosted Whisper.''')}
 
 ## What a mis-heard name did, and did not, reach
 

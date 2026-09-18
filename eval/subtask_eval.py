@@ -388,10 +388,14 @@ def render_report(results: dict) -> str:
         shape = _shape_note(results)
         if shape:
             lines += [shape, ""]
+        first = next(iter(results.values()))
+        same = first["judge_model"] == first["arms"]["anthropic"]["model"]
+        whose = ("is also the Claude generator, so it scored its own output" if same
+                 else "is a Claude model, so it scored its own model family's output")
         lines += [
-            "The judge is a Claude model in both cases, so it scored its own model family's "
-            "output in one comparison and a competitor's in the other. If that has any effect, it "
-            "favours Claude, and Claude still does not score significantly higher than Gemini.",
+            f"The judge, `{first['judge_model']}`, {whose}. "
+            "If that has any effect, it favours Claude, and Claude still does not score "
+            "significantly higher than Gemini.",
             "",
         ]
     for n, r in results.items():

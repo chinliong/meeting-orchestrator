@@ -212,6 +212,7 @@ Recreates a previously deleted task from a `DELETE` snapshot; it powers undo. Bo
 above (`{ "task": { ... } }`). The task is restored with its **original id** (so references stay
 valid). Requires edit access to the task's board. `201` with the restored task; `409` if a task
 with that id already exists. A dangling `meeting_id` (its meeting was deleted meanwhile) is cleared.
+The task's subtasks and attachments are deleted with it and are not restored.
 
 ## Subtasks
 
