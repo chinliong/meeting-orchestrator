@@ -12,8 +12,8 @@ on the short set (+0.074, p < 0.001), level on the long set (+0.030, p = 0.252),
 across all eight transcripts (+0.040, p = 0.037). On the long set it is also more precise
 (+0.038, p < 0.001), so it proposes fewer items that are not real tasks. It also costs a tenth
 of Claude Sonnet's price per input token and a sixth per output token. Claude Haiku is rejected
-because it resolves deadlines one day late: exactly +1 day on 52% of its matched deadlines on
-the short set and 40% on the long set.
+because it sets deadlines one day late: exactly +1 day on 52% of its matched deadlines on the
+short set and 40% on the long set.
 
 ## Test sets
 
@@ -23,8 +23,11 @@ the short set and 40% on the long set.
 | Long | 4 | 3,102-4,089 | 8 | 123 | Held out: written after the prompt was fixed, never used to tune it |
 
 All eight are synthetic SAP programme meetings. Every configuration was run eight times on each
-set. Differences are tested with an exact permutation test over the eight per-run scores, and a
-difference is only called a lead when p < 0.05.
+set, because the models do not give the same answer every time. Differences are tested with an
+exact permutation test over the eight per-run scores. Its p-value is the chance of seeing a
+difference at least this large if the two configurations actually performed the same; a
+difference is only reported as real when p < 0.05. "Level" means the difference did not meet
+that bar.
 
 ## Step 1 - choosing the model
 
@@ -32,25 +35,29 @@ Every row uses the with-guidance configuration the application runs; only the mo
 
 | Model | F1 short | F1 long | F1 all eight | Precision | Recall | Deadlines exact | Cost |
 |---|---|---|---|---|---|---|---|
-| Claude Sonnet | 0.855 | 0.858 | 0.858 | 0.918 | 0.807 | 96% | ~$3 / $15 per M tokens |
-| Claude Haiku | 0.781 | 0.813 | 0.806 | 0.951 | 0.701 | 50% | ~$1 / $5 per M tokens |
-| **Gemini Flash** | 0.929 | 0.888 | **0.898** | 0.961 | 0.844 | 96% | ~$0.30 / $2.50 per M tokens |
+| Claude Sonnet | 0.855 | 0.858 | 0.858 | 0.918 | 0.807 | 96% | ~$3 / $15 |
+| Claude Haiku | 0.781 | 0.813 | 0.806 | 0.951 | 0.701 | 50% | ~$1 / $5 |
+| **Gemini Flash** | 0.929 | 0.888 | **0.898** | 0.961 | 0.844 | 96% | ~$0.30 / $2.50 |
 
-_Precision, recall and deadlines are over all eight transcripts._
+Precision is the share of proposed tasks that are real; recall is the share of real tasks that
+were found; F1 combines the two into one score. Precision, recall and deadlines are over all eight
+transcripts. "Deadlines exact" is the share of matched tasks with a deadline where the date is
+exactly right. Cost is the approximate price in US dollars per million input / output tokens.
 
-**Much of Claude Sonnet's gap is completed work.** The answer keys include work the meeting
-reports as already finished (status `done`), because the board records it. Across all eight
-transcripts Claude Sonnet finds 47% of those items against Gemini Flash's 68%, while on open
-work the two are close (91% against 88% of to-do items, 88% against 93% of in-progress ones).
-Claude Haiku finds 7% of completed items.
+**Claude Sonnet's lower recall comes from completed work.** The answer keys include work the
+meeting reports as already finished (status `done`), because the board shows it. Across all
+eight transcripts and eight runs, Claude Sonnet finds 60 fewer completed items than Gemini Flash
+(47% against 68%), while its total shortfall is 46 items. On work that is still open the two are
+close: 91% against 88% of to-do items, and 88% against 93% of in-progress items. Claude Haiku
+finds 7% of completed items.
 
 Claude Sonnet also returned a valid response containing no action items once. The application
-would show that meeting as processed with an empty board, which is harder to notice than a
-failed parse. Gemini Flash never did.
+would show that meeting as processed with no tasks and no error message, which is harder to
+notice than a failed extraction, where an error is shown. Gemini Flash never did.
 
-The three models differ in price tier and release date, and the difference runs both ways:
-Claude Sonnet is a larger tier, Gemini Flash a later release. This is a decision for this
-project, not a ranking of vendors.
+The three models differ in price tier and release date: Claude Sonnet is a larger, more
+expensive model, and Gemini Flash is a more recent release. Because the models are not matched
+on either point, this table supports a decision for this project, not a ranking of vendors.
 
 ## Step 2 - what the prompt and schema guidance adds
 
@@ -58,7 +65,7 @@ Each model was also run without the guidance: a one-line prompt and a schema wit
 descriptions removed. The output format is identical; only the guidance text differs. All eight
 transcripts:
 
-| Model | Responses failing validation | Source decision filled | F1 |
+| Model | Responses failing validation | Tasks that record their source decision | F1 |
 |---|---|---|---|
 | Gemini Flash | 3/64 -> **0/64** | 20% -> **100%** | 0.836 -> **0.898** (p = 0.002) |
 | Claude Sonnet | 7/64 -> **0/64** | 53% -> **100%** | 0.796 -> **0.858** (p = 0.012) |
@@ -72,11 +79,11 @@ significant on both models.
 
 - **The meetings are synthetic.** They are written text, not recorded speech. The long
   transcripts and their answer keys were drafted with an AI assistant (Claude). Text written by
-  one candidate's model family could suit that family; here it would favour Claude Sonnet, which
-  is the opposite direction to the decision.
+  one model family could be easier for models of the same family. Here that would help Claude
+  Sonnet, so any such effect works against the model that was chosen.
 - **Eight meetings is still a small sample.** The results show the choice holds on longer,
   harder meetings than the ones the prompt was built on; they do not show it holds for every
   kind of meeting.
 - **The low-confidence review flag was tuned on Claude Sonnet.** Every Sonnet item scored below
-  0.85 was wrong (11 of 11), but Gemini Flash never scored an item below 0.85 (0 items in all
-  runs), so on the implemented model the flag does not fire. See the appendix.
+  0.85 was wrong (11 of 11), but Gemini Flash scored 0 items below 0.85 in all its runs, so on
+  the implemented model the review flag never appears. See the appendix.

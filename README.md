@@ -294,13 +294,13 @@ failure and raises F1 significantly on both models.
 **2. Which model should the project use?** Claude Sonnet, Claude Haiku and Gemini Flash on the
 with-guidance configuration (`prod`, `haiku_prod`, `gemini_prod`), eight runs each per set, tested
 with an exact permutation test. Gemini Flash is never significantly behind Claude Sonnet on F1:
-ahead on the short set, level on the long set, and ahead across all eight (p = 0.037). It costs a
-tenth of Sonnet's input price, so extraction runs on Gemini. Claude Haiku is rejected for
-resolving deadlines one day late. Subtask generation is indistinguishable between the two models
+ahead on the short set, level (no significant difference) on the long set, and ahead across all
+eight (p = 0.037). It costs a tenth of Sonnet's input price, so extraction runs on Gemini. Claude
+Haiku is rejected because it sets 40-52% of deadlines exactly one day late. Subtask generation is indistinguishable between the two models
 on both sets (p = 0.652 and p = 1.0), so it runs on Gemini for cost and a single provider.
 
-The models differ in tier and release date in both directions, so this is a decision for this
-project, not a ranking of vendors.
+Claude Sonnet is a larger model and Gemini Flash a more recent one, so the models are not
+matched and this is a decision for this project, not a ranking of vendors.
 
 Predictions are matched to the annotated items by word overlap, with no model involved, so
 scoring is repeatable. A semantic LLM-judge matcher is available behind `--rescore-judge` but has
@@ -336,8 +336,8 @@ python -m eval.subtask_eval --report-only                        # re-render, no
 
 This writes `eval/subtask_results.json` or `eval/subtask_results_long.json` and refreshes
 [docs/subtask-evaluation-report.md](docs/subtask-evaluation-report.md). Unlike the transcript
-evaluation there is no prediction cache, so every run calls the model twice per task (generate,
-then judge).
+evaluation there is no prediction cache, so every run makes two model calls per task (the
+generator, then the judge).
 
 ## Project layout
 

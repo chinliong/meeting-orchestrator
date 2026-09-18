@@ -23,17 +23,20 @@ _Summary and decision: [evaluation-report.md](evaluation-report.md). Speech-to-t
   because the board records it.
 - Each transcript is parsed with its true meeting date, so relative cues ("by Friday") resolve
   to one correct date.
-- Predictions are matched one-to-one to annotated items by **word overlap** (Jaccard over
-  content words, threshold 0.18), with no model involved, so scoring is
-  repeatable. Owner, status and deadline are then scored on matched pairs only.
-- **Precision** = matched / predicted, **recall** = matched / annotated, **F1** is their
-  harmonic mean. One value of each is computed per run over every transcript in the set.
+- Predictions are matched one-to-one to annotated items by **word overlap**: the share of
+  meaningful words two descriptions have in common (Jaccard similarity, threshold
+  0.18). No model is involved, so scoring is repeatable. Owner, status and
+  deadline are then scored on matched pairs only.
+- **Precision** = matched / predicted, **recall** = matched / annotated, **F1** combines the two
+  (their harmonic mean, which is pulled towards the lower of the two). One value of each is
+  computed per run over every transcript in the set.
 - Every configuration was run **8 times on each set**. "All eight" joins run *i* of the short
   set with run *i* of the long set; runs are independent, so this pairing adds nothing but lets
   one score cover all eight transcripts.
 - Differences use an **exact permutation test** over the per-run scores: all 12,870 ways of
-  splitting sixteen runs into two groups of eight are enumerated. A difference is called a lead
-  only when p < 0.05.
+  splitting sixteen runs into two groups of eight are enumerated. p is the probability of a
+  difference at least as large arising if the two configurations actually performed the same,
+  and a difference is treated as real only when p < 0.05.
 - Requests that never completed (rate limit, capacity) are excluded as API failures. Only
   responses that arrived and failed the schema count as validation failures.
 
@@ -70,7 +73,8 @@ Gemini Flash fills it on 20% of items and Claude Sonnet on 53%.
 
 ## Study 2 - which model?
 
-Every row uses the with-guidance configuration. Owner and status accuracy are over matched items.
+Every row uses the with-guidance configuration. Owner and status accuracy are measured only on
+matched items, meaning predictions that were paired with an annotated task.
 
 | Model | Set | Runs | Precision | Recall | F1 | Validation failures | Owner | Status |
 |---|---|---|---|---|---|---|---|---|
@@ -98,7 +102,7 @@ Differences (first model minus second), with exact permutation p-values:
 | Claude Sonnet - Claude Haiku | Long | -0.009, p = 0.185 | +0.080, p = 0.024 | +0.045, p = 0.047 |
 | Claude Sonnet - Claude Haiku | All eight | -0.033, p < 0.001 | +0.106, p = 0.003 | +0.051, p = 0.011 |
 
-### Which items each model misses (all eight transcripts)
+### Share of annotated tasks each model finds, by status (all eight transcripts)
 
 | Model | To do | In progress | Done |
 |---|---|---|---|
@@ -106,20 +110,23 @@ Differences (first model minus second), with exact permutation p-values:
 | Claude Haiku | 660/736 (90%) | 195/224 (87%) | 19/288 (7%) |
 | Gemini Flash | 648/736 (88%) | 209/224 (93%) | 196/288 (68%) |
 
-**Much of Claude Sonnet's gap is completed work.** The answer keys include work the meeting
-reports as already finished (status `done`), because the board records it. Across all eight
-transcripts Claude Sonnet finds 47% of those items against Gemini Flash's 68%, while on open
-work the two are close (91% against 88% of to-do items, 88% against 93% of in-progress ones).
-Claude Haiku finds 7% of completed items.
+**Claude Sonnet's lower recall comes from completed work.** The answer keys include work the
+meeting reports as already finished (status `done`), because the board shows it. Across all
+eight transcripts and eight runs, Claude Sonnet finds 60 fewer completed items than Gemini Flash
+(47% against 68%), while its total shortfall is 46 items. On work that is still open the two are
+close: 91% against 88% of to-do items, and 88% against 93% of in-progress items. Claude Haiku
+finds 7% of completed items.
 
 Claude Sonnet also returned a valid response containing no action items once. The application
-would show that meeting as processed with an empty board, which is harder to notice than a
-failed parse. Gemini Flash never did.
+would show that meeting as processed with no tasks and no error message, which is harder to
+notice than a failed extraction, where an error is shown. Gemini Flash never did.
 
 ## Deadline errors
 
-A model that is wrong by a constant amount has a resolution bug, which shifts every reminder;
-one that is randomly wrong has a comprehension limit. The table separates the two.
+A model whose dates are wrong by the same number of days every time has a fixed error in how it
+works out dates, and every reminder scheduled from it would move by that amount. A model whose
+errors vary has no such pattern. The table shows which case applies; "left blank" means the
+model gave no deadline where the answer key has one.
 
 | Configuration | Set | Exact | Most common error |
 |---|---|---|---|
@@ -133,14 +140,16 @@ one that is randomly wrong has a comprehension limit. The table separates the tw
 | Without guidance (Claude Sonnet) | Long | 534/640 (83%) | +1 day (16%) |
 
 **Claude Haiku is systematically one day late**: 52% of its matched deadlines on the short set
-and 40% on the long set are exactly +1 day, so every reminder it scheduled would be sent a day
-late. No other with-guidance configuration produces a +1 day error even once. Claude Sonnet
-without guidance shows the same +1 day drift on the long set (16%), which the guidance removes.
+and 40% on the long set are exactly +1 day, so reminders scheduled from those deadlines would be
+sent a day late. No other with-guidance configuration produces a +1 day error even once. Claude
+Sonnet without guidance makes the same +1 day error on the long set (16% of its deadlines), and
+with guidance it does not.
 
 ## Is the confidence score meaningful?
 
-Every item carries a confidence score and the card flags items below 0.85 for
-review. "Real" means the item matched an annotated one. All eight transcripts:
+Every item carries a confidence score, and the card asks the user to review items below
+0.85. "Real" means the item matched an annotated task; "spurious" means it matched
+none. All eight transcripts:
 
 **Gemini Flash** - real items average 0.963
 (n=1053), spurious ones 0.952 (n=43).
@@ -165,35 +174,40 @@ Below 0.85: 0 real, 11 spurious.
 | 0.95 - 0.99 | 758 | 95% |
 | 0.99 - 1.00 | 192 | 93% |
 
-Neither model's score is a calibrated probability. Claude Sonnet's discriminates at the low end:
-its items below 0.85 were all spurious, which is what the 0.85 threshold was set from. Gemini
-Flash, the implemented model, never scored an item below 0.85 (0 items), and its spurious items
-score almost as high as its real ones. On the implemented model the review flag therefore does
-not fire, and the score carries little information. Gemini Flash also produces few spurious
-items, so the practical cost is small, but the flag should not be described as a safeguard for
-this model.
+Neither model's score can be read as a probability: an item scored 0.9 is not right nine times
+in ten. Claude Sonnet's low scores are still useful, because its items below 0.85 were all
+spurious, and that is where the 0.85 threshold came from. Gemini Flash, the implemented model,
+scored 0 items below 0.85, and its spurious items score almost as high as its real ones. On the
+implemented model the review flag therefore never appears, and the score says little about
+whether an item is right. Gemini Flash also produces few spurious items, so the practical cost
+is small, but the flag should not be described as a check that catches this model's errors.
 
 ## Limitations
 
 - **Synthetic meetings.** All eight are written text, not recorded speech. The pipeline was
   also run end to end on a real AMI recording, which is not part of the scored sets.
 - **Who wrote the long set.** The long transcripts and their answer keys were drafted with an AI
-  assistant (Claude). Text from one candidate's model family could suit that family; here it
-  would favour Claude Sonnet, the opposite direction to the decision.
+  assistant (Claude). Text written by one model family could be easier for models of the same
+  family. Here that would help Claude Sonnet, so any such effect works against the chosen model.
 - **One annotator.** Each answer key has a single labeller, so there is no agreement measure.
 - **Word-overlap matching** occasionally pairs the wrong items when two tasks share many words
   (for example "remove the conflicts" and "review the mitigating controls for the conflicts");
   those pairs show up as large deadline errors. They are rare and do not change any verdict.
 - **Eight meetings.** The long set shows the choice holds on harder meetings than the prompt was
   built on; it does not show it holds for every kind of meeting.
-- **Models differ in tier and release date**, in both directions, so this is a decision for this
-  project rather than a ranking of vendors.
+- **Models differ in tier and release date.** Claude Sonnet is a larger model and Gemini Flash a
+  more recent one, so this is a decision for this project rather than a ranking of vendors.
 - `gemini-3.7-flash` returned HTTP 503 "high demand" or hung on roughly three attempts in four
   and could not be used; `gemini-3.6-flash` is the newest Flash that answered reliably.
 - **A correction worth recording.** An earlier `BARE_TOOL` stripped every key named
   `description`, including the *field* of that name, so the without-guidance configuration
   required a field it did not define. The stripper now removes only annotation text, and
   `eval/test_matching.py` has a regression test. All figures are from runs after the fix.
+- **A second correction.** The Claude conditions used to take their provider from
+  `LLM_PROVIDER`, which the deployment sets to `gemini`, so a new Claude run would have called
+  Gemini while being labelled Claude. Every stored run records the model that produced it, which
+  confirms no figure here was affected. The conditions now name their provider, with a
+  regression test.
 
 ## Raw results
 
