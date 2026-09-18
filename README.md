@@ -288,15 +288,17 @@ The extraction evaluation answers two questions.
 | **Gemini Flash** (`GEMINI_MODEL`) | `gemini_naive` | `gemini_prod`, implemented |
 
 Within a model the two configurations differ *only* in guidance text: identical fields, types,
-enum and required list. Across all eight transcripts the guidance removes every validation
-failure and raises F1 significantly on both models.
+enum and required list. On both test sets the guidance removes every validation failure and
+makes every task record its source decision. Its F1 gain is significant on the combined data but
+borderline: it does not hold for most choices of five runs out of eight.
 
 **2. Which model should the project use?** Claude Sonnet, Claude Haiku and Gemini Flash on the
 with-guidance configuration (`prod`, `haiku_prod`, `gemini_prod`), eight runs each per set, tested
-with an exact permutation test. Gemini Flash is never significantly behind Claude Sonnet on F1:
-ahead on the short set, level (no significant difference) on the long set, and ahead across all
-eight (p = 0.037). It costs a tenth of Sonnet's input price, so extraction runs on Gemini. Claude
-Haiku is rejected because it sets 40-52% of deadlines exactly one day late. Subtask generation is indistinguishable between the two models
+with an exact permutation test. Gemini Flash is never significantly behind Claude Sonnet on F1
+(ahead on the short set, no significant difference on the long set), is more precise on both
+sets, and costs a tenth of Sonnet's input price, so extraction runs on Gemini. Its small F1 lead
+across all eight transcripts (p = 0.037) is borderline, and the decision does not rely on it.
+Claude Haiku is rejected because it sets 40-52% of deadlines exactly one day late. Subtask generation is indistinguishable between the two models
 on both sets (p = 0.652 and p = 1.0), so it runs on Gemini for cost and a single provider.
 
 Claude Sonnet is a larger model and Gemini Flash a more recent one, so the models are not

@@ -36,7 +36,7 @@ _Summary and decision: [evaluation-report.md](evaluation-report.md). Speech-to-t
 - Differences use an **exact permutation test** over the per-run scores: all 12,870 ways of
   splitting sixteen runs into two groups of eight are enumerated. p is the probability of a
   difference at least as large arising if the two configurations actually performed the same,
-  and a difference is treated as real only when p < 0.05.
+  and a difference is called significant only when p < 0.05.
 - Requests that never completed (rate limit, capacity) are excluded as API failures. Only
   responses that arrived and failed the schema count as validation failures.
 
@@ -120,6 +120,41 @@ finds 7% of completed items.
 Claude Sonnet also returned a valid response containing no action items once. The application
 would show that meeting as processed with no tasks and no error message, which is harder to
 notice than a failed extraction, where an error is shown. Gemini Flash never did.
+
+## Do the results hold with five runs?
+
+Each comparison above uses all eight runs. To check that a verdict does not depend on which runs
+happened to be kept, it was re-tested on every way of choosing five of the eight runs (56 ways).
+With five runs the smallest possible p-value is 0.008, so a difference has to be clearer to count
+as significant.
+
+| Comparison | Set | Verdict with eight runs | Same verdict with five runs |
+|---|---|---|---|
+| Gemini Flash vs Claude Sonnet, F1 | Short | significant | 56 of 56 |
+| Gemini Flash vs Claude Sonnet, F1 | Long | not significant | 49 of 56 |
+| Gemini Flash vs Claude Sonnet, F1 | All eight | significant | 13 of 56 |
+| Gemini Flash vs Claude Sonnet, precision | Short | significant | 40 of 56 |
+| Gemini Flash vs Claude Sonnet, precision | Long | significant | 56 of 56 |
+| Gemini Flash vs Claude Sonnet, precision | All eight | significant | 56 of 56 |
+| Gemini Flash vs Claude Haiku, F1 | Short | significant | 56 of 56 |
+| Gemini Flash vs Claude Haiku, F1 | Long | significant | 56 of 56 |
+| Gemini Flash vs Claude Haiku, F1 | All eight | significant | 56 of 56 |
+| Guidance on Gemini Flash, F1 | Short | not significant | 56 of 56 |
+| Guidance on Gemini Flash, F1 | Long | significant | 26 of 56 |
+| Guidance on Gemini Flash, F1 | All eight | significant | 37 of 56 |
+| Guidance on Claude Sonnet, F1 | Short | significant | 47 of 56 |
+| Guidance on Claude Sonnet, F1 | Long | not significant | 35 of 56 |
+| Guidance on Claude Sonnet, F1 | All eight | significant | 21 of 56 |
+
+Significant results that hold for at least 90% of the choices: Gemini Flash vs Claude Sonnet, F1
+(short, 56 of 56); Gemini Flash vs Claude Sonnet, precision (long, 56 of 56); Gemini Flash vs
+Claude Sonnet, precision (all eight, 56 of 56); Gemini Flash vs Claude Haiku, F1 (short, 56 of
+56); Gemini Flash vs Claude Haiku, F1 (long, 56 of 56); Gemini Flash vs Claude Haiku, F1 (all
+eight, 56 of 56). Significant results that do not: Gemini Flash vs Claude Sonnet, F1 (all eight,
+13 of 56); Gemini Flash vs Claude Sonnet, precision (short, 40 of 56); Guidance on Gemini Flash,
+F1 (long, 26 of 56); Guidance on Gemini Flash, F1 (all eight, 37 of 56); Guidance on Claude
+Sonnet, F1 (short, 47 of 56); Guidance on Claude Sonnet, F1 (all eight, 21 of 56). These are
+treated as borderline, and no decision in this report rests on them alone.
 
 ## Deadline errors
 

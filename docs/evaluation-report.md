@@ -7,13 +7,13 @@ Speech-to-text: [asr-evaluation.md](asr-evaluation.md). Subtask generation:
 
 ## Decision
 
-**Extraction runs on Gemini Flash.** It is never significantly behind Claude Sonnet on F1: ahead
-on the short set (+0.074, p < 0.001), level on the long set (+0.030, p = 0.252), and ahead
-across all eight transcripts (+0.040, p = 0.037). On the long set it is also more precise
-(+0.038, p < 0.001), so it proposes fewer items that are not real tasks. It also costs a tenth
-of Claude Sonnet's price per input token and a sixth per output token. Claude Haiku is rejected
-because it sets deadlines one day late: exactly +1 day on 52% of its matched deadlines on the
-short set and 40% on the long set.
+**Extraction runs on Gemini Flash.** It is never significantly behind Claude Sonnet on F1 on
+either test set, it is more precise on both, meaning fewer of the tasks it proposes are wrong,
+and it costs a tenth of Claude Sonnet's price per input token and a sixth per output token.
+Across all eight transcripts it also has a small F1 lead (+0.040, p = 0.037), but that lead is
+borderline: with five runs instead of eight it holds for only 13 of the 56 possible choices of
+runs, so the decision does not depend on it. Claude Haiku is rejected because it sets deadlines
+exactly one day late: 52% of its matched deadlines on the short set and 40% on the long set.
 
 ## Test sets
 
@@ -26,10 +26,32 @@ All eight are synthetic SAP programme meetings. Every configuration was run eigh
 set, because the models do not give the same answer every time. Differences are tested with an
 exact permutation test over the eight per-run scores. Its p-value is the chance of seeing a
 difference at least this large if the two configurations actually performed the same; a
-difference is only reported as real when p < 0.05. "Level" means the difference did not meet
-that bar.
+difference is called significant only when p < 0.05.
 
-## Step 1 - choosing the model
+## Results on each test set
+
+"Guidance" is the refined prompt and the fully described output schema; without it, the model gets
+a one-line prompt and a schema with the field descriptions removed. The last column says whether
+the result holds on both sets.
+
+| Result | Short set | Long set | Conclusion |
+|---|---|---|---|
+| Guidance prevents invalid output | 9 of 64 parses failed -> 0 | 1 of 64 parses failed -> 0 | Holds on both |
+| Guidance makes tasks record their source decision | Gemini 16%, Sonnet 44% -> both 100% | Gemini 21%, Sonnet 56% -> both 100% | Holds on both |
+| Guidance raises F1 on Gemini Flash | +0.045, not significant | +0.069, significant | Combined data only |
+| Guidance raises F1 on Claude Sonnet | +0.139, significant | +0.041, not significant | Combined data only |
+| Gemini Flash vs Claude Sonnet, F1 | +0.074, significant | +0.030, not significant | Gemini never behind |
+| Gemini Flash vs Claude Sonnet, precision | +0.058, significant | +0.038, significant | Gemini ahead on both |
+| Gemini Flash vs Claude Haiku, F1 | +0.148, significant | +0.075, significant | Gemini ahead on both |
+| Claude Haiku deadlines exactly one day late | 52% | 40% | Holds on both |
+
+Three results across all eight transcripts are significant with eight runs but borderline. When
+the test is repeated on each of the 56 ways of keeping only five runs, Gemini Flash's F1 lead
+over Claude Sonnet holds in 13, the F1 gain from guidance on Gemini Flash holds in 37, and the
+F1 gain from guidance on Claude Sonnet holds in 21. The appendix gives this check for every
+result.
+
+## Choosing the model
 
 Every row uses the with-guidance configuration the application runs; only the model changes.
 
@@ -58,22 +80,6 @@ notice than a failed extraction, where an error is shown. Gemini Flash never did
 The three models differ in price tier and release date: Claude Sonnet is a larger, more
 expensive model, and Gemini Flash is a more recent release. Because the models are not matched
 on either point, this table supports a decision for this project, not a ranking of vendors.
-
-## Step 2 - what the prompt and schema guidance adds
-
-Each model was also run without the guidance: a one-line prompt and a schema with the field
-descriptions removed. The output format is identical; only the guidance text differs. All eight
-transcripts:
-
-| Model | Responses failing validation | Tasks that record their source decision | F1 |
-|---|---|---|---|
-| Gemini Flash | 3/64 -> **0/64** | 20% -> **100%** | 0.836 -> **0.898** (p = 0.002) |
-| Claude Sonnet | 7/64 -> **0/64** | 53% -> **100%** | 0.796 -> **0.858** (p = 0.012) |
-
-Without guidance both models sometimes return output that fails validation, and the application
-then gets no tasks at all; with guidance that never happened. With guidance both models also
-record which decision each task came from. Across all eight transcripts the F1 gain is
-significant on both models.
 
 ## What this does not show
 

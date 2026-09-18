@@ -766,6 +766,35 @@ def pair_tests(overlap: dict) -> dict:
     return out
 
 
+# The comparisons the conclusions rest on, re-tested on every choice of five of the eight runs.
+ROBUSTNESS_CHECKS = [("gemini_prod", "prod", "f1"), ("gemini_prod", "prod", "precision"),
+                     ("gemini_prod", "haiku_prod", "f1"), ("gemini_prod", "gemini_naive", "f1"),
+                     ("prod", "naive", "f1")]
+
+
+def five_run_robustness(overlap: dict) -> dict:
+    """How often each eight-run verdict survives when only five runs are kept.
+
+    Every way of choosing five of the eight runs (56) is tested. A verdict that holds for most
+    choices does not depend on which runs happened to be kept; one that holds for few is
+    borderline, however small its eight-run p-value.
+    """
+    out = {}
+    for x, y, m in ROBUSTNESS_CHECKS:
+        if x not in overlap or y not in overlap:
+            continue
+        a = [r[m] for r in overlap[x]["runs"]]
+        b = [r[m] for r in overlap[y]["runs"]]
+        if len(a) != len(b) or len(a) < 5:
+            continue
+        verdict = _standing(permutation_test(a, b))
+        subsets = list(itertools.combinations(range(len(a)), 5))
+        held = sum(_standing(permutation_test([a[i] for i in s], [b[i] for i in s])) == verdict
+                   for s in subsets)
+        out[f"{x}|{y}|{m}"] = {"verdict": verdict, "held": held, "of": len(subsets)}
+    return out
+
+
 def merge_caches(*caches: dict) -> dict:
     """Join run i of each cache into one run, per condition, so the sets can be scored together.
 
@@ -858,6 +887,7 @@ def build_results(sets: dict) -> dict:
             "below_threshold": {c: below_threshold(cache, ann, c) for c in ov},
             "confidence": {c: confidence_calibration(cache, ann, c)
                            for c in ("gemini_prod", "prod") if c in ov},
+            "robustness": five_run_robustness(ov),
         }
     return out
 
@@ -917,35 +947,111 @@ _ROLES = {"short": "Development: the prompt was refined against it",
 
 
 def _decision(res: dict) -> str:
-    """The decision paragraph. Each clause is derived from a test, so it cannot overstate."""
-    parts = []
-    for name in ("short", "long", "all"):
-        t = res[name]["tests"].get("gemini_prod|prod")
-        if not t:
-            continue
-        where = {"short": "on the short set", "long": "on the long set",
-                 "all": "across all eight transcripts"}[name]
-        parts.append(f"{_standing(t['f1'])} {where} ({_gap(t['f1'])})")
-    never_behind = all(_standing(res[n]["tests"]["gemini_prod|prod"]["f1"]) != "behind"
-                       for n in ("short", "long", "all") if "gemini_prod|prod" in res[n]["tests"])
-    lead = ("It is never significantly behind Claude Sonnet on F1: " if never_behind
-            else "Against Claude Sonnet on F1 it is ")
-    body = lead + ", ".join(parts[:-1]) + ", and " + parts[-1] + "."
-    lp = res["long"]["tests"].get("gemini_prod|prod", {}).get("precision")
-    if lp and _standing(lp) == "ahead":
-        body += (f" On the long set it is also more precise ({_gap(lp)}), so it proposes fewer "
-                 f"items that are not real tasks.")
-    body += (" It also costs a tenth of Claude Sonnet's price per input token and a sixth per "
+    """The decision paragraph. It rests only on results that hold on both sets; a result that
+    holds only on the combined data is reported as such, with its five-run robustness."""
+    sets = ("short", "long")
+    f1 = {n: _standing(res[n]["tests"]["gemini_prod|prod"]["f1"]) for n in sets + ("all",)}
+    prec = {n: _standing(res[n]["tests"]["gemini_prod|prod"]["precision"]) for n in sets}
+    if all(f1[n] != "behind" for n in sets):
+        body = "It is never significantly behind Claude Sonnet on F1 on either test set"
+    else:
+        body = "It is significantly behind Claude Sonnet on F1 on at least one test set"
+    if all(prec[n] == "ahead" for n in sets):
+        body += ", it is more precise on both, meaning fewer of the tasks it proposes are wrong"
+    body += (", and it costs a tenth of Claude Sonnet's price per input token and a sixth per "
              "output token.")
-    haiku = [(n, res[n]["offsets"].get("haiku_prod")) for n in ("short", "long")]
+    t = res["all"]["tests"]["gemini_prod|prod"]["f1"]
+    rob = res["all"]["robustness"].get("gemini_prod|prod|f1")
+    if f1["all"] == "ahead" and rob:
+        if rob["held"] < 0.9 * rob["of"]:
+            body += (f" Across all eight transcripts it also has a small F1 lead ({_gap(t)}), but "
+                     f"that lead is borderline: with five runs instead of eight it holds for only "
+                     f"{rob['held']} of the {rob['of']} possible choices of runs, so the decision "
+                     f"does not depend on it.")
+        else:
+            body += (f" Across all eight transcripts it also leads on F1 ({_gap(t)}), and that "
+                     f"lead holds for {rob['held']} of the {rob['of']} choices of five runs.")
+    haiku = [(n, res[n]["offsets"].get("haiku_prod")) for n in sets]
     shares = [f"{o['dominant_share']:.0%}" + (" of its matched deadlines" if i == 0 else "")
               + f" on the {n} set"
               for i, (n, o) in enumerate((n, o) for n, o in haiku
                                          if o and o["dominant_offset"] == 1)]
     if shares:
-        body += (" Claude Haiku is rejected because it sets deadlines one day late: "
-                 "exactly +1 day on " + " and ".join(shares) + ".")
+        body += (" Claude Haiku is rejected because it sets deadlines exactly one day late: "
+                 + " and ".join(shares) + ".")
     return body
+
+
+def _borderline_note(res: dict) -> str:
+    """Name the combined-data results that do not survive a five-run re-check."""
+    labels = {"gemini_prod|prod|f1": "Gemini Flash's F1 lead over Claude Sonnet",
+              "gemini_prod|gemini_naive|f1": "the F1 gain from guidance on Gemini Flash",
+              "prod|naive|f1": "the F1 gain from guidance on Claude Sonnet"}
+    weak = [(text, r) for key, text in labels.items()
+            if (r := res["all"]["robustness"].get(key)) and r["verdict"] == "ahead"
+            and r["held"] < 0.9 * r["of"]]
+    if not weak:
+        return ""
+    of = weak[0][1]["of"]
+    parts = [f"{text} holds in {r['held']}" for text, r in weak]
+    listed = parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + ", and " + parts[-1]
+    count = {1: "One result", 2: "Two results", 3: "Three results"}.get(len(weak), "Some results")
+    return (f"{count} across all eight transcripts are significant with eight runs but "
+            f"borderline. When the test is repeated on each of the {of} ways of keeping only five "
+            f"runs, {listed}. The appendix gives this check for every result.")
+
+
+def _summary_rows(res: dict) -> list[str]:
+    """One row per result: what each set shows and whether it holds on both. Mirrors E2 Table 7-2."""
+    def word(t):
+        return f"{t[0]:+.3f}, " + ("significant" if t[1] < 0.05 else "not significant")
+
+    def guidance_conclusion(key):
+        v = [_standing(res[n]["tests"][key]["f1"]) for n in ("short", "long", "all")]
+        if v[0] == v[1] == "ahead":
+            return "Holds on both"
+        return "Combined data only" if v[2] == "ahead" else "Not shown"
+
+    def model_conclusion(key, metric, name):
+        v = [_standing(res[n]["tests"][key][metric]) for n in ("short", "long")]
+        if v[0] == v[1] == "ahead":
+            return f"{name} ahead on both"
+        return f"{name} never behind" if "behind" not in v else "Mixed"
+
+    rows = []
+    fails = {n: (sum(res[n]["overlap"][c]["validation_failures"] for c in ("gemini_naive", "naive")),
+                 sum(res[n]["overlap"][c]["parses"] for c in ("gemini_naive", "naive")),
+                 sum(res[n]["overlap"][c]["validation_failures"] for c in ("gemini_prod", "prod")))
+             for n in ("short", "long")}
+    rows.append("| Guidance prevents invalid output | "
+                + " | ".join(f"{f} of {t} parses failed -> {w}" for f, t, w in fails.values())
+                + " | " + ("Holds on both" if all(v[2] == 0 for v in fails.values()) else "Mixed")
+                + " |")
+    src = {n: (res[n]["completeness"]["gemini_naive"]["source_decision_rate"],
+               res[n]["completeness"]["naive"]["source_decision_rate"],
+               min(res[n]["completeness"][c]["source_decision_rate"] for c in ("gemini_prod", "prod")))
+           for n in ("short", "long")}
+    rows.append("| Guidance makes tasks record their source decision | "
+                + " | ".join(f"Gemini {_pct(g)}, Sonnet {_pct(c)} -> both {_pct(w)}"
+                             for g, c, w in src.values())
+                + " | " + ("Holds on both" if all(v[2] == 1.0 for v in src.values()) else "Mixed")
+                + " |")
+    for key, name in (("gemini_prod|gemini_naive", "Gemini Flash"), ("prod|naive", "Claude Sonnet")):
+        rows.append(f"| Guidance raises F1 on {name} | "
+                    + " | ".join(word(res[n]["tests"][key]["f1"]) for n in ("short", "long"))
+                    + f" | {guidance_conclusion(key)} |")
+    for key, metric, label in (("gemini_prod|prod", "f1", "Gemini Flash vs Claude Sonnet, F1"),
+                               ("gemini_prod|prod", "precision",
+                                "Gemini Flash vs Claude Sonnet, precision"),
+                               ("gemini_prod|haiku_prod", "f1", "Gemini Flash vs Claude Haiku, F1")):
+        rows.append(f"| {label} | "
+                    + " | ".join(word(res[n]["tests"][key][metric]) for n in ("short", "long"))
+                    + f" | {model_conclusion(key, metric, 'Gemini')} |")
+    hk = [res[n]["offsets"]["haiku_prod"] for n in ("short", "long")]
+    if all(o["dominant_offset"] == 1 for o in hk):
+        rows.append("| Claude Haiku deadlines exactly one day late | "
+                    + " | ".join(f"{o['dominant_share']:.0%}" for o in hk) + " | Holds on both |")
+    return rows
 
 
 def _completed_work(res: dict) -> str:
@@ -1005,27 +1111,6 @@ def render_report(res: dict, profiles: dict) -> str:
             f"{a['overlap'][cond]['precision']} | {a['overlap'][cond]['recall']} | "
             f"{o['exact'] / o['total']:.0%} | {_MODEL_NOTES[cond]} |")
 
-    g_rows = []
-    for base, impr in (("gemini_naive", "gemini_prod"), ("naive", "prod")):
-        mb, mi = a["overlap"][base], a["overlap"][impr]
-        qb, qi = a["completeness"][base], a["completeness"][impr]
-        t = a["tests"][f"{impr}|{base}"]["f1"]
-        g_rows.append(
-            f"| {CONDITIONS[impr].short} | {mb['validation_failures']}/{mb['parses']} -> "
-            f"**{mi['validation_failures']}/{mi['parses']}** | "
-            f"{_pct(qb['source_decision_rate'])} -> **{_pct(qi['source_decision_rate'])}** | "
-            f"{mb['f1']} -> **{mi['f1']}** ({_p(t[1])}) |")
-
-    verdicts = {CONDITIONS[i].short: _standing(a["tests"][f"{i}|{b}"]["f1"])
-                for b, i in (("gemini_naive", "gemini_prod"), ("naive", "prod"))}
-    raised = [m for m, v in verdicts.items() if v == "ahead"]
-    if len(raised) == 2:
-        guidance_f1 = "Across all eight transcripts the F1 gain is significant on both models."
-    elif raised:
-        guidance_f1 = (f"Across all eight transcripts the F1 gain is significant on {raised[0]} "
-                       f"only.")
-    else:
-        guidance_f1 = "The F1 difference is not significant."
     g_real, g_spur = a["below_threshold"].get("gemini_prod", (0, 0))
     c_real, c_spur = a["below_threshold"].get("prod", (0, 0))
 
@@ -1051,10 +1136,21 @@ Speech-to-text: [asr-evaluation.md](asr-evaluation.md). Subtask generation:
 times on each set, because the models do not give the same answer every time. Differences are
 tested with an exact permutation test over the eight per-run scores. Its p-value is the chance of
 seeing a difference at least this large if the two configurations actually performed the same; a
-difference is only reported as real when p < 0.05. "Level" means the difference did not meet that
-bar.''')}
+difference is called significant only when p < 0.05.''')}
 
-## Step 1 - choosing the model
+## Results on each test set
+
+"Guidance" is the refined prompt and the fully described output schema; without it, the model gets
+a one-line prompt and a schema with the field descriptions removed. The last column says whether
+the result holds on both sets.
+
+| Result | Short set | Long set | Conclusion |
+|---|---|---|---|
+{chr(10).join(_summary_rows(res))}
+
+{_wrap(_borderline_note(res))}
+
+## Choosing the model
 
 Every row uses the with-guidance configuration the application runs; only the model changes.
 
@@ -1075,20 +1171,6 @@ exactly right. Cost is the approximate price in US dollars per million input / o
 more expensive model, and Gemini Flash is a more recent release. Because the models are not
 matched on either point, this table supports a decision for this project, not a ranking of
 vendors.''')}
-
-## Step 2 - what the prompt and schema guidance adds
-
-Each model was also run without the guidance: a one-line prompt and a schema with the field
-descriptions removed. The output format is identical; only the guidance text differs. All eight
-transcripts:
-
-| Model | Responses failing validation | Tasks that record their source decision | F1 |
-|---|---|---|---|
-{chr(10).join(g_rows)}
-
-{_wrap(f'''Without guidance both models sometimes return output that fails validation, and the
-application then gets no tasks at all; with guidance that never happened. With guidance both
-models also record which decision each task came from. {guidance_f1}''')}
 
 ## What this does not show
 
@@ -1187,6 +1269,37 @@ def render_appendix(res: dict, profiles: dict, models: dict, judge_note: str) ->
                 s2_tests.append(f"| {label} | {SET_LABELS[name]} | {_gap(t['precision'])} | "
                                 f"{_gap(t['recall'])} | {_gap(t['f1'])} |")
 
+    # Five-run robustness.
+    rob_labels = {"gemini_prod|prod|f1": "Gemini Flash vs Claude Sonnet, F1",
+                  "gemini_prod|prod|precision": "Gemini Flash vs Claude Sonnet, precision",
+                  "gemini_prod|haiku_prod|f1": "Gemini Flash vs Claude Haiku, F1",
+                  "gemini_prod|gemini_naive|f1": "Guidance on Gemini Flash, F1",
+                  "prod|naive|f1": "Guidance on Claude Sonnet, F1"}
+    verdict_words = {"ahead": "significant", "behind": "significant (reversed)",
+                     "level": "not significant"}
+    rob_rows = []
+    for key, label in rob_labels.items():
+        for name in ("short", "long", "all"):
+            r = res[name]["robustness"].get(key)
+            if r:
+                rob_rows.append(f"| {label} | {SET_LABELS[name]} | {verdict_words[r['verdict']]} | "
+                                f"{r['held']} of {r['of']} |")
+
+    firm, fragile = [], []
+    for key, label in rob_labels.items():
+        for name in ("short", "long", "all"):
+            r = res[name]["robustness"].get(key)
+            if r and r["verdict"] != "level":
+                item = f"{label} ({SET_LABELS[name].lower()}, {r['held']} of {r['of']})"
+                (firm if r["held"] >= 0.9 * r["of"] else fragile).append(item)
+    rob_text = ""
+    if firm:
+        rob_text += ("Significant results that hold for at least 90% of the choices: "
+                     + "; ".join(firm) + ". ")
+    if fragile:
+        rob_text += ("Significant results that do not: " + "; ".join(fragile) + ". These are "
+                     "treated as borderline, and no decision in this report rests on them alone.")
+
     # Recall by status.
     status_rows = []
     for cond in COMPARISON_CONDITIONS:
@@ -1273,7 +1386,7 @@ _Summary and decision: [evaluation-report.md](evaluation-report.md). Speech-to-t
 - Differences use an **exact permutation test** over the per-run scores: all 12,870 ways of
   splitting sixteen runs into two groups of eight are enumerated. p is the probability of a
   difference at least as large arising if the two configurations actually performed the same,
-  and a difference is treated as real only when p < 0.05.
+  and a difference is called significant only when p < 0.05.
 - Requests that never completed (rate limit, capacity) are excluded as API failures. Only
   responses that arrived and failed the schema count as validation failures.
 
@@ -1325,6 +1438,19 @@ Differences (first model minus second), with exact permutation p-values:
 {_completed_work(res)}
 
 {_empty_note(res)}
+
+## Do the results hold with five runs?
+
+Each comparison above uses all eight runs. To check that a verdict does not depend on which runs
+happened to be kept, it was re-tested on every way of choosing five of the eight runs (56 ways).
+With five runs the smallest possible p-value is 0.008, so a difference has to be clearer to count
+as significant.
+
+| Comparison | Set | Verdict with eight runs | Same verdict with five runs |
+|---|---|---|---|
+{chr(10).join(rob_rows)}
+
+{_wrap(rob_text)}
 
 ## Deadline errors
 

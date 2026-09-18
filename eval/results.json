@@ -1006,6 +1006,33 @@
             }
           ]
         }
+      },
+      "robustness": {
+        "gemini_prod|prod|f1": {
+          "verdict": "ahead",
+          "held": 56,
+          "of": 56
+        },
+        "gemini_prod|prod|precision": {
+          "verdict": "ahead",
+          "held": 40,
+          "of": 56
+        },
+        "gemini_prod|haiku_prod|f1": {
+          "verdict": "ahead",
+          "held": 56,
+          "of": 56
+        },
+        "gemini_prod|gemini_naive|f1": {
+          "verdict": "level",
+          "held": 56,
+          "of": 56
+        },
+        "prod|naive|f1": {
+          "verdict": "ahead",
+          "held": 47,
+          "of": 56
+        }
       }
     },
     "long": {
@@ -2009,6 +2036,33 @@
               "matched_rate": 1.0
             }
           ]
+        }
+      },
+      "robustness": {
+        "gemini_prod|prod|f1": {
+          "verdict": "level",
+          "held": 49,
+          "of": 56
+        },
+        "gemini_prod|prod|precision": {
+          "verdict": "ahead",
+          "held": 56,
+          "of": 56
+        },
+        "gemini_prod|haiku_prod|f1": {
+          "verdict": "ahead",
+          "held": 56,
+          "of": 56
+        },
+        "gemini_prod|gemini_naive|f1": {
+          "verdict": "ahead",
+          "held": 26,
+          "of": 56
+        },
+        "prod|naive|f1": {
+          "verdict": "level",
+          "held": 35,
+          "of": 56
         }
       }
     },
@@ -3025,6 +3079,33 @@
               "matched_rate": 0.927
             }
           ]
+        }
+      },
+      "robustness": {
+        "gemini_prod|prod|f1": {
+          "verdict": "ahead",
+          "held": 13,
+          "of": 56
+        },
+        "gemini_prod|prod|precision": {
+          "verdict": "ahead",
+          "held": 56,
+          "of": 56
+        },
+        "gemini_prod|haiku_prod|f1": {
+          "verdict": "ahead",
+          "held": 56,
+          "of": 56
+        },
+        "gemini_prod|gemini_naive|f1": {
+          "verdict": "ahead",
+          "held": 37,
+          "of": 56
+        },
+        "prod|naive|f1": {
+          "verdict": "ahead",
+          "held": 21,
+          "of": 56
         }
       }
     }
