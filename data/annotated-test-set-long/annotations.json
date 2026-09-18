@@ -1,0 +1,815 @@
+[
+ {
+  "transcript_file": "cutover-readiness-review-05.txt",
+  "meeting_date": "2026-06-22",
+  "expected_decisions": [
+   "Go-live moves from 6 July to 13 July 2026.",
+   "Production transport freeze from 29 June; after that only emergency fixes, approved by Aisha.",
+   "Hypercare runs for four weeks, with daily stand-ups for the first two weeks and twice a week after that."
+  ],
+  "expected_action_items": [
+   {
+    "description": "forward the signed-off bank statement sample file to Daniel",
+    "owner": "Kenji",
+    "deadline": "2026-06-24",
+    "status": "todo"
+   },
+   {
+    "description": "finish the MT940 parser fix and retest it in QA",
+    "owner": "Daniel",
+    "deadline": "2026-06-26",
+    "status": "in_progress"
+   },
+   {
+    "description": "complete the APAC cost center mapping",
+    "owner": "Daniel",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "clear the eleven duplicate postings from the system",
+    "owner": "Priya",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "prepare the opening balance reconciliation for the mock cutover",
+    "owner": "Priya",
+    "deadline": "2026-06-26",
+    "status": "in_progress"
+   },
+   {
+    "description": "rerun the material master validation against the cleaned data",
+    "owner": "Priya",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "write the rollback steps into the cutover runbook",
+    "owner": "Daniel",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "install the barcode scanner firmware patch in the test environment",
+    "owner": "Marcus",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "rerun the full warehouse readiness test with the new scanner firmware",
+    "owner": "Farah",
+    "deadline": "2026-06-30",
+    "status": "todo"
+   },
+   {
+    "description": "fix the WM to TMS interface timeout errors",
+    "owner": "Kenji",
+    "deadline": "2026-07-03",
+    "status": "in_progress"
+   },
+   {
+    "description": "forward the WM to TMS timeout notes to Kenji",
+    "owner": "Daniel",
+    "deadline": "2026-06-22",
+    "status": "todo"
+   },
+   {
+    "description": "confirm the stock count schedule with the warehouse managers",
+    "owner": "Farah",
+    "deadline": "2026-06-24",
+    "status": "todo"
+   },
+   {
+    "description": "finish the cycle count reconciliation for the mock cutover",
+    "owner": "Nadia",
+    "deadline": "2026-06-26",
+    "status": "in_progress"
+   },
+   {
+    "description": "finish the label printer integration",
+    "owner": "Daniel",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "renew the expired SSL certificate on the QA interface server",
+    "owner": "Marcus",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "run the system copy from production to the mock environment",
+    "owner": null,
+    "deadline": null,
+    "status": "todo"
+   },
+   {
+    "description": "communicate the production transport freeze to all development teams",
+    "owner": "Marcus",
+    "deadline": "2026-06-25",
+    "status": "todo"
+   },
+   {
+    "description": "approve the change request for additional consulting days",
+    "owner": "Wei Lin",
+    "deadline": "2026-06-23",
+    "status": "todo"
+   },
+   {
+    "description": "send the month-end close timetable to Priya",
+    "owner": "Wei Lin",
+    "deadline": "2026-06-22",
+    "status": "todo"
+   },
+   {
+    "description": "finish the mitigating controls document for the auditors",
+    "owner": "Daniel",
+    "deadline": "2026-06-25",
+    "status": "in_progress"
+   },
+   {
+    "description": "put the segregation-of-duties conflict report in the newer format into the project folder",
+    "owner": "Marcus",
+    "deadline": null,
+    "status": "todo"
+   },
+   {
+    "description": "rebook the cutover weekend team for the eleventh and twelfth",
+    "owner": "Marcus",
+    "deadline": null,
+    "status": "todo"
+   },
+   {
+    "description": "update the cutover runbook with the new go-live date",
+    "owner": "Aisha",
+    "deadline": "2026-06-25",
+    "status": "todo"
+   },
+   {
+    "description": "brief the steering committee on the new go-live date",
+    "owner": "Aisha",
+    "deadline": "2026-06-30",
+    "status": "todo"
+   },
+   {
+    "description": "sign off the post-load financial balances on the cutover Sunday",
+    "owner": "Priya",
+    "deadline": "2026-07-12",
+    "status": "todo"
+   },
+   {
+    "description": "sign off the warehouse side on the cutover Sunday",
+    "owner": "Farah",
+    "deadline": "2026-07-12",
+    "status": "todo"
+   },
+   {
+    "description": "update the cutover run sheet with the new weekend dates, names and contact numbers",
+    "owner": "Marcus",
+    "deadline": "2026-06-29",
+    "status": "todo"
+   },
+   {
+    "description": "finish the training materials for the finance users",
+    "owner": "Siti",
+    "deadline": null,
+    "status": "in_progress"
+   },
+   {
+    "description": "send the bank reconciliation screenshots to Siti",
+    "owner": "Daniel",
+    "deadline": null,
+    "status": "todo"
+   },
+   {
+    "description": "schedule the train-the-trainer sessions for the warehouse supervisors",
+    "owner": "Siti",
+    "deadline": "2026-07-03",
+    "status": "todo"
+   },
+   {
+    "description": "draft the go-live communication email to all users",
+    "owner": "Siti",
+    "deadline": "2026-06-26",
+    "status": "todo"
+   }
+  ],
+  "not_action_items": [
+   "phased-rollout plan for the warehouses (requested, then cancelled later in the meeting)",
+   "API monitoring dashboards (parked for hypercare planning)",
+   "supplier communication (considered and rejected)",
+   "second Basis contractor for hypercare (asked, not approved)",
+   "end-to-end test with the bank (not possible before August)",
+   "Daniel's original Wednesday date for the parser fix (superseded by Friday)"
+  ]
+ },
+ {
+  "transcript_file": "finance-close-planning-06.txt",
+  "meeting_date": "2026-07-01",
+  "expected_decisions": [
+   "Manual bank reconciliation is the fallback if the bank interface fails in the first week after go-live.",
+   "The last legacy payment run is Tuesday 7 July, with no exceptions.",
+   "The July close runs on seven working days, returning to five from August.",
+   "Legacy stays read-only for twelve months after go-live."
+  ],
+  "expected_action_items": [
+   {
+    "description": "fix the MT940 parser and retest it in QA",
+    "owner": "Daniel",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "run the end-to-end bank statement test in pre-production",
+    "owner": "Kenji",
+    "deadline": "2026-07-03",
+    "status": "todo"
+   },
+   {
+    "description": "write the work instruction for the manual bank reconciliation fallback",
+    "owner": "Daniel",
+    "deadline": "2026-07-10",
+    "status": "todo"
+   },
+   {
+    "description": "set up the five new house bank accounts in the production system",
+    "owner": "Omar",
+    "deadline": "2026-07-10",
+    "status": "in_progress"
+   },
+   {
+    "description": "sign the bank mandate letters",
+    "owner": "Wei Lin",
+    "deadline": "2026-07-01",
+    "status": "todo"
+   },
+   {
+    "description": "fix the payment file transfer to the bank",
+    "owner": "Kenji",
+    "deadline": "2026-07-06",
+    "status": "in_progress"
+   },
+   {
+    "description": "close the three dormant bank accounts",
+    "owner": "Omar",
+    "deadline": "2026-07-31",
+    "status": "todo"
+   },
+   {
+    "description": "send Omar the list of bank GL accounts",
+    "owner": "Daniel",
+    "deadline": "2026-07-01",
+    "status": "todo"
+   },
+   {
+    "description": "schedule the daily exchange rate upload job in production",
+    "owner": "Kenji",
+    "deadline": "2026-07-10",
+    "status": "todo"
+   },
+   {
+    "description": "check the opening cash position in the new system against the bank balances on go-live Monday",
+    "owner": "Omar",
+    "deadline": "2026-07-13",
+    "status": "todo"
+   },
+   {
+    "description": "clear the remaining parked vendor invoices before the legacy lock",
+    "owner": "Hannah",
+    "deadline": "2026-07-09",
+    "status": "in_progress"
+   },
+   {
+    "description": "approve the overtime for the AP clerks",
+    "owner": "Wei Lin",
+    "deadline": "2026-07-01",
+    "status": "todo"
+   },
+   {
+    "description": "send the overtime request form to Wei Lin",
+    "owner": "Hannah",
+    "deadline": "2026-07-01",
+    "status": "todo"
+   },
+   {
+    "description": "send the payment run cut-off notice to vendors",
+    "owner": "Hannah",
+    "deadline": "2026-07-02",
+    "status": "todo"
+   },
+   {
+    "description": "clean up the remaining duplicate vendor records",
+    "owner": "Hannah",
+    "deadline": "2026-07-03",
+    "status": "in_progress"
+   },
+   {
+    "description": "train the two new AP clerks on invoice parking",
+    "owner": "Hannah",
+    "deadline": "2026-07-10",
+    "status": "todo"
+   },
+   {
+    "description": "reconcile the intercompany balances",
+    "owner": "Priya",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "validate the fixed asset balances from the mock load",
+    "owner": "Priya",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "send round the updated chart of accounts",
+    "owner": "Priya",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "draft the first month-end close calendar on the new system",
+    "owner": "Priya",
+    "deadline": "2026-07-15",
+    "status": "todo"
+   },
+   {
+    "description": "agree the cash forecast template with Priya",
+    "owner": "Omar",
+    "deadline": null,
+    "status": "todo"
+   },
+   {
+    "description": "complete the Singapore tax code mapping",
+    "owner": "Grace",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "confirm the Malaysian tax code mapping",
+    "owner": "Grace",
+    "deadline": "2026-07-06",
+    "status": "in_progress"
+   },
+   {
+    "description": "configure the GST reporting variant",
+    "owner": "Daniel",
+    "deadline": "2026-07-17",
+    "status": "todo"
+   },
+   {
+    "description": "file the June withholding tax return under the legacy system",
+    "owner": "Grace",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "draw up the finance hypercare support rota",
+    "owner": "Priya",
+    "deadline": "2026-07-03",
+    "status": "todo"
+   },
+   {
+    "description": "confirm with Marcus that finance users keep read-only access to legacy after go-live",
+    "owner": "Daniel",
+    "deadline": "2026-07-03",
+    "status": "todo"
+   },
+   {
+    "description": "share the internal audit checklist for the cutover sign-off",
+    "owner": "Ravi",
+    "deadline": "2026-07-01",
+    "status": "todo"
+   },
+   {
+    "description": "observe the cutover weekend reconciliation and sign-off on site",
+    "owner": "Ravi",
+    "deadline": "2026-07-12",
+    "status": "todo"
+   },
+   {
+    "description": "update the finance FAQ page on the intranet",
+    "owner": null,
+    "deadline": "2026-07-10",
+    "status": "todo"
+   },
+   {
+    "description": "send the action list round",
+    "owner": "Priya",
+    "deadline": "2026-07-01",
+    "status": "todo"
+   }
+  ],
+  "not_action_items": [
+   "lockbox configuration (requested, then dropped: the bank does not offer it)",
+   "e-invoicing mandate (parked for the September finance leadership meeting)",
+   "manual statement upload if the end-to-end test fails (conditional plan)",
+   "Kenji helping the service desk with screenshots (declined)",
+   "Daniel being in by eight and Grace being on call (inputs to Priya's rota, not separate tasks)"
+  ]
+ },
+ {
+  "transcript_file": "warehouse-go-live-readiness-07.txt",
+  "meeting_date": "2026-07-07",
+  "expected_decisions": [
+   "Tuas starts goods receipts on the new system on Tuesday 14 July; Monday's Tuas deliveries are received on paper.",
+   "No new materials are created in legacy from Wednesday 8 July.",
+   "Paper fallback at both sites for the whole cutover weekend."
+  ],
+  "expected_action_items": [
+   {
+    "description": "deliver six replacement scanners to Tuas",
+    "owner": "Tom",
+    "deadline": "2026-07-10",
+    "status": "todo"
+   },
+   {
+    "description": "set up the scanner user accounts in production",
+    "owner": "Marcus",
+    "deadline": "2026-07-09",
+    "status": "in_progress"
+   },
+   {
+    "description": "send the firmware release notes to Marcus",
+    "owner": "Tom",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "arrange site access at Tuas for Tom's engineer",
+    "owner": "Marcus",
+    "deadline": "2026-07-10",
+    "status": "todo"
+   },
+   {
+    "description": "send the engineer's name and IC number to Marcus",
+    "owner": "Tom",
+    "deadline": "2026-07-07",
+    "status": "todo"
+   },
+   {
+    "description": "rerun the full warehouse readiness test with the new firmware",
+    "owner": "Farah",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "fix the returns movement type mapping in the interface",
+    "owner": "Kenji",
+    "deadline": "2026-07-09",
+    "status": "in_progress"
+   },
+   {
+    "description": "retest the returns process after Kenji's fix",
+    "owner": "Nadia",
+    "deadline": "2026-07-10",
+    "status": "todo"
+   },
+   {
+    "description": "fix the WM to TMS interface timeout errors",
+    "owner": "Kenji",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "watch the WM to TMS interface on go-live morning",
+    "owner": "Kenji",
+    "deadline": "2026-07-13",
+    "status": "todo"
+   },
+   {
+    "description": "load the active carrier master data into the transport system",
+    "owner": "Arjun",
+    "deadline": "2026-07-09",
+    "status": "in_progress"
+   },
+   {
+    "description": "confirm the go-live week delivery schedule with the carriers",
+    "owner": "Arjun",
+    "deadline": "2026-07-08",
+    "status": "todo"
+   },
+   {
+    "description": "send the proof-of-delivery template to the carriers",
+    "owner": "Arjun",
+    "deadline": null,
+    "status": "todo"
+   },
+   {
+    "description": "finish the cycle count reconciliation for the mock",
+    "owner": "Nadia",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "reconcile the bin locations between legacy and the new system",
+    "owner": "Nadia",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "run the final stock count at Tuas",
+    "owner": "Nadia",
+    "deadline": "2026-07-11",
+    "status": "todo"
+   },
+   {
+    "description": "tell the purchasing team about the material creation freeze",
+    "owner": "Nadia",
+    "deadline": "2026-07-07",
+    "status": "todo"
+   },
+   {
+    "description": "clear the backlog of open transfer orders in legacy",
+    "owner": "Mei Ling",
+    "deadline": "2026-07-10",
+    "status": "in_progress"
+   },
+   {
+    "description": "brief the night shift on the paper fallback process",
+    "owner": "Mei Ling",
+    "deadline": "2026-07-09",
+    "status": "todo"
+   },
+   {
+    "description": "key the paper records into the new system on Monday morning",
+    "owner": null,
+    "deadline": "2026-07-13",
+    "status": "todo"
+   },
+   {
+    "description": "nominate two super-users for the Tuas night shift",
+    "owner": "Mei Ling",
+    "deadline": "2026-07-08",
+    "status": "todo"
+   },
+   {
+    "description": "move the forklift servicing to the week after go-live",
+    "owner": "Mei Ling",
+    "deadline": "2026-07-07",
+    "status": "todo"
+   },
+   {
+    "description": "book a dedicated truck for the Harbourfront order on Monday",
+    "owner": "Arjun",
+    "deadline": "2026-07-07",
+    "status": "todo"
+   },
+   {
+    "description": "include the Harbourfront order in the first pick wave",
+    "owner": "Nadia",
+    "deadline": "2026-07-13",
+    "status": "todo"
+   },
+   {
+    "description": "finish the replenishment settings for the Pandan pick faces",
+    "owner": "Nadia",
+    "deadline": "2026-07-09",
+    "status": "in_progress"
+   },
+   {
+    "description": "run the train-the-trainer sessions for the warehouse supervisors",
+    "owner": "Siti",
+    "deadline": "2026-07-09",
+    "status": "in_progress"
+   },
+   {
+    "description": "print the laminated quick reference cards for the scanner cradles",
+    "owner": "Siti",
+    "deadline": "2026-07-10",
+    "status": "todo"
+   },
+   {
+    "description": "send the go-live email to the warehouse staff",
+    "owner": "Siti",
+    "deadline": "2026-07-09",
+    "status": "todo"
+   },
+   {
+    "description": "test the label printers in production",
+    "owner": "Marcus",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "document the interface restart procedure for the night shift",
+    "owner": "Kenji",
+    "deadline": "2026-07-10",
+    "status": "todo"
+   },
+   {
+    "description": "send the go/no-go warehouse checklist to Aisha",
+    "owner": "Farah",
+    "deadline": "2026-07-09",
+    "status": "todo"
+   },
+   {
+    "description": "raise the overtime request for the weekend warehouse crew",
+    "owner": "Farah",
+    "deadline": "2026-07-07",
+    "status": "todo"
+   }
+  ],
+  "not_action_items": [
+   "redoing the scanner training video (dropped: screens unchanged)",
+   "email alerts for failed interface messages (already exist)",
+   "voice picking (parked until after hypercare)",
+   "Tuas dock door (facilities, already on their list)",
+   "running Tuas one scanner short (conditional fallback)",
+   "cold room Wi-Fi (already fixed by the network team before this meeting)"
+  ]
+ },
+ {
+  "transcript_file": "access-and-audit-review-08.txt",
+  "meeting_date": "2026-07-16",
+  "expected_decisions": [
+   "No shared or generic user accounts in production.",
+   "Internal audit reviews the firefighter access log weekly.",
+   "The three segregation-of-duties conflicts are accepted until 31 August with written mitigating controls.",
+   "Scanner device accounts are exempt from password expiry."
+  ],
+  "expected_action_items": [
+   {
+    "description": "send Jun Wei the list of AP clerks who used the shared account",
+    "owner": "Hannah",
+    "deadline": "2026-07-16",
+    "status": "todo"
+   },
+   {
+    "description": "create individual accounts for the AP clerks who don't have one",
+    "owner": "Jun Wei",
+    "deadline": "2026-07-17",
+    "status": "todo"
+   },
+   {
+    "description": "lock the shared generic accounts in production",
+    "owner": "Jun Wei",
+    "deadline": "2026-07-17",
+    "status": "in_progress"
+   },
+   {
+    "description": "remove the accounts of the four leavers from production",
+    "owner": "Jun Wei",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "set up a weekly extract of the firefighter log for Ravi",
+    "owner": "Jun Wei",
+    "deadline": "2026-07-20",
+    "status": "todo"
+   },
+   {
+    "description": "review the firefighter access log",
+    "owner": "Ravi",
+    "deadline": "2026-07-20",
+    "status": "todo"
+   },
+   {
+    "description": "reset the stuck payment run status using firefighter access",
+    "owner": "Daniel",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "write the mitigating controls for the three segregation-of-duties conflicts",
+    "owner": "Daniel",
+    "deadline": "2026-07-21",
+    "status": "todo"
+   },
+   {
+    "description": "approve the mitigating controls",
+    "owner": "Priya",
+    "deadline": null,
+    "status": "todo"
+   },
+   {
+    "description": "remove the three segregation-of-duties conflicts",
+    "owner": null,
+    "deadline": "2026-08-31",
+    "status": "todo"
+   },
+   {
+    "description": "restrict the period-open transaction to the controller's team",
+    "owner": "Marcus",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "review the list of users with posting access to closed periods",
+    "owner": "Priya",
+    "deadline": "2026-07-20",
+    "status": "todo"
+   },
+   {
+    "description": "fix the GR/IR clearing authorization error",
+    "owner": "Daniel",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "retest the GR/IR clearing transaction",
+    "owner": "Hannah",
+    "deadline": "2026-07-17",
+    "status": "todo"
+   },
+   {
+    "description": "confirm the AP approval limits match the current policy",
+    "owner": "Hannah",
+    "deadline": "2026-07-21",
+    "status": "todo"
+   },
+   {
+    "description": "send the list of sample requests for the IT general controls",
+    "owner": "Sofia",
+    "deadline": "2026-07-22",
+    "status": "todo"
+   },
+   {
+    "description": "confirm with her manager whether the auditors rely on the migration reconciliations",
+    "owner": "Sofia",
+    "deadline": "2026-07-22",
+    "status": "todo"
+   },
+   {
+    "description": "add the June bulk user approval emails to the access documentation pack",
+    "owner": "Aisha",
+    "deadline": null,
+    "status": "todo"
+   },
+   {
+    "description": "send Sofia the signed cutover reconciliation pack",
+    "owner": "Priya",
+    "deadline": "2026-07-17",
+    "status": "todo"
+   },
+   {
+    "description": "finish the role design documentation",
+    "owner": "Marcus",
+    "deadline": "2026-07-24",
+    "status": "in_progress"
+   },
+   {
+    "description": "send the auditors the system access documentation pack",
+    "owner": "Aisha",
+    "deadline": "2026-07-24",
+    "status": "todo"
+   },
+   {
+    "description": "complete the user access review for all finance roles",
+    "owner": "Marcus",
+    "deadline": "2026-07-31",
+    "status": "in_progress"
+   },
+   {
+    "description": "share last year's IT audit findings with Marcus",
+    "owner": "Ravi",
+    "deadline": "2026-07-16",
+    "status": "todo"
+   },
+   {
+    "description": "patch the production application server",
+    "owner": "Jun Wei",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "rotate the interface service account passwords",
+    "owner": "Jun Wei",
+    "deadline": "2026-07-24",
+    "status": "todo"
+   },
+   {
+    "description": "review the security audit log settings",
+    "owner": "Jun Wei",
+    "deadline": "2026-07-22",
+    "status": "in_progress"
+   },
+   {
+    "description": "remove the temporary go-live superuser access from the consultants",
+    "owner": "Marcus",
+    "deadline": "2026-08-07",
+    "status": "todo"
+   },
+   {
+    "description": "build the three new approval roles for treasury",
+    "owner": "Daniel",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "log today's access issues and the outage windows in the hypercare issue log",
+    "owner": "Aisha",
+    "deadline": "2026-07-16",
+    "status": "todo"
+   }
+  ],
+  "not_action_items": [
+   "custom segregation-of-duties report (dropped: the standard report does it)",
+   "single sign-on (parked until after hypercare)",
+   "access governance tool (rejected on cost)",
+   "password expiry for scanner device accounts (rejected)"
+  ]
+ }
+]

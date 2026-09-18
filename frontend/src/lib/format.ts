@@ -88,10 +88,9 @@ export function confidenceColor(confidence: number): string {
 /**
  * Below this, a card is flagged for review rather than shown as a percentage.
  *
- * Measured, not chosen: against the annotated evaluation set every extracted item scoring under
- * 0.80 turned out to be spurious, while items at 0.99 were genuine only 86% of the time. The
- * score discriminates at the low end but is not a calibrated probability, so a raw percentage
- * invites a reading it cannot support. 0.85 keeps a small margin over the measured 0.80.
+ * Set from Claude Sonnet's scores: every Sonnet item scored below 0.85 in the evaluation was
+ * spurious. Gemini Flash, the implemented model, never scored an item below 0.85, so on it the
+ * flag rarely if ever fires. The score is not a calibrated probability on either model.
  * See docs/evaluation-appendix.md, "Is the confidence score meaningful?".
  */
 export const LOW_CONFIDENCE = 0.85;

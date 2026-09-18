@@ -1,0 +1,2284 @@
+{
+  "judge_model": "claude-sonnet-4-6",
+  "sample_size": 12,
+  "implemented_arm": "gemini",
+  "arms": {
+    "gemini": {
+      "label": "Gemini Flash",
+      "provider": "gemini",
+      "model": "gemini-3.6-flash",
+      "runs": 5,
+      "overall_per_run": [
+        4.92,
+        4.88,
+        4.81,
+        4.81,
+        4.94
+      ],
+      "overall_mean": 4.872,
+      "overall_sd": 0.061,
+      "overall_min": 4.81,
+      "overall_max": 4.94,
+      "mean_scores": {
+        "relevance": 4.93,
+        "actionability": 4.85,
+        "coverage": 4.87,
+        "non_redundancy": 4.83
+      },
+      "avg_subtasks_per_task": 5.02,
+      "per_task_runs": [
+        [
+          {
+            "task": "forward the signed-off bank statement sample file to Daniel",
+            "subtasks": [
+              "Locate the signed-off bank statement sample file",
+              "Verify the sign-off documentation is complete",
+              "Draft an email to Daniel attaching the sample file",
+              "Send the email and confirm receipt with Daniel",
+              "Mark the task as complete in the project tracker"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks are clearly relevant and collectively cover the task end-to-end, though \"Verify the sign-off documentation is complete\" slightly overlaps with \"Locate the signed-off bank statement sample file,\" and \"confirm receipt with Daniel\" edges toward over-specification for a simple forwarding task."
+          },
+          {
+            "task": "finish the MT940 parser fix and retest it in QA",
+            "subtasks": [
+              "Complete MT940 parser code fix",
+              "Deploy updated code to QA environment",
+              "Execute QA test scenarios for MT940 file processing",
+              "Verify parsed MT940 statement data in QA",
+              "Document test results and sign off fix"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly tied to the parent task, each represents a concrete and distinct step (code fix \u2192 deploy \u2192 test \u2192 verify \u2192 sign off), and together they cover the full end-to-end lifecycle with no meaningful overlap."
+          },
+          {
+            "task": "prepare the opening balance reconciliation for the mock cutover",
+            "subtasks": [
+              "Extract legacy system opening balances",
+              "Pull target GL balances from SAP S/4HANA",
+              "Map legacy accounts to target SAP accounts",
+              "Execute variance analysis between source and target balances",
+              "Document reconciliation discrepancies and root causes",
+              "Submit opening balance reconciliation report for review"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are directly relevant to opening balance reconciliation for a mock cutover, each is a concrete and executable step, together they cover the full end-to-end process from data extraction through mapping, variance analysis, discrepancy documentation, and final report submission, and there is no meaningful overlap between any of the steps."
+          },
+          {
+            "task": "run the end-to-end bank statement test in pre-production",
+            "subtasks": [
+              "Prepare sample bank statement files and test data",
+              "Verify pre-production bank interface configuration",
+              "Execute automated bank statement import and processing",
+              "Validate manual bank reconciliation fallback workflow",
+              "Verify accounting postings and ledger balances",
+              "Document test outcomes and log any issues"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are directly relevant, concrete, and together cover the full end-to-end lifecycle\u2014from data prep and environment config through execution, validation, accounting verification, and documentation\u2014with no meaningful overlap between steps."
+          },
+          {
+            "task": "write the work instruction for the manual bank reconciliation fallback",
+            "subtasks": [
+              "Define activation triggers and scope for manual reconciliation fallback",
+              "Document step-by-step manual statement entry and matching in SAP",
+              "Detail review, approval, and audit trail requirements",
+              "Review draft work instruction with the finance team",
+              "Publish final work instruction to the project repository"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to the parent task, each represents a concrete and distinct step\u2014from defining scope through drafting, reviewing, and publishing\u2014providing full end-to-end coverage with no meaningful overlap."
+          },
+          {
+            "task": "set up the five new house bank accounts in the production system",
+            "subtasks": [
+              "Gather bank account details and IBANs from Finance",
+              "Create the five house bank keys and accounts in SAP Production",
+              "Map dedicated G/L accounts to each house bank account",
+              "Configure bank statement formats and manual reconciliation rules",
+              "Verify setup and test bank account connectivity"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly relevant to SAP house bank setup, each is a concrete and distinct action (data gathering, system creation, G/L mapping, format configuration, and verification), and together they cover the full end-to-end workflow with no meaningful overlap."
+          },
+          {
+            "task": "deliver six replacement scanners to Tuas",
+            "subtasks": [
+              "Retrieve six replacement scanners from inventory",
+              "Configure and test scanners for warehouse system",
+              "Pack scanners and accessories for transit",
+              "Transport scanners to the Tuas facility",
+              "Hand over scanners to site team and verify receipt"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the delivery mission, each step is concrete and executable, the sequence covers the full end-to-end flow from inventory retrieval to confirmed handover, and there is no meaningful overlap between any of the five steps."
+          },
+          {
+            "task": "set up the scanner user accounts in production",
+            "subtasks": [
+              "Gather list of Tuas warehouse scanner users",
+              "Define required scanner roles and permissions",
+              "Create user accounts in production SAP system",
+              "Assign scanner roles and authorization profiles",
+              "Test account logins on warehouse scanner devices",
+              "Distribute credentials to Tuas warehouse team"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are directly relevant, concrete, and collectively span the full end-to-end lifecycle of setting up scanner user accounts\u2014from gathering requirements through testing and credential handover\u2014with no meaningful overlap between steps."
+          },
+          {
+            "task": "arrange site access at Tuas for Tom's engineer",
+            "subtasks": [
+              "Obtain engineer details and visit schedule from Tom",
+              "Submit site access request to Tuas facility management",
+              "Confirm safety induction and security clearance requirements",
+              "Send access confirmation and arrival instructions to Tom and engineer"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are directly relevant, concrete and doable, collectively cover the full end-to-end access arrangement workflow, and are clearly distinct from one another with no overlap."
+          },
+          {
+            "task": "send Jun Wei the list of AP clerks who used the shared account",
+            "subtasks": [
+              "Query audit logs for shared AP account activity",
+              "Cross-reference login timestamps with AP team schedules",
+              "Compile the list of AP clerks who accessed the account",
+              "Send the final list to Jun Wei"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All subtasks are directly relevant and distinct, covering the full workflow from data retrieval to delivery, though \"cross-reference login timestamps with AP team schedules\" could be slightly more specific about what tool or system to use."
+          },
+          {
+            "task": "create individual accounts for the AP clerks who don't have one",
+            "subtasks": [
+              "Identify AP clerks needing individual SAP accounts",
+              "Gather user information and required role permissions",
+              "Provision individual user accounts in SAP S4HANA",
+              "Assign relevant AP authorization roles to each account",
+              "Distribute login credentials and onboarding instructions",
+              "Deactivate shared and generic AP accounts in production"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks are tightly scoped to the AP account provisioning task, each step is concrete and executable, and together they cover the full lifecycle from identification to credential delivery \u2014 though deactivating shared accounts, while related, slightly exceeds the parent task's stated scope and the role-gathering step partially overlaps with provisioning."
+          },
+          {
+            "task": "lock the shared generic accounts in production",
+            "subtasks": [
+              "Identify active shared and generic accounts in production",
+              "Audit account dependencies and background processes",
+              "Notify impacted stakeholders of the account locking schedule",
+              "Lock generic accounts in the production environment",
+              "Confirm account locks and monitor system for access issues"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the parent goal, each step is concrete and executable, the sequence covers the full end-to-end lifecycle from discovery through post-lock validation, and no two steps meaningfully overlap."
+          }
+        ],
+        [
+          {
+            "task": "forward the signed-off bank statement sample file to Daniel",
+            "subtasks": [
+              "Locate the signed-off bank statement sample file",
+              "Verify file completeness and sign-off status",
+              "Attach the sample file in an email to Daniel",
+              "Send email to Daniel and request receipt confirmation"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks are directly relevant and collectively cover the task end-to-end, though \"Verify file completeness and sign-off status\" slightly overlaps with \"Locate the signed-off bank statement sample file,\" and \"Attach the sample file in an email\" and \"Send email\" could arguably be merged into one concrete step."
+          },
+          {
+            "task": "finish the MT940 parser fix and retest it in QA",
+            "subtasks": [
+              "Review reported MT940 parser errors and edge cases",
+              "Complete code fixes for the MT940 parser",
+              "Deploy updated parser code to the QA environment",
+              "Execute QA tests using sample MT940 files",
+              "Verify statement postings and reconciliation in QA",
+              "Document test results and sign off on the fix"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are tightly scoped to the MT940 parser fix-and-retest lifecycle, each is a concrete doable step, they flow end-to-end from root-cause review through sign-off, and none overlap meaningfully with one another."
+          },
+          {
+            "task": "prepare the opening balance reconciliation for the mock cutover",
+            "subtasks": [
+              "Extract legacy system trial balance and subledgers",
+              "Set up the opening balance reconciliation template",
+              "Load opening balances into SAP S/4HANA mock environment",
+              "Compare SAP trial balance against legacy balances",
+              "Investigate and document any balance variances",
+              "Submit opening balance reconciliation report for review"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are directly tied to opening balance reconciliation for a mock cutover, each is a concrete and executable step, together they cover the full end-to-end workflow from data extraction through final submission, and there is no meaningful overlap between any of the steps."
+          },
+          {
+            "task": "run the end-to-end bank statement test in pre-production",
+            "subtasks": [
+              "Prepare mock bank statement test files",
+              "Confirm pre-production SAP environment readiness",
+              "Upload and process statement files in pre-production",
+              "Verify automatic matching and GL postings",
+              "Test manual reconciliation fallback workflow",
+              "Document test results and log defects"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are directly tied to end-to-end bank statement testing, each is a concrete and distinct step (data prep \u2192 environment check \u2192 execution \u2192 verification \u2192 fallback testing \u2192 reporting), collectively covering the full test lifecycle with no meaningful overlap."
+          },
+          {
+            "task": "write the work instruction for the manual bank reconciliation fallback",
+            "subtasks": [
+              "Define trigger criteria and prerequisites for activating the manual fallback",
+              "Document step-by-step manual statement retrieval and SAP upload instructions",
+              "Detail manual transaction matching and clearing procedures in SAP",
+              "Specify exception handling and approval requirements",
+              "Review draft work instruction with the finance team for validation"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to authoring a manual bank reconciliation fallback work instruction, each step is concrete and doable, together they cover the full lifecycle from trigger conditions through drafting to finance-team sign-off, and there is no meaningful overlap between any of the five steps."
+          },
+          {
+            "task": "set up the five new house bank accounts in the production system",
+            "subtasks": [
+              "Gather required bank account details and IBANs",
+              "Create house banks and bank account IDs in Production",
+              "Map house bank accounts to main and clearing GL accounts",
+              "Configure electronic bank statement settings for each account",
+              "Verify account setup and access permissions with Finance"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to SAP/ERP house bank configuration, each step is concrete and executable, they form a logical end-to-end sequence (gather \u2192 create \u2192 map \u2192 configure \u2192 verify) with no overlapping concerns."
+          },
+          {
+            "task": "deliver six replacement scanners to Tuas",
+            "subtasks": [
+              "Retrieve six replacement scanners from inventory",
+              "Configure software and network settings on each device",
+              "Test scanner connectivity and S4HANA compatibility",
+              "Pack scanners securely with chargers and accessories",
+              "Transport and hand over scanners to Tuas site lead"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly relevant, concrete and doable, collectively cover the full end-to-end delivery workflow (retrieval \u2192 configuration \u2192 testing \u2192 packing \u2192 delivery), and are clearly distinct with no overlapping steps."
+          },
+          {
+            "task": "set up the scanner user accounts in production",
+            "subtasks": [
+              "Identify required scanner users and SAP roles",
+              "Create scanner user accounts in production",
+              "Assign RF scanner authorization profiles to users",
+              "Verify login and access on production handheld devices",
+              "Distribute user credentials to Tuas warehouse supervisors"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to scanner account setup, each is a concrete and distinct step, and together they cover the full lifecycle from identification through credential handover with no overlap."
+          },
+          {
+            "task": "arrange site access at Tuas for Tom's engineer",
+            "subtasks": [
+              "Collect engineer details and visit dates from Tom",
+              "Submit site access request to Tuas facility management",
+              "Confirm safety induction requirements for the engineer",
+              "Send site access confirmation and entry instructions to Tom"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 4,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are clearly relevant, concrete, and distinct, covering the key steps from gathering info to confirming access, though there is a minor gap around chasing approval or handling a rejection before the final confirmation step."
+          },
+          {
+            "task": "send Jun Wei the list of AP clerks who used the shared account",
+            "subtasks": [
+              "Pull audit logs for the shared AP account",
+              "Identify AP clerks associated with the account usage",
+              "Compile the final list of AP clerks",
+              "Send the list of AP clerks to Jun Wei"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks are all clearly relevant and cover the task end-to-end, but \"Compile the final list\" slightly overlaps with \"Identify AP clerks,\" and the steps could be more specific (e.g., naming the system or communication channel)."
+          },
+          {
+            "task": "create individual accounts for the AP clerks who don't have one",
+            "subtasks": [
+              "Identify AP clerks requiring individual accounts",
+              "Collect user details and required authorization roles",
+              "Provision individual user accounts in SAP S/4HANA",
+              "Assign appropriate AP roles and permissions",
+              "Distribute login credentials and password reset instructions",
+              "Deactivate generic and shared AP accounts"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks are directly relevant and concrete, covering the full lifecycle from identification to credential distribution, though \"Assign appropriate AP roles and permissions\" overlaps somewhat with \"Collect user details and required authorization roles,\" and the final deactivation step \u2014 while a good security practice \u2014 goes slightly beyond the stated scope of creating accounts for those without one."
+          },
+          {
+            "task": "lock the shared generic accounts in production",
+            "subtasks": [
+              "Identify all active generic accounts in production",
+              "Check background jobs and services for account dependencies",
+              "Notify affected stakeholders of the scheduled account lock",
+              "Lock the generic accounts in the production environment",
+              "Document the locked accounts and verify audit compliance"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the parent task, each is a concrete and executable step, together they cover the full end-to-end workflow from discovery through execution to post-action compliance, and there is no meaningful overlap between any of the five steps."
+          }
+        ],
+        [
+          {
+            "task": "forward the signed-off bank statement sample file to Daniel",
+            "subtasks": [
+              "Locate the signed-off bank statement sample file",
+              "Confirm the document contains proper sign-off approval",
+              "Draft an email to Daniel referencing the updated go-live schedule",
+              "Attach the sample file and send the email"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 3,
+              "actionability": 4,
+              "coverage": 4,
+              "non_redundancy": 3
+            },
+            "comment": "Subtask 3 introduces an irrelevant reference to a \"go-live schedule\" not mentioned in the parent task, and subtask 2 partially overlaps with subtask 1 since locating the file would naturally include verifying its sign-off status."
+          },
+          {
+            "task": "finish the MT940 parser fix and retest it in QA",
+            "subtasks": [
+              "Complete code changes for the MT940 parser fix",
+              "Run local unit tests on sample MT940 files",
+              "Deploy updated MT940 parser code to the QA environment",
+              "Execute QA test scenarios using sample bank statement files",
+              "Validate statement line item mappings and postings in SAP QA"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to the MT940 parser fix, each represents a concrete and distinct step in the dev-to-QA lifecycle, and together they cover the full end-to-end flow from code completion through QA validation with no meaningful overlap."
+          },
+          {
+            "task": "prepare the opening balance reconciliation for the mock cutover",
+            "subtasks": [
+              "Extract legacy trial balance and subledger balances",
+              "Export SAP mock cutover opening balance reports",
+              "Build the opening balance reconciliation working template",
+              "Perform variance analysis between legacy and SAP balances",
+              "Document reconciliation outcomes and flag discrepancies for cleanup"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the reconciliation workflow, each step is concrete and executable, together they cover the full end-to-end process from data extraction through to discrepancy documentation, and no two steps meaningfully overlap."
+          },
+          {
+            "task": "run the end-to-end bank statement test in pre-production",
+            "subtasks": [
+              "Prepare test bank statement files",
+              "Verify pre-production environment and interface configuration",
+              "Import and process bank statement file in SAP",
+              "Review automatic matching and posting results",
+              "Test manual reconciliation fallback process",
+              "Document test results and log open defects"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are directly relevant to an end-to-end bank statement test, each is a concrete and distinct step (from environment setup through import, matching, manual fallback, and documentation), together covering the full test lifecycle with no meaningful overlap."
+          },
+          {
+            "task": "write the work instruction for the manual bank reconciliation fallback",
+            "subtasks": [
+              "Define trigger criteria for activating the manual reconciliation fallback",
+              "Document step-by-step manual bank reconciliation steps in SAP S/4HANA",
+              "Detail data catch-up and re-sync procedures once interface is restored",
+              "Review draft work instruction with Finance Close team stakeholders",
+              "Publish final work instruction to the project documentation repository"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to the parent task, each is a concrete and doable step, they span the full lifecycle from trigger definition through drafting, review, and publication with no meaningful overlap."
+          },
+          {
+            "task": "set up the five new house bank accounts in the production system",
+            "subtasks": [
+              "Obtain bank details and GL account mappings from Finance",
+              "Create house bank keys and account IDs in SAP Production",
+              "Assign GL accounts and payment methods to the new accounts",
+              "Configure manual bank statement rules for fallback reconciliation",
+              "Perform validation checks and test postings with Finance"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly relevant to SAP house bank setup, each is a concrete and distinct configuration or coordination step, and together they cover the full end-to-end lifecycle from gathering requirements through validation \u2014 with no meaningful overlap between steps."
+          },
+          {
+            "task": "deliver six replacement scanners to Tuas",
+            "subtasks": [
+              "Verify configuration and setup of six replacement scanners",
+              "Pack scanners securely for transport",
+              "Coordinate delivery schedule with Tuas site contact",
+              "Transport the scanners to the Tuas warehouse",
+              "Confirm delivery and perform handoff with Tuas team"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 4,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are clearly relevant, concrete, and distinct, covering the delivery lifecycle well, though a step for sourcing/retrieving the replacement scanners before configuration is missing."
+          },
+          {
+            "task": "set up the scanner user accounts in production",
+            "subtasks": [
+              "Compile list of required scanner users and hardware IDs",
+              "Create scanner user accounts in SAP production environment",
+              "Assign warehouse security roles and authorizations to accounts",
+              "Test login functionality on physical handheld scanners",
+              "Distribute login credentials to Tuas warehouse team"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to scanner account setup, each is a concrete executable step, they flow end-to-end from requirements gathering through credential handover, and there is no meaningful overlap between any of them."
+          },
+          {
+            "task": "arrange site access at Tuas for Tom's engineer",
+            "subtasks": [
+              "Obtain engineer details and visit schedule from Tom",
+              "Submit site access clearance request to Tuas security",
+              "Verify site safety and PPE requirements for the visit",
+              "Send access pass and entry instructions to Tom and engineer"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are directly relevant, concrete, and collectively cover the full workflow end-to-end\u2014from gathering details to submitting the request, meeting safety requirements, and delivering access confirmation\u2014with no overlapping steps."
+          },
+          {
+            "task": "send Jun Wei the list of AP clerks who used the shared account",
+            "subtasks": [
+              "Query audit logs for AP shared account activity",
+              "Cross-reference activity timestamps to identify AP clerks",
+              "Compile and verify the list of AP clerks",
+              "Send the verified list to Jun Wei"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks map cleanly onto the parent task end-to-end \u2014 from data extraction through verification to delivery \u2014 with only minor overlap between cross-referencing and compiling steps, and each step is concrete enough to act on."
+          },
+          {
+            "task": "create individual accounts for the AP clerks who don't have one",
+            "subtasks": [
+              "Identify AP clerks lacking individual user accounts",
+              "Collect required user details and role requirements",
+              "Provision individual SAP user accounts",
+              "Assign appropriate AP authorization profiles",
+              "Deactivate shared or generic AP accounts",
+              "Send credentials to clerks and verify login"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask directly serves the parent goal, each step is concrete and executable, the sequence covers the full lifecycle from identification to verification, and no two subtasks meaningfully overlap."
+          },
+          {
+            "task": "lock the shared generic accounts in production",
+            "subtasks": [
+              "Identify active shared and generic accounts in production",
+              "Audit background jobs and dependencies for target accounts",
+              "Reassign process dependencies to dedicated service accounts",
+              "Notify impacted stakeholders of the account lock schedule",
+              "Lock shared generic accounts in the production system",
+              "Monitor production logs for access or job issues"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the parent task, each step is concrete and executable, the sequence covers discovery through post-lock monitoring end-to-end, and no two steps overlap in scope."
+          }
+        ],
+        [
+          {
+            "task": "forward the signed-off bank statement sample file to Daniel",
+            "subtasks": [
+              "Locate the signed-off bank statement sample file",
+              "Verify file completeness and sign-off documentation",
+              "Draft message to Daniel referencing the updated go-live date",
+              "Attach sample file and send to Daniel"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 3,
+              "actionability": 4,
+              "coverage": 4,
+              "non_redundancy": 4
+            },
+            "comment": "Most subtasks are concrete and relevant, but \"Draft message to Daniel referencing the updated go-live date\" introduces an unsupported detail (go-live date) not mentioned in the parent task, lowering relevance; the remaining steps adequately cover the end-to-end workflow without significant overlap."
+          },
+          {
+            "task": "finish the MT940 parser fix and retest it in QA",
+            "subtasks": [
+              "Complete MT940 parser code fixes",
+              "Deploy updated parser code to QA environment",
+              "Prepare sample MT940 bank statement test files",
+              "Run MT940 parsing test scenarios in QA",
+              "Validate parsed statement data and transaction mapping"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to the MT940 parser fix-and-retest workflow, each is a concrete doable step, they form a complete end-to-end flow from code fix through QA validation, and there is no meaningful overlap between any of them."
+          },
+          {
+            "task": "prepare the opening balance reconciliation for the mock cutover",
+            "subtasks": [
+              "Gather legacy and target system opening balance data",
+              "Map GL accounts and define balance matching rules",
+              "Execute initial balance comparison and variance analysis",
+              "Investigate and resolve balance discrepancies",
+              "Finalize the opening balance reconciliation report for review"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to opening balance reconciliation for a mock cutover, each step is concrete and executable, together they form a complete end-to-end workflow (data gathering \u2192 mapping \u2192 comparison \u2192 resolution \u2192 reporting), and there is no meaningful overlap between any of the five steps."
+          },
+          {
+            "task": "run the end-to-end bank statement test in pre-production",
+            "subtasks": [
+              "Obtain sample MT940 or CAMT bank statement files",
+              "Verify pre-production bank interface connectivity",
+              "Import bank statement file into pre-production S4HANA",
+              "Run automated clearing and posting rules",
+              "Test manual bank reconciliation fallback process",
+              "Document test results and review with the finance team"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are tightly scoped to bank statement E2E testing in pre-production, each is a concrete and distinct step progressing logically from file preparation through connectivity, import, automated processing, fallback validation, and sign-off documentation, with no meaningful overlap and full end-to-end coverage."
+          },
+          {
+            "task": "write the work instruction for the manual bank reconciliation fallback",
+            "subtasks": [
+              "Define trigger criteria and activation process for manual fallback",
+              "Outline step-by-step manual statement entry and reconciliation in SAP",
+              "Specify roles, approval workflows, and exception handling",
+              "Review draft instruction with Finance Close stakeholders",
+              "Publish final work instruction to the project repository"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to the parent task, each represents a concrete and distinct step, and together they cover the full lifecycle from defining triggers through drafting, reviewing, and publishing the work instruction with no meaningful overlap."
+          },
+          {
+            "task": "set up the five new house bank accounts in the production system",
+            "subtasks": [
+              "Gather bank account details, IBANs, and associated GL accounts",
+              "Create bank keys and house banks in the production system",
+              "Configure the five house bank accounts and link GL accounts",
+              "Assign payment methods and account symbols to each account",
+              "Verify account configuration and perform production connectivity checks"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask maps directly to a concrete, ordered step in a standard house bank setup workflow (data gathering \u2192 bank key/house bank creation \u2192 account configuration \u2192 payment method assignment \u2192 verification), with no overlap and full end-to-end coverage."
+          },
+          {
+            "task": "deliver six replacement scanners to Tuas",
+            "subtasks": [
+              "Retrieve six replacement scanners from inventory",
+              "Test hardware and ensure full battery charge",
+              "Configure scanners with required software and SAP settings",
+              "Transport and deliver scanners to Tuas facility",
+              "Hand over scanners to Tuas warehouse lead and confirm receipt"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the delivery mission, each step is concrete and executable, the sequence covers the full end-to-end workflow from inventory retrieval to confirmed handover, and there is no overlap between steps."
+          },
+          {
+            "task": "set up the scanner user accounts in production",
+            "subtasks": [
+              "Identify required scanner user roles and permissions",
+              "Gather list of warehouse staff requiring scanner access",
+              "Create scanner user accounts in the production environment",
+              "Assign authorization roles and warehouse profiles",
+              "Test account login on physical scanner devices",
+              "Distribute credentials to warehouse supervisors"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are directly relevant, concrete, and distinct, forming a complete end-to-end flow from requirements gathering through account creation, role assignment, device testing, and credential handoff with no overlapping steps."
+          },
+          {
+            "task": "arrange site access at Tuas for Tom's engineer",
+            "subtasks": [
+              "Obtain engineer details and credentials from Tom",
+              "Submit site access request to Tuas facility security",
+              "Verify safety induction and EHS clearance requirements",
+              "Send entry pass details and site guidelines to Tom's engineer"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 4,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are directly relevant, concrete, and distinct, covering the end-to-end flow well, though a confirmation/follow-up step (e.g., confirming access approval before sending pass details) is missing, leaving a minor gap in coverage."
+          },
+          {
+            "task": "send Jun Wei the list of AP clerks who used the shared account",
+            "subtasks": [
+              "Query audit logs for shared AP account usage",
+              "Identify individual AP clerks from login records",
+              "Verify the list of users for accuracy",
+              "Send the finalized list to Jun Wei"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 4,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are clearly relevant and distinct, forming a logical end-to-end flow, though \"Verify the list of users for accuracy\" could be slightly more specific about what verification entails (e.g., cross-referencing with HR records or a supervisor sign-off)."
+          },
+          {
+            "task": "create individual accounts for the AP clerks who don't have one",
+            "subtasks": [
+              "Identify AP clerks currently using generic or shared accounts",
+              "Gather user details and required SAP AP roles for each clerk",
+              "Provision individual user accounts in SAP S/4HANA",
+              "Assign appropriate AP authorization profiles and roles",
+              "Send login credentials and initial password reset instructions",
+              "Confirm successful user logins and disable shared accounts"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask maps directly to the parent goal, each step is concrete and executable, the sequence covers the full lifecycle from identification through decommissioning shared accounts, and there is no meaningful overlap between steps."
+          },
+          {
+            "task": "lock the shared generic accounts in production",
+            "subtasks": [
+              "Identify active shared and generic accounts in production",
+              "Review background jobs and services tied to generic accounts",
+              "Notify stakeholders of the upcoming account locking schedule",
+              "Lock generic user accounts in the production system",
+              "Monitor production environment for potential process disruptions"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly relevant and collectively cover the full lifecycle of the task end-to-end (discovery, impact assessment, communication, execution, and post-action monitoring) with no meaningful overlap, though \"lock generic user accounts\" could be slightly more specific about the mechanism or tooling used."
+          }
+        ],
+        [
+          {
+            "task": "forward the signed-off bank statement sample file to Daniel",
+            "subtasks": [
+              "Locate the signed-off bank statement sample file",
+              "Verify sign-off completeness and file integrity",
+              "Draft email to Daniel detailing the file context",
+              "Attach the sample file and send to Daniel",
+              "Mark task as complete in the cutover tracking log"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All subtasks are directly relevant, concretely actionable, collectively cover the task end-to-end (locate \u2192 verify \u2192 draft \u2192 send \u2192 log), and are fully distinct with no overlapping steps."
+          },
+          {
+            "task": "finish the MT940 parser fix and retest it in QA",
+            "subtasks": [
+              "Finish code adjustments for the MT940 parser fix",
+              "Deploy updated MT940 parser build to QA",
+              "Execute test cases with sample MT940 bank statements",
+              "Verify parsed outputs and log QA test results"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 4,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are tightly scoped, concrete, and distinct, covering the fix-deploy-test-verify lifecycle well, though a final sign-off or bug-triage step after QA results would make coverage complete."
+          },
+          {
+            "task": "prepare the opening balance reconciliation for the mock cutover",
+            "subtasks": [
+              "Extract legacy system trial balances",
+              "Load mock cutover balances into SAP S/4HANA",
+              "Populate opening balance reconciliation templates",
+              "Investigate and document balance variances",
+              "Review reconciled balances with finance leads"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to the reconciliation workflow, each is a concrete and distinct step (extract \u2192 load \u2192 populate \u2192 investigate \u2192 review), and together they cover the full end-to-end process with no overlap."
+          },
+          {
+            "task": "run the end-to-end bank statement test in pre-production",
+            "subtasks": [
+              "Prepare test bank statement files in MT940 or CAMT.053 format",
+              "Import statement files into the SAP pre-production system",
+              "Verify automatic posting and clearing rules for matched transactions",
+              "Execute the manual bank reconciliation fallback process for unmatched items",
+              "Document test findings and review results with the Finance team"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are tightly scoped to bank statement E2E testing in pre-prod, each is a concrete executable step, they collectively span the full lifecycle from file preparation through import, auto-posting validation, manual fallback, and sign-off, with no meaningful overlap between steps."
+          },
+          {
+            "task": "write the work instruction for the manual bank reconciliation fallback",
+            "subtasks": [
+              "Define triggers and criteria for activating manual reconciliation",
+              "Document step-by-step procedures for manual statement entry and matching",
+              "Specify roles, escalation paths, and approval requirements",
+              "Draft the manual bank reconciliation work instruction document",
+              "Review and validate the draft with the Finance Close team"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks are tightly relevant and concrete, covering the full lifecycle from trigger definition to stakeholder validation, though \"Draft the work instruction document\" slightly overlaps with the procedural and roles subtasks that feed directly into it."
+          },
+          {
+            "task": "set up the five new house bank accounts in the production system",
+            "subtasks": [
+              "Collect bank details and GL account mappings for all five accounts",
+              "Create house bank master records in the production environment",
+              "Define house bank account IDs IBANs and currency settings",
+              "Link house bank accounts to corresponding GL clearing accounts",
+              "Verify payment method assignments and user access permissions"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly relevant to house bank setup, each represents a concrete and distinct configuration step, and together they cover the full end-to-end process from data gathering through master record creation, account configuration, GL linking, and final verification."
+          },
+          {
+            "task": "deliver six replacement scanners to Tuas",
+            "subtasks": [
+              "Retrieve six replacement scanners from inventory",
+              "Configure scanners for SAP S4HANA compatibility",
+              "Test connectivity and barcode scanning functionality",
+              "Arrange transport and deliver scanners to Tuas facility",
+              "Hand over scanners to Tuas team and confirm operational readiness"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 4,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly relevant, concrete, and non-overlapping, covering the full delivery lifecycle well, though documentation or a post-handover sign-off step could strengthen end-to-end closure."
+          },
+          {
+            "task": "set up the scanner user accounts in production",
+            "subtasks": [
+              "Identify required scanner roles and user details for Tuas staff",
+              "Provision scanner user accounts in SAP production",
+              "Assign warehouse authorization profiles and RF device roles",
+              "Test scanner logins and transaction access in production",
+              "Distribute credentials to Tuas warehouse supervisors"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the parent task, each step is concrete and executable, the sequence covers the full lifecycle from requirements gathering to credential handover, and there is no meaningful overlap between any of the steps."
+          },
+          {
+            "task": "arrange site access at Tuas for Tom's engineer",
+            "subtasks": [
+              "Collect engineer details and visit schedule from Tom",
+              "Submit site access request to Tuas security",
+              "Confirm access approval with Tuas site management",
+              "Send site entry instructions and pass details to Tom"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are tightly scoped to the parent task, follow a logical end-to-end sequence (gather info \u2192 submit request \u2192 confirm approval \u2192 communicate outcome), are concrete and doable, and have no overlap with one another."
+          },
+          {
+            "task": "send Jun Wei the list of AP clerks who used the shared account",
+            "subtasks": [
+              "Extract audit logs for the shared AP account",
+              "Cross-reference logs to identify specific AP clerks",
+              "Compile the identified AP clerks into a list",
+              "Email the finalized list to Jun Wei"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are directly relevant, concrete and doable, collectively cover the full workflow from data extraction to delivery, and are clearly distinct from one another with no overlap."
+          },
+          {
+            "task": "create individual accounts for the AP clerks who don't have one",
+            "subtasks": [
+              "Identify AP clerks needing individual user accounts",
+              "Gather user details and required SAP roles",
+              "Provision individual accounts in SAP S4HANA",
+              "Assign authorization roles to each new account",
+              "Send credentials and login instructions to clerks",
+              "Disable shared and generic AP accounts"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are directly relevant, concrete, and together form a complete end-to-end account provisioning workflow with no meaningful overlap between steps."
+          },
+          {
+            "task": "lock the shared generic accounts in production",
+            "subtasks": [
+              "Identify active shared generic accounts in production",
+              "Notify affected team leads of scheduled account locks",
+              "Lock the generic accounts in SAP S/4HANA production",
+              "Verify background processes and integrations remain functional",
+              "Update user access documentation and audit records"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the parent task, concretely doable, collectively covers the full lifecycle from discovery through execution to documentation, and each step is distinctly non-overlapping."
+          }
+        ]
+      ]
+    },
+    "anthropic": {
+      "label": "Claude Sonnet",
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-6",
+      "runs": 5,
+      "overall_per_run": [
+        4.9,
+        4.85,
+        4.88,
+        4.86,
+        4.9
+      ],
+      "overall_mean": 4.878,
+      "overall_sd": 0.023,
+      "overall_min": 4.85,
+      "overall_max": 4.9,
+      "mean_scores": {
+        "relevance": 4.88,
+        "actionability": 4.9,
+        "coverage": 4.95,
+        "non_redundancy": 4.77
+      },
+      "avg_subtasks_per_task": 5.66,
+      "per_task_runs": [
+        [
+          {
+            "task": "forward the signed-off bank statement sample file to Daniel",
+            "subtasks": [
+              "Locate the signed-off bank statement sample file",
+              "Confirm Daniel's current email address or preferred contact channel",
+              "Compose the email with appropriate context referencing the go-live date change",
+              "Attach the signed-off bank statement sample file to the message",
+              "Send the email to Daniel and request a read receipt or acknowledgement"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 4,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 3
+            },
+            "comment": "The subtasks are mostly relevant and cover the end-to-end flow well, but composing the email with a reference to a \"go-live date change\" introduces context not present in the parent task, and attaching the file is heavily overlapping with locating it and sending it \u2014 these steps could arguably be merged, reducing redundancy."
+          },
+          {
+            "task": "finish the MT940 parser fix and retest it in QA",
+            "subtasks": [
+              "Reproduce and diagnose the existing MT940 parser bug",
+              "Implement and unit-test the parser fix in the codebase",
+              "Peer-review and merge the fix into the main branch",
+              "Deploy the updated parser to the QA environment",
+              "Execute MT940 regression and end-to-end test cases in QA",
+              "Document test results and confirm sign-off for go-live readiness"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are tightly scoped to MT940 parser fix and QA retesting, each is a concrete and distinct engineering step, and together they cover the full lifecycle from diagnosis through sign-off with no overlap."
+          },
+          {
+            "task": "prepare the opening balance reconciliation for the mock cutover",
+            "subtasks": [
+              "Identify all accounts requiring opening balance reconciliation for the mock cutover",
+              "Extract trial balance and legacy system data as at the mock cutover date",
+              "Map legacy balances to corresponding S/4HANA GL accounts and cost objects",
+              "Load and post opening balances in the S/4HANA mock environment",
+              "Reconcile S/4HANA opening balances against legacy source data and resolve variances",
+              "Produce and circulate the opening balance reconciliation report for sign-off"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "The six subtasks form a tight, end-to-end sequence\u2014scoping, data extraction, mapping, loading, reconciling, and reporting\u2014each is concrete and distinct with no meaningful overlap, fully covering the parent task."
+          },
+          {
+            "task": "run the end-to-end bank statement test in pre-production",
+            "subtasks": [
+              "Set up pre-production environment with bank statement test data",
+              "Configure bank interface connection and reconciliation settings in pre-prod",
+              "Execute the end-to-end bank statement test run",
+              "Capture and document test results and any error logs",
+              "Validate reconciliation output against expected manual fallback behaviour",
+              "Report findings and sign off with Kenji ahead of the 2026-07-03 deadline"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are directly relevant, concretely actionable, collectively cover the full lifecycle from environment setup to sign-off, and each step is clearly distinct with no meaningful overlap."
+          },
+          {
+            "task": "write the work instruction for the manual bank reconciliation fallback",
+            "subtasks": [
+              "Define the trigger conditions for activating the manual reconciliation fallback",
+              "Document the step-by-step manual bank reconciliation procedure",
+              "Specify roles, responsibilities, and system access required for each step",
+              "Include error-handling guidance and escalation paths",
+              "Review draft with Finance and Daniel for accuracy and completeness",
+              "Obtain sign-off and publish the work instruction to the relevant teams"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to producing a work instruction, each step is concrete and doable, together they span the full lifecycle from scoping triggers to publishing, and there is no meaningful overlap between steps."
+          },
+          {
+            "task": "set up the five new house bank accounts in the production system",
+            "subtasks": [
+              "Gather bank account details (account numbers, bank keys, currencies, and GL assignments) for all five banks",
+              "Create each house bank entry in SAP S/4HANA Financial Accounting configuration (FI12)",
+              "Define the corresponding house bank accounts for each house bank",
+              "Assign the correct GL accounts to each house bank account",
+              "Validate account settings by running a test posting or reconciliation simulation in the production client",
+              "Confirm setup with the Finance team and document the final house bank account configurations"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to SAP house bank setup, follows a logical end-to-end sequence from data gathering through configuration, validation, and sign-off, with no overlapping steps."
+          },
+          {
+            "task": "deliver six replacement scanners to Tuas",
+            "subtasks": [
+              "Confirm quantity and model of the six replacement scanners",
+              "Arrange collection or dispatch of scanners from the warehouse",
+              "Coordinate delivery logistics to the Tuas site by 10 July 2026",
+              "Obtain proof of delivery and confirm receipt with Tuas site contact",
+              "Notify Tom and the Go-Live team that scanners are on-site and ready for Tuesday 14 July go-live"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask maps directly to the delivery workflow, each step is concrete and doable, together they cover the full end-to-end process from verification through confirmation, and there is no meaningful overlap between steps."
+          },
+          {
+            "task": "set up the scanner user accounts in production",
+            "subtasks": [
+              "Confirm the list of scanner users required for Tuas warehouse operations",
+              "Create scanner user accounts in the SAP S/4HANA production system",
+              "Assign appropriate roles and authorisations to each scanner user",
+              "Verify user accounts can log in and access the correct transactions on the scanners",
+              "Communicate credentials and login instructions to the Tuas warehouse team"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly relevant, concrete, and collectively cover the full lifecycle of setting up scanner user accounts end-to-end\u2014from requirements gathering through creation, authorisation, testing, and handover\u2014with no meaningful overlap between steps."
+          },
+          {
+            "task": "arrange site access at Tuas for Tom's engineer",
+            "subtasks": [
+              "Confirm the engineer's name, visit date, and access requirements with Tom",
+              "Identify the Tuas site contact responsible for granting access",
+              "Submit the site access request to the Tuas site contact",
+              "Obtain and share access confirmation and any entry instructions with Tom's engineer",
+              "Verify access is in place ahead of the visit"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks are highly relevant and concrete, covering the full access-arrangement workflow end to end, though steps 4 and 5 overlap slightly since \"obtaining confirmation\" and \"verifying access is in place\" address similar ground."
+          },
+          {
+            "task": "send Jun Wei the list of AP clerks who used the shared account",
+            "subtasks": [
+              "Pull the audit log from SAP S/4HANA for shared account usage",
+              "Filter the log to identify AP clerks who accessed the shared account",
+              "Compile the filtered results into a clear list",
+              "Send the list of AP clerks to Jun Wei"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are directly relevant, concrete and doable, together cover the full end-to-end workflow from data extraction to delivery, and are fully distinct with no overlap."
+          },
+          {
+            "task": "create individual accounts for the AP clerks who don't have one",
+            "subtasks": [
+              "Obtain the full list of AP clerks from the team or HR system",
+              "Audit existing SAP S/4HANA accounts to identify clerks without individual logins",
+              "Collect required details for each clerk needing an account (name, email, role)",
+              "Create individual SAP S/4HANA accounts for each identified AP clerk",
+              "Assign appropriate AP roles and permissions to the new accounts",
+              "Confirm access with each clerk and document accounts created"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are tightly scoped to the parent task, each is a concrete executable step, they form a complete end-to-end workflow (identify \u2192 audit \u2192 gather info \u2192 create \u2192 configure \u2192 verify), and none overlap meaningfully with one another."
+          },
+          {
+            "task": "lock the shared generic accounts in production",
+            "subtasks": [
+              "Identify all shared and generic accounts in the production environment",
+              "Export and document the list of accounts for audit trail purposes",
+              "Notify relevant teams of the upcoming account lockout",
+              "Lock all identified shared and generic accounts in production",
+              "Verify all targeted accounts are successfully locked",
+              "Record completion and update the Access And Audit Review log"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the parent task, each step is concrete and executable, the sequence covers the full lifecycle from discovery through documentation and verification, and no two steps overlap meaningfully."
+          }
+        ],
+        [
+          {
+            "task": "forward the signed-off bank statement sample file to Daniel",
+            "subtasks": [
+              "Locate the signed-off bank statement sample file",
+              "Confirm Daniel's current email address or preferred sharing method",
+              "Compose an email referencing the SAP S/4HANA Go-Live Programme and the revised go-live date of 13 July 2026",
+              "Attach the signed-off bank statement sample file to the email",
+              "Send the email to Daniel before the 24 June 2026 deadline",
+              "Confirm with Daniel that he has received and can access the file"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 3,
+              "actionability": 3,
+              "coverage": 4,
+              "non_redundancy": 4
+            },
+            "comment": "Subtasks generally cover the end-to-end flow of forwarding a file, but subtask 3 injects highly specific, unsupported context (SAP S/4HANA programme, go-live date, deadline) that is not grounded in the parent task, lowering relevance and actionability; otherwise the breakdown is reasonably distinct and complete."
+          },
+          {
+            "task": "finish the MT940 parser fix and retest it in QA",
+            "subtasks": [
+              "Reproduce and diagnose the current MT940 parser failure",
+              "Implement the fix in the parser codebase",
+              "Write or update unit tests to cover the fixed logic",
+              "Deploy the updated parser to the QA environment",
+              "Execute end-to-end MT940 parsing regression tests in QA",
+              "Document test results and confirm sign-off with Daniel"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks map directly to the parent task, are concrete and executable, together cover the full fix-and-retest lifecycle end to end, and none overlap with one another."
+          },
+          {
+            "task": "prepare the opening balance reconciliation for the mock cutover",
+            "subtasks": [
+              "Identify all accounts requiring opening balance reconciliation for the mock cutover",
+              "Extract trial balance and legacy system data as at the mock cutover date",
+              "Map legacy balances to corresponding SAP S/4HANA GL accounts",
+              "Load and post opening balances in the SAP S/4HANA mock environment",
+              "Reconcile posted balances against source data and investigate variances",
+              "Document reconciliation results and flag unresolved items for sign-off"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to an opening balance reconciliation for a mock cutover, each step is concrete and executable, together they cover the full end-to-end workflow from scoping through sign-off, and there is no meaningful overlap between any of the six steps."
+          },
+          {
+            "task": "run the end-to-end bank statement test in pre-production",
+            "subtasks": [
+              "Prepare pre-production test environment with bank statement test data",
+              "Configure bank interface settings to mirror production setup",
+              "Execute the end-to-end bank statement test scenario in pre-production",
+              "Capture and document test results and any errors encountered",
+              "Validate manual bank reconciliation fallback procedure against test outcomes",
+              "Sign off test results and share report with Finance Close Planning stakeholders"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks are clearly relevant and concrete, covering the full lifecycle from environment prep to stakeholder sign-off, though \"Capture and document test results\" and \"Sign off test results and share report\" have a slight overlap in handling test output."
+          },
+          {
+            "task": "write the work instruction for the manual bank reconciliation fallback",
+            "subtasks": [
+              "Define the trigger conditions for activating the manual reconciliation fallback",
+              "Document the step-by-step manual bank reconciliation procedure",
+              "Specify roles, responsibilities, and system access required for each step",
+              "Include error-handling guidance and escalation contacts",
+              "Review the work instruction with Daniel and the Finance team for accuracy",
+              "Obtain sign-off and publish the instruction to the go-live documentation repository"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to authoring a work instruction, each step is concrete and doable, together they cover the full lifecycle from scoping through publication, and there is no meaningful overlap between any of the six steps."
+          },
+          {
+            "task": "set up the five new house bank accounts in the production system",
+            "subtasks": [
+              "Gather bank account details for all five house bank accounts",
+              "Create each house bank in SAP S/4HANA Financial Accounting configuration",
+              "Set up the corresponding bank account master records (IBAN, currency, GL account)",
+              "Assign payment methods and ranking to each house bank account",
+              "Validate account settings by running test transactions in production",
+              "Confirm setup with Finance team and document accounts for manual reconciliation fallback"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask maps directly to a concrete, sequenced step in the house bank setup process\u2014from data gathering through configuration, payment method assignment, validation, and sign-off\u2014with no overlap and full end-to-end coverage."
+          },
+          {
+            "task": "deliver six replacement scanners to Tuas",
+            "subtasks": [
+              "Confirm the six replacement scanners are available and in working order",
+              "Arrange transport or courier to Tuas with delivery by 10 July 2026",
+              "Coordinate with the Tuas site team to schedule receipt of the scanners",
+              "Verify scanners are configured and ready for the new SAP S/4HANA system",
+              "Confirm successful delivery and sign-off with the Tuas site contact"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly tied to the delivery task, each is a concrete and doable step (verify readiness, arrange transport, coordinate receipt, configure, confirm sign-off), together they cover the full end-to-end delivery lifecycle, and there is no meaningful overlap between any of them."
+          },
+          {
+            "task": "set up the scanner user accounts in production",
+            "subtasks": [
+              "Confirm the full list of scanner users needing accounts with the Tuas warehouse team",
+              "Create scanner user accounts in the SAP S/4HANA production system",
+              "Assign appropriate roles and authorisations to each scanner user",
+              "Validate account access by logging in with a test scanner device",
+              "Communicate login credentials securely to each scanner user",
+              "Confirm all accounts are ready before Tuesday 14 July go-live"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the parent goal, each step is concrete and doable, together they cover the full end-to-end lifecycle from requirements gathering through go-live confirmation, and there is no meaningful overlap between any of the six steps."
+          },
+          {
+            "task": "arrange site access at Tuas for Tom's engineer",
+            "subtasks": [
+              "Confirm the engineer's details and expected visit date with Tom",
+              "Identify the Tuas site access requirements and approval process",
+              "Submit site access request for the engineer to the Tuas facility",
+              "Obtain and share access confirmation or pass with Tom's engineer",
+              "Verify access is in place ahead of the Tuesday 14 July go-live"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly relevant, concrete and doable, collectively cover the full end-to-end access arrangement workflow, and are clearly distinct from one another with no meaningful overlap."
+          },
+          {
+            "task": "send Jun Wei the list of AP clerks who used the shared account",
+            "subtasks": [
+              "Pull the audit log from SAP S/4HANA for shared account usage in AP",
+              "Identify all AP clerks who logged in or transacted via the shared account",
+              "Compile the findings into a clear list with clerk names and usage details",
+              "Send the list to Jun Wei with context referencing the no shared accounts decision"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks map directly to the parent task, are concrete and executable steps (with specific system references), collectively cover the full workflow from data extraction to delivery, and contain no meaningful overlap between steps."
+          },
+          {
+            "task": "create individual accounts for the AP clerks who don't have one",
+            "subtasks": [
+              "Pull the full list of AP clerks from HR or the team roster",
+              "Identify which AP clerks lack individual production accounts",
+              "Collect required user details for each clerk needing an account",
+              "Create individual accounts for each clerk in SAP S/4HANA production",
+              "Assign appropriate AP roles and permissions to each new account",
+              "Confirm access with each clerk and validate no shared accounts remain"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the parent task, concretely executable, the six steps cover the full lifecycle from roster pull to post-creation validation, and there is no meaningful overlap between any of the steps."
+          },
+          {
+            "task": "lock the shared generic accounts in production",
+            "subtasks": [
+              "Identify all shared and generic accounts in the production environment",
+              "Export and document the list of accounts for audit trail purposes",
+              "Notify relevant stakeholders before accounts are locked",
+              "Lock all identified shared and generic accounts in production",
+              "Verify all targeted accounts are successfully locked",
+              "Document completion and report back to the Access And Audit Review team"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the parent task, each step is concrete and executable, the sequence covers discovery through closure end-to-end, and no two subtasks overlap meaningfully."
+          }
+        ],
+        [
+          {
+            "task": "forward the signed-off bank statement sample file to Daniel",
+            "subtasks": [
+              "Locate the signed-off bank statement sample file",
+              "Confirm Daniel's email address and preferred delivery method",
+              "Attach the file to an email with clear subject referencing the SAP S/4HANA Go-Live Programme",
+              "Send the email to Daniel before the 24 June 2026 deadline",
+              "Notify the Cutover Readiness Review team that the file has been forwarded"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 4,
+              "actionability": 4,
+              "coverage": 4,
+              "non_redundancy": 4
+            },
+            "comment": "Subtasks are largely relevant and actionable, but steps like referencing the SAP S/4HANA programme and notifying the Cutover Readiness Review team introduce context not present in the parent task, slightly inflating scope and reducing precision."
+          },
+          {
+            "task": "finish the MT940 parser fix and retest it in QA",
+            "subtasks": [
+              "Identify and reproduce the current MT940 parser bug in a dev environment",
+              "Implement and peer-review the parser fix",
+              "Deploy the fixed parser to the QA environment",
+              "Run the full MT940 regression and edge-case test suite in QA",
+              "Document test results and confirm all cases pass",
+              "Sign off QA validation and notify the Cutover Readiness team"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask maps directly to the parent task's fix-and-retest lifecycle, each step is concretely doable with clear outputs, the sequence covers the full end-to-end flow from bug reproduction through stakeholder sign-off, and no two subtasks meaningfully overlap."
+          },
+          {
+            "task": "prepare the opening balance reconciliation for the mock cutover",
+            "subtasks": [
+              "Identify all accounts requiring opening balance reconciliation for the mock cutover",
+              "Extract trial balance and legacy system data as at the mock cutover date",
+              "Map legacy balances to corresponding S/4HANA GL accounts",
+              "Run the data migration load and capture opening balances in S/4HANA",
+              "Reconcile legacy balances against S/4HANA opening balances and log variances",
+              "Investigate and resolve reconciling differences with finance and migration teams",
+              "Produce and sign off the opening balance reconciliation report for mock cutover sign-off"
+            ],
+            "n_subtasks": 7,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to opening balance reconciliation for a mock cutover, follows a logical end-to-end sequence from account identification through to signed-off report, each step is concrete and executable, and there is no meaningful overlap between any of the seven steps."
+          },
+          {
+            "task": "run the end-to-end bank statement test in pre-production",
+            "subtasks": [
+              "Confirm pre-production environment is stable and accessible",
+              "Prepare bank statement test data and upload to pre-production",
+              "Execute the end-to-end bank statement test scenario in pre-production",
+              "Validate bank reconciliation fallback behaviour on simulated interface failure",
+              "Document test results and any defects found",
+              "Obtain sign-off from Kenji and Finance Close Planning stakeholders"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks are tightly scoped to the parent task and form a clear, end-to-end testing lifecycle; the only minor redundancy is that \"validate fallback behaviour\" could arguably be considered part of \"execute the test scenario,\" but it is specific enough to justify its own step."
+          },
+          {
+            "task": "write the work instruction for the manual bank reconciliation fallback",
+            "subtasks": [
+              "Define the trigger conditions for activating the manual reconciliation fallback",
+              "Document the step-by-step manual bank reconciliation procedure",
+              "Specify roles, responsibilities, and authorization requirements for each step",
+              "Include error-handling guidance and escalation contacts",
+              "Review the work instruction with Daniel and the Finance team for accuracy",
+              "Obtain sign-off and publish the work instruction to the project documentation repository"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to producing a complete, publishable work instruction \u2014 from scoping triggers and drafting the procedure, through roles/error-handling, stakeholder review, and formal sign-off \u2014 with no overlap between steps."
+          },
+          {
+            "task": "set up the five new house bank accounts in the production system",
+            "subtasks": [
+              "Gather bank account details for all five house banks (account numbers, bank keys, currencies, etc.)",
+              "Create the five house bank entries in the SAP S/4HANA production system via transaction FI12",
+              "Configure the corresponding house bank account IDs and assign GL accounts for each",
+              "Validate account details and posting settings with the Finance team",
+              "Run a test posting for each house bank account to confirm correct configuration",
+              "Document the completed house bank setup and hand over to Omar for sign-off"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the parent goal, each step is concrete and executable (with specific tools like FI12 named), the sequence covers the full lifecycle from data gathering to sign-off, and there is no meaningful overlap between steps."
+          },
+          {
+            "task": "deliver six replacement scanners to Tuas",
+            "subtasks": [
+              "Confirm quantity and model of the six replacement scanners",
+              "Arrange collection or dispatch of scanners from the warehouse",
+              "Coordinate delivery logistics to the Tuas site",
+              "Obtain proof of delivery and confirm receipt with Tuas staff",
+              "Log delivered scanners against the Tuas site asset register"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly relevant, concrete and doable, collectively cover the full delivery lifecycle from verification through asset logging, and are clearly distinct with no overlapping steps."
+          },
+          {
+            "task": "set up the scanner user accounts in production",
+            "subtasks": [
+              "Identify all scanner users requiring production accounts",
+              "Gather required user details and role/authorization requirements",
+              "Create scanner user accounts in the production SAP S/4HANA system",
+              "Assign correct roles and authorizations to each account",
+              "Verify accounts can log in and access scanner functions",
+              "Confirm readiness with Marcus ahead of the 14 July go-live"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks are highly relevant and concrete, covering the full lifecycle from user identification through go-live confirmation, with only minor overlap between gathering user details and identifying users."
+          },
+          {
+            "task": "arrange site access at Tuas for Tom's engineer",
+            "subtasks": [
+              "Confirm the engineer's name, visit date, and ID details with Tom",
+              "Submit site access request to Tuas facility security team",
+              "Obtain and share access confirmation or visitor pass with Tom's engineer",
+              "Verify access is in place ahead of the Tuesday 14 July go-live date"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are directly relevant, concrete and doable, cover the full end-to-end flow (gather info \u2192 submit request \u2192 obtain confirmation \u2192 verify ahead of deadline), and are clearly distinct with no overlap."
+          },
+          {
+            "task": "send Jun Wei the list of AP clerks who used the shared account",
+            "subtasks": [
+              "Pull the audit log from SAP S/4HANA for shared account usage",
+              "Filter the log to identify AP clerks who accessed the shared account",
+              "Compile the filtered results into a clear list",
+              "Send the list to Jun Wei with context referencing the no shared accounts decision"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are tightly scoped to the parent task, each is a concrete and executable step, they cover the full workflow from data extraction to delivery, and there is no meaningful overlap between them."
+          },
+          {
+            "task": "create individual accounts for the AP clerks who don't have one",
+            "subtasks": [
+              "Obtain the full list of AP clerks from the team roster",
+              "Audit existing production accounts to identify AP clerks without individual logins",
+              "Collect required details for each clerk needing an account (full name, email, role)",
+              "Create individual user accounts in SAP S/4HANA for each identified clerk",
+              "Assign appropriate AP roles and permissions to the new accounts",
+              "Notify each clerk of their new credentials and login instructions"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the parent task, each step is concrete and executable, the sequence covers the full end-to-end workflow from roster review to clerk notification, and no two steps overlap in scope."
+          },
+          {
+            "task": "lock the shared generic accounts in production",
+            "subtasks": [
+              "Identify all shared and generic accounts in the production environment",
+              "Document the list of accounts for review and sign-off",
+              "Notify relevant teams of the upcoming account lockout",
+              "Lock all identified shared and generic accounts in production",
+              "Verify all targeted accounts are successfully locked",
+              "Record completion and update the Access And Audit Review log"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask directly serves the parent task, each step is concrete and executable, the sequence covers the full end-to-end workflow from discovery through audit logging, and no two steps overlap meaningfully."
+          }
+        ],
+        [
+          {
+            "task": "forward the signed-off bank statement sample file to Daniel",
+            "subtasks": [
+              "Locate the signed-off bank statement sample file",
+              "Confirm Daniel's current email address or preferred delivery method",
+              "Compose a covering message referencing the Go-live schedule change to 13 July 2026",
+              "Attach the file and send it to Daniel",
+              "Confirm Daniel has received and acknowledged the file"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 3,
+              "actionability": 4,
+              "coverage": 4,
+              "non_redundancy": 4
+            },
+            "comment": "Subtasks are generally concrete and cover the end-to-end forwarding workflow, but one subtask introduces an irrelevant detail (the Go-live schedule change to 13 July 2026) that has no basis in the parent task, which hurts relevance; the confirmation step is useful but borderline out of scope for a simple forwarding task."
+          },
+          {
+            "task": "finish the MT940 parser fix and retest it in QA",
+            "subtasks": [
+              "Identify and document the root cause of the MT940 parser bug",
+              "Implement and peer-review the code fix",
+              "Deploy the fixed parser to the QA environment",
+              "Execute MT940 regression and edge-case test scenarios in QA",
+              "Log and resolve any defects found during QA retesting",
+              "Obtain QA sign-off and update Cutover Readiness Review status"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to the MT940 parser fix lifecycle, progresses logically from root-cause analysis through code fix, deployment, testing, defect resolution, and formal sign-off, with no overlapping steps."
+          },
+          {
+            "task": "prepare the opening balance reconciliation for the mock cutover",
+            "subtasks": [
+              "Identify all accounts requiring opening balance reconciliation for the mock cutover",
+              "Extract trial balance and legacy system data as at the mock cutover date",
+              "Map legacy balances to corresponding SAP S/4HANA GL accounts",
+              "Load and post opening balances in the SAP S/4HANA mock environment",
+              "Reconcile loaded balances against source data and investigate variances",
+              "Document reconciliation results and sign off for Cutover Readiness review"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to opening balance reconciliation for a mock cutover, each step is concrete and executable, they form a complete end-to-end workflow from scoping through sign-off, and there is no meaningful overlap between any of them."
+          },
+          {
+            "task": "run the end-to-end bank statement test in pre-production",
+            "subtasks": [
+              "Confirm pre-production environment is stable and test data is loaded",
+              "Configure bank statement import settings to mirror production setup",
+              "Execute end-to-end bank statement test run in pre-production",
+              "Validate statement parsing, posting, and reconciliation output",
+              "Log any errors or discrepancies and raise defects if needed",
+              "Obtain sign-off from Kenji and Finance team on test results"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to the bank statement E2E test lifecycle, each step is concrete and executable, together they cover the full pipeline from environment readiness to stakeholder sign-off, and there is no meaningful overlap between any of the six steps."
+          },
+          {
+            "task": "write the work instruction for the manual bank reconciliation fallback",
+            "subtasks": [
+              "Define the trigger conditions for activating the manual reconciliation fallback",
+              "Document the step-by-step manual bank reconciliation procedure",
+              "Specify roles, responsibilities, and system access required for each step",
+              "Include error-handling and escalation paths for discrepancies found",
+              "Review the draft with the Finance team and incorporate feedback",
+              "Obtain sign-off and publish the work instruction to the relevant teams"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to producing a work instruction for this specific fallback process, each step is concrete and executable, the sequence covers the full lifecycle from trigger definition to publication, and there is no meaningful overlap between steps."
+          },
+          {
+            "task": "set up the five new house bank accounts in the production system",
+            "subtasks": [
+              "Gather bank account details for all five house bank accounts",
+              "Create each house bank in SAP S/4HANA Financial Accounting configuration",
+              "Create the corresponding house bank account IDs for each bank",
+              "Assign GL accounts to each house bank account",
+              "Validate account settings and run test transactions in production",
+              "Confirm setup with Omar and document for manual reconciliation fallback"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask maps directly to a concrete, sequenced step in a real SAP house bank setup workflow\u2014from data gathering through configuration, GL assignment, validation, and sign-off\u2014with no overlap and full end-to-end coverage."
+          },
+          {
+            "task": "deliver six replacement scanners to Tuas",
+            "subtasks": [
+              "Confirm the six replacement scanners are available and tested",
+              "Arrange transport or courier to Tuas site",
+              "Package and label scanners for delivery",
+              "Deliver scanners to Tuas before the 10 July deadline",
+              "Obtain signed proof of delivery from Tuas site",
+              "Confirm receipt with Tuas team and verify scanners are operational"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks are directly relevant, concrete, and together cover the full delivery lifecycle end-to-end; the only minor overlap is between \"Deliver scanners to Tuas before the 10 July deadline\" and \"Arrange transport or courier to Tuas site,\" as delivery is a natural consequence of arranging transport and could arguably be merged, but they are distinct enough in focus (logistics planning vs. physical handoff) to justify separation."
+          },
+          {
+            "task": "set up the scanner user accounts in production",
+            "subtasks": [
+              "Confirm the list of scanner users requiring accounts with the Tuas warehouse team",
+              "Create scanner user accounts in the SAP S/4HANA production system",
+              "Assign correct roles and authorisations to each scanner user account",
+              "Conduct a quick login test on physical scanners to validate each account",
+              "Hand over credentials to scanner users and confirm readiness before Tuesday 14 July go-live"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the parent task, each step is concrete and executable, the sequence covers the full lifecycle from requirements gathering to go-live validation, and there is no meaningful overlap between steps."
+          },
+          {
+            "task": "arrange site access at Tuas for Tom's engineer",
+            "subtasks": [
+              "Confirm the engineer's name, visit date, and credentials with Tom",
+              "Contact the Tuas site security or facilities team to initiate the access request",
+              "Submit all required documentation and visitor details to the site access system",
+              "Receive and share the access confirmation or pass with Tom's engineer",
+              "Verify the engineer is cleared and ready for site entry ahead of the visit"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "The subtasks are highly relevant and concrete end-to-end, but steps 4 and 5 overlap slightly \u2014 sharing the pass and verifying clearance are closely related confirmation activities that could arguably be merged."
+          },
+          {
+            "task": "send Jun Wei the list of AP clerks who used the shared account",
+            "subtasks": [
+              "Pull the audit log of shared account usage in the production SAP S/4HANA environment",
+              "Filter the log to identify AP clerks who accessed the shared account",
+              "Compile the filtered results into a clear list with relevant details (name, user ID, access dates)",
+              "Send the compiled list to Jun Wei with context referencing the Access And Audit Review 08 decision"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks map directly to the parent task, each is a concrete and executable step, they chain together to fully complete the task end-to-end, and there is no meaningful overlap between them."
+          },
+          {
+            "task": "create individual accounts for the AP clerks who don't have one",
+            "subtasks": [
+              "Obtain the full list of AP clerks from HR or the team lead",
+              "Audit existing SAP S/4HANA accounts to identify clerks without individual logins",
+              "Collect required details for each clerk needing an account (full name, email, role)",
+              "Create individual user accounts for identified AP clerks in SAP S/4HANA",
+              "Assign appropriate AP clerk roles and permissions to each new account",
+              "Notify each AP clerk of their new account credentials and login instructions",
+              "Confirm all AP clerks can successfully log in and no shared accounts remain in use"
+            ],
+            "n_subtasks": 7,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to AP clerk account creation, each step is concrete and executable, the sequence covers the full lifecycle from discovery through verification, and no two steps meaningfully overlap."
+          },
+          {
+            "task": "lock the shared generic accounts in production",
+            "subtasks": [
+              "Identify all shared and generic accounts currently active in production",
+              "Obtain sign-off from stakeholders before locking accounts",
+              "Notify relevant teams of the planned account lockout and timeline",
+              "Lock all identified shared and generic accounts in production",
+              "Verify all targeted accounts are successfully locked",
+              "Document the changes and update the audit log for the Access And Audit Review"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the parent task, each step is concrete and executable, the sequence covers the full lifecycle from discovery through verification and documentation, and no two steps overlap meaningfully."
+          }
+        ],
+        [
+          {
+            "task": "forward the signed-off bank statement sample file to Daniel",
+            "subtasks": [
+              "Locate the signed-off bank statement sample file",
+              "Confirm Daniel's email address and preferred delivery method",
+              "Attach the file to an email with clear context referencing the Go-live date change to 13 July 2026",
+              "Send the email to Daniel and request a read receipt or acknowledgement",
+              "Log the file transfer as complete in the Cutover Readiness Review tracker"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 4,
+              "actionability": 4,
+              "coverage": 5,
+              "non_redundancy": 3
+            },
+            "comment": "The subtasks cover the task end-to-end well and are mostly concrete, but steps 3\u20134 overlap heavily (composing and sending the email could be one step), and step 3 introduces an unsupported assumption about a Go-live date change that is not mentioned in the parent task, slightly hurting relevance and adding noise."
+          },
+          {
+            "task": "finish the MT940 parser fix and retest it in QA",
+            "subtasks": [
+              "Reproduce and document the current MT940 parser bug",
+              "Implement the fix in the MT940 parser code",
+              "Conduct unit and integration testing of the fix locally",
+              "Deploy the fixed parser to the QA environment",
+              "Execute QA regression and end-to-end test scenarios for MT940 parsing",
+              "Log test results and confirm sign-off with Daniel ahead of the 26 June deadline"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All six subtasks are directly relevant, concretely actionable, cover the full fix-and-retest lifecycle end to end, and are cleanly distinct from one another with no meaningful overlap."
+          },
+          {
+            "task": "prepare the opening balance reconciliation for the mock cutover",
+            "subtasks": [
+              "Identify all accounts requiring opening balance reconciliation for mock cutover",
+              "Extract trial balance and legacy system data as of the mock cutover date",
+              "Map legacy balances to corresponding SAP S/4HANA GL accounts",
+              "Load and post opening balances in the SAP mock environment",
+              "Compare posted balances against source data and document variances",
+              "Investigate and resolve any out-of-tolerance discrepancies",
+              "Produce and sign off the opening balance reconciliation report"
+            ],
+            "n_subtasks": 7,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All seven subtasks are tightly scoped to opening balance reconciliation for a mock cutover, each is a concrete and executable step, they collectively cover the full end-to-end lifecycle from account identification through sign-off, and there is no meaningful overlap between any of the steps."
+          },
+          {
+            "task": "run the end-to-end bank statement test in pre-production",
+            "subtasks": [
+              "Prepare pre-production test environment with bank statement test data",
+              "Configure bank interface settings to mirror production setup",
+              "Execute end-to-end bank statement processing in pre-production",
+              "Validate reconciliation results and flag any discrepancies",
+              "Document manual fallback steps based on any interface failures observed",
+              "Sign off test results and share report with Finance Close Planning stakeholders"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 4
+            },
+            "comment": "All subtasks are tightly relevant and concretely actionable end-to-end, though \"Document manual fallback steps\" leans slightly beyond a pure test-execution scope and edges toward overlapping with the sign-off/reporting step in intent, preventing a perfect non-redundancy score."
+          },
+          {
+            "task": "write the work instruction for the manual bank reconciliation fallback",
+            "subtasks": [
+              "Define the trigger conditions for activating the manual reconciliation fallback",
+              "Document the step-by-step manual bank reconciliation procedure",
+              "Specify roles, responsibilities, and authorization requirements for each step",
+              "Include error-handling and escalation paths for discrepancies found during reconciliation",
+              "Review the work instruction with Daniel and the Finance Close team for accuracy",
+              "Obtain sign-off and publish the work instruction to the relevant process library"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is tightly scoped to authoring a work instruction, progresses logically from scoping through drafting, review, and publication, covers the full lifecycle without gaps, and contains no overlapping steps."
+          },
+          {
+            "task": "set up the five new house bank accounts in the production system",
+            "subtasks": [
+              "Gather bank account details for all five house banks (account numbers, bank keys, currencies, company codes)",
+              "Create house bank master records in SAP S/4HANA production client",
+              "Configure bank account IDs for each house bank in the production system",
+              "Assign G/L accounts to each house bank account in the chart of accounts",
+              "Validate house bank account settings with the finance team",
+              "Conduct a test posting or balance confirmation for each account to verify correct setup"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask maps directly to a distinct, concrete configuration or validation step in the standard SAP house bank setup workflow, collectively covering the full end-to-end process with no meaningful overlap."
+          },
+          {
+            "task": "deliver six replacement scanners to Tuas",
+            "subtasks": [
+              "Confirm the six replacement scanners are available and ready for dispatch",
+              "Arrange transport or courier to Tuas with delivery by 10 July 2026",
+              "Pack and label the scanners for the Tuas site",
+              "Dispatch the scanners and obtain proof of delivery",
+              "Confirm receipt of all six scanners with the Tuas site team",
+              "Notify the Go-Live Readiness team that scanners are on-site ahead of 14 July go-live"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the delivery mission, each step is concrete and executable, the sequence covers the full end-to-end flow from stock confirmation to go-live notification, and no two steps meaningfully overlap."
+          },
+          {
+            "task": "set up the scanner user accounts in production",
+            "subtasks": [
+              "Gather the list of scanner users requiring production accounts",
+              "Create user accounts in the production SAP S/4HANA system",
+              "Assign appropriate roles and authorisations to each scanner user",
+              "Verify users can log in and access the correct scanner transactions",
+              "Confirm accounts are ready with Marcus before 9 July deadline"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly relevant, concrete, and collectively cover the full lifecycle of account setup\u2014from gathering requirements through creation, role assignment, verification, and sign-off\u2014with no meaningful overlap between steps."
+          },
+          {
+            "task": "arrange site access at Tuas for Tom's engineer",
+            "subtasks": [
+              "Confirm the engineer's details and expected visit date with Tom",
+              "Identify the Tuas site contact responsible for granting access",
+              "Submit the site access request to the Tuas site contact",
+              "Share access confirmation and site instructions with Tom's engineer",
+              "Verify access is in place ahead of the Tuesday 14 July go-live"
+            ],
+            "n_subtasks": 5,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All five subtasks are directly relevant, concrete and doable, together span the full end-to-end access-arrangement workflow, and are clearly distinct from one another with no overlap."
+          },
+          {
+            "task": "send Jun Wei the list of AP clerks who used the shared account",
+            "subtasks": [
+              "Pull the audit log from SAP S/4HANA for shared account usage",
+              "Filter the log to identify AP clerks who accessed the shared account",
+              "Compile the filtered results into a clear list",
+              "Send the list of AP clerks to Jun Wei"
+            ],
+            "n_subtasks": 4,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "All four subtasks are directly relevant, concrete, and sequential \u2014 covering data extraction, filtering, compilation, and delivery \u2014 with no overlap between steps."
+          },
+          {
+            "task": "create individual accounts for the AP clerks who don't have one",
+            "subtasks": [
+              "Obtain the full list of AP clerks from the team or HR system",
+              "Audit existing SAP S/4HANA accounts to identify clerks without individual logins",
+              "Collect required details for each clerk needing an account (name, role, email, etc.)",
+              "Create individual SAP S/4HANA accounts for each identified AP clerk",
+              "Assign appropriate AP roles and permissions to each new account",
+              "Notify each AP clerk of their new credentials and login instructions",
+              "Confirm all AP clerks have successfully logged in and decommission any shared accounts"
+            ],
+            "n_subtasks": 7,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the parent goal, each step is concrete and executable, the sequence covers the full lifecycle from discovery through verification and cleanup, and there is no meaningful overlap between steps."
+          },
+          {
+            "task": "lock the shared generic accounts in production",
+            "subtasks": [
+              "Identify all shared and generic accounts in the production environment",
+              "Document the list of accounts flagged for locking and obtain sign-off",
+              "Notify relevant teams of the scheduled account lock and any access impact",
+              "Lock all identified shared and generic accounts in production",
+              "Verify all targeted accounts are successfully locked",
+              "Record completion and update the Access and Audit Review log"
+            ],
+            "n_subtasks": 6,
+            "scores": {
+              "relevance": 5,
+              "actionability": 5,
+              "coverage": 5,
+              "non_redundancy": 5
+            },
+            "comment": "Every subtask is directly tied to the parent task, each step is concrete and executable, the sequence covers the full lifecycle from discovery through audit logging, and there is no overlap between steps."
+          }
+        ]
+      ]
+    }
+  },
+  "comparison": {
+    "metric": "Gemini - Claude, mean per-task rubric score",
+    "difference": -0.0042,
+    "p_value": 1.0,
+    "n_tasks": 12
+  }
+}

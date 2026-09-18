@@ -1,0 +1,305 @@
+================================================================
+SESSION 7
+Meeting: Warehouse Go-Live Readiness Check
+Date: 2026-07-07
+Duration: ~50 min
+Attendees: Farah Ismail (Logistics Lead, chair), Nadia Karim (Inventory Controller), Mei Ling Chua (Warehouse Supervisor, Tuas), Arjun Pillai (Transport Planner), Marcus Lee (Basis and Security Lead), Kenji Sato (Integration Developer), Siti Hamid (Change and Training Lead), Tom Baker (Account Manager, scanner vendor)
+================================================================
+
+Farah: Okay, can everyone hear me? Mei Ling, you're in the warehouse office, yeah? There's a forklift beeping behind you.
+
+Mei Ling: Sorry, sorry. It's reversing. Give it ten seconds.
+
+Farah: Fine. So, six days. I'm not going to pretend this is a normal meeting, I just want to go through everything that could stop the warehouses going live on Monday and make sure someone has it. Tom from the scanner vendor is joining for the first part because we have a scanner problem, which I'll come to. Tom, thanks for making the time.
+
+Tom: Happy to. I've got about twenty minutes, then I'm on a flight.
+
+Farah: Then let's do scanners first. Mei Ling, tell Tom what happened.
+
+Mei Ling: So on Saturday we did a full shift on the new firmware as a trial, and six of the handhelds at Tuas started rebooting in the middle of a scan. Always the same six. We think it's the batteries, because they're the oldest units, but we're not sure.
+
+Tom: That matches what we've seen at two other customers. It's the older battery packs, they can't hold the voltage the new firmware draws during a scan. It's not the firmware itself. The fix is to replace the units, and we have stock.
+
+Farah: How fast?
+
+Tom: I can get six replacement scanners delivered to Tuas by Friday. They'll come pre-loaded with the new firmware, so it's plug and play, nobody needs to configure them.
+
+Marcus: They'll still need user accounts on the production system. The devices log in with a device account, not a person.
+
+Tom: Yes, the device accounts are on your side.
+
+Marcus: That's fine, I'm already setting up the scanner user accounts in production for all the devices. I've done Pandan, Tuas is half done. I'll have all of them done by Thursday, including the six new ones, if Tom sends me the serial numbers.
+
+Tom: I'll put the serial numbers in the delivery note, it's automatic.
+
+Farah: And the old six?
+
+Tom: We take them back on delivery. No charge, it's under the support contract.
+
+Farah: Brilliant. And if the replacements don't arrive by Friday?
+
+Tom: They will.
+
+Farah: But if they don't.
+
+Mei Ling: Then we run Tuas one scanner short per aisle for the first week. It's slower but it works. We did it in the mock.
+
+Farah: Okay. Tom, one more. Marcus, did you get the release notes for the firmware?
+
+Marcus: Yes, Tom sent the firmware release notes yesterday. I've read them. Nothing surprising.
+
+Siti: Can I ask something while Tom's here? Our training video shows the scanner screens from the old firmware. Do I need to redo it for the new screens? It's about two days of work.
+
+Tom: The screens are identical. This release only changed the power management and the wireless driver. Nothing the user sees.
+
+Siti: Oh, that's a relief. Then I won't touch the video.
+
+Farah: Good, leave the video. Tom, anything else we should know?
+
+Tom: Only that the install at Tuas needs one of our engineers on site for an hour to swap the charging cradles as well, because the new units use a different cradle. He'll come with the delivery.
+
+Marcus: Then he needs site access. Tuas has the security gate. I'll get Tom's engineer site access for Friday, I just need his name and IC number by Thursday.
+
+Tom: I'll send it today.
+
+Farah: Great. Tom, thank you, go and catch your flight.
+
+Tom: Good luck on Monday. You'll be fine.
+
+Farah: Okay. So. Readiness test. Most of you know this, but for the record, I reran the full warehouse readiness test with the new firmware last Tuesday, the thirtieth, the day of steering. It passed. Everything passed except one thing, which is returns.
+
+Nadia: The returns movement type.
+
+Farah: Yes. Customer returns are posting to the wrong storage location. They go to unrestricted stock instead of the returns area, which means someone could pick a returned item and ship it out again before it's been inspected.
+
+Kenji: That's a mapping error in the interface, I found it on Friday. The movement type is right in the warehouse system, but the interface translates it to the wrong one on the way to the transport side. I'm fixing the returns movement type mapping now. I'll have it fixed by Thursday.
+
+Nadia: And then I retest returns. I'll need a day. So I'll retest the returns process on Friday, after Kenji's fix is in.
+
+Farah: Friday, before the lock at six.
+
+Nadia: Before the lock, yes. If it fails, I'll call Kenji, not email.
+
+Kenji: Please call. I don't read email on cutover weekend.
+
+Farah: Right. Kenji, while you're here, the timeout errors.
+
+Kenji: Fixed. The WM to TMS interface timeout errors are done. I fixed them on the second, a day ahead of the date I gave. It was a connection pool setting, the interface was opening a new connection for every message and running out.
+
+Arjun: I can confirm. My side hasn't had a single timeout since Thursday. It was ten a day before that.
+
+Farah: Nice. And for go-live morning?
+
+Kenji: I'll be watching the WM to TMS interface on go-live morning from six. If anything queues up, I'll see it before the warehouse does.
+
+Arjun: Speaking of which, should we set up email alerts for failed interface messages? So we're not relying on Kenji staring at a screen.
+
+Kenji: They already exist. Every failed message sends an alert to the integration inbox. I set that up in the second mock. We're covered.
+
+Arjun: Okay, then ignore me.
+
+Farah: Arjun, you're next anyway. Transport.
+
+Arjun: So, carrier master data. We have forty-two carriers in legacy, but only eighteen that we actually use. I've been loading the eighteen active carriers into the transport system. Twelve are in. I'll have all the carrier master data loaded by Thursday.
+
+Farah: Why not all forty-two?
+
+Arjun: Because the other twenty-four haven't delivered anything since before the pandemic. If one of them comes back, it takes ten minutes to add.
+
+Farah: Fair. What else?
+
+Arjun: The delivery schedule for go-live week. I need to confirm it with the three main carriers, because they all want to deliver on Monday morning, and that's the worst possible time. I'll confirm the go-live week delivery schedule with the carriers tomorrow.
+
+Mei Ling: Please don't let them all come Monday. We'll be learning the new screens and there'll be trucks backed up to the road.
+
+Farah: That's actually something I wanted to decide today. Mei Ling, how would you feel if Tuas didn't receive goods on the new system on the Monday at all? We take Monday's deliveries on paper, and start goods receipts on the new system on Tuesday.
+
+Mei Ling: I'd feel very good about that.
+
+Nadia: From an inventory point of view, it's fine, as long as the paper receipts are keyed in on Tuesday before anything else.
+
+Arjun: And I can tell the carriers that Monday is a light day anyway.
+
+Farah: Then let's do that. Tuas starts goods receipts on the new system on Tuesday the fourteenth. Monday's deliveries at Tuas are received on paper and keyed in on Tuesday morning. Pandan goes live normally on Monday, because Pandan has almost no inbound on Mondays.
+
+Arjun: Got it. I'll build that into what I tell the carriers.
+
+Farah: And the proof of delivery?
+
+Arjun: The carriers need the new proof-of-delivery template, the one with the new document numbers. I'll send the proof-of-delivery template to the carriers. It's ready, I just haven't sent it. No rush, the old one works for the first week.
+
+Farah: Okay. Nadia, inventory.
+
+Nadia: Good news first. The cycle count reconciliation for the mock is finished. I finished it on the Friday like I said. The variance was point two percent, mostly one aisle of fasteners where the unit of measure was boxes in one system and pieces in the other.
+
+Farah: Point two is good.
+
+Nadia: It is. Second, the bin locations. I reconciled the bin locations between legacy and the new system last Friday as well. Every bin that has stock in legacy exists in the new system. That's done.
+
+Farah: What's left?
+
+Nadia: The final stock count. After the lock on Friday evening, we count Tuas. I'll run the final stock count at Tuas on Saturday morning, the eleventh. Pandan was counted on the mock weekend and nothing's moved much since.
+
+Mei Ling: The team's booked for seven. It's the same crew as the mock.
+
+Nadia: And one more thing I want to raise. Purchasing is still creating new materials in legacy every day. Every new material after the extract is one that won't exist in the new system on Monday.
+
+Farah: How many are we talking about?
+
+Nadia: Five or six a day.
+
+Marcus: That's a real problem. The final extract runs on Friday, but the material master extract is earlier, it runs on Wednesday night because it's the longest.
+
+Farah: Then let's stop it. No new materials in legacy from tomorrow, Wednesday the eighth. If purchasing needs a new material urgently, they request it and we create it in the new system on Monday.
+
+Nadia: I'd support that.
+
+Farah: So that's decided. Material creation freeze in legacy from Wednesday. Nadia, can you tell purchasing?
+
+Nadia: I'll tell the purchasing team about the material creation freeze today, straight after this.
+
+Farah: Mei Ling, Tuas.
+
+Mei Ling: Okay, a few things. The transfer orders. We have open transfer orders in legacy that need to be confirmed or cancelled before the lock, because they don't migrate. We had two hundred on Friday. We're down to about forty. I'll have the open transfer order backlog cleared by Friday.
+
+Farah: Before the lock.
+
+Mei Ling: Before the lock. Second, the night shift. They're the ones who'll be on the floor when legacy locks on Friday at six. They need to know the paper process for the weekend. Most of them did it in the mock, but we have four new people.
+
+Farah: When can you brief them?
+
+Mei Ling: Thursday night, they're all in on Thursday. I'll brief the night shift on the paper fallback process on Thursday.
+
+Farah: And confirming, the fallback is paper at both sites for the whole cutover weekend, Friday six p.m. to Monday morning. That's the same as the mock. Is everyone okay with that?
+
+Marcus: That's the plan in the run sheet.
+
+Farah: Then that's decided, paper at both sites for the weekend. And who keys the paper in on Monday?
+
+Mei Ling: The night shift team keys the paper records into the new system on Monday morning, before the day shift starts. They wrote it, they know it.
+
+Farah: Good. Anything else?
+
+Mei Ling: Super-users. Siti asked me to nominate two super-users for the Tuas night shift, the people everyone goes to with questions. I haven't picked them yet, I want to ask them first. I'll nominate the two super-users by tomorrow.
+
+Siti: Thank you. I need the names to give them the extra session.
+
+Mei Ling: And last one, sorry. The forklift servicing is booked for Monday the thirteenth. Of all the days. I'll call the servicing company today and move the forklift servicing to the week after go-live.
+
+Farah: Please do. I don't want half the forklifts on jacks on go-live day.
+
+Farah: Let's talk about Pandan on Monday, since Pandan goes live on the day. Nadia, you'll be there?
+
+Nadia: From six. The day shift starts at seven, the first wave of picks releases at half seven. The plan is we release a small wave first, maybe thirty orders, and watch them all the way through to the truck before we release the next one. If the first thirty go out clean, we go to normal wave sizes after lunch.
+
+Arjun: Thirty is small. The Monday morning outbound at Pandan is usually a hundred and twenty orders. If we do thirty and wait, the afternoon trucks will be late.
+
+Nadia: I'd rather the afternoon trucks were an hour late than ship the wrong stock to a hundred and twenty customers.
+
+Farah: I'm with Nadia on this. Small first wave, watch it, then scale up. If the trucks are late on day one, I'll take that conversation with the customers.
+
+Arjun: Okay. Then there's one order we can't be late with. The Harbourfront hotel group has a big delivery on Monday, it's the opening of their new property and they've been promised the goods by two o'clock. If that's late, it goes to the CEO.
+
+Farah: How big?
+
+Arjun: Nine pallets. It normally goes on the shared truck with the other east-side customers.
+
+Mei Ling: Put it on its own truck. Then it doesn't wait for anything else.
+
+Arjun: That's what I was going to suggest. I'll book a dedicated truck for the Harbourfront order on Monday. I'll do it today, trucks for Monday get scarce by Wednesday.
+
+Farah: Do it. And pick that order in the first wave, so if something breaks, we find out at eight, not at one.
+
+Nadia: I'll make sure it's in the first thirty.
+
+Farah: Nadia, anything else for Pandan?
+
+Nadia: One thing, and it's my mistake. I said at the last meeting that the replenishment settings for the pick faces were all done. They're done for Tuas. When I checked Pandan on Friday, about sixty of the pick faces had no minimum and maximum quantities, because they were added to the layout after the extract. So Pandan isn't done. I've set up about half of them. I'll have the replenishment settings for the Pandan pick faces finished by Thursday.
+
+Farah: What happens if they're not finished?
+
+Nadia: Those pick faces never trigger a replenishment, so they run empty on Monday afternoon and the pickers stand around waiting.
+
+Farah: Then Thursday, please. Thanks for catching it.
+
+Marcus: While we're on Pandan, the Wi-Fi in the cold room. It dropped twice during the mock.
+
+Mei Ling: That was fixed. The network team put a second access point in the cold room two weeks ago. We haven't had a drop since.
+
+Marcus: Good, I didn't know. Then scratch that.
+
+Kenji: Is it the same network for the printers? The dangerous goods printer is in that corner.
+
+Marcus: Same network. And the printer was one of the ones I tested on Monday, so it's fine.
+
+Farah: Good. Siti, training.
+
+Siti: So the train-the-trainer sessions. I scheduled three, like I said I would. I've run two of them, Pandan and the first Tuas one. The last one is Thursday for the second Tuas group. So that's in progress, finished Thursday.
+
+Farah: And the materials?
+
+Siti: The quick reference cards. The supervisors asked for laminated cards they can hang on each scanner cradle with the six most common screens. I've designed them, I'll print the laminated quick reference cards by Friday, so they're on the cradles for Monday.
+
+Mei Ling: Can you put the returns screen on it? That's the one people always forget.
+
+Siti: It's on there.
+
+Siti: And the go-live email to the warehouse staff. I drafted it two weeks ago and it's been approved. I'll send it on Thursday, so people get it before the weekend and not on Monday morning.
+
+Farah: Good. Marcus, anything that isn't scanners?
+
+Marcus: Label printers. I tested all the label printers in production on Monday, both sites. Everything prints, including the dangerous goods labels, which were the ones that failed in the first mock. So that's done.
+
+Farah: What about restarting the interface if it hangs? If Kenji's asleep at three in the morning, what does the night shift do?
+
+Kenji: They shouldn't have to do anything, it restarts itself.
+
+Farah: Should, yes. But if it doesn't.
+
+Kenji: Fair. I'll document the interface restart procedure for the night shift. One page, with screenshots, no jargon. I'll have it by the end of the week.
+
+Marcus: Put it next to the run sheet in the shared folder, then the night shift supervisor can find it.
+
+Kenji: Will do.
+
+Arjun: Can I raise one idea? For after go-live, not now. Some of the other sites in the group have moved to voice picking, headsets instead of scanners. It's supposed to be much faster.
+
+Farah: I've heard good things. But not in the first three months. Let's park voice picking until after hypercare. Remind me in October.
+
+Arjun: Okay.
+
+Nadia: While we're parking things, the dock doors at Tuas. Door three still doesn't close properly. Someone should look at it.
+
+Farah: That's facilities, not us, and it's already on their list. It's not a go-live issue.
+
+Farah: Okay, the last thing from me. Aisha wants the warehouse go or no-go checklist before the go or no-go call on Sunday. I'd like her to have it well before that. I'll send the go/no-go warehouse checklist to Aisha by Thursday.
+
+Nadia: Can you copy me? Half of it is inventory.
+
+Farah: Of course.
+
+Farah: And the overtime for the weekend crew. We need overtime approved for the crews at both sites for the Saturday count and the Monday keying. Nadia, can you raise the overtime request?
+
+Nadia: I can't, I'm not a cost center manager. It has to come from a manager.
+
+Mei Ling: I'm the cost center manager for Tuas. I can raise it for my crew.
+
+Farah: But then Pandan needs a separate one, and Wei Lin will want one request, not two. No, it has to be me, I'm the manager for both. I'll raise the overtime request for the weekend warehouse crew today.
+
+Mei Ling: Okay. My crew numbers are already in the shared sheet.
+
+Farah: Thank you. Oh. Sorry, everyone, I have to jump, Aisha is calling me about the steering pack. Nadia, can you close the meeting?
+
+Nadia: Sure. Is there anything we haven't covered? Kenji?
+
+Kenji: No, I'm good. Returns mapping by Thursday, restart procedure by Friday, and watching the interface on Monday morning.
+
+Nadia: Marcus?
+
+Marcus: Scanner accounts by Thursday, site access for Tom's engineer by Friday. That's it.
+
+Nadia: Arjun?
+
+Arjun: Carriers tomorrow, master data by Thursday, and the proof-of-delivery template.
+
+Nadia: Then that's everything. Same time on Thursday for a quick check. Thanks everyone.

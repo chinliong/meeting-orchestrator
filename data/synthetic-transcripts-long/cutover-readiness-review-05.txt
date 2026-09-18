@@ -1,0 +1,365 @@
+================================================================
+SESSION 5
+Meeting: S/4HANA Cutover Readiness Review #5
+Date: 2026-06-22
+Duration: ~60 min
+Attendees: Aisha Rahman (Programme Manager), Wei Lin (Finance Director, joined late), Daniel Tan (SAP FICO Consultant), Priya Nair (Controller), Marcus Lee (Basis and Security Lead), Farah Ismail (Logistics Lead), Kenji Sato (Integration Developer), Siti Hamid (Change and Training Lead)
+================================================================
+
+Aisha: Morning everyone. Let's give it one more minute, Wei Lin said she might be late, she's coming out of the audit committee. Kenji, can you hear us okay? You were breaking up on Friday.
+
+Kenji: Loud and clear today. I moved closer to the router. Different desk, same chaos.
+
+Marcus: Different desk, same coffee machine that doesn't work.
+
+Aisha: Don't get me started on the coffee machine. Facilities said this week, which means next month. Okay. Let's start without Wei Lin, she knows the agenda. This one is going to be long, so I'd rather we go workstream by workstream and I'll do a summary at the end. Four things I need out of today. One, are we still on track for the sixth of July go-live, honestly. Two, the bank integration, because that's been sitting red for two weeks. Three, the warehouse readiness retest. Four, training and communications. And there's a pile of small stuff in between. Daniel, you're first, because the bank thing is the one keeping me up at night.
+
+Daniel: Fair enough. So, quick recap for Farah and Siti who weren't in the finance session. The bank statement upload was failing on the multi-currency MT940 files. I found the root cause a while back, it's the delimiter on the multi-currency lines. I've got a candidate fix in the dev system. What I don't have is the confirmed statement format from the bank, so I can't finish the fix or test it properly.
+
+Aisha: And where are we with the bank?
+
+Kenji: That's actually me now. Aisha asked me on Friday to take over the bank contact because it's really an interface question. I spoke to their integration team this morning, before this call. They've agreed the format. They're sending a signed-off sample file, and they promised it by Wednesday. I'll forward it to Daniel the moment it lands, so Daniel, you'll have it Wednesday.
+
+Daniel: Good. Then I can finish the parser fix and retest it in QA by Wednesday as well, assuming the file is what they say it is.
+
+Kenji: Hang on, Daniel. If they send it Wednesday, it'll be Wednesday afternoon their time. You won't have it until Wednesday evening at the earliest.
+
+Daniel: Hm. Right. Then Wednesday's not realistic for me. Let's leave that open for a second, I want to see what else lands on my plate today.
+
+Aisha: Okay, I'll come back to your date. What else on finance, Daniel?
+
+Daniel: APAC cost center mapping. That's finished. I closed it on Thursday, all the APAC cost centers are mapped and validated against the new hierarchy. So both regions are complete now.
+
+Aisha: That's the one that was blocked on Priya's codes?
+
+Daniel: Yes, and Priya got them to me on the Wednesday as promised, so that unblocked it.
+
+Priya: I'll take the credit for that one.
+
+Aisha: You can have it. Priya, the duplicate postings?
+
+Priya: Done. All eleven duplicate postings are cleared out of the system, I did it on Thursday afternoon, before the dress rehearsal. I reran the open items report afterwards and it's clean.
+
+Aisha: Brilliant. And the opening balances?
+
+Priya: That's the big one for me this week. I'm preparing the opening balance reconciliation for the mock cutover. I've started, I've got the GL side done, but the sub-ledgers are still outstanding. I'll have the full reconciliation ready by the end of the week.
+
+Aisha: End of the week meaning Friday.
+
+Priya: Friday, yes.
+
+Aisha: While we're on your side, Priya, the material master. Last Thursday you were rerunning the validation against the cleaned data.
+
+Priya: Yes, that's finished. I completed the rerun of the material master validation on Friday. We're down to about zero point three percent errors, and all of the remaining ones are units of measure on old spare parts that nobody has ordered in six years.
+
+Marcus: Zero point three is better than I expected, to be honest. On the first trial load it was closer to four percent.
+
+Priya: It was four point one. Most of it was the duplicate vendor numbers, which we cleaned in the source. The rest was the plant codes that got renamed in the reorganisation last year.
+
+Farah: Those plant codes caused us grief in logistics too. Half the warehouse still calls plant twelve "the old site".
+
+Priya: Well, in the new system it's plant twelve, whatever they call it on the floor.
+
+Aisha: Do the remaining errors block anything?
+
+Priya: No. They're inactive materials, so they load as they are. If one of them ever matters, it's a normal support ticket like anything else. If someone suddenly needs one of those spare parts in the first week, I'll eat my hat.
+
+Aisha: I'll hold you to that. Is the load sequence still the same as the trial?
+
+Marcus: Same sequence. Material master first, then customers and vendors, then open items, then balances last. The timings from the trial load were fine, the whole thing took eleven hours and forty minutes against a window of eighteen.
+
+Wei Lin: Eighteen was the extended window?
+
+Marcus: Yes, the one the business signed off last week. Aisha got the sign-off on Tuesday.
+
+Aisha: I did, they signed it without a fight, which surprised me. Okay, good. So data migration is in reasonable shape. Let's not spend more time there. Daniel, one more on your list from last week, the rollback steps in the runbook.
+
+Daniel: Done. I wrote the rollback steps into the cutover runbook on Wednesday. Marcus reviewed them, so that one's closed.
+
+Marcus: Confirmed, I read through them Thursday. They match the script.
+
+Aisha: Good. Let's move to logistics, then come back to Daniel's bank date. Farah.
+
+Farah: Okay. So the headline is the scanner firmware patch finally arrived from the vendor. Marcus?
+
+Marcus: Yes, I installed the barcode scanner firmware patch in the test environment on Friday evening. It's in, it's done, the scanners are picking up the new firmware. I did a quick smoke test, scanned about twenty labels, all fine.
+
+Farah: So what I need to do now is rerun the full warehouse readiness test with the new firmware, the proper one, all the movement types, not a smoke test. I haven't started that, I only heard the patch was in this morning.
+
+Aisha: When can you do it?
+
+Farah: I need the warehouse team for a full day. Realistically I'll get it done before the steering committee on the thirtieth. I'd rather have the result in hand when we walk in there.
+
+Aisha: That works. And the timeout errors on the interface, the WM to TMS one? That was Daniel's last time.
+
+Daniel: I've been looking at it on and off. I'm happy to keep going on it.
+
+Aisha: No, I'd rather not. You've got the bank fix and that's the critical path. Kenji, can you take the WM to TMS interface timeout errors off Daniel's plate?
+
+Kenji: Yes, it's closer to my area anyway. Honestly I already opened the logs this morning because the errors were flooding my inbox, so I've started. I'll have it fixed by next Friday.
+
+Aisha: Next Friday, the third of July.
+
+Kenji: Yes, the third.
+
+Aisha: So the timeout errors move from Daniel to Kenji. Daniel, send Kenji whatever notes you have.
+
+Daniel: I'll forward them after this call, there's not much, it's mostly screenshots.
+
+Aisha: Farah, one more thing for you. Last week you asked whether we should do a phased rollout across the three warehouses. Can you prepare a phased-rollout plan so we have it as an option for steering?
+
+Farah: I can, but it'll take me a couple of days. I'll look at it.
+
+Aisha: Okay. Also the stock count. Where are we?
+
+Farah: I still need to confirm the stock count schedule with the warehouse managers. They keep moving it because of the quarter-end shipments. I'll get it confirmed with them by Wednesday.
+
+Aisha: Wednesday, fine. And the reconciliation after the count? Last time there was some confusion about who does that.
+
+Farah: That's sorted. Nadia in my team is doing the cycle count reconciliation for the mock cutover. She's already pulled the counts from the last two cycles, and she'll have the reconciliation finished by Friday. I checked with her this morning, she's comfortable with that.
+
+Aisha: Nadia's not on this call, is she?
+
+Farah: No, she's on the warehouse floor this week. But it's hers, and I'll make sure she reports into me.
+
+Priya: Can she copy me on the output? It feeds my opening balances for inventory.
+
+Farah: She already does. You're on her distribution list from the last count.
+
+Aisha: Good. Anything else, Farah?
+
+Farah: Only that the label printers are working. Daniel finished the printer integration last Tuesday, so that's off the risk list.
+
+Daniel: Yes, the label printer integration is done, I finished it on the sixteenth.
+
+Aisha: Great, one less thing. Marcus, your side. Anything I don't know about?
+
+Marcus: A couple of things. First, the outage on Thursday on the QA interface server. That was an expired SSL certificate. I renewed the certificate on Thursday night, so it's resolved, but it was a good reminder that nobody was tracking expiry dates.
+
+Kenji: That outage cost me half a day of testing.
+
+Marcus: I know, sorry. Second thing, the system copy for the mock cutover. The Basis team will run the system copy from production to the mock environment over the weekend. It needs to be complete by Sunday so Priya can start her reconciliation checks on Monday.
+
+Aisha: Who from the Basis team?
+
+Marcus: Whoever's on the weekend rota, it's a team job. It's already in the schedule.
+
+Aisha: Okay. And the transport freeze?
+
+Marcus: That's what I wanted to raise. We need a transport freeze in production before go-live. My proposal is we freeze from the twenty-ninth of June. After that, nothing moves to production except emergency fixes.
+
+Aisha: Let's hold that until Wei Lin joins, she'll want a say on the emergency route.
+
+Wei Lin: I'm here, sorry, sorry. Audit committee ran over. I caught the last bit. Freeze from the twenty-ninth, yes, I support that.
+
+Aisha: Welcome. Perfect timing. So, proposal: production transport freeze from the twenty-ninth of June, only emergency fixes after that. Who approves emergencies?
+
+Wei Lin: You do, Aisha. I don't want five people approving transports. One gate.
+
+Aisha: Fine by me. So that's decided: freeze from the twenty-ninth, emergency fixes only, and they come through me for approval. Marcus, can you tell the development teams?
+
+Marcus: Yes, I'll communicate the transport freeze to all the development teams. I'll send it out by Thursday, that gives them the weekend to get their last transports in.
+
+Aisha: Thank you. Wei Lin, while you're here, the change request for extra consulting days. Daniel sent it on Thursday.
+
+Wei Lin: I've read it. I'm fine with it, the bank delay isn't anyone's fault in this room. I'll approve the change request tomorrow, I just need to put it through the finance system.
+
+Daniel: Thank you. That's a relief.
+
+Wei Lin: While I think of it, Priya, you were asking my office about the month-end timetable. I'm sorry, that fell through the cracks. I'll send you the month-end close timetable myself tonight.
+
+Priya: That would be great, thank you. I'd more or less given up on it.
+
+Wei Lin: Don't give up on me yet. And since I've just come out of audit committee, the auditors asked about the mitigating controls document. Daniel, that's yours, isn't it?
+
+Daniel: It is. It's about half written. The segregation-of-duties conflicts are all listed, and I've written the controls for the finance roles. The logistics roles are still to do. The auditors wanted it by Thursday, and I'll still make Thursday.
+
+Wei Lin: Please do. They were quite pointed about it. I'd rather not be in that room again explaining why we're late.
+
+Marcus: If it helps, Daniel, I can give you the conflict report in the newer format, with the role names already mapped. It saves you retyping.
+
+Daniel: That would help, yes.
+
+Marcus: It's the same file I circulated last week, just with the extra column. I'll drop it in the project folder.
+
+Aisha: Okay. Quick five-minute pause before we get to the big one? I need a refill and Kenji's been muted for ten minutes, which means he's eating.
+
+Kenji: Guilty. It's lunchtime here.
+
+Farah: What are you eating?
+
+Kenji: Leftover curry. It's better on the second day, everyone knows that.
+
+Marcus: Controversial, but correct.
+
+Aisha: Okay, we're back. Is everyone back? Siti?
+
+Siti: Here.
+
+Aisha: Good.
+
+Aisha: Wei Lin, since you're here, we need to talk about the go-live date, because I'm not comfortable with the sixth any more.
+
+Wei Lin: Go on.
+
+Aisha: Two things are on the critical path. The bank fix, which depends on a file we don't have until Wednesday evening. And the warehouse retest, which Farah is doing before the thirtieth. If either of those finds a problem, we have no room at all before the sixth. And the mock cutover over the weekend is our last rehearsal.
+
+Marcus: From a technical side, I'd agree. I'd rather have one more week of buffer than a weekend of firefighting.
+
+Wei Lin: What does a week cost us?
+
+Daniel: Mostly consulting days, which are already in the change request I sent, so it's covered. The business impact is small because the thirteenth is still before the quarter-end close.
+
+Wei Lin: And the business can live with the thirteenth?
+
+Farah: Warehouses would actually prefer it. The sixth was clashing with a big inbound delivery. We've got three containers arriving that week and I was dreading doing goods receipts on a brand-new system with a queue of trucks outside.
+
+Priya: Finance is neutral. The thirteenth still gives us two full weeks before the first month-end on the new system, which is what I care about. If it went any later than the thirteenth, I'd start to worry about the close.
+
+Siti: For training it's actually better. I was going to have to squeeze the warehouse sessions into three days.
+
+Kenji: From the interface side it's neutral. In an ideal world I'd use the extra week for an end-to-end test with the bank, but their test slots are booked until August, so that isn't happening either way. The parser test in QA is what we've got.
+
+Marcus: One risk with moving it. The cutover weekend team was booked for the fourth and fifth. I need to rebook them for the eleventh and twelfth. Most of them won't mind, but two are contractors.
+
+Aisha: Can you rebook them?
+
+Marcus: I'll try. It's not a problem yet. If one of them can't make it, we can cover from the internal team.
+
+Wei Lin: Let's not over-plan for a problem we don't have.
+
+Wei Lin: Then let's do it properly. We move go-live from the sixth of July to the thirteenth of July. Aisha, take it to steering as a decision, not a question.
+
+Aisha: Okay. Go-live moves to the thirteenth. I'll brief the steering committee on the new date at the meeting on the thirtieth, and before that I'll update the cutover runbook with the new go-live date, by Thursday, so the steering pack is consistent.
+
+Wei Lin: Good.
+
+Aisha: Daniel, that gives us room. Back to your bank date.
+
+Daniel: Right. With the thirteenth, I'm much more comfortable. If Kenji's file lands Wednesday evening, I'll finish the parser fix Thursday and retest in QA. Let's say I'll have the MT940 parser fix finished and retested by Friday. That's honest.
+
+Aisha: Friday the twenty-sixth, the bank fix. Good.
+
+Kenji: And I'll get the sample file to you Wednesday, as soon as the bank sends it.
+
+Aisha: Great. Before training, let's walk the cutover weekend itself, because with the new date the whole thing shifts by a week and I want to be sure nothing falls between the chairs. Marcus, talk us through it.
+
+Marcus: Okay. At a high level it's the same plan as the mock. Friday evening, the tenth, we lock the legacy system at six. Business stops posting. Then the extracts run overnight, and that takes about four hours based on the trial. Saturday morning the loads start, in the sequence I said earlier. Material master, customers and vendors, open items, balances. Saturday night is mostly validation. Sunday is reconciliation and sign-off, and if everything's green, we open the system to users on Monday morning, the thirteenth.
+
+Wei Lin: And if it's not green on Sunday?
+
+Marcus: Then we have a go or no-go call at six on Sunday evening. If it's a no-go, we roll back to legacy using the script Daniel documented, and the business posts in the old system on Monday as if nothing happened. The rollback takes about three hours. We tested it in the trial, it worked, which was a pleasant surprise.
+
+Daniel: The rollback is the one part of this I'm genuinely not worried about.
+
+Aisha: Who's on the go or no-go call?
+
+Marcus: Same as the steering core. Wei Lin, you, me, Priya for finance and Farah for logistics.
+
+Aisha: Priya, the financial sign-off on the Sunday, that's yours?
+
+Priya: Yes. I'll sign off the post-load financial balances on the cutover Sunday, the twelfth. Daniel supports me on it, but the signature is mine. I'm not signing anything I haven't reconciled myself.
+
+Daniel: Which is exactly why she's the one signing.
+
+Aisha: Good. And Farah, the warehouse sign-off?
+
+Farah: Yes, I'll sign off the warehouse side on the Sunday as well. But honestly it depends on the stock count, which is why the schedule matters so much. If the count isn't reconciled, I'm not signing.
+
+Aisha: Understood. Marcus, the hour-by-hour run sheet still has the old dates on it, and the old names for two of the steps.
+
+Marcus: I know. I'll update the run sheet for the new weekend, dates, names, contact numbers, all of it. I'll have it updated before our meeting next Monday, so everyone can check their slots then.
+
+Aisha: Thank you. Do we need anything from facilities for the weekend? Access cards, air conditioning in the war room, that sort of thing.
+
+Marcus: The building's open, it's the same as the mock weekend. Facilities already has the list. Nothing changes except the date, and they've got that from the booking system automatically.
+
+Kenji: Is there food this time? The mock weekend was a vending machine situation.
+
+Aisha: There will be food. Facilities booked the catering with the room, it moved with the date. I'm not running a cutover on crisps.
+
+Farah: What about the warehouse night shift? They'll be locked out of the legacy system from six on Friday.
+
+Aisha: That's the same as the mock. They switch to paper for the weekend and key it in on Monday. Farah, your supervisors already know the paper process from the mock, right?
+
+Farah: They do. It went fine last time, apart from one pallet that went missing and turned out to be behind another pallet.
+
+Wei Lin: The classic.
+
+Aisha: Okay, I think that's the weekend covered. Siti, thank you for waiting. Training and comms.
+
+Siti: No problem, it was useful to hear. So, finance users first. The training materials for the finance users are about two-thirds done. I'm still waiting on screenshots for the new bank reconciliation screens, which obviously depend on Daniel's fix, so I'll finish those when the fix is in. I don't want to promise a date on that because it depends on the fix.
+
+Daniel: I'll send you the screenshots as soon as QA passes.
+
+Siti: Thank you. Warehouse staff next. I need to schedule the train-the-trainer sessions for the warehouse supervisors. I haven't booked anything yet, because I didn't know the go-live date, but now that it's the thirteenth, I'll get those sessions scheduled by the third of July, so there's a full week of training before go-live.
+
+Farah: Can you avoid Monday mornings? That's when the inbound deliveries hit.
+
+Siti: Noted, no Monday mornings.
+
+Aisha: And the go-live communication?
+
+Siti: I'll draft the go-live communication email to all users. I'd rather wait until the date is formally confirmed by steering, but I can have the draft ready by Friday so it's sitting there, and then we just send it after the thirtieth.
+
+Aisha: Draft by Friday, good. Do we need a separate one for the external suppliers?
+
+Siti: Maybe. I'm honestly not sure the suppliers even notice, the portal doesn't change for them.
+
+Farah: They don't notice. The supplier portal is untouched.
+
+Aisha: Then let's not. No supplier comms.
+
+Kenji: Can I raise something slightly off-topic? After go-live, we really should look at proper API monitoring dashboards for the interfaces. Right now we find out about failures from angry emails.
+
+Aisha: I agree, but that's a hypercare conversation, not a cutover one. Let's park it for the hypercare planning session.
+
+Kenji: Fair enough.
+
+Aisha: And speaking of hypercare, Wei Lin, we need to agree the length. The vendor proposed two weeks.
+
+Wei Lin: Two weeks isn't enough. The first month-end close on the new system falls inside the first month. I want four weeks.
+
+Marcus: Four weeks is fine from our side if we can drop the daily stand-ups after the first two.
+
+Wei Lin: Agreed. Four weeks of hypercare, daily stand-ups for the first two weeks, then twice a week.
+
+Aisha: Okay, that's decided. Four weeks hypercare, daily stand-ups in the first two weeks.
+
+Marcus: Should we bring in a second Basis contractor for hypercare? It'll be a lot of late nights.
+
+Wei Lin: It's not budgeted, and I just approved extra consulting days. Let's see how the mock cutover goes. If it's rough, ask me again.
+
+Marcus: Fine, I'll see how the weekend goes.
+
+Aisha: Farah, back to you on the phased rollout. With the thirteenth confirmed, and Wei Lin wanting a single cutover, do we still need that plan?
+
+Wei Lin: No. Steering already chose big-bang in the last meeting. I don't want a phased option in the pack, it just reopens the debate.
+
+Aisha: Then scrap that, Farah. No need for the phased-rollout plan.
+
+Farah: Happy to hear it, honestly. That saves me two days.
+
+Aisha: Okay. Let me do the summary, and please shout if I get anything wrong, because there's a lot. Decisions first. One, go-live moves from the sixth of July to the thirteenth of July. Two, production transport freeze from the twenty-ninth of June, emergency fixes only, approved by me. Three, four weeks of hypercare with daily stand-ups for the first two weeks.
+
+Wei Lin: Correct.
+
+Aisha: Done since last time. Daniel finished the APAC cost center mapping, the rollback steps in the runbook, and the label printer integration. Priya cleared the eleven duplicate postings and finished the material master validation rerun. Marcus installed the scanner firmware patch in test.
+
+Marcus: And the certificate.
+
+Aisha: Sorry, and Marcus renewed the SSL certificate on the QA interface server. In progress: Priya's opening balance reconciliation, due Friday. Daniel's mitigating controls document for the auditors, due Thursday. Kenji's WM to TMS timeout errors, due the third of July. Siti's finance training materials, date depends on the bank fix.
+
+Siti: Yes.
+
+Aisha: To-dos. Kenji sends the bank sample file to Daniel by Wednesday. Daniel finishes the MT940 parser fix and retests in QA by Friday. Farah reruns the warehouse readiness test before the thirtieth, and confirms the stock count schedule with the warehouse managers by Wednesday. Marcus communicates the transport freeze to the development teams by Thursday. Wei Lin approves the change request tomorrow and sends Priya the month-end timetable tonight. Siti schedules the train-the-trainer sessions by the third of July and drafts the go-live email by Friday. And I update the runbook with the new date by Thursday and brief steering on the thirtieth.
+
+Priya: And the system copy over the weekend.
+
+Aisha: Yes, the Basis team runs the system copy by Sunday. Anything missing?
+
+Farah: Nothing from me.
+
+Kenji: That's everything I have.
+
+Aisha: Good. Same time next Monday, which will be the day before steering, so bring your final numbers. Thanks everyone.

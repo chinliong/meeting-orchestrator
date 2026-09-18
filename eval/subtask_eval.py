@@ -10,20 +10,23 @@ generated breakdown is scored 1-5 on four dimensions:
   - coverage        — together, do they plausibly complete the task end to end?
   - non_redundancy  — are they distinct, without duplicate or overlapping steps?
 
-The sample is drawn from the same annotated action items used for the transcript evaluation, so
+The samples are drawn from the same annotated action items used for the transcript evaluation, so
 the tasks are realistic enterprise-programme work. The judge model is prompted independently of
 the generator and returns structured scores via tool-use.
 
 Caveat (worth stating in the report): the judge is a single LLM applying a rubric, so the scores
 indicate quality trends rather than an absolute accuracy figure. The judge is held fixed as Claude
-across both arms, so it is independent of the implemented Gemini generator but assesses Claude's own
-output in the comparison arm - an asymmetry that runs against the conclusion drawn, not for it.
+for both generators, so it is independent of the implemented Gemini generator but assesses
+Claude's own output in the comparison - an asymmetry that runs against the conclusion drawn.
 
-Usage (from the repo root, with the backend virtualenv active and ANTHROPIC_API_KEY set):
+Two samples are scored, one per test set (SAMPLE_RULE), each stored in its own results file.
 
-    python -m eval.subtask_eval                  # score a sample of tasks
-    python -m eval.subtask_eval --limit 8        # smaller/faster sample
-    python -m eval.subtask_eval --write-report   # also refresh docs/subtask-evaluation-report.md
+Usage (from the repo root, with the backend virtualenv active; every run except --report-only
+calls both models):
+
+    python -m eval.subtask_eval --runs 5 --write-report              # short set
+    python -m eval.subtask_eval --set long --runs 5 --write-report   # long set
+    python -m eval.subtask_eval --report-only                        # re-render, no API calls
 """
 from __future__ import annotations
 
@@ -43,6 +46,15 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 BACKEND = REPO_ROOT / "backend"
 ANNOTATIONS = REPO_ROOT / "data" / "annotated-test-set" / "annotations.json"
 RESULTS_JSON = REPO_ROOT / "eval" / "subtask_results.json"
+LONG_ANNOTATIONS = REPO_ROOT / "data" / "annotated-test-set-long" / "annotations.json"
+LONG_RESULTS_JSON = REPO_ROOT / "eval" / "subtask_results_long.json"
+TEST_SETS = {"short": (ANNOTATIONS, RESULTS_JSON), "long": (LONG_ANNOTATIONS, LONG_RESULTS_JSON)}
+# How each set's sample is drawn, for the report. The short set keeps its original rule so its
+# stored results stay reproducible; the long set is stratified so every transcript is represented.
+SAMPLE_RULE = {
+    "short": "the first 12 annotated items in file order (finance and logistics workshops)",
+    "long": "the first 3 open items (to do or in progress) from each of the 4 long transcripts",
+}
 REPORT_MD = REPO_ROOT / "docs" / "subtask-evaluation-report.md"
 
 # Make the backend `app` package importable and load ANTHROPIC_API_KEY from backend/.env.
@@ -92,14 +104,17 @@ Be discerning — reserve 5 for genuinely strong breakdowns. Always respond by c
 score_subtasks tool."""
 
 
-def load_sample(limit: int) -> list[dict]:
-    """Flatten the annotated action items into standalone tasks for breakdown."""
-    data = json.loads(ANNOTATIONS.read_text())
+def load_sample(limit: int, test_set: str = "short") -> list[dict]:
+    """Flatten the annotated action items into standalone tasks for breakdown (SAMPLE_RULE)."""
+    data = json.loads(TEST_SETS[test_set][0].read_text())
     tasks: list[dict] = []
     for meeting in data:
         decision = (meeting.get("expected_decisions") or [None])[0]
         title = Path(meeting["transcript_file"]).stem.replace("-", " ").title()
-        for item in meeting.get("expected_action_items", []):
+        items = meeting.get("expected_action_items", [])
+        if test_set == "long":
+            items = [i for i in items if i["status"] != "done"][:3]
+        for item in items:
             tasks.append(
                 {
                     "description": item["description"],
@@ -151,8 +166,8 @@ class SubtaskJudge:
         return tool_use.input
 
 
-def evaluate(limit: int, provider: str | None = None) -> dict:
-    sample = load_sample(limit)
+def evaluate(limit: int, provider: str | None = None, test_set: str = "short") -> dict:
+    sample = load_sample(limit, test_set)
     # The judge is held fixed across providers: swapping it too would change two variables at
     # once. It stays Claude, so the Claude arm is self-judged and the Gemini arm is not - an
     # asymmetry that favours Claude, and therefore does not inflate a Gemini win.
@@ -260,106 +275,128 @@ def aggregate(arm_runs: dict[str, list[dict]]) -> dict:
     return out
 
 
-def render_report(res: dict) -> str:
-    today = date.today().isoformat()
+def _set_section(name: str, res: dict) -> list[str]:
+    """Tables for one test set: mean scores, per-run overall, and per-task detail."""
     ship = res["arms"][res["implemented_arm"]]
     other = res["arms"].get("anthropic" if res["implemented_arm"] == "gemini" else "gemini")
-    lines = [
-        "# Subtask Generation Evaluation Report",
-        "",
-        f"_Generated by `python -m eval.subtask_eval --write-report` on {today}._",
-        f"_Extraction accuracy: [evaluation-report.md](evaluation-report.md). Speech-to-text: [asr-evaluation.md](asr-evaluation.md)._",
-        "",
-        "The AI subtask feature breaks a single action item into an ordered checklist. Unlike "
-        "transcript parsing, this is **open-ended generation with no ground truth**, so it is "
-        "assessed qualitatively with an LLM-as-judge rubric rather than precision/recall.",
-        "",
-        f"- Implemented generator: `{ship['model']}` ({ship['provider']})",
-        f"- Judge model: `{res['judge_model']}` (held fixed across both configurations)",
-        f"- Sample size: {res['sample_size']} tasks, drawn from the annotated action-item set",
-        f"- Runs per configuration: {ship['runs']}",
-        f"- Average subtasks per task: {ship['avg_subtasks_per_task']}",
-        "",
-    ]
-    if other:
-        c = res["comparison"]
-        verdict = "separable" if c["p_value"] < 0.05 else "indistinguishable on quality"
-        gap = abs(ship["overall_mean"] - other["overall_mean"])
-        lead = other["label"] if other["overall_mean"] > ship["overall_mean"] else ship["label"]
-        lines += [
-            "## Decision",
-            "",
-            f"**Subtask checklists are generated by {ship['label']}.** Over {ship['runs']} runs per "
-            f"configuration it scores {ship['overall_mean']} out of 5 against {other['label']}'s "
-            f"{other['overall_mean']}, a gap of {gap:.3f} that an exact paired permutation test "
-            f"over the per-task means does not separate (p = {c['p_value']}), so the two are "
-            f"{verdict}. The choice rests on cost rather than quality: Gemini is roughly a tenth "
-            "the price per token and keeps the system on a single provider.",
-            "",
-            f"The run-to-run spread inside each configuration ({ship['label']} {ship['overall_min']}-"
-            f"{ship['overall_max']}, sd {ship['overall_sd']}; {other['label']} "
-            f"{other['overall_min']}-{other['overall_max']}, sd {other['overall_sd']}) is wider "
-            f"than the {gap:.3f} between them, and {lead} leads only nominally. What does differ "
-            f"is shape rather than standard: {other['label']} produced "
-            f"{other['avg_subtasks_per_task']} subtasks per task against {ship['label']}'s "
-            f"{ship['avg_subtasks_per_task']}, scoring higher on coverage where {ship['label']} "
-            "scores higher on non-redundancy.",
-            "",
-            "The judge was Claude in both configurations. That means Claude assessed its own output "
-            "in one and a competitor's in the other, an asymmetry that favours Claude - and Claude "
-            "still does not separate from Gemini, so the tie is not an artefact of a partial judge.",
-            "",
-            "## Mean scores (1–5), averaged over all runs",
-            "",
-            f"| Dimension | {ship['label']} | {other['label']} |",
-            "| --- | --- | --- |",
-        ]
-        for dim in DIMENSIONS:
-            lines.append(f"| {dim.replace('_', ' ')} | {ship['mean_scores'][dim]} "
-                         f"| {other['mean_scores'][dim]} |")
-        lines.append(f"| **overall** | **{ship['overall_mean']}** | {other['overall_mean']} |")
-        lines += ["", "## Overall score per run", "",
-                  "| Configuration | Runs | Mean | SD | Range |", "| --- | --- | --- | --- | --- |"]
-        for a in (ship, other):
-            lines.append(f"| {a['label']} | {', '.join(str(x) for x in a['overall_per_run'])} "
-                         f"| {a['overall_mean']} | {a['overall_sd']} "
-                         f"| {a['overall_min']}-{a['overall_max']} |")
-    else:
-        lines += ["## Mean scores (1–5)", "", "| Dimension | Mean |", "| --- | --- |"]
-        for dim in DIMENSIONS:
-            lines.append(f"| {dim.replace('_', ' ')} | {ship['mean_scores'][dim]} |")
-        lines.append(f"| **overall** | **{ship['overall_mean']}** |")
-
+    arms = [ship, other] if other else [ship]
+    title = {"short": "Short test set", "long": "Long test set"}[name]
+    lines = [f"## {title}", "",
+             f"Sample: {SAMPLE_RULE[name]}. {ship['runs']} runs per configuration.", "",
+             "### Mean scores (1-5), averaged over all runs", "",
+             "| Dimension | " + " | ".join(a["label"] for a in arms) + " |",
+             "| --- |" + " --- |" * len(arms)]
+    for dim in DIMENSIONS:
+        lines.append(f"| {dim.replace('_', ' ')} | "
+                     + " | ".join(str(a["mean_scores"][dim]) for a in arms) + " |")
+    lines.append("| **overall** | " + " | ".join(f"**{a['overall_mean']}**" for a in arms) + " |")
+    lines.append("| subtasks per task | "
+                 + " | ".join(str(a["avg_subtasks_per_task"]) for a in arms) + " |")
+    lines += ["", "### Overall score per run", "",
+              "| Configuration | Runs | Mean | SD | Range |", "| --- | --- | --- | --- | --- |"]
+    for a in arms:
+        lines.append(f"| {a['label']} | {', '.join(str(x) for x in a['overall_per_run'])} "
+                     f"| {a['overall_mean']} | {a['overall_sd']} "
+                     f"| {a['overall_min']}-{a['overall_max']} |")
     # Averaged over runs rather than taken from one of them: a single run is a noisy sample,
-    # and picking the first would quietly report whichever run happened to score best. Both
-    # arms get the same treatment, so the per-task view is comparable like the tables above.
-    lines += ["", "## Per-task detail", "",
-              "Rel, Act, Cov and NR are the four rubric dimensions, each scored 1-5. Subtasks is "
-              "the number of steps the generator produced, which is a count and not a score.", ""]
-    for a in ([ship, other] if other else [ship]):
+    # and picking the first would quietly report whichever run happened to score best.
+    lines += ["", "### Per-task detail", ""]
+    for a in arms:
         runs = a["per_task_runs"]
         lines += [f"{a['label']}, averaged over {len(runs)} runs:", "",
                   "| Task | Subtasks | Rel | Act | Cov | NR |",
                   "| --- | --- | --- | --- | --- | --- |"]
         for first in runs[0]:
-            name = first["task"]
-            rows = [m for run in runs for m in run if m["task"] == name]
+            task_name = first["task"]
+            rows = [m for run in runs for m in run if m["task"] == task_name]
             dims = {d: st.mean(r["scores"][d] for r in rows) for d in DIMENSIONS}
             nsub = st.mean(r["n_subtasks"] for r in rows)
-            task = name[:50] + ("…" if len(name) > 50 else "")
+            task = task_name[:50] + ("…" if len(task_name) > 50 else "")
             lines.append(f"| {task} | {nsub:.1f} | {dims['relevance']:.1f} "
                          f"| {dims['actionability']:.1f} | {dims['coverage']:.1f} "
                          f"| {dims['non_redundancy']:.1f} |")
         lines.append("")
-    lines += [
+    return lines
+
+
+def _shape_note(results: dict) -> str:
+    """Where the two generators differ in shape, if the difference is the same on every set."""
+    notes = []
+    for res in results.values():
+        g, c = res["arms"]["gemini"], res["arms"]["anthropic"]
+        notes.append((c["avg_subtasks_per_task"] > g["avg_subtasks_per_task"],
+                      c["mean_scores"]["coverage"] > g["mean_scores"]["coverage"],
+                      g["mean_scores"]["non_redundancy"] > c["mean_scores"]["non_redundancy"]))
+    if not all(all(n) for n in notes):
+        return ""
+    counts = "; ".join(f"{res['arms']['anthropic']['avg_subtasks_per_task']} against "
+                       f"{res['arms']['gemini']['avg_subtasks_per_task']} on the {n} set"
+                       for n, res in results.items())
+    return ("What differs is shape rather than quality: on both sets Claude Sonnet writes more "
+            f"subtasks per task ({counts}), scoring higher on coverage, while Gemini Flash scores "
+            "higher on non-redundancy.")
+
+
+def render_report(results: dict) -> str:
+    """results: test-set name -> stored aggregate. Both sets use the same judge and rubric."""
+    today = date.today().isoformat()
+    first = next(iter(results.values()))
+    ship = first["arms"][first["implemented_arm"]]
+    lines = [
+        "# Subtask Generation Evaluation Report",
         "",
+        f"_Generated by `python -m eval.subtask_eval --write-report` on {today}._",
+        "_Extraction accuracy: [evaluation-report.md](evaluation-report.md). Speech-to-text: "
+        "[asr-evaluation.md](asr-evaluation.md)._",
+        "",
+        "The AI subtask feature breaks a single action item into an ordered checklist. Unlike "
+        "transcript parsing, this is **open-ended generation with no ground truth**, so it is "
+        "assessed with an LLM-as-judge rubric (relevance, actionability, coverage, "
+        "non-redundancy, each 1-5) rather than precision and recall.",
+        "",
+        f"- Implemented generator: `{ship['model']}` ({ship['label']})",
+        f"- Judge: `{first['judge_model']}`, held fixed across both generators and both sets",
+        "- Test sets: " + ", ".join(f"{n} ({r['sample_size']} tasks)" for n, r in results.items()),
+        "",
+    ]
+    comps = {n: r["comparison"] for n, r in results.items() if "comparison" in r}
+    if comps:
+        clauses = []
+        for n, r in results.items():
+            g, c = r["arms"]["gemini"], r["arms"]["anthropic"]
+            p = comps[n]["p_value"]
+            verdict = "not separable" if p >= 0.05 else "separable"
+            clauses.append(f"{g['overall_mean']} against {c['overall_mean']} on the {n} set "
+                           f"(p = {p}, {verdict})")
+        all_tied = all(c["p_value"] >= 0.05 for c in comps.values())
+        lines += [
+            "## Decision",
+            "",
+            f"**Subtask checklists are generated by {ship['label']}.** Scored out of 5 against "
+            f"Claude Sonnet, it rates {'; '.join(clauses)}, using an exact paired permutation "
+            "test over the per-task means. "
+            + ("On quality the two are indistinguishable on both sets, so the choice rests on "
+               "cost and on keeping the system on one provider: Gemini Flash costs a tenth of "
+               "Claude Sonnet's price per input token and a sixth per output token."
+               if all_tied else
+               "The sets disagree on quality; see the tables below."),
+            "",
+        ]
+        shape = _shape_note(results)
+        if shape:
+            lines += [shape, ""]
+        lines += [
+            "The judge was Claude in both configurations, so Claude assessed its own output in "
+            "one and a competitor's in the other. That asymmetry favours Claude, and Claude still "
+            "does not separate from Gemini.",
+            "",
+        ]
+    for n, r in results.items():
+        lines += _set_section(n, r)
+    lines += [
         "> **Caveat:** scores come from a single LLM judge applying a rubric, so they indicate "
         "quality trends rather than an absolute metric. The judge is Claude and the implemented "
-        "generator is Gemini, so the judge is independent of it. The sample is the first "
-        f"{res['sample_size']} annotated items in file order, which covers the finance and "
-        "logistics workshops but not the security or data-migration ones.",
-        "",
-        f"_Generated by `python -m eval.subtask_eval --write-report` on {today}. Re-run to refresh._",
+        "generator is Gemini, so the judge is independent of the implemented generator.",
         "",
     ]
     return "\n".join(lines)
@@ -367,39 +404,39 @@ def render_report(res: dict) -> str:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Qualitatively evaluate AI subtask generation.")
+    ap.add_argument("--set", choices=sorted(TEST_SETS), default="short", dest="test_set",
+                    help="Which test set to sample tasks from (default short).")
     ap.add_argument("--limit", type=int, default=12, help="Number of tasks to score (default 12).")
-    ap.add_argument("--runs", type=int, default=1, help="Runs per arm (default 1). Both arms get the same count.")
+    ap.add_argument("--runs", type=int, default=1, help="Runs per generator (default 1).")
     ap.add_argument("--arms", default="gemini,anthropic",
                     help="Comma-separated generators to score. The judge is always Claude.")
     ap.add_argument("--write-report", action="store_true", help="Refresh docs/subtask-evaluation-report.md")
     ap.add_argument("--report-only", action="store_true",
                     help="Re-render the report from stored results without calling any model.")
-    ap.add_argument("--provider", choices=("anthropic", "gemini"),
-                    help="Deprecated alias for --arms with a single value.")
     args = ap.parse_args()
 
-    if args.report_only:
-        res = json.loads(RESULTS_JSON.read_text())
-    else:
-        arms = [args.provider] if args.provider else [a.strip() for a in args.arms.split(",") if a.strip()]
+    if not args.report_only:
+        arms = [a.strip() for a in args.arms.split(",") if a.strip()]
         arm_runs: dict[str, list[dict]] = {}
         for arm in arms:
             arm_runs[arm] = []
             for r in range(1, args.runs + 1):
-                print(f"[{arm} run {r}/{args.runs}] scoring {args.limit} tasks…")
-                arm_runs[arm].append(evaluate(args.limit, provider=arm))
+                print(f"[{arm} run {r}/{args.runs}] scoring {args.limit} {args.test_set}-set tasks…")
+                arm_runs[arm].append(evaluate(args.limit, provider=arm, test_set=args.test_set))
                 print(f"  overall {arm_runs[arm][-1]['overall_mean']}")
-        res = aggregate(arm_runs)
-        RESULTS_JSON.write_text(json.dumps(res, indent=2))
-        print(f"\nWrote raw results to {RESULTS_JSON.relative_to(REPO_ROOT)}")
+        out_path = TEST_SETS[args.test_set][1]
+        out_path.write_text(json.dumps(aggregate(arm_runs), indent=2))
+        print(f"\nWrote raw results to {out_path.relative_to(REPO_ROOT)}")
 
-    for arm in res["arms"].values():
-        print(f"{arm['label']:<15} mean {arm['overall_mean']} over {arm['runs']} run(s)")
-    if "comparison" in res:
-        print(f"paired permutation p = {res['comparison']['p_value']}")
+    results = {n: json.loads(p.read_text()) for n, (_, p) in TEST_SETS.items() if p.exists()}
+    for n, res in results.items():
+        for arm in res["arms"].values():
+            print(f"{n:5} {arm['label']:<15} mean {arm['overall_mean']} over {arm['runs']} run(s)")
+        if "comparison" in res:
+            print(f"{n:5} paired permutation p = {res['comparison']['p_value']}")
 
     if args.write_report or args.report_only:
-        REPORT_MD.write_text(render_report(res))
+        REPORT_MD.write_text(render_report(results))
         print(f"Wrote report to {REPORT_MD.relative_to(REPO_ROOT)}")
 
 

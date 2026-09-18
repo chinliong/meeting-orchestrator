@@ -1,0 +1,243 @@
+================================================================
+SESSION 8
+Meeting: Hypercare Access and Audit Readiness Review
+Date: 2026-07-16
+Duration: ~55 min
+Attendees: Marcus Lee (Basis and Security Lead, chair), Aisha Rahman (Programme Manager), Ravi Menon (Internal Audit), Sofia Reyes (External Audit Senior), Jun Wei Ong (Security Analyst), Daniel Tan (SAP FICO Consultant), Priya Nair (Controller), Hannah Goh (Accounts Payable Supervisor)
+================================================================
+
+Marcus: Right, it's two minutes past, let's go. Welcome to day four of hypercare, which feels like day forty. This session is about access and audit. Sofia is here from the external audit team, because the auditors start their interim fieldwork on the twenty-seventh and the first thing they'll test is who can do what in the new system. So I'd like to find our problems before they do.
+
+Sofia: Thanks for having me. I'll be honest, I'm mostly here to understand what's changed, so I can plan the testing. I won't be writing anything up today.
+
+Marcus: Good. Aisha, anything before we start?
+
+Aisha: Only that the hypercare issue log is at sixty-three open issues, and eleven of them are access problems. So this meeting is useful. I'll take notes.
+
+Marcus: Okay. I'll start with the thing that worries me most, which is the shared accounts. Jun Wei, tell them what you found.
+
+Jun Wei: So on Tuesday I ran a check of every user logged into production since go-live. Almost everything is named users, which is what we want. But there are three generic accounts being used. One is the AP team account, the one the clerks used in the mock and never stopped using. One is a warehouse account at Pandan. And one is a test account that somebody used to post a goods receipt on Monday.
+
+Ravi: A test account posted in production?
+
+Jun Wei: One goods receipt, on Monday afternoon. I've traced it, it was a consultant who was helping at Pandan and didn't have his own access yet. The posting itself was correct. But it's exactly the kind of thing the auditors will pick up.
+
+Sofia: It is. A shared account in production means we can't attribute a posting to a person, and then we can't rely on any control that depends on who did what.
+
+Marcus: So I want to decide this today. No shared or generic accounts in production, full stop. Everyone gets a named user. Any objections?
+
+Aisha: None from the programme.
+
+Hannah: Mine is the AP account, so I should say something. The clerks used it because two of them didn't have named users on Monday morning. They do now, I think, but they've kept using the shared one out of habit.
+
+Marcus: Then it's decided, no shared accounts in production. Jun Wei, what do you need to lock them?
+
+Jun Wei: For the AP account, I need to make sure every clerk who used it has a named user first, or I'll lock them out in the middle of the payment run. Hannah, can you send me the list of clerks who've been using the shared account?
+
+Hannah: I'll send you the list of AP clerks today, straight after this.
+
+Jun Wei: Then I'll create individual accounts for any AP clerks who don't have one tomorrow morning, and I'll lock all three shared generic accounts by the end of tomorrow. I've already locked the test account, actually, I did that on Tuesday night. So it's two left.
+
+Marcus: Good. So the generic account lock is in progress, finished tomorrow.
+
+Ravi: Can I ask about leavers? In the last audit we had a finding about leavers keeping access for weeks.
+
+Jun Wei: Already done. There were four leavers since the user list was frozen in June, and all four still had accounts in production because the accounts were created from the June list. I removed the accounts of the four leavers from production yesterday.
+
+Ravi: Thank you. That was the finding I was most worried about.
+
+Marcus: Next, firefighter access. For those who haven't dealt with it, that's the emergency access we give the support team when something breaks and a normal user can't fix it. It's powerful, it's logged, and the rule is that someone independent reviews the log.
+
+Ravi: And in legacy nobody did. That was another finding.
+
+Marcus: Exactly. So I'd like internal audit to own the review. Ravi, would your team review the firefighter access log every week?
+
+Ravi: Yes. Weekly is right during hypercare, maybe monthly after that. But I need the log in a form I can read, not raw system tables.
+
+Marcus: Then that's decided. Internal audit reviews the firefighter access log weekly. Jun Wei, can you give Ravi an extract he can actually read?
+
+Jun Wei: I'll set up a weekly extract of the firefighter log for Ravi. It'll email him every Monday morning. I'll have it running by Monday.
+
+Ravi: Then I'll review the firefighter access log for the first time on Monday, and every Monday after that.
+
+Sofia: How often has firefighter access been used since go-live? Just so I have a sense of the volume.
+
+Jun Wei: Seven times in three days. Five of those were Monday, which you'd expect. The worst one was Monday night, when the payment medium program failed and Daniel had to go in with firefighter access to reset the payment run status. That session lasted about forty minutes.
+
+Daniel: That was not my favourite evening. The payment run had stopped halfway, so half the invoices were marked as paid and the payment file hadn't been created. If I hadn't reset it, the vendors wouldn't have been paid and the invoices would have looked paid.
+
+Ravi: And is that session documented?
+
+Daniel: The system logs every transaction I ran. I also wrote up what I did in the hypercare log that night, with the reason, because I knew someone would ask.
+
+Ravi: That's what I like to see. That's the model for every firefighter session.
+
+Aisha: For context on volume, the service desk had two hundred and ten password resets in the first three days. Most of them are people who never logged in during training and are now trying their temporary password from three weeks ago.
+
+Marcus: Two hundred and ten.
+
+Aisha: Two hundred and ten. The service desk is not happy with us. The good news is it dropped from a hundred and forty on Monday to twenty-five yesterday, so it's burning off.
+
+Hannah: Half my team was in that hundred and forty.
+
+Marcus: I believe it. Good. Now the hard one. Segregation of duties. Daniel.
+
+Daniel: So, we knew going in that there'd be a few conflicts we couldn't remove before go-live, because the teams are small. There are three. The treasury team can both create a payment and approve it, because there are only two people in treasury and one of them is on leave. Two of the AP supervisors can post a vendor invoice and change the vendor's bank details. And the controller's team can open a posting period and post into it.
+
+Sofia: The vendor bank details one is the one we'll focus on. That's the classic fraud route.
+
+Daniel: I know. We can't remove all three this week without stopping payments. My proposal is that we accept the three conflicts for hypercare only, with mitigating controls, and remove them by the end of August when the new treasury hire starts and the AP roles are split.
+
+Ravi: I can accept that, as long as the mitigating controls are written down and someone actually does them.
+
+Sofia: From our side, a documented and operating mitigating control is fine for a temporary conflict. An undocumented one is a finding.
+
+Marcus: Then let's decide it. The three segregation-of-duties conflicts are accepted until the thirty-first of August, with written mitigating controls. After that they're removed. Agreed?
+
+Priya: Agreed.
+
+Aisha: Agreed.
+
+Marcus: Daniel, the mitigating controls need writing. When?
+
+Daniel: I'll write the mitigating controls for the three conflicts within three working days. So by Tuesday.
+
+Priya: And I'll approve them. Send them to me when they're ready and I'll sign them off, it doesn't need a meeting.
+
+Marcus: Good. Daniel, while we're on it, you offered last week to build a custom report that lists every user with a conflict.
+
+Daniel: I did. I've started the design.
+
+Jun Wei: Before you spend more time on it, the standard access risk report in the new system does exactly that. It came with the security package we installed. I ran it on Tuesday, it's how I found the three conflicts.
+
+Daniel: Really? Then I'll stop. There's no point building a copy of a standard report.
+
+Marcus: Agreed, drop the custom report. We'll use the standard one.
+
+Marcus: Next, the period controls. Priya, this is yours and Daniel's.
+
+Priya: Okay. So the second conflict, the controller's team opening and posting into periods. Part of the mitigation is already in place. Marcus restricted the period-open transaction to my team on Tuesday, so nobody outside the controller's team can open a period at all.
+
+Marcus: That's done, yes. It used to be open to anyone with the finance role.
+
+Priya: The second part is that I want to know exactly who can post into a closed period, because that list should be tiny. I'll review the list of users with posting access to closed periods on Monday. If there's anyone on it who shouldn't be, I'll tell Jun Wei the same day.
+
+Ravi: That's a good control.
+
+Marcus: Hannah, there was an access issue in AP this week that wasn't about shared accounts.
+
+Hannah: Yes. The GR/IR clearing. My clerks couldn't run the GR/IR clearing transaction on Monday, they got an authorization error. We had to ask Daniel to run it for us, which is exactly what shouldn't happen.
+
+Daniel: That one's fixed. The AP role was missing one authorization object for the clearing transaction. I fixed the GR/IR authorization error on Tuesday and moved it to production on Tuesday night.
+
+Hannah: I haven't had it retested yet. I'll get one of my clerks to retest the GR/IR clearing tomorrow morning, and I'll tell Daniel if it still fails.
+
+Marcus: Good. Anything else from AP?
+
+Hannah: Only the approval limits. The limits in the new workflow were copied from the legacy policy, and the policy changed in April. I'm not sure the new system has the April limits. I'll confirm that my team's approval limits match the current policy by Tuesday.
+
+Priya: Good catch. If they're the old limits, a clerk could approve up to fifty thousand when the policy now says twenty.
+
+Marcus: Let's move to the audit itself. Sofia, what do you need from us before the twenty-seventh?
+
+Sofia: Three things. First, the system access documentation. Role design, who has which roles, how access is requested and approved. Second, a list of sample requests from us for the IT general controls testing. That's on me, I'll send you our list of sample requests for the IT general controls by next Wednesday. Third, I need to know whether we can rely on your migration reconciliations, or whether we reperform them ourselves. That's a question for my manager, not for you. I'll confirm with my manager whether we rely on the migration reconciliations, also by next Wednesday.
+
+Marcus: How big are the samples, roughly? I'd like to know how much of the team's time this will take in hypercare.
+
+Sofia: For a system this size, typically twenty-five items per control for anything that runs daily or more often, and fewer for the monthly and quarterly controls. For user access, we'll pick a sample of new users and check there's an approved request for each one, and a sample of leavers and check they were removed in time.
+
+Jun Wei: The leavers will be easy now. Four leavers, all removed.
+
+Sofia: Then that sample will be short. The new users will be the harder one, because a lot of accounts were created in bulk for go-live. We'll want to see that the bulk list was approved by someone.
+
+Aisha: The bulk list was approved by each department head in June. I have the emails.
+
+Sofia: Then that should be fine. Put them in the pack.
+
+Aisha: I'll add the approval emails to the pack.
+
+Ravi: For what it's worth, the external auditors tend to be kinder in the first year on a new system, as long as the evidence is organised. It's the missing evidence that turns into findings, not the imperfect controls.
+
+Sofia: That's a fair summary, yes. I'd rather see an honest list of known gaps with dates than a perfect-looking pack that falls apart when we sample it.
+
+Priya: If it helps, the cutover reconciliation pack is signed. I signed the financial balances on the Sunday. I can send it to you.
+
+Sofia: That would help my manager decide.
+
+Priya: I'll send you the signed cutover reconciliation pack tomorrow.
+
+Marcus: And the access documentation. Aisha, you're pulling the pack together?
+
+Aisha: I'm assembling it, but most of the content is yours, Marcus. The role design document is the big gap.
+
+Marcus: I know. The role design documentation is about two-thirds written. I'll finish the role design documentation by Friday next week, the twenty-fourth, which is before the auditors arrive.
+
+Aisha: Then I'll send the auditors the system access documentation pack on the twenty-fourth as well, once Marcus's part is in.
+
+Marcus: Fine. And the user access review. Sofia, you'll want evidence that someone reviewed who has access.
+
+Sofia: Yes, a post-go-live access review would be very helpful. Even one.
+
+Marcus: I've started the user access review for all the finance roles. Every role, every user, signed off by the role owner. I'm about a third through it. I'll have it complete by the end of the month.
+
+Ravi: Can I suggest something? Last year's IT audit had six findings. Two are fixed by the new system, but I'd like you to check the other four against what you're building. I'll share last year's IT audit findings with you today, Marcus.
+
+Marcus: Please do.
+
+Jun Wei: Can I raise the technical side? Two things the auditors always test are patching and passwords.
+
+Marcus: Go ahead.
+
+Jun Wei: Patching is fine. I patched the production application server on Sunday night, the quarterly security patch. It's done and it's documented. Passwords are the problem. The interface service accounts, the accounts that the interfaces use to log in to each other, still have the passwords from the mock. Several people know them.
+
+Sofia: That would be a finding, yes.
+
+Marcus: Kenji normally does the service accounts. Can we ask Kenji?
+
+Jun Wei: Kenji's on leave until the twenty-seventh. He's earned it. I'll take it. I'll rotate the interface service account passwords before the auditors arrive, by the twenty-fourth. I'll need a short outage window for each interface, so I'll do them in the evenings.
+
+Aisha: I'll put the outage windows in the hypercare log when I log today's issues, so the business knows.
+
+Jun Wei: Thanks. And the second technical point. The security audit log settings. In the mock we had them on the minimum setting because the volume was huge. In production they're still on the minimum. I'm reviewing the security audit log settings now to see what we can switch on without filling the disk. I'll have a recommendation by next Wednesday.
+
+Marcus: Good. While we're on passwords, somebody asked whether the scanner device accounts should have password expiry like everybody else.
+
+Jun Wei: They can't. If a device account password expires at three in the morning, every scanner at that site stops working until someone resets it. The standard is to exempt device accounts and restrict them to the scanner transactions only, which they already are.
+
+Sofia: That's the normal approach. We'd accept that with the restriction documented.
+
+Marcus: Then no expiry on the device accounts, leave them as they are.
+
+Aisha: One more from me. The consultants still have the temporary superuser access we gave them for go-live week. When does that come off?
+
+Marcus: At the end of hypercare. I'll remove the temporary go-live superuser access from the consultants at the end of hypercare, the seventh of August. Not before, because they're still fixing things.
+
+Ravi: Please don't let it drift past the seventh. That's how it becomes permanent.
+
+Marcus: It won't.
+
+Daniel: Can I mention treasury? The three new approval roles for treasury. I built them on Monday, they're in production, and Omar's team is using them. That was one of the open items on the audit list from the planning session.
+
+Marcus: Thank you, that's done then.
+
+Priya: Marcus, one thing we haven't talked about is single sign-on. Half the finance team keeps forgetting their new password.
+
+Marcus: Single sign-on is a whole project. It needs the identity team, and it touches every system, not just this one. Let's park single sign-on until after hypercare. I'll raise it at the IT leadership meeting in September.
+
+Hannah: Could we buy one of those access governance tools instead? The ones that do all the reviews automatically?
+
+Marcus: We looked at them last year. They cost more than the whole security budget. Not this year.
+
+Marcus: Okay, we're nearly out of time. Aisha, you've been taking notes, can you read back the actions?
+
+Aisha: Let me try. Jun Wei creates the individual AP accounts and locks the shared accounts tomorrow. Hannah sends the list of clerks today. Jun Wei sets up the firefighter extract by Monday and Ravi reviews it every Monday. Daniel writes the mitigating controls by Tuesday and Priya approves them. Priya reviews closed-period posting access on Monday. Hannah gets the GR/IR clearing retested on Monday, and confirms the approval limits by Tuesday.
+
+Hannah: Tomorrow, not Monday. The retest is tomorrow morning.
+
+Aisha: Sorry, tomorrow. Sofia sends the sample requests and confirms the reliance question by Wednesday. Priya sends Sofia the reconciliation pack tomorrow. Marcus finishes the role design documentation by the twenty-fourth and I send the pack the same day. Marcus finishes the user access review by the end of the month. Ravi shares last year's findings today. Daniel rotates the service account passwords by the twenty-fourth.
+
+Jun Wei: That's me, not Daniel. Kenji's on leave, so I took the service accounts.
+
+Aisha: Right, Jun Wei rotates the service account passwords by the twenty-fourth, and reviews the audit log settings by Wednesday. Marcus removes the consultants' superuser access on the seventh of August. And I'll log today's access issues in the hypercare issue log this afternoon, including Jun Wei's outage windows.
+
+Marcus: That's it. Decisions: no shared accounts, internal audit reviews the firefighter log weekly, and the three conflicts are accepted until the end of August with mitigating controls. Thanks, everyone. Same time next Thursday.

@@ -1,0 +1,309 @@
+================================================================
+SESSION 6
+Meeting: Finance Cutover and First Close Planning
+Date: 2026-07-01
+Duration: ~55 min
+Attendees: Wei Lin (Finance Director, chair), Priya Nair (Controller), Daniel Tan (SAP FICO Consultant), Hannah Goh (Accounts Payable Supervisor), Omar Rashid (Treasury Manager), Kenji Sato (Integration Developer), Grace Lim (Tax Manager), Ravi Menon (Internal Audit)
+================================================================
+
+Wei Lin: Let's begin. We have under two weeks to go-live and I want finance to be the workstream nobody worries about. I'll go round the table. Short answers, please. If it's done, say done. If it isn't, tell me what's stopping it and when it will be done. Ravi is joining us from internal audit as an observer today, so please don't be alarmed by the note-taking.
+
+Ravi: I'm mostly here to listen. I'll interrupt if I hear something the auditors will ask about.
+
+Hannah: Before we start, did everyone see the photos from Grace's trip? The ones from the tea plantation?
+
+Grace: Please, not now. Wei Lin will time me.
+
+Wei Lin: I will. Photos after the meeting. Also, a small housekeeping note. The room is booked until eleven, but the facilities team needs it at quarter to, so we have fifty-five minutes, not sixty. And the minutes from last week's steering are on the shared drive if you haven't read them. They don't change anything for finance except the date, which you all know.
+
+Omar: Thirteenth of July. It's written on my whiteboard in red.
+
+Wei Lin: Good. Daniel, the bank statement fix.
+
+Daniel: Done. The MT940 parser fix passed QA on Friday. The sample file from the bank came in on the Wednesday evening like Kenji said, I finished the fix on Thursday and the retest in QA passed on Friday. All six multi-currency test statements load cleanly now.
+
+Wei Lin: Finally. Kenji, what's left on the bank interface?
+
+Kenji: The parser works in isolation. What we haven't done is the full end-to-end run in pre-production, statement in from the bank, posted, and reconciled. The bank opened a test window for us this week after all, which I didn't expect. I'll run the end-to-end bank statement test in pre-production by Friday.
+
+Omar: That's good news. I'd assumed we were going live without that.
+
+Kenji: So had I. They had a cancellation.
+
+Wei Lin: And if the end-to-end test fails?
+
+Kenji: Then we're back to the fallback, which is manual upload of the statements. It's slow but it works.
+
+Wei Lin: Then let's be clear on that. If the interface fails in the first week after go-live, we reconcile manually. Daniel, is there a written instruction for the manual reconciliation?
+
+Daniel: Not a proper one. There are notes from the mock.
+
+Wei Lin: Notes aren't enough. I want a work instruction the AP and treasury teams can follow without calling you at midnight.
+
+Daniel: Fair. I'll write the work instruction for the manual bank reconciliation fallback by the end of next week.
+
+Wei Lin: End of next week is the tenth. That's the Friday we lock legacy.
+
+Daniel: Then the tenth it is. I'd rather it exists before the weekend.
+
+Wei Lin: Okay. So that's decided: manual bank reconciliation is the fallback if the interface fails in the first week. Omar, treasury.
+
+Omar: Three things. First, the new house bank accounts. I'm setting them up in the production system now. I've done two of the five. The other three are waiting on the bank mandate letters, which need a signature.
+
+Wei Lin: Mine?
+
+Omar: Yours, I'm afraid. They're in your inbox since Monday.
+
+Wei Lin: I'll sign the mandate letters this afternoon. I'm sorry, I've been in audit meetings all week. When will the accounts be done after that?
+
+Omar: If I have the letters today, the bank needs two days, so I'll have all five house bank accounts set up before the cutover weekend. Before Friday the tenth at the latest.
+
+Wei Lin: Fine. Second thing?
+
+Omar: The payment file transfer. The test payment file failed to transfer to the bank on Monday. It's the file naming convention, the bank's server rejects anything with a space in it.
+
+Kenji: That's mine to fix. I've already changed the naming in dev, it just needs to be moved and tested. I was going to do it by next Wednesday.
+
+Omar: That's too late. The last legacy payment run is on Tuesday, and I'd like the new file transfer proven before that, just in case we need to switch over early.
+
+Kenji: Okay, then I'll have the payment file transfer fixed by Monday. It's a small change, it's the testing that takes time.
+
+Wei Lin: Monday, the sixth. Good. Omar, third?
+
+Omar: The three dormant bank accounts. We agreed last quarter to close them. It's been sitting on the list for months.
+
+Wei Lin: Hannah, can you take the dormant accounts? Your team has the contacts at the branch.
+
+Hannah: I can, but honestly it's a treasury matter. The bank will only take the instruction from an authorised treasury signatory, which I'm not. It'll bounce back to Omar anyway.
+
+Omar: She's right. I'll take the dormant accounts. I'll get the three dormant bank accounts closed by the end of the month. It's not urgent for go-live, the balances are zero.
+
+Wei Lin: End of July, fine. Daniel, Omar will need the list of GL accounts linked to those bank accounts, and to the new ones.
+
+Daniel: I'll send Omar the list of bank GL accounts after this meeting. I have it ready, it's just sitting on my desktop.
+
+Omar: Thank you.
+
+Omar: While I have the floor, the exchange rates. On legacy the daily rates come in from the central bank feed at seven every morning. On the new system that job doesn't exist yet in production. It ran in the mock because Kenji triggered it by hand.
+
+Kenji: That's true. I ran it manually on both mock weekends. It's a scheduled job, it just hasn't been scheduled in production because production didn't exist in a usable form until last week.
+
+Wei Lin: What happens if it isn't scheduled on go-live day?
+
+Omar: Every foreign currency invoice posts at the last rate we loaded, which will be whatever the mock had. For the US dollar that's already a percent off. Nobody would notice for a week, and then the revaluation at month-end would be a mess.
+
+Kenji: I'll schedule the daily exchange rate upload job in production. It has to be in before the lock, so by the tenth as well. I'll set it to run at seven like legacy.
+
+Omar: And can you send me the log for the first run, so I can check the rates against the bank's?
+
+Kenji: It emails a log automatically, and treasury is already on the distribution list from the mock.
+
+Wei Lin: Good. How are we on the cash position for go-live day itself? I don't want a situation where the business can't see its cash on Monday morning.
+
+Omar: The plan is the same as the mock. On Friday the tenth I take the closing position from legacy, and on Monday morning I check the opening position in the new system against the bank balances. We did it in both mocks and it matched both times, apart from one timing difference on a cheque that cleared late.
+
+Wei Lin: And if it doesn't match on the Monday?
+
+Omar: Then I call you before nine. But I don't expect it to.
+
+Wei Lin: While we're on banking. Daniel, you suggested a lockbox setup for the customer receipts a few weeks ago. I'd like you to prepare the lockbox configuration so we can switch it on after go-live.
+
+Daniel: I can scope it.
+
+Omar: Before Daniel spends time on it, our bank doesn't offer a lockbox service in Singapore. I asked them in May. It's only available for the US accounts, and we don't have any.
+
+Wei Lin: Really? Then there's nothing to configure. Daniel, drop the lockbox, don't spend any time on it.
+
+Daniel: Understood. That's easy to drop.
+
+Wei Lin: Hannah, payables.
+
+Hannah: Okay. So the big thing is the parked vendor invoices. We had about four hundred parked invoices in legacy at the start of last week. My team has cleared about two hundred and sixty, so there are roughly a hundred and forty left. We need them all cleared before the legacy lock, because they won't migrate as parked documents.
+
+Wei Lin: Will you make it?
+
+Hannah: I'll have the parked vendor invoices cleared by Thursday next week. That gives us a day of buffer before the lock on the tenth. But I need overtime approved for two of the clerks to do it.
+
+Wei Lin: How much overtime?
+
+Hannah: Around twenty hours each over the next week.
+
+Wei Lin: That's fine. I'll approve the overtime for the AP clerks today, send me the request form.
+
+Hannah: I'll send it right after this. Second thing, the vendors need to know about the payment run cut-off. The last legacy payment run is Tuesday the seventh, and anything that misses it goes in the first run on the new system, which is the fifteenth. Some of the smaller suppliers will be upset if they don't hear about it in advance.
+
+Wei Lin: Has that notice gone out?
+
+Hannah: Not yet. The template is ready. I'll send the payment run cut-off notice to vendors tomorrow.
+
+Wei Lin: Good. So, to be clear, the last legacy payment run is Tuesday the seventh, no exceptions, and nothing gets paid from legacy after that.
+
+Omar: Agreed from treasury.
+
+Wei Lin: Then that's decided. Anything else, Hannah?
+
+Hannah: One more, and it's slightly embarrassing. I told you last meeting that the duplicate vendor records were cleaned up. I thought they were. But when Priya ran the final vendor extract on Monday, we found twelve more duplicates, all from the branch in Penang that was set up separately. So it's not finished. I've merged four of the twelve already. I'll have the remaining duplicate vendor records cleaned up by Friday.
+
+Priya: To be fair, those Penang vendors were in a separate company code until March. Nobody would have caught them.
+
+Wei Lin: I'm not looking for blame, I'm looking for a date. Friday, good. And the new AP clerks?
+
+Hannah: Yes, we have two new clerks starting on Monday. They need to be trained on invoice parking in the new system before go-live. I'll train the two new AP clerks on invoice parking the week before go-live, so by the tenth.
+
+Wei Lin: Okay. Priya.
+
+Priya: Mostly good news. Intercompany first. I finished reconciling the intercompany balances yesterday. Every pair agrees now, including the Malaysia to Singapore one that had the old FX difference. That's closed.
+
+Wei Lin: That FX difference has been open for two years.
+
+Priya: I know. It turned out to be a revaluation that was posted twice in 2024. Grace helped me trace it.
+
+Grace: It was a satisfying afternoon, in a strange way.
+
+Ravi: Out of interest, how was it found? The auditors flagged that difference in last year's management letter, and the answer we gave them then was that it was immaterial.
+
+Priya: It was immaterial, that part was true. But immaterial and unexplained are two different things. When we mapped the intercompany accounts for the migration, every pair had to agree to the cent or the load would reject it, so we couldn't carry it forward as a known difference any more. That forced the issue.
+
+Grace: And the revaluation had been posted once by the system and once by hand, because someone thought the job had failed. The manual entry had a reference that pointed to the wrong period, which is why nobody could find it.
+
+Ravi: That's a good story for the management letter this year. A migration that fixed a finding by accident.
+
+Wei Lin: Not by accident. By Priya refusing to load a difference she couldn't explain.
+
+Ravi: Fair point.
+
+Hannah: Does that mean the manual revaluation entries are blocked on the new system? My team sometimes posts corrections at month-end.
+
+Daniel: Manual postings to the revaluation accounts are blocked, yes. They go through a separate approval in the new system. That was built and tested in the second mock, so it's already in place. If your team needs a correction there, it goes to Priya for approval.
+
+Hannah: That's fine, as long as they know. It'll be in the training.
+
+Priya: It's in the training material already.
+
+Priya: Second, the fixed assets. I validated the fixed asset balances from the mock load, the net book values agree to legacy to the cent for all three company codes. That's done. Third, the chart of accounts. I sent the updated chart of accounts round last Thursday. If anyone still has the old version open, please close it.
+
+Wei Lin: And the close calendar?
+
+Priya: That's the one I haven't started. We need a close calendar for the first month-end on the new system. And I want to raise something about it. The current close is five working days. I don't think we can do five working days on the first close on a new system. People will be slower, there'll be issues nobody has seen before.
+
+Wei Lin: What do you propose?
+
+Priya: Seven working days for the July close only. Then we go back to five from August.
+
+Ravi: From an audit perspective, I'd support that. A rushed first close is where the errors come from. I'd much rather see seven days and a clean close.
+
+Wei Lin: Okay. The July close runs on seven working days, then back to five from August. That's decided. Priya, when will the calendar be ready?
+
+Priya: I'll draft the first month-end close calendar by the fifteenth, so it's out a full two weeks before the close starts.
+
+Omar: Priya, while you're doing the calendar, can we agree the cash forecast template at the same time? Treasury needs the forecast in the new format from the first week.
+
+Priya: Yes, let's do that together. I'll set up time with you.
+
+Omar: I'll agree the cash forecast template with Priya then. No date, it just needs to be before the first forecast is due.
+
+Wei Lin: Fine. Grace, tax.
+
+Grace: Tax codes. The Singapore tax code mapping is complete, I finished it on Monday and it's already in the pre-production system. Malaysia is still open. The sales and service tax codes changed in May and the legacy mapping is out of date. I'm about halfway through it. I'll have the Malaysian tax code mapping confirmed by Monday.
+
+Daniel: I need it Monday at the latest to get it loaded before the freeze exceptions get harder.
+
+Grace: Monday, then. Second, the GST reporting. We need the GST reporting variant configured on the new system before the first quarterly return, which is in October, but I'd like to see it working in July so we're not scrambling.
+
+Daniel: I can configure the GST reporting variant. I'll have it done by the seventeenth, that's the Friday after go-live. The week of go-live I'll be on the floor anyway.
+
+Grace: That works for me. And last thing from me, I filed the June withholding tax return under the legacy system on Monday. So that's out of the way, and the next one will be the first from the new system.
+
+Wei Lin: Good. Anything else in tax?
+
+Grace: Only a heads-up. The e-invoicing mandate for next year. We'll need to decide how the new system connects to the tax authority's platform. It's a big piece of work.
+
+Wei Lin: It is, and it's not this project. Park it. I'll put it on the agenda for the September finance leadership meeting.
+
+Grace: That's fine. I just didn't want it forgotten.
+
+Wei Lin: It won't be. Before we get to Ravi, hypercare. The programme has agreed four weeks of hypercare. For finance, I want to know who is on the floor each day of the first week, because that's when the calls will come. Priya, who's covering?
+
+Priya: I haven't put a rota together yet. My rough thinking is that Daniel is on site every day in the first week, and then the rest of us rotate so there's always one person from AP, one from treasury and one from the controller's team available until seven in the evening.
+
+Hannah: The AP team will want someone there first thing as well. The clerks start at eight, and the first hour is when they'll get stuck on parking.
+
+Daniel: I can be in by eight for the first week. After that I'd like to go back to normal hours if things are calm.
+
+Grace: Tax doesn't need daily cover. Put me down as on call, and I'll come in for anything tax-specific.
+
+Omar: Treasury will be there anyway, we have the payment run on the fifteenth.
+
+Wei Lin: Priya, put that into a proper rota so people know when they're on. By when?
+
+Priya: I'll draw up the finance hypercare support rota by Friday, so everyone has a week's notice.
+
+Wei Lin: Good. Ravi, you had your hand up.
+
+Ravi: A question on the legacy system. After go-live, will finance still have access to legacy? The auditors will ask for historical documents during the year-end audit, and I'd rather we don't have to restore a backup to find an invoice from 2025.
+
+Wei Lin: The plan is that legacy stays read-only for twelve months after go-live. Nobody can post, but everyone can look. Is that still the plan?
+
+Daniel: As far as I know. But that's Marcus's area, the access roles for legacy sit with Basis, and I haven't seen the read-only roles tested.
+
+Wei Lin: Then let's not assume. Daniel, please confirm with Marcus that finance users keep read-only access to legacy after go-live. This week, if you can.
+
+Daniel: I'll confirm with Marcus by Friday. If the roles aren't built, I'll say so on Friday rather than find out on the fourteenth.
+
+Ravi: Twelve months is fine for audit purposes. After that we'd want an archive, but that's a later problem.
+
+Wei Lin: Then that's decided as well. Legacy stays read-only for twelve months after go-live. Ravi, anything else you want to raise?
+
+Ravi: A few things. First, for the cutover sign-off, internal audit has a checklist we use for any system change of this size. It covers the reconciliations, the access, the approvals. I'll share the internal audit checklist for the cutover sign-off today, so Priya and Daniel can check it against what they're already planning.
+
+Priya: Please do. I'd rather find a gap now than on the Sunday.
+
+Ravi: Second, I'd like to observe the reconciliation and sign-off on the cutover weekend. Not to sign anything, just to observe and document. I'll be on site on Sunday the twelfth for the sign-off.
+
+Wei Lin: That's welcome. Priya, you're signing the financial balances that Sunday?
+
+Priya: Yes, as agreed last week.
+
+Ravi: Third, has anyone told the external auditors about the move from the sixth to the thirteenth?
+
+Wei Lin: It was in the steering pack that went to them on Tuesday. They acknowledged it.
+
+Ravi: Good, then nothing to do there.
+
+Hannah: Can I raise the intranet? The finance FAQ page still talks about the old go-live date and it still shows the old approval screens. Users are going to go there first when they're confused.
+
+Wei Lin: Who owns that page?
+
+Hannah: The service desk team maintains it. It's their site.
+
+Wei Lin: Then the service desk team needs to update the finance FAQ on the intranet before go-live. I'd like it by Friday the tenth. Their manager already knows it's coming, it's their task.
+
+Kenji: I can help them with the screenshots if they need it. I have a lot of screenshots.
+
+Wei Lin: If they ask, sure. Don't volunteer your time yet, you have the bank test and the payment file.
+
+Kenji: Noted.
+
+Wei Lin: Let me check the time. We have ten minutes. Daniel, anything I haven't asked about that I should have?
+
+Daniel: Everything from the earlier sessions is closed. The GST variant and the work instruction are my two open items, plus the GL list for Omar and the check with Marcus. I think that's all.
+
+Wei Lin: Priya?
+
+Priya: No, that's everything from me.
+
+Omar: One question. During hypercare, who does the daily bank reconciliation if Daniel is pulled onto something else?
+
+Wei Lin: Treasury does it, with Daniel supporting. The work instruction is exactly so that it's not dependent on Daniel.
+
+Omar: Okay, that's what I wanted to hear.
+
+Wei Lin: Right. I'm not going to do a long summary, we'll run out of time. Priya, please send the action list round tonight, from your notes. Everyone check your own items and tell Priya by tomorrow if anything's wrong.
+
+Priya: I'll send the action list round tonight.
+
+Wei Lin: Thank you. Next week, same time. Go-live minus six days. Bring nothing but good news.
+
+Hannah: No pressure.
+
+Wei Lin: None at all. Thank you, everyone.

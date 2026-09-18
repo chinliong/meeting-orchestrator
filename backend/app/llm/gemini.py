@@ -1,8 +1,8 @@
 """Gemini backend for the extraction pipeline (Objective 2).
 
-Gemini is the shipped parser: on the annotated test set it leads Claude Sonnet on recall,
-precision and F1, each separated by an exact permutation test over eight runs
-(docs/evaluation-report.md). It reaches the model through the same forced-tool-call contract
+Gemini is the implemented parser: across the short and long annotated test sets it is never
+significantly behind Claude Sonnet on F1 and leads across all eight transcripts, at a fraction of
+the price (docs/evaluation-report.md). It reaches the model through the same forced-tool-call contract
 the Claude path uses, so the caller gets a validated ExtractionResult either way.
 
 The one difference is the schema. Anthropic accepts JSON Schema directly; Gemini takes an

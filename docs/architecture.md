@@ -143,10 +143,11 @@ flowchart LR
   through a forced function call. The tool schema is defined once and translated into Gemini's
   OpenAPI subset (`app/llm/gemini.py`); the translation raises on anything it does not recognise
   rather than dropping it silently, so a schema change cannot weaken the contract unnoticed.
-- **Why Gemini:** it leads Claude Sonnet on recall, precision and F1 across eight runs per model,
-  each separated by an exact permutation test (`docs/evaluation-report.md`). Subtask generation
-  moved on a different basis: quality there is indistinguishable over five runs
-  per configuration (p = 0.652), so the reason is cost and keeping the system on one provider.
+- **Why Gemini:** on extraction it is never significantly behind Claude Sonnet on F1 across a
+  short development set and a long held-out set, leads across all eight transcripts (exact
+  permutation test, p = 0.037), and costs a tenth of Sonnet's input price
+  (`docs/evaluation-report.md`). Subtask quality is indistinguishable between the two on both
+  sets (p = 0.652 and p = 1.0), so there the reason is cost and keeping one provider.
 
 ## Access model
 

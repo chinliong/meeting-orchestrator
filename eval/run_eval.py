@@ -6,66 +6,63 @@ The pipeline is given a meeting transcript and must return structured action ite
 framework scores that output against a hand-annotated answer key: action-item precision /
 recall / F1, plus owner, status and deadline accuracy on the items that matched.
 
-Two questions are answered, by two different sets of conditions (see CONDITIONS):
+Two test sets are scored:
 
-1. **Does the guidance layer help?** A 2x2: guidance level - a no-guidance control against
-   the with-guidance configuration the project ships - crossed with model family, Claude Sonnet
-   against Gemini Flash. On Claude alone the two levels cannot be separated on extraction
-   accuracy: the run-to-run spread is larger than the gap, and the report says so rather than
-   claiming a gain. The second model tests whether the guidance does work a capable model
-   already does unaided.
+* **short** - four ~1,000-word transcripts (33 items). The prompt was refined against these, so
+  they are the development set.
+* **long** - four 3,100-4,100-word transcripts (123 items), written after the prompt was fixed
+  and never used to tune it. They are the held-out set, and test whether the model choice holds
+  on longer meetings with more people, revised deadlines and cancelled requests.
 
-2. **Which model should the project use?** Claude Sonnet (the incumbent), Claude Haiku, Gemini
-   Flash, both on the with-guidance configuration only. The incumbent is included
-   because the question is whether to replace it. Tiers and release dates differ and the
-   mismatch runs both ways - Sonnet is a larger tier, Gemini Flash is a later release - so
-   this is reported as a procurement decision for this project, not a vendor ranking. Haiku is
-   the tier-matched Claude entry, which is what makes this a comparison rather than vendor loyalty.
+Two questions are answered, by two sets of conditions (see CONDITIONS):
 
-Four design decisions worth knowing
------------------------------------
+1. **Does the guidance layer help?** Guidance level (without guidance, or the with-guidance
+   configuration the project implements) crossed with model family (Claude Sonnet, Gemini Flash).
+2. **Which model should the project use?** Claude Sonnet, Claude Haiku and Gemini Flash, all on
+   the with-guidance configuration. Tiers and release dates differ in both directions, so this is
+   a decision for this project, not a vendor ranking.
+
+Every configuration is run eight times per set, and differences are tested with an exact
+permutation test over the per-run scores (permutation_test).
+
+Design decisions worth knowing
+------------------------------
 1. **Parsing is separated from scoring.** `--parse` calls the model and caches every predicted
-   item to eval/predictions.json; scoring then reads that cache. Without this split, any change
-   to the scoring step also re-samples the model, and on a 33-item test set that noise is larger
-   than most effects worth measuring. Caching also makes re-scoring free and repeatable.
+   item (eval/predictions.json, eval/predictions_long.json); scoring reads the caches. A change
+   to scoring therefore never re-samples the model, and re-scoring is free and repeatable.
 
-2. **The baseline had to include the tool schema.** An earlier version of this framework swapped
-   only the system prompt and left EXTRACTION_TOOL in place for both variants. That was not a
-   control: the tool's field descriptions already state the owner / deadline / status rules, so
-   the "baseline" was still receiving all of them. The two variants scored within noise of each
-   other because they were barely different. BARE_TOOL fixes this by stripping the guidance from
-   the schema while keeping the output shape identical.
+2. **The without-guidance configuration had to strip the tool schema too.** The tool's field
+   descriptions state the owner / deadline / status rules, so swapping only the system prompt
+   would leave them in place. BARE_TOOL removes the guidance from the schema while keeping the
+   output shape identical.
 
-3. **Each run holds one model group.** A `--parse` invocation records exactly one group, so run
-   counts differ per condition and every aggregate filters with `runs_with()` rather than
-   assuming a uniform run list. Adding runs for one model therefore cannot disturb another's
-   cached figures - which is also what keeps the paid Claude conditions from being re-billed
-   when a free model is sampled.
+3. **Each run holds one model group.** A `--parse` invocation records one group, so every
+   aggregate filters with `runs_with()`, and adding runs for one model cannot disturb another's.
 
 4. **API failures are not model failures.** A request that never completed (rate limit,
-   capacity) is marked and excluded from scoring rather than counted as the model finding
-   nothing. Only responses that arrived but did not satisfy the schema count as validation
-   failures. Conflating the two would let an exhausted quota masquerade as a quality result.
+   capacity) is marked and excluded from scoring. Only responses that arrived but did not satisfy
+   the schema count as validation failures.
+
+5. **The provider is always named.** The Claude conditions pass provider="anthropic" explicitly;
+   otherwise they would follow LLM_PROVIDER, which the deployment sets to gemini.
 
 Usage (from the repo root, with the backend virtualenv active):
 
-    python -m eval.run_eval --write-report                       # regenerate the report - FREE
-    python -m eval.run_eval                                      # re-score the cache - FREE
-    python -m eval.run_eval --parse --provider gemini --runs 3   # free (20 req/day/model)
-    python -m eval.run_eval --parse --provider haiku --runs 3    # COSTS ANTHROPIC CREDIT (cheap)
-    python -m eval.run_eval --parse --provider claude --runs 1   # COSTS ANTHROPIC CREDIT
-    python -m eval.run_eval --rescore-judge                      # COSTS ANTHROPIC CREDIT
+    python -m eval.run_eval --write-report                            # regenerate - FREE
+    python -m eval.run_eval                                           # re-score - FREE
+    python -m eval.run_eval --parse --set long --provider gemini --runs 8   # Gemini credit
+    python -m eval.run_eval --parse --set long --provider haiku --runs 8    # Anthropic credit
+    python -m eval.run_eval --parse --set long --provider claude --runs 8   # Anthropic credit
+    python -m eval.run_eval --rescore-judge                           # Anthropic credit
 
-API BOUNDARY: only `--parse` and `--rescore-judge` contact a model, and only the `claude` /
-`haiku` groups and `--rescore-judge` spend Anthropic credit. The default path scores the cached
-predictions with pure computation and reuses stored judge scores, so regenerating the report
-costs nothing. Judge scores are cached per condition, so adding runs for one model does not
-silently re-bill the judge for another.
+API BOUNDARY: only `--parse` and `--rescore-judge` contact a model. The default path scores the
+cached predictions with pure computation, so regenerating the report costs nothing.
 """
 from __future__ import annotations
 
 import argparse
 import copy
+import itertools
 import json
 import os
 import re
@@ -83,11 +80,19 @@ BACKEND = REPO_ROOT / "backend"
 TRANSCRIPTS_DIR = REPO_ROOT / "data" / "synthetic-transcripts"
 ANNOTATIONS = REPO_ROOT / "data" / "annotated-test-set" / "annotations.json"
 PREDICTIONS_JSON = REPO_ROOT / "eval" / "predictions.json"
+# The long set is held out: written after the prompt was fixed and never used to tune it, so it
+# tests whether the model choice survives meetings the prompt was not shaped around.
+LONG_TRANSCRIPTS_DIR = REPO_ROOT / "data" / "synthetic-transcripts-long"
+LONG_ANNOTATIONS = REPO_ROOT / "data" / "annotated-test-set-long" / "annotations.json"
+LONG_PREDICTIONS_JSON = REPO_ROOT / "eval" / "predictions_long.json"
+TEST_SETS = {
+    "short": (TRANSCRIPTS_DIR, ANNOTATIONS, PREDICTIONS_JSON),
+    "long": (LONG_TRANSCRIPTS_DIR, LONG_ANNOTATIONS, LONG_PREDICTIONS_JSON),
+}
 RESULTS_JSON = REPO_ROOT / "eval" / "results.json"
-# Two documents on purpose. The report is what gets opened in a progress check-in and has to
-# be readable in a couple of minutes; the appendix carries the methodology, caveats and
-# per-condition figures that make the report defensible but would drown it. Nothing is
-# dropped - the report links to the appendix for every claim it compresses.
+# Two documents on purpose. The report has to be readable in a couple of minutes; the appendix
+# carries the method, every condition on every set, and the limitations. The report links to the
+# appendix for every claim it compresses.
 REPORT_MD = REPO_ROOT / "docs" / "evaluation-report.md"
 APPENDIX_MD = REPO_ROOT / "docs" / "evaluation-appendix.md"
 
@@ -138,20 +143,15 @@ def _strip_descriptions(node, keys_are_field_names: bool = False):
 BARE_TOOL = _strip_descriptions(copy.deepcopy(EXTRACTION_TOOL))
 BARE_TOOL["description"] = "Record extracted data."
 
-# The guidance ships as one layer - the prompt rules and the schema field descriptions carry the
-# same instructions - so it is evaluated as one layer. The experiment is a 2x2:
+# The guidance is implemented as one layer - the prompt rules and the schema field descriptions
+# carry the same instructions - so it is evaluated as one layer, crossed with model family:
 #
-#                  Basic guidance                Improved guidance
+#                  Without guidance              With guidance
 #   Claude         naive                         prod
 #   Gemini         gemini_naive                  gemini_prod
 #
-# Crossing the two axes answers a question neither answers alone. On this test set the guidance
-# effect on Claude is smaller than the run-to-run spread, so it cannot be called an accuracy
-# gain. The second model was added expecting the guidance to matter *more* where the model is
-# weaker. It did not: the net F1 effect changes sign between the two, and both deltas stay inside
-# the noise. What did replicate is the direction of the trade (recall up, precision down) and the
-# elimination of validation failures - which is now the best-supported claim here, holding across
-# two independent model families.
+# Running it on two model families shows whether an effect belongs to the guidance or to one
+# vendor's tool use. The results themselves are computed and written by render_appendix.
 #
 # Both tools emit an identical JSON shape (eval/test_matching.py asserts it for Claude,
 # eval/test_providers.py for Gemini after schema translation).
@@ -183,9 +183,9 @@ CONDITIONS = {
                               BASELINE_PROMPT, BARE_TOOL, group="gemini", short="Gemini Flash"),
     "gemini_prod":  Condition("With guidance (Gemini Flash)", "gemini", "Improved",
                               SYSTEM_PROMPT, EXTRACTION_TOOL, group="gemini", short="Gemini Flash"),
-    # Model comparison, shipped config only. These deliberately carry no Basic arm: the guidance
-    # question is already answered by the 2x2 above, and "which model should this product use?"
-    # is correctly asked under the configuration that actually ships.
+    # Model comparison, with-guidance configuration only: the guidance question is answered by
+    # the four conditions above, and "which model should this product use?" is asked under the
+    # configuration the application actually runs.
     "haiku_prod":   Condition("With guidance (Claude Haiku)", "claude", "Improved",
                               SYSTEM_PROMPT, EXTRACTION_TOOL, group="haiku",
                               short="Claude Haiku", model="claude-haiku-4-5"),
@@ -196,12 +196,10 @@ LABELS = {key: cond.label for key, cond in CONDITIONS.items()}
 # --parse operates on one group at a time, so a run never mixes providers.
 GROUPS = sorted({c.group for c in CONDITIONS.values()})
 
-# The model-choice comparison, all under the shipped config. The incumbent (Sonnet) is
-# included because the question being answered is "should this project switch?", and a
-# candidate list without the thing being replaced cannot answer it. The tiers differ and the
-# report says so: Sonnet is a larger tier than the other two, while Gemini Flash is a later
-# release than Sonnet. The confound runs both ways, which is precisely why this is reported as
-# a procurement decision for this project rather than a vendor ranking.
+# The model-choice comparison, all on the with-guidance configuration. Claude Sonnet was the
+# original model, so it is included: the question is whether to replace it. The tiers differ in
+# both directions (Sonnet is a larger tier, Gemini Flash a later release), which is why this is
+# reported as a decision for this project rather than a vendor ranking.
 COMPARISON_CONDITIONS = ["prod", "haiku_prod", "gemini_prod"]
 
 
@@ -439,17 +437,22 @@ def _make_parser(cond: Condition):
     """Build a parser for one condition. All of them expose .parse(text, meeting_date).
 
     Claude varies its schema by monkey-patching the module global the app parser reads, so the
-    shipped code path is exercised as-is; the second return value is the tool to patch in. The
+    application's own code path is exercised as-is; the second return value is the tool to patch in. The
     other providers take the tool as a constructor argument (eval/providers.py) and so return
     None for it.
     """
     if cond.provider == "gemini":
         from eval.providers import GeminiParser
         return GeminiParser(cond.prompt, cond.tool, model=cond.model), None
-    return TranscriptParser(system_prompt=cond.prompt, model=cond.model), cond.tool
+    # The provider is named explicitly. Left to default, TranscriptParser follows LLM_PROVIDER,
+    # which the deployment sets to gemini - and every "Claude" condition would silently run on
+    # Gemini while being labelled as Claude.
+    return (TranscriptParser(system_prompt=cond.prompt, model=cond.model, provider="anthropic"),
+            cond.tool)
 
 
-def parse_run(annotations: list[dict], conditions: list[str]) -> dict:
+def parse_run(annotations: list[dict], conditions: list[str],
+              transcripts_dir: Path = TRANSCRIPTS_DIR) -> dict:
     """One independent parse of the full test set under each named condition.
 
     Two kinds of failure are recorded separately, and the distinction matters:
@@ -474,7 +477,7 @@ def parse_run(annotations: list[dict], conditions: list[str]) -> dict:
             parser_mod.EXTRACTION_TOOL = claude_tool   # vary schema without touching app code
         try:
             for entry in annotations:
-                transcript = (TRANSCRIPTS_DIR / entry["transcript_file"]).read_text()
+                transcript = (transcripts_dir / entry["transcript_file"]).read_text()
                 block = {"transcript_file": entry["transcript_file"], "predicted": []}
                 try:
                     result = parser.parse(transcript,
@@ -621,7 +624,7 @@ def completeness(cache: dict) -> dict:
     """Record-quality metrics, computed from the cached predictions alone (no model calls).
 
     Extraction F1 asks "did it find the tasks". These ask "are the records it produced actually
-    usable" - which is what the guidance is written to control. The shipped guidance tells the
+    usable" - which is what the guidance is written to control. The implemented guidance tells the
     model who counts as an owner, how to resolve a date, to give a confidence reflecting how
     explicit the transcript was, and what source_decision is for. None of that shows up in F1.
     """
@@ -703,57 +706,163 @@ def confidence_calibration(cache: dict, annotations: list[dict], cond: str = "pr
     }
 
 
-def _models_used(cache: dict, overlap: dict) -> dict:
-    """Provider -> the concrete model id(s) that produced the cached runs.
-
-    Runs cached before this field was recorded carry no model id; those fall back to the value
-    configured now, flagged so the report does not present an assumption as a record.
-    """
-    recorded: dict[str, set] = {}
-    unrecorded: set = set()
-    for run in cache.get("runs", []):
-        models = run.get("models") or {}
-        for cond in run.get("conditions", {}):
-            if cond not in overlap:
-                continue
-            group = CONDITIONS[cond].group
-            if models.get(cond):
-                recorded.setdefault(group, set()).add(models[cond])
-            else:
-                unrecorded.add(group)
-
-    out = {}
-    fallback = {
-        "claude": os.getenv("CLAUDE_MODEL", "claude-sonnet-4-6"),
-        "gemini": os.getenv("GEMINI_MODEL", "gemini-3.6-flash"),
-        "haiku": "claude-haiku-4-5",
-    }
-    for group in sorted(set(recorded) | unrecorded):
-        names = sorted(recorded.get(group, ()))
-        if names:
-            # At least one run recorded it. Older runs that predate the field are assumed to be
-            # the same model rather than reported as a separate unknown.
-            out[group] = ", ".join(names)
-        else:
-            out[group] = f"{fallback.get(group, '?')} (from config; not recorded in cache)"
-    return out
+def _models_by_name(sets: dict) -> dict:
+    """Model name -> the model id(s) recorded in the cached runs of every set."""
+    seen: dict[str, set] = {}
+    for cache, _ in sets.values():
+        for run in cache.get("runs", []):
+            for cond, model in (run.get("models") or {}).items():
+                if cond in CONDITIONS and model:
+                    seen.setdefault(CONDITIONS[cond].short, set()).add(model)
+    return {name: ", ".join(sorted(ids)) for name, ids in sorted(seen.items())}
 
 # Operational facts that do not come out of the scores but decide deployability. Kept beside the
-# numbers deliberately: on a test set this small the accuracy columns are nearly tied, so quota
-# and price are what actually separate the options.
+# numbers deliberately: where the accuracy columns are close, price is what separates the options.
 _MODEL_NOTES = {
-    "prod": "paid, ~$3/$15 per M tokens",
-    "haiku_prod": "paid, ~$1/$5 per M tokens",
-    # Both are ordinary paid models. Their vendors grant a small daily allowance of free
-    # requests, and this evaluation stayed inside it - a billing arrangement, not a different
-    # or lesser model, and so not a reason to prefer or reject either one.
-    "gemini_prod": "paid, ~$0.30/$2.50 per M tokens; selected for extraction",
+    "prod": "~$3 / $15 per M tokens",
+    "haiku_prod": "~$1 / $5 per M tokens",
+    "gemini_prod": "~$0.30 / $2.50 per M tokens",
 }
 
-# Below this, differences in F1 on this test set are not distinguishable from run-to-run noise.
-NOISE_FLOOR_F1 = 0.15
+# Mirrors LOW_CONFIDENCE in frontend/src/lib/format.ts: below it, a card asks for review.
+REVIEW_THRESHOLD = 0.85
+
+SET_LABELS = {"short": "Short", "long": "Long", "all": "All eight"}
 
 
+# ------------------------------------------------------------------- statistics
+def permutation_test(a: list[float], b: list[float]) -> tuple[float, float]:
+    """Exact two-sample permutation test on the difference of means.
+
+    Every split of the pooled per-run values into groups of the original sizes is enumerated
+    (12,870 for eight runs against eight), so the p-value is exact rather than sampled.
+    Returns (mean(a) - mean(b), two-sided p).
+    """
+    pool, n = a + b, len(a)
+    observed = abs(stats.mean(a) - stats.mean(b))
+    hits = total = 0
+    for idx in itertools.combinations(range(len(pool)), n):
+        chosen = set(idx)
+        x = [pool[i] for i in chosen]
+        y = [pool[i] for i in range(len(pool)) if i not in chosen]
+        total += 1
+        hits += abs(stats.mean(x) - stats.mean(y)) >= observed - 1e-12
+    return round(stats.mean(a) - stats.mean(b), 3), round(hits / total, 4)
+
+
+TESTED_PAIRS = [("gemini_prod", "prod"), ("gemini_prod", "haiku_prod"), ("prod", "haiku_prod"),
+                ("prod", "naive"), ("gemini_prod", "gemini_naive")]
+
+
+def pair_tests(overlap: dict) -> dict:
+    """Permutation tests on per-run precision, recall and F1 for each compared pair."""
+    out = {}
+    for x, y in TESTED_PAIRS:
+        if x in overlap and y in overlap:
+            out[f"{x}|{y}"] = {
+                m: permutation_test([r[m] for r in overlap[x]["runs"]],
+                                    [r[m] for r in overlap[y]["runs"]])
+                for m in ("precision", "recall", "f1")}
+    return out
+
+
+def merge_caches(*caches: dict) -> dict:
+    """Join run i of each cache into one run, per condition, so the sets can be scored together.
+
+    Runs are independent samples, so pairing them by position introduces nothing; it only lets
+    one precision / recall / F1 be computed per run over every transcript at once.
+    """
+    out = {"runs": []}
+    for cond in CONDITIONS:
+        parts = [runs_with(c, cond) for c in caches]
+        for group in zip(*parts):
+            out["runs"].append({
+                "conditions": {cond: [b for r in group for b in r["conditions"][cond]]},
+                "validation_failures": {cond: sum(r["validation_failures"].get(cond, 0)
+                                                  for r in group)},
+                "api_failures": {cond: sum(r.get("api_failures", {}).get(cond, 0)
+                                           for r in group)},
+                "models": {cond: group[0].get("models", {}).get(cond)},
+            })
+    return out
+
+
+def recall_by_status(cache: dict, annotations: list[dict], cond: str) -> dict:
+    """Share of annotated items found, split by the item's annotated status."""
+    by_file = {e["transcript_file"]: e for e in annotations}
+    found: dict = {}
+    for run in runs_with(cache, cond):
+        for blk in scorable(run["conditions"][cond]):
+            items = by_file[blk["transcript_file"]]["expected_action_items"]
+            hit = {ei for ei, _, _ in _match_overlap(items, blk["predicted"])}
+            for i, item in enumerate(items):
+                h, t = found.get(item["status"], (0, 0))
+                found[item["status"]] = (h + (i in hit), t + 1)
+    return found
+
+
+def empty_responses(cache: dict, cond: str) -> int:
+    """Responses that passed validation but contained no action items at all.
+
+    A validation failure also leaves an empty block, so those are subtracted per run.
+    """
+    n = 0
+    for run in runs_with(cache, cond):
+        empty = sum(1 for b in scorable(run["conditions"][cond]) if not b["predicted"])
+        n += max(0, empty - run["validation_failures"].get(cond, 0))
+    return n
+
+
+def below_threshold(cache: dict, annotations: list[dict], cond: str) -> tuple[int, int]:
+    """(real, spurious) counts of predictions scored below REVIEW_THRESHOLD."""
+    by_file = {e["transcript_file"]: e for e in annotations}
+    real = spurious = 0
+    for run in runs_with(cache, cond):
+        for blk in scorable(run["conditions"][cond]):
+            items = by_file[blk["transcript_file"]]["expected_action_items"]
+            hit = {pi for _, pi, _ in _match_overlap(items, blk["predicted"])}
+            for i, p in enumerate(blk["predicted"]):
+                c = p.get("confidence")
+                if c is not None and c < REVIEW_THRESHOLD:
+                    real += i in hit
+                    spurious += i not in hit
+    return real, spurious
+
+
+def transcript_profile(directory: Path, annotations: list[dict]) -> dict:
+    """Word counts and attendee counts, read from the transcript files themselves."""
+    words, people = [], []
+    for e in annotations:
+        text = (directory / e["transcript_file"]).read_text()
+        words.append(len(text.split()))
+        line = next((ln for ln in text.splitlines() if ln.startswith("Attendees:")), "")
+        people.append(line.count("("))
+    return {"transcripts": len(annotations), "words": (min(words), max(words)),
+            "people": (min(people), max(people)),
+            "items": sum(len(e["expected_action_items"]) for e in annotations)}
+
+
+def build_results(sets: dict) -> dict:
+    """Everything the two documents report, computed once from the cached predictions."""
+    out = {}
+    for name, (cache, ann) in sets.items():
+        ov = aggregate(cache, ann, "overlap")
+        out[name] = {
+            "overlap": ov,
+            "tests": pair_tests(ov),
+            "completeness": completeness(cache),
+            "offsets": deadline_offsets(cache, ann),
+            "counts": pooled_field_counts(cache, ann),
+            "status_recall": {c: recall_by_status(cache, ann, c) for c in ov},
+            "empty": {c: empty_responses(cache, c) for c in ov},
+            "below_threshold": {c: below_threshold(cache, ann, c) for c in ov},
+            "confidence": {c: confidence_calibration(cache, ann, c)
+                           for c in ("gemini_prod", "prod") if c in ov},
+        }
+    return out
+
+
+# ------------------------------------------------------------------- formatting
 def _wrap(text: str, indent: str = "", width: int = 96) -> str:
     """Re-flow a generated paragraph so the markdown source stays readable in a diff."""
     return "\n\n".join(
@@ -765,654 +874,489 @@ def _pct(value) -> str:
     return "-" if value is None else f"{value:.0%}"
 
 
-def _fmt_frac(counts: dict, cond: str, field_: str) -> str:
-    k = (counts or {}).get(cond)
-    if not k:
-        return "-"
-    c, t = k[field_]
-    return f"{c}/{t} ({c/t:.2f})" if t else "-"
+def _p(p: float) -> str:
+    return "p < 0.001" if p < 0.001 else f"p = {p:.3f}"
+
+
+def _gap(test: tuple[float, float]) -> str:
+    d, p = test
+    return f"{d:+.3f}, {_p(p)}"
+
+
+def _standing(test: tuple[float, float], alpha: float = 0.05) -> str:
+    """'ahead' / 'behind' / 'level' - the verdict a difference supports, not just its sign."""
+    d, p = test
+    if p >= alpha:
+        return "level"
+    return "ahead" if d > 0 else "behind"
+
+
+def _frac(pair) -> str:
+    h, t = pair
+    return f"{h}/{t} ({h / t:.0%})" if t else "-"
 
 
 def _offset_shape(entry: dict) -> str:
-    """How a condition's date errors are shaped, in a few words."""
     dom = entry["dominant_offset"]
     if dom is None:
         return "no errors"
     if dom == "none":
-        return f"omitted ({entry['dominant_share']:.0%})"
+        return f"left blank ({entry['dominant_share']:.0%})"
     return f"{dom:+d} day ({entry['dominant_share']:.0%})"
 
 
-def _delta_shape(dc: float, dg: float) -> tuple[str, str]:
-    """How the two guidance deltas relate, in words.
-
-    Derived rather than written out, because the deltas move with every re-run: a hardcoded
-    phrase silently contradicts the numbers it sits next to the first time a sign flips.
-    """
-    signs = "opposite signs" if (dc >= 0) != (dg >= 0) else "the same sign on both models"
-    span = (f"both smaller than the ~{NOISE_FLOOR_F1} run-to-run spread"
-            if max(abs(dc), abs(dg)) < NOISE_FLOOR_F1
-            else f"the larger of them at or beyond the ~{NOISE_FLOOR_F1} run-to-run spread")
-    return signs, span
+def _profile_row(name: str, prof: dict, role: str) -> str:
+    w, p = prof["words"], prof["people"]
+    people = str(p[0]) if p[0] == p[1] else f"{p[0]}-{p[1]}"
+    return (f"| {SET_LABELS[name]} | {prof['transcripts']} | {w[0]:,}-{w[1]:,} | "
+            f"{people} | {prof['items']} | {role} |")
 
 
-def _summary(overlap, comp, offsets) -> str:
-    """Answers first. A reader who stops here should still have the whole story.
-
-    Everything below this section is evidence for these three claims; nothing new is introduced
-    later. Written to be falsifiable - each bullet names the number that would have to change.
-    """
-    bullets = []
-
-    # 1. The guidance finding that replicated.
-    pairs = [("naive", "prod", "Claude Sonnet"), ("gemini_naive", "gemini_prod", "Gemini Flash")]
-    have = [(b, i, n) for b, i, n in pairs if b in overlap and i in overlap]
-    if have:
-        detail = "; ".join(
-            f"{n} {overlap[b]['validation_failures']}/{overlap[b]['parses']} -> "
-            f"{overlap[i]['validation_failures']}/{overlap[i]['parses']}" for b, i, n in have)
-        bullets.append(
-            f"1. **The described schema eliminates malformed output.** The shape-only schema "
-            f"returned responses that failed validation; the described schema never did, on "
-            f"either model ({detail}). This is the best-supported result here - it replicated "
-            f"across two independent model families - and it is a qualitative failure: there is "
-            f"no record at all to score.")
-
-    # 2. The guidance finding that did not.
-    if all(k in overlap for k in ("naive", "prod", "gemini_naive", "gemini_prod")):
-        dc = round(overlap["prod"]["f1"] - overlap["naive"]["f1"], 3)
-        dg = round(overlap["gemini_prod"]["f1"] - overlap["gemini_naive"]["f1"], 3)
-        signs, span = _delta_shape(dc, dg)
-        bullets.append(
-            f"2. **The guidance does not measurably change extraction accuracy.** The F1 delta is "
-            f"{dc:+.3f} on Claude and {dg:+.3f} on Gemini - {signs}, {span}. "
-            f"What does move consistently is the trade: "
-            f"recall up, precision down, on both models. Any claim of an accuracy gain would need "
-            f"a larger test set than this one.")
-
-    # 3. The clearest model difference.
-    flagged = [c for c, o in (offsets or {}).items()
-               if isinstance(o["dominant_offset"], int) and o["dominant_offset"] != 0
-               and o["dominant_share"] >= 0.25]
-    if flagged:
-        worst = max(flagged, key=lambda c: offsets[c]["dominant_share"])
-        o = offsets[worst]
-        bullets.append(
-            f"3. **{CONDITIONS[worst].short} has a systematic "
-            f"date bias.** {o['dominant_share']:.0%} of its deadlines fall exactly "
-            f"{o['dominant_offset']:+d} day from the annotated one - no other model produces that "
-            f"offset once. Unlike the F1 differences, this is far outside the noise, and it "
-            f"matters directly: deadlines determine this product's reminder scheduling.")
-
-    return "\n\n".join(_wrap(b, indent="   ") for b in bullets)
+_ROLES = {"short": "Development: the prompt was refined against it",
+          "long": "Held out: written after the prompt was fixed, never used to tune it"}
 
 
-def _recommendation(overlap, comp, offsets) -> str:
-    """The decision the model comparison exists to inform, stated plainly."""
-    present = [c for c in COMPARISON_CONDITIONS if c in overlap]
-    if len(present) < 2:
+def _decision(res: dict) -> str:
+    """The decision paragraph. Each clause is derived from a test, so it cannot overstate."""
+    parts = []
+    for name in ("short", "long", "all"):
+        t = res[name]["tests"].get("gemini_prod|prod")
+        if not t:
+            continue
+        where = {"short": "on the short set", "long": "on the long set",
+                 "all": "across all eight transcripts"}[name]
+        parts.append(f"{_standing(t['f1'])} {where} ({_gap(t['f1'])})")
+    never_behind = all(_standing(res[n]["tests"]["gemini_prod|prod"]["f1"]) != "behind"
+                       for n in ("short", "long", "all") if "gemini_prod|prod" in res[n]["tests"])
+    lead = ("It is never significantly behind Claude Sonnet on F1: " if never_behind
+            else "Against Claude Sonnet on F1 it is ")
+    body = lead + ", ".join(parts[:-1]) + ", and " + parts[-1] + "."
+    lp = res["long"]["tests"].get("gemini_prod|prod", {}).get("precision")
+    if lp and _standing(lp) == "ahead":
+        body += (f" On the long set it is also more precise ({_gap(lp)}), so it proposes fewer "
+                 f"items that are not real tasks.")
+    body += (" It also costs a tenth of Claude Sonnet's price per input token and a sixth per "
+             "output token.")
+    haiku = [(n, res[n]["offsets"].get("haiku_prod")) for n in ("short", "long")]
+    shares = [f"{o['dominant_share']:.0%}" + (" of its matched deadlines" if i == 0 else "")
+              + f" on the {n} set"
+              for i, (n, o) in enumerate((n, o) for n, o in haiku
+                                         if o and o["dominant_offset"] == 1)]
+    if shares:
+        body += (" Claude Haiku is rejected because it resolves deadlines one day late: "
+                 "exactly +1 day on " + " and ".join(shares) + ".")
+    return body
+
+
+def _completed_work(res: dict) -> str:
+    sr = res["all"]["status_recall"]
+    if "gemini_prod" not in sr or "prod" not in sr or "done" not in sr["prod"]:
         return ""
-    spread = round(max(overlap[c]["f1"] for c in present)
-                   - min(overlap[c]["f1"] for c in present), 3)
-
-    lines = []
-    for cond in present:
-        m, q = overlap[cond], (comp or {}).get(cond, {})
-        o = (offsets or {}).get(cond, {})
-        exact = f"{o['exact']}/{o['total']}" if o else "-"
-        lines.append(
-            f"| {CONDITIONS[cond].short} | {m['recall']} | {exact} | "
-            f"{_pct(q.get('source_decision_rate'))} | {_MODEL_NOTES.get(cond, '?')} |")
-
-    return f"""
-## Decision
-
-**Extraction runs on Gemini Flash.** Over eight runs per model it leads Claude Sonnet on recall (+0.091), precision
-(+0.058) and F1 (+0.074). Each gap is separated by an exact permutation test at p < 0.01, so
-unlike the earlier four-run comparison this one does distinguish the models on accuracy. How each
-one *fails* still matters more than where it ranks in the table:
-
-| Model | Recall | Deadlines exact | `source_decision` | Cost |
-|---|---|---|---|---|
-{chr(10).join(lines)}
-
-- **Claude Haiku** resolves relative dates a day late on most deadlines, so every reminder would
-  be sent late. The cheapest model is the one whose failure most directly breaks the core feature.
-- **Gemini Flash** leads on recall, deadline accuracy and F1, and records `source_decision` on
-  every item. Its previous disqualifier was a prompt defect, not a model weakness: the schema
-  called the field optional and the system prompt never asked for it. Correcting that raised all
-  three models to 100%, which means the earlier comparison was partly measuring prompt ambiguity.
-  The one column it does not lead is precision, where Claude Haiku reaches 0.937 against 0.895 -
-  but only by proposing roughly a third fewer items. Precision on its own rewards a model for
-  proposing fewer items, which is what F1 accounts for and Gemini Flash leads.
-- **Claude Sonnet** is second on recall, deadline accuracy and F1, with no disqualifying failure
-  of its own. It is last on precision.
-
-Gemini Flash no longer has the completeness gap that once ruled it out.
-Subtask generation was measured separately on its own rubric ([subtask-evaluation-report.md](subtask-evaluation-report.md)), because open-ended
-decomposition is a different problem from extraction and a parser result is not evidence about
-it.
-"""
+    g, c = sr["gemini_prod"], sr["prod"]
+    rate = lambda d, s: d[s][0] / d[s][1]  # noqa: E731
+    return _wrap(
+        f"**Much of Claude Sonnet's gap is completed work.** The answer keys include work the "
+        f"meeting reports as already finished (status `done`), because the board records it. "
+        f"Across all eight transcripts Claude Sonnet finds {rate(c, 'done'):.0%} of those "
+        f"items against Gemini Flash's {rate(g, 'done'):.0%}, while on open work the two are "
+        f"close ({rate(c, 'todo'):.0%} against {rate(g, 'todo'):.0%} of to-do items, "
+        f"{rate(c, 'in_progress'):.0%} against {rate(g, 'in_progress'):.0%} of in-progress "
+        f"ones). Claude Haiku finds {rate(sr['haiku_prod'], 'done'):.0%} of completed items.")
 
 
-def _fails(m: dict) -> str:
-    """Validation failures as a fraction of parses, e.g. "3/16"."""
-    return f"{m['validation_failures']}/{m['parses']}"
-
-
-def _run_count_note(overlap: dict) -> str:
-    """Say what the run counts actually are, rather than asserting they differ."""
-    counts = {m["n_runs"] for m in overlap.values()}
-    if len(counts) == 1:
-        return (f"Every condition is averaged over its own {counts.pop()} runs, never pooled "
-                f"across models.")
-    return ("Run counts differ because the daily free-request allowances cap how many runs a "
-            "model can do in a day; each condition is averaged over its own runs, never pooled "
-            "across models.")
-
-
-def _precision_note(overlap: dict) -> str:
-    """Why precision falls when the guidance is added.
-
-    Written out because it is the one arrow in the study 1 table that points the wrong way, and
-    an adverse number left without an explanation reads as one nobody looked at. Every figure is
-    computed, so the paragraph cannot drift away from the table above it.
-    """
-    def totals(cond):
-        runs = overlap[cond]["runs"]
-        return (sum(r["predicted_items"] for r in runs), sum(r["matched_items"] for r in runs))
-
-    def spread(cond):
-        ps = [r["precision"] for r in overlap[cond]["runs"]]
-        return max(ps) - min(ps)
-
-    if not all(c in overlap for c in ("naive", "prod", "gemini_naive", "gemini_prod")):
+def _empty_note(res: dict) -> str:
+    n = res["all"]["empty"].get("prod", 0)
+    if not n:
         return ""
-
-    pb, mb = totals("naive")
-    pi, mi = totals("prod")
-    extra, hit = pi - pb, mi - mb
-    gpb, gmb = totals("gemini_naive")
-    gpi, gmi = totals("gemini_prod")
-    g_extra, g_hit = gpi - gpb, gmi - gmb
-
-    if pb == 0:
-        # The control returned nothing scorable - every parse failed validation - so there is no
-        # precision trade to decompose here. Say that instead of dividing by zero.
-        parses = sum(r["parses"] for r in overlap["naive"]["runs"]) if \
-            "parses" in overlap["naive"]["runs"][0] else len(overlap["naive"]["runs"]) * 4
-        return _wrap(f"""**No precision trade to report on this model.** The control produced no
-scorable output at all - every one of its {parses} parses failed schema validation - so it
-proposed zero items, and its precision, recall and F1 are zero by construction rather than by
-performance. On this model the comparison is not "more items, slightly less precise" but
-"output or no output". Gemini Flash, whose control does return items, still shows the trade:
-{gpi} proposed with guidance against {gpb} without, of which {g_hit} of the {g_extra} extra
-matched an annotated item.""")
-
-    return _wrap(f"""**Why precision falls.** Precision is the share of proposed items that turned
-out to be real. With the guidance the model proposes more of them - {pi} against {pb} without it, on Claude
-Sonnet - so there is simply more to be wrong about. The extra proposals are almost
-as good as the ones the without-guidance configuration already made: {hit} of the {extra} extra matched an annotated
-item, a match rate of {hit / extra:.0%} against {mb / pb:.0%} without it. That is why precision
-barely moves ({overlap['naive']['precision']} -> {overlap['prod']['precision']}) while recall
-moves a lot ({overlap['naive']['recall']} -> {overlap['prod']['recall']}): {hit} real tasks
-recovered for {extra - hit} spurious ones. Gemini Flash makes the same trade on a smaller
-scale - {g_hit} of {g_extra} extra, against a much larger base - so its precision falls less.
-Neither drop is larger than the
-run-to-run variation inside that same configuration ({spread('prod'):.3f} on Claude,
-{spread('gemini_prod'):.3f} on Gemini), so neither is separable from noise. For this application
-the trade is the right way round in any case: a spurious task is visible on the board and can be
-deleted, while a missed one is invisible.""")
+    times = "once" if n == 1 else f"{n} times"
+    g = res["all"]["empty"].get("gemini_prod", 0)
+    other = ("Gemini Flash never did." if not g
+             else f"Gemini Flash did so {g} time{'s' if g > 1 else ''}.")
+    return _wrap(
+        f"Claude Sonnet also returned a valid response containing no action items {times}. The "
+        f"application would show that meeting as processed with an empty board, which is harder "
+        f"to notice than a failed parse. {other}")
 
 
-def _study_one(overlap, comp, counts) -> str:
-    """Does the guidance layer help? One row per model, every cell a within-model contrast.
-
-    Laid out as `without -> with` pairs rather than one row per arm. The only valid comparison
-    here is within a model - the two families are a generation apart - and a four-row grid
-    invites reading down the columns instead. Pairing the arms inside each cell makes the
-    change the unit of analysis, and puts the replicated result (both models 3/16 -> 0/16) in
-    one column where it can be seen at a glance.
-    """
-    pairs = [("naive", "prod"), ("gemini_naive", "gemini_prod")]
-    have = [(b, i) for b, i in pairs if b in overlap and i in overlap]
-    if not have:
-        return ""
-
-    def arrow(before, after) -> str:
-        return f"{before} -> **{after}**"
-
-    rows = []
-    for base, impr in have:
-        mb, mi = overlap[base], overlap[impr]
-        qb, qi = (comp or {}).get(base, {}), (comp or {}).get(impr, {})
-        runs = (str(mi["n_runs"]) if mb["n_runs"] == mi["n_runs"]
-                else f"{mb['n_runs']} / {mi['n_runs']}")
-        rows.append(
-            f"| {CONDITIONS[impr].short} | {runs} | "
-            f"{arrow(_fails(mb), _fails(mi))} | "
-            f"{arrow(_pct(qb.get('source_decision_rate')), _pct(qi.get('source_decision_rate')))} | "
-            f"{arrow(mb['recall'], mi['recall'])} | "
-            f"{arrow(mb['precision'], mi['precision'])} | "
-            f"{arrow(mb['f1'], mi['f1'])} | "
-            f"{arrow(_fmt_frac(counts, base, 'owner'), _fmt_frac(counts, impr, 'owner'))} |")
-
-    c_n, c_p = (comp or {}).get("naive", {}), (comp or {}).get("prod", {})
-    g_n, g_p = (comp or {}).get("gemini_naive", {}), (comp or {}).get("gemini_prod", {})
-    d_claude = overlap["prod"]["f1"] - overlap["naive"]["f1"]
-    d_gemini = overlap["gemini_prod"]["f1"] - overlap["gemini_naive"]["f1"]
-    signs, span = _delta_shape(d_claude, d_gemini)
-
-    # Built then wrapped, rather than laid out inline: interpolated numbers vary in width and
-    # would otherwise break these sentences at arbitrary points in the generated markdown.
-    prose = _wrap(f"""**Reliability - replicated.** The shape-only schema produced output that
-failed validation on both models; the described schema never did on either. Two unrelated model
-families failing the same way, and being fixed the same way, is the strongest evidence here.
-
-**Accuracy - not established.** The guidance raises recall and lowers precision on both models,
-but the net F1 effect has {signs} ({d_claude:+.3f} on Claude, {d_gemini:+.3f} on Gemini),
-{span}. The second model was added expecting the guidance to help *more*
-where the model is weaker; it did not, and that expectation is recorded here as refuted rather
-than dropped.
-
-{_precision_note(overlap)}
-
-**Record quality - Claude only.** Source-decision capture rose
-{_pct(c_n.get('source_decision_rate'))} -> {_pct(c_p.get('source_decision_rate'))} on Claude but
-only {_pct(g_n.get('source_decision_rate'))} -> {_pct(g_p.get('source_decision_rate'))} on Gemini.
-The schema asks both models for the same field; only Claude acts on it. Claude also varies its
-confidence score as instructed ({c_p.get('confidence_min')}-{c_p.get('confidence_max')},
-{c_p.get('confidence_distinct')} distinct values) where the without-guidance configuration emits a near-constant one
-({c_n.get('confidence_min')}-{c_n.get('confidence_max')}, {c_n.get('confidence_distinct')} values)
-that cannot be filtered on.""")
-
-    return f"""
-## Study 1 - does the guidance layer help?
-
-Within each model the two configurations differ **only** in guidance text; the JSON contract is identical.
-`eval/test_matching.py` asserts this for Claude, `eval/test_providers.py` for Gemini after schema
-translation.
-
-Each cell reads *without guidance* -> **with guidance**, for that model alone. The contrast is
-within one row; the two models are a generation apart, so a gap read *down* a column would
-measure release date as much as capability.
-
-| Model | Runs | Validation failures | `source_decision` | Recall | Precision | F1 | Owner |
-|---|---|---|---|---|---|---|---|
-{chr(10).join(rows)}
-
-{prose}
-
-> Gemini Flash is here as a replication check, not as a competitor: the question is whether the
-> guidance effect is a property of the schema or a quirk of one vendor's tool use. The model
-> comparison is Study 2.
-"""
-
-
-def _study_two(overlap, comp, counts, models) -> str:
-    """Which model should the project use? Tier-matched, shipped config only."""
-    present = [c for c in COMPARISON_CONDITIONS if c in overlap]
-    if len(present) < 2:
-        return ""
-
-    rows = []
-    for cond in present:
-        m, q = overlap[cond], (comp or {}).get(cond, {})
-        model_id = models.get(CONDITIONS[cond].group, "?").split(" (")[0]
-        rows.append(
-            f"| {CONDITIONS[cond].short} | `{model_id}` | {m['n_runs']} | "
-            f"{m['precision']} | {m['recall']} | **{m['f1']}** | "
-            f"{m['validation_failures']}/{m['parses']} | "
-            f"{_pct(q.get('source_decision_rate'))} | {_fmt_frac(counts, cond, 'status')} |")
-
-    return f"""
-## Study 2 - which model should the project use?
-
-Every row runs the **with-guidance configuration** - the one the project implements; only the
-model changes. The incumbent (Claude
-Sonnet) is included because the question is whether to replace it, and a candidate list without
-the thing being replaced cannot answer that.
-
-The tiers are not matched, and the mismatch runs both ways: Sonnet is a larger tier than the other
-two, while Gemini Flash is a later release than Sonnet. So this table is a procurement decision
-for this project - where price and quota are legitimate inputs - and not a ranking of vendors.
-Haiku is the tier-matched Claude entry, which is what makes "Gemini Flash was chosen" a comparison
-rather than vendor loyalty.
-
-| Model | Model id | Runs | Precision | Recall | F1 | Validation failures | `source_decision` | Status |
-|---|---|---|---|---|---|---|---|---|
-{chr(10).join(rows)}
-
-{_run_count_note(overlap)}
-"""
-
-
-def _deadline_section(offsets: dict) -> str:
-    """Systematic vs random date error - the one place a clear model difference shows up."""
-    # dict.fromkeys keeps the incumbent in the list without listing it twice - "prod" is
-    # already the first entry of COMPARISON_CONDITIONS.
-    present = [c for c in dict.fromkeys(COMPARISON_CONDITIONS + ["prod"]) if c in offsets]
-    if len(present) < 2:
-        return ""
-
-    rows = [f"| {CONDITIONS[c].short} | {offsets[c]['total']} | "
-            f"{offsets[c]['exact']}/{offsets[c]['total']} "
-            f"({offsets[c]['exact']/offsets[c]['total']:.0%}) | {_offset_shape(offsets[c])} |"
-            for c in present]
-
-    flagged = [c for c in present
-               if isinstance(offsets[c]["dominant_offset"], int)
-               and offsets[c]["dominant_offset"] != 0
-               and offsets[c]["dominant_share"] >= 0.25]
-    if flagged:
-        worst = max(flagged, key=lambda c: offsets[c]["dominant_share"])
-        o = offsets[worst]
-        callout = "\n" + _wrap(f"""**{CONDITIONS[worst].short} is systematically biased, not confused.** {o['dominant_share']:.0%} of its matched deadlines fall exactly {o['dominant_offset']:+d} day from the annotated
-one - it resolves relative cues ("by Friday", "end of next week") consistently one day late, and
-no other model here produces that offset even once. Two consequences: its low exact-match rate
-overstates how badly it resolves dates, and a constant offset is the kind of error a prompt
-change could plausibly remove. Unlike the F1 differences elsewhere in this report, {o['dominant_share']:.0%} of {o['total']}
-scored deadlines is well outside the noise.""")
-    else:
-        callout = ("\nNo condition shows a dominant constant offset, so these look like "
-                   "comprehension misses rather than a systematic resolution bug.")
-
-    return f"""
-## Deadline errors - systematic or random?
-
-Exact-match accuracy cannot tell a model that is *randomly* wrong about dates from one that is
-wrong by a *constant* amount, and those mean different things - the second is a resolution
-bug a prompt could fix, and it shifts every reminder this product sends.
-
-| Model | Deadlines scored | Exact | Most common error |
-|---|---|---|---|
-{chr(10).join(rows)}
-{callout}
-"""
-
-
-def _flagged_offset(offsets: dict):
-    """The condition whose date errors are dominated by one constant offset, if any."""
-    flagged = [c for c, o in (offsets or {}).items()
-               if isinstance(o["dominant_offset"], int) and o["dominant_offset"] != 0
-               and o["dominant_share"] >= 0.25]
-    if not flagged:
-        return None, None
-    worst = max(flagged, key=lambda c: offsets[c]["dominant_share"])
-    return worst, offsets[worst]
-
-
-def render_report(cache: dict, overlap: dict, n_transcripts: int, n_items: int,
-                  comp: dict | None = None, offsets: dict | None = None) -> str:
-    """The short report - what gets opened in a progress check-in.
-
-    Deliberately compressed to two tables and three claims. Everything it leaves out lives in
-    the appendix and is linked, so compressing here costs nothing in defensibility: the reader
-    who wants precision/recall per condition, the confound notes or the corrections can follow
-    one link. The one thing that must survive compression is the limit on what the numbers
-    support, so the "What this does not show" section is not optional.
-    """
+def render_report(res: dict, profiles: dict) -> str:
+    """The short report: decision, the two test sets, and two tables."""
     today = date.today().isoformat()
-    comp, offsets = comp or {}, offsets or {}
+    a = res["all"]
+    rows = []
+    for cond in COMPARISON_CONDITIONS:
+        if cond not in a["overlap"]:
+            continue
+        o = a["offsets"].get(cond, {})
+        b = "**" if cond == "gemini_prod" else ""
+        f1 = [res[n]["overlap"][cond]["f1"] for n in ("short", "long", "all")]
+        rows.append(
+            f"| {b}{CONDITIONS[cond].short}{b} | {f1[0]} | {f1[1]} | {b}{f1[2]}{b} | "
+            f"{a['overlap'][cond]['precision']} | {a['overlap'][cond]['recall']} | "
+            f"{o['exact'] / o['total']:.0%} | {_MODEL_NOTES[cond]} |")
 
-    # Step 1 - the model table. Every candidate, incumbent included.
-    model_rows = []
-    for cond in [c for c in COMPARISON_CONDITIONS if c in overlap]:
-        m, q = overlap[cond], comp.get(cond, {})
-        o = offsets.get(cond, {})
-        deadlines = f"{o['exact']/o['total']:.0%}" if o.get("total") else "-"
-        chosen = "**" if cond == "gemini_prod" else ""
-        model_rows.append(
-            f"| {chosen}{CONDITIONS[cond].short}{chosen} | {m['recall']:.0%} | {m['f1']} | "
-            f"{deadlines} | {_pct(q.get('source_decision_rate'))} | {_MODEL_NOTES.get(cond, '?')} |")
+    g_rows = []
+    for base, impr in (("gemini_naive", "gemini_prod"), ("naive", "prod")):
+        mb, mi = a["overlap"][base], a["overlap"][impr]
+        qb, qi = a["completeness"][base], a["completeness"][impr]
+        t = a["tests"][f"{impr}|{base}"]["f1"]
+        g_rows.append(
+            f"| {CONDITIONS[impr].short} | {mb['validation_failures']}/{mb['parses']} -> "
+            f"**{mi['validation_failures']}/{mi['parses']}** | "
+            f"{_pct(qb['source_decision_rate'])} -> **{_pct(qi['source_decision_rate'])}** | "
+            f"{mb['f1']} -> **{mi['f1']}** ({_p(t[1])}) |")
 
-    worst, o = _flagged_offset(offsets)
-    bias = _wrap(
-        f"**{CONDITIONS[worst].short} has a systematic date bug.** {o['dominant_share']:.0%} of the deadlines it "
-        f"produced fall exactly {o['dominant_offset']:+d} day from the correct one - it resolves \"by Friday\" to the "
-        f"following day, consistently. Every reminder scheduled from it would be sent a day late."
-    ) if worst else "No model showed a systematic date bias."
-
-    # Step 2 - what the guidance bought on the chosen model. Mirrors the slide exactly.
-    c_n, c_p = comp.get("naive", {}), comp.get("prod", {})
-    o_n, o_p = overlap.get("naive", {}), overlap.get("prod", {})
-    guidance_rows = "\n".join([
-        f"| Source decision captured | {_pct(c_n.get('source_decision_rate'))} | "
-        f"**{_pct(c_p.get('source_decision_rate'))}** |",
-        f"| Confidence actually varies | {c_n.get('confidence_min')} - {c_n.get('confidence_max')} "
-        f"({c_n.get('confidence_distinct')} values) | **{c_p.get('confidence_min')} - "
-        f"{c_p.get('confidence_max')} ({c_p.get('confidence_distinct')} values)** |",
-        f"| Parses failing validation | {c_n.get('validation_failures')} / {c_n.get('parses')} | "
-        f"**{c_p.get('validation_failures')} / {c_p.get('parses')}** |",
-        f"| Action items found (recall) | {o_n.get('recall')} | **{o_p.get('recall')}** |",
-    ])
+    verdicts = {CONDITIONS[i].short: _standing(a["tests"][f"{i}|{b}"]["f1"])
+                for b, i in (("gemini_naive", "gemini_prod"), ("naive", "prod"))}
+    raised = [m for m, v in verdicts.items() if v == "ahead"]
+    if len(raised) == 2:
+        guidance_f1 = "Across all eight transcripts the F1 gain is significant on both models."
+    elif raised:
+        guidance_f1 = (f"Across all eight transcripts the F1 gain is significant on {raised[0]} "
+                       f"only.")
+    else:
+        guidance_f1 = "The F1 difference is not separable from run-to-run noise."
+    g_real, g_spur = a["below_threshold"].get("gemini_prod", (0, 0))
+    c_real, c_spur = a["below_threshold"].get("prod", (0, 0))
 
     return f"""# Evaluation Report
 
 _Generated by `python -m eval.run_eval --write-report` on {today}._
-_Full methodology, per-condition figures and caveats: [evaluation-appendix.md](evaluation-appendix.md)._
-_Speech-to-text model comparison: [asr-evaluation.md](asr-evaluation.md)._
-_Subtask generation, scored on its own rubric: [subtask-evaluation-report.md](subtask-evaluation-report.md)._
+_Method, per-condition figures and caveats: [evaluation-appendix.md](evaluation-appendix.md).
+Speech-to-text: [asr-evaluation.md](asr-evaluation.md). Subtask generation:
+[subtask-evaluation-report.md](subtask-evaluation-report.md)._
 
 ## Decision
 
-**Extraction runs on Gemini Flash.** Over eight runs per model it leads Claude Sonnet on recall,
-precision and F1, each gap separated by an exact permutation test at p < 0.01, and it resolves
-deadlines most accurately of the three candidates. Claude Haiku is rejected on a systematic
-one-day date offset. The margin is real but the test set is small, so the caveats in "What this
-does not show" apply to the size of the lead, not to the choice.
+{_wrap("**Extraction runs on Gemini Flash.** " + _decision(res))}
 
-## What was measured
+## Test sets
 
-The transcript parser is scored against **{n_transcripts} synthetic SAP meeting transcripts** containing
-**{n_items} manually annotated action items**. Two questions, in order:
+| Set | Transcripts | Words each | People each | Annotated action items | Role |
+|---|---|---|---|---|---|
+{_profile_row("short", profiles["short"], _ROLES["short"])}
+{_profile_row("long", profiles["long"], _ROLES["long"])}
 
-1. **Which model should the project use?**
-2. **What does the prompt and schema engineering add on that model?**
+{_wrap('''All eight are synthetic SAP programme meetings. Every configuration was run eight
+times on each set. Differences are tested with an exact permutation test over the eight per-run
+scores, and a difference is only called a lead when p < 0.05.''')}
 
 ## Step 1 - choosing the model
 
-Every row runs the same with-guidance configuration - the one the project implements; only the
-model changes.
+Every row uses the with-guidance configuration the application runs; only the model changes.
 
-| Model | Action items found | F1 | Deadlines correct | Context captured | Cost |
-|---|---|---|---|---|---|
-{chr(10).join(model_rows)}
+| Model | F1 short | F1 long | F1 all eight | Precision | Recall | Deadlines exact | Cost |
+|---|---|---|---|---|---|---|---|
+{chr(10).join(rows)}
 
-{bias}
+_Precision, recall and deadlines are over all eight transcripts._
 
-{_wrap('''Gemini Flash was previously rejected for leaving the source-decision field empty on
-most items, but that proved to be a prompt defect rather than a model weakness - the schema called
-the field optional and the prompt never asked for it. With the prompt corrected every model fills
-it on 100% of items, so the earlier comparison was partly measuring prompt ambiguity. Claude Sonnet is second on each of these measures, with no
-disqualifying failure of its own. Precision is not in this table because it is not a selection
-criterion on its own: Haiku is the most precise model at 0.937, but only by proposing a third
-fewer items - which is exactly what the F1 column already accounts for.''')}
+{_completed_work(res)}
 
-> {_wrap('''These models are at different price tiers *and* different release dates - Sonnet is a
-larger tier than the other two, while Gemini Flash is a later release than Sonnet. The confound
-runs in both directions, which is why this table is a cost decision for this project rather than a
-ranking of vendors.''', indent="> ")}
+{_empty_note(res)}
 
-## Step 2 - what the prompt and schema engineering adds
+{_wrap('''The three models differ in price tier and release date, and the difference runs both
+ways: Claude Sonnet is a larger tier, Gemini Flash a later release. This is a decision for this
+project, not a ranking of vendors.''')}
 
-Each model is run with and without the structured guidance layer - the refined prompt rules plus
-the fully described JSON schema. The output contract is identical in both columns; only the
-guidance text differs. The figures below are Claude Sonnet; Gemini Flash replicates the pattern
-and is reported in the appendix.
+## Step 2 - what the prompt and schema guidance adds
 
-| Metric | Without guidance | With guidance |
-|---|---|---|
-{guidance_rows}
+Each model was also run without the guidance: a one-line prompt and a schema with the field
+descriptions removed. The output format is identical; only the guidance text differs. All eight
+transcripts:
 
-{_wrap('''Without the descriptions the model periodically returns output that fails validation
-outright - usually a malformed date - and the application gets no record at all. With them, that did
-not happen once. The remaining rows are the fields the guidance explicitly asks for: the decision
-each task came from, and a confidence score that actually varies instead of remaining near-constant.
-Varying is necessary but not sufficient - the appendix measures what that variation is worth, and
-finds it separates spurious items only at the low end.''')}
+| Model | Responses failing validation | Source decision filled | F1 |
+|---|---|---|---|
+{chr(10).join(g_rows)}
+
+{_wrap(f'''Without guidance both models sometimes return output that fails validation, and the
+application then gets no tasks at all; with guidance that never happened. With guidance both
+models also record which decision each task came from. {guidance_f1}''')}
 
 ## What this does not show
 
-{_wrap(f'''The test set is small ({n_transcripts} transcripts, {n_items} items), and repeat runs of the *same*
-configuration vary by more than most of the gaps between them. The Gemini-versus-Sonnet
-difference does survive an exact permutation test over eight runs, so that one comparison is
-established; the rest are not, and no wider ranking should be read into either table. What they
-support more strongly is the reliability and completeness differences: valid output, captured
-context, and the date bug. A larger annotated test set is scheduled for the next phase and would
-settle how far the accuracy result generalises beyond these four transcripts.''')}
+{_wrap(f'''- **The meetings are synthetic.** They are written text, not recorded speech. The long
+transcripts and their answer keys were drafted with an AI assistant (Claude). Text written by one
+candidate's model family could suit that family; here it would favour Claude Sonnet, which is the
+opposite direction to the decision.''', indent="  ")}
+{_wrap(f'''- **Eight meetings is still a small sample.** The results show the choice holds on
+longer, harder meetings than the ones the prompt was built on; they do not show it holds for
+every kind of meeting.''', indent="  ")}
+{_wrap(f'''- **The low-confidence review flag was tuned on Claude Sonnet.** Every Sonnet item
+scored below {REVIEW_THRESHOLD} was wrong ({c_spur} of {c_real + c_spur}), but Gemini Flash
+never scored an item below {REVIEW_THRESHOLD} ({g_real + g_spur} items in all runs), so on the
+implemented model the flag does not fire. See the appendix.''', indent="  ")}
 """
 
 
-def _confidence_section(cal: dict) -> str:
-    """The confidence score is shown on every card; this reports whether it carries information."""
-    if not cal:
-        return ""
-    rows = "\n".join(
-        f"| {b['lo']:.2f} - {b['hi']:.2f} | {b['n']} | {b['matched_rate']:.0%} |"
-        for b in cal["buckets"])
-    top = cal["buckets"][-1]
-    low = cal["buckets"][0]
-    m, sp = cal["matched"], cal["spurious"]
-    return f"""
-## Is the confidence score meaningful?
-
-Every extracted item carries a confidence score, and the interface shows it, so it is worth
-asking whether it carries information. There is no annotated confidence to compare against, so
-correctness here means the same thing it does everywhere else in this report: a prediction that
-matches an annotated item is real, one that matches nothing is spurious.
-
-Real items average {m['mean']} confidence (n={m['n']}), spurious ones {sp['mean']} (n={sp['n']}) -
-a gap of {m['mean'] - sp['mean']:+.3f}.
-
-| Confidence | Items | Actually real |
-|---|---|---|
-{rows}
-
-Two properties have to be separated here. **Calibration** asks whether 0.9 means right nine times
-in ten; the score fails that, because items at {top['lo']:.2f}+ are real {top['matched_rate']:.0%}
-of the time, not {top['lo']:.0%}. **Discrimination** asks only whether low scores are more often
-wrong, and that holds at the bottom of the range: every item below {low['hi']:.2f} was spurious
-({low['n']} of them).
-
-The practical reading is that the score is a review flag, not a probability. It is not safe to
-present as a likelihood, and the interface accordingly uses it to colour items for attention
-rather than to assert one. The caveat is sample size: {sum(b['n'] for b in cal['buckets'][:2])}
-items fall below 0.90, so the low-end result is suggestive rather than established, and
-{top['n']} of {m['n'] + sp['n']} items fall in the top band where the score does not
-discriminate at all.
-"""
+def _set_table(res: dict, conds: list[str]) -> list[str]:
+    rows = []
+    for cond in conds:
+        for name in ("short", "long", "all"):
+            m = res[name]["overlap"].get(cond)
+            if not m:
+                continue
+            c = res[name]["counts"][cond]
+            rows.append(
+                f"| {CONDITIONS[cond].short} | {SET_LABELS[name]} | {m['n_runs']} | "
+                f"{m['precision']} | {m['recall']} | **{m['f1']}** | "
+                f"{m['validation_failures']}/{m['parses']} | {_frac(c['owner'])} | "
+                f"{_frac(c['status'])} |")
+    return rows
 
 
-def render_appendix(cache: dict, overlap: dict, judge: dict | None, n_transcripts: int,
-                    n_items: int, comp: dict | None = None, counts: dict | None = None,
-                    offsets: dict | None = None, cal: dict | None = None) -> str:
-    """Render the technical appendix: every condition, every caveat, every correction.
+def _confidence_rows(cal: dict) -> str:
+    return "\n".join(f"| {b['lo']:.2f} - {min(b['hi'], 1.0):.2f} | {b['n']} | "
+                     f"{b['matched_rate']:.0%} |" for b in cal["buckets"])
 
-    Structure is deliberate. Two studies are reported, each with one table, because their rows are
-    not mutually comparable - Study 1 varies guidance, Study 2 varies model, and a single combined
-    table would invite reading across that boundary. The LLM-judge figures are kept out of the
-    tables entirely: they are computed on demand (they cost API calls) so most conditions lack
-    them, and a column of dashes reads as broken rather than absent.
-    """
+
+def render_appendix(res: dict, profiles: dict, models: dict, judge_note: str) -> str:
+    """The technical appendix: method, every condition on every set, and the limitations."""
     today = date.today().isoformat()
-    judge, comp, counts, offsets = judge or {}, comp or {}, counts or {}, offsets or {}
-    models = _models_used(cache, overlap)
-    bare = {k: v.split(" (")[0] for k, v in models.items()}
+    a = res["all"]
 
-    judged = [c for c in ("naive", "prod") if c in judge and c in overlap]
-    if judged:
-        agreement = "; ".join(
-            f"{CONDITIONS[c].label}: {overlap[c]['f1']} overlap vs {judge[c]['f1']} judge"
-            for c in judged)
-        judge_note = (
-            f"A second, semantic matcher (an LLM judge deciding whether two descriptions name the "
-            f"same task) was run on the Claude conditions and agreed on the ordering, scoring "
-            f"slightly higher throughout - {agreement}. It costs API calls per transcript, so it "
-            f"is not computed for every condition and is kept out of the tables below; "
-            f"`eval/results.json` holds the full figures.")
+    # Study 1 - guidance, per model and set.
+    s1 = []
+    for base, impr in (("gemini_naive", "gemini_prod"), ("naive", "prod")):
+        for name in ("short", "long", "all"):
+            mb, mi = res[name]["overlap"][base], res[name]["overlap"][impr]
+            qb, qi = res[name]["completeness"][base], res[name]["completeness"][impr]
+            t = res[name]["tests"][f"{impr}|{base}"]
+            s1.append(
+                f"| {CONDITIONS[impr].short} | {SET_LABELS[name]} | "
+                f"{mb['validation_failures']}/{mb['parses']} -> "
+                f"**{mi['validation_failures']}/{mi['parses']}** | "
+                f"{_pct(qb['source_decision_rate'])} -> **{_pct(qi['source_decision_rate'])}** | "
+                f"{mb['recall']} -> **{mi['recall']}** | {mb['f1']} -> **{mi['f1']}** | "
+                f"{_gap(t['f1'])} |")
+    pairs = {"Gemini Flash": ("gemini_naive", "gemini_prod"), "Claude Sonnet": ("naive", "prod")}
+    raised, details = [], []
+    for m, (b, i) in pairs.items():
+        v = {n: _standing(res[n]["tests"][f"{i}|{b}"]["f1"]) for n in ("short", "long", "all")}
+        if v["all"] == "ahead":
+            raised.append(m)
+        sig = [n for n in ("short", "long") if v[n] == "ahead"]
+        if len(sig) == 2:
+            details.append(f"{m}'s gain is significant on both sets")
+        elif sig:
+            other = "long" if sig[0] == "short" else "short"
+            details.append(f"{m}'s gain is significant on the {sig[0]} set but not the {other}")
+        else:
+            details.append(f"{m}'s gain is not significant on either set alone")
+    if len(raised) == 2:
+        gain_text = "Across all eight transcripts the guidance raises F1 significantly on both models."
+    elif raised:
+        gain_text = f"Across all eight transcripts the guidance raises F1 significantly on {raised[0]} only."
     else:
-        judge_note = ("A semantic LLM-judge matcher is available via `--rescore-judge` but has not "
-                      "been run on the current cache.")
+        gain_text = "Across all eight transcripts the F1 difference is not separable from noise."
+    gain_text += " Within a single set, " + "; ".join(details) + "."
+    fail_sets = [f"{CONDITIONS[b].short} on the {SET_LABELS[n].lower()} set "
+                 f"({res[n]['overlap'][b]['validation_failures']}/{res[n]['overlap'][b]['parses']})"
+                 for b in ("gemini_naive", "naive") for n in ("short", "long")
+                 if res[n]["overlap"][b]["validation_failures"]]
+    with_fails = sum(res["all"]["overlap"][i]["validation_failures"] for i in ("gemini_prod", "prod"))
+    with_parses = sum(res["all"]["overlap"][i]["parses"] for i in ("gemini_prod", "prod"))
+    src = {CONDITIONS[b].short: _pct(res["all"]["completeness"][b]["source_decision_rate"])
+           for b in ("gemini_naive", "naive")}
 
-    judge_note = _wrap(judge_note)
+    # Study 2 - pairwise tests.
+    s2_tests = []
+    for key, label in (("gemini_prod|prod", "Gemini Flash - Claude Sonnet"),
+                       ("gemini_prod|haiku_prod", "Gemini Flash - Claude Haiku"),
+                       ("prod|haiku_prod", "Claude Sonnet - Claude Haiku")):
+        for name in ("short", "long", "all"):
+            t = res[name]["tests"].get(key)
+            if t:
+                s2_tests.append(f"| {label} | {SET_LABELS[name]} | {_gap(t['precision'])} | "
+                                f"{_gap(t['recall'])} | {_gap(t['f1'])} |")
 
+    # Recall by status.
+    status_rows = []
+    for cond in COMPARISON_CONDITIONS:
+        sr = a["status_recall"][cond]
+        status_rows.append(f"| {CONDITIONS[cond].short} | {_frac(sr['todo'])} | "
+                           f"{_frac(sr['in_progress'])} | {_frac(sr['done'])} |")
+
+    # Deadlines.
+    dl_rows = []
+    for cond in COMPARISON_CONDITIONS + ["naive"]:
+        for name in ("short", "long"):
+            o = res[name]["offsets"].get(cond)
+            if o:
+                dl_rows.append(f"| {CONDITIONS[cond].label} | {SET_LABELS[name]} | "
+                               f"{o['exact']}/{o['total']} ({o['exact'] / o['total']:.0%}) | "
+                               f"{_offset_shape(o)} |")
+    hk = [res[n]["offsets"]["haiku_prod"] for n in ("short", "long")]
+    plus_one_elsewhere = sum(res[n]["offsets"][c]["counts"].get(1, 0)
+                             for n in ("short", "long") for c in ("prod", "gemini_prod"))
+    others = ("No other with-guidance configuration produces a +1 day error even once."
+              if not plus_one_elsewhere else
+              f"The other with-guidance configurations produce it {plus_one_elsewhere} times in "
+              f"total.")
+    nv = res["long"]["offsets"].get("naive", {})
+    naive_note = ""
+    if nv.get("dominant_offset") == 1 and not res["long"]["offsets"]["prod"]["counts"].get(1):
+        naive_note = (f" Claude Sonnet without guidance shows the same +1 day drift on the long "
+                      f"set ({nv['dominant_share']:.0%}), which the guidance removes.")
+
+    # Confidence.
+    conf_blocks = []
+    for cond in ("gemini_prod", "prod"):
+        cal = a["confidence"].get(cond)
+        if not cal:
+            continue
+        real, spur = a["below_threshold"][cond]
+        conf_blocks.append(f"""**{CONDITIONS[cond].short}** - real items average {cal['matched']['mean']}
+(n={cal['matched']['n']}), spurious ones {cal['spurious']['mean']} (n={cal['spurious']['n']}).
+Below {REVIEW_THRESHOLD}: {real} real, {spur} spurious.
+
+| Confidence | Items | Real |
+|---|---|---|
+{_confidence_rows(cal)}
+""")
+    g_below = sum(a["below_threshold"]["gemini_prod"])
+
+    long_p, short_p = profiles["long"], profiles["short"]
     return f"""# Evaluation Report - Technical Appendix
 
 _Generated by `python -m eval.run_eval --write-report` on {today}. Re-run to refresh._
-_Summary and decision: [evaluation-report.md](evaluation-report.md)._
-_Speech-to-text: [asr-evaluation.md](asr-evaluation.md). Subtask generation: [subtask-evaluation-report.md](subtask-evaluation-report.md)._
+_Summary and decision: [evaluation-report.md](evaluation-report.md). Speech-to-text:
+[asr-evaluation.md](asr-evaluation.md). Subtask generation:
+[subtask-evaluation-report.md](subtask-evaluation-report.md)._
 
-## Summary
+## Test sets and method
 
-{_summary(overlap, comp, offsets)}
-{_recommendation(overlap, comp, offsets)}
-## Test set and method
+| Set | Transcripts | Words each | People each | Annotated action items | Role |
+|---|---|---|---|---|---|
+{_profile_row("short", short_p, _ROLES["short"])}
+{_profile_row("long", long_p, _ROLES["long"])}
 
-- Synthetic SAP-programme transcripts: **{n_transcripts}**; manually annotated action items: **{n_items}**.
-- Source: `data/synthetic-transcripts/` and `data/annotated-test-set/annotations.json`.
-- Each transcript is parsed with its true meeting date, so relative cues ("by this Friday")
-  resolve deterministically.
-- Predicted items are matched one-to-one against the annotated ones by **word overlap** (Jaccard
-  over content words, threshold {MATCH_THRESHOLD}) - deterministic, no model involved. Matched pairs are then
-  scored field by field.
-- **precision** = matched / predicted, **recall** = matched / expected, **F1** their harmonic
-  mean. Owner, status and deadline accuracy are computed over *matched* items only, so they are computed
-  on different denominators per condition and are reported with counts.
-- Runs are independent and averaged; both models are non-deterministic and run counts differ by
-  condition, so each is stated rather than assumed.
-- Requests that never completed (rate limit, capacity) are recorded as API failures and excluded
-  from scoring - an exhausted quota is never counted as the model failing to find items. Only
-  responses that arrived but did not satisfy the schema count as validation failures.
+- **Short set:** `data/synthetic-transcripts/`, answer key `data/annotated-test-set/annotations.json`.
+- **Long set:** `data/synthetic-transcripts-long/`, answer key
+  `data/annotated-test-set-long/annotations.json`. Each long transcript was written to include
+  deadlines revised later in the meeting, a task handed from one person to another, an owner
+  who is not in the meeting, work owned by a team rather than a person, and requests that are
+  later cancelled, parked or rejected. The answer key lists those non-tasks separately
+  (`not_action_items`) so it is clear what was deliberately left out.
+- The answer keys count work reported as already finished as a task with status `done`,
+  because the board records it.
+- Each transcript is parsed with its true meeting date, so relative cues ("by Friday") resolve
+  to one correct date.
+- Predictions are matched one-to-one to annotated items by **word overlap** (Jaccard over
+  content words, threshold {MATCH_THRESHOLD}), with no model involved, so scoring is
+  repeatable. Owner, status and deadline are then scored on matched pairs only.
+- **Precision** = matched / predicted, **recall** = matched / annotated, **F1** is their
+  harmonic mean. One value of each is computed per run over every transcript in the set.
+- Every configuration was run **8 times on each set**. "All eight" joins run *i* of the short
+  set with run *i* of the long set; runs are independent, so this pairing adds nothing but lets
+  one score cover all eight transcripts.
+- Differences use an **exact permutation test** over the per-run scores: all 12,870 ways of
+  splitting sixteen runs into two groups of eight are enumerated. A difference is called a lead
+  only when p < 0.05.
+- Requests that never completed (rate limit, capacity) are excluded as API failures. Only
+  responses that arrived and failed the schema count as validation failures.
 
 {judge_note}
 
-Gemini needs the tool schema translated into its OpenAPI subset (`eval/providers.py`), while
-Anthropic accepts JSON Schema unchanged. The translation is asserted to preserve fields, required list and
-enum, because a translation bug would appear as a model difference that is really a framework bug.
-{_study_one(overlap, comp, counts)}{_study_two(overlap, comp, counts, models)}{_deadline_section(offsets)}{_confidence_section(cal or {})}
+Models: {", ".join(f"{k} `{v}`" for k, v in models.items())}.
+
+## Study 1 - does the guidance help?
+
+Within each model the two configurations differ only in guidance text; the output schema is
+identical (`eval/test_matching.py`, `eval/test_providers.py`). Each cell reads *without
+guidance* -> **with guidance**. The last column tests the F1 difference.
+
+| Model | Set | Validation failures | `source_decision` | Recall | F1 | F1 gain |
+|---|---|---|---|---|---|---|
+{chr(10).join(s1)}
+
+{_wrap(f'''**Reliability.** With guidance neither model ever returned output that failed
+validation ({with_fails} of {with_parses} responses). Without it, failures occurred for
+{"; ".join(fail_sets)}.
+
+**Accuracy.** {gain_text}
+
+**Record quality.** With guidance both models fill `source_decision` on every item. Without it,
+Gemini Flash fills it on {src["Gemini Flash"]} of items and Claude Sonnet on
+{src["Claude Sonnet"]}.''')}
+
+## Study 2 - which model?
+
+Every row uses the with-guidance configuration. Owner and status accuracy are over matched items.
+
+| Model | Set | Runs | Precision | Recall | F1 | Validation failures | Owner | Status |
+|---|---|---|---|---|---|---|---|---|
+{chr(10).join(_set_table(res, COMPARISON_CONDITIONS))}
+
+Differences (first model minus second), with exact permutation p-values:
+
+| Comparison | Set | Precision | Recall | F1 |
+|---|---|---|---|---|
+{chr(10).join(s2_tests)}
+
+### Which items each model misses (all eight transcripts)
+
+| Model | To do | In progress | Done |
+|---|---|---|---|
+{chr(10).join(status_rows)}
+
+{_completed_work(res)}
+
+{_empty_note(res)}
+
+## Deadline errors
+
+A model that is wrong by a constant amount has a resolution bug, which shifts every reminder;
+one that is randomly wrong has a comprehension limit. The table separates the two.
+
+| Configuration | Set | Exact | Most common error |
+|---|---|---|---|
+{chr(10).join(dl_rows)}
+
+{_wrap(f'''**Claude Haiku is systematically one day late**: {hk[0]['dominant_share']:.0%} of its
+matched deadlines on the short set and {hk[1]['dominant_share']:.0%} on the long set are exactly
++1 day, so every reminder it scheduled would be sent a day late. {others}{naive_note}''')}
+
+## Is the confidence score meaningful?
+
+Every item carries a confidence score and the card flags items below {REVIEW_THRESHOLD} for
+review. "Real" means the item matched an annotated one. All eight transcripts:
+
+{chr(10).join(conf_blocks)}
+{_wrap(f'''Neither model's score is a calibrated probability. Claude Sonnet's discriminates at the
+low end: its items below {REVIEW_THRESHOLD} were all spurious, which is what the {REVIEW_THRESHOLD}
+threshold was set from. Gemini Flash, the implemented model, never scored an item below
+{REVIEW_THRESHOLD} ({g_below} items), and its spurious items score almost as high as its real
+ones. On the implemented model the review flag therefore does not fire, and the score carries
+little information. Gemini Flash also produces few spurious items, so the practical cost is
+small, but the flag should not be described as a safeguard for this model.''')}
+
 ## Limitations
 
-- **The test set is synthetic.** The four transcripts were generated for this project and written
-  to be deliberately messy - interruptions, corrections, half-finished sentences and decisions
-  revisited later - so that the parser is not only measured on tidy prose. They are still authored
-  text rather than a transcription of real speech, which is the main caveat: generated dialogue
-  may be more internally consistent than a genuine recording even when written to look untidy. The
-  pipeline was separately tested end to end on a real recording from the AMI meeting corpus, but
-  that recording is not part of the scored test set.
-- **One annotator, no second opinion.** The answer key was labelled by the project author, so there
-  is no second labeller to measure agreement against, and no independent check on what counts as
-  an action item.
-  On a four-transcript set a single ambiguous judgement moves the reported rates measurably.
-- **Small test set** ({n_transcripts} transcripts, {n_items} annotated items) and few runs per condition. Individual
-  runs of the same configuration varied by up to ~{NOISE_FLOOR_F1} F1 - larger than most gaps reported here.
-  This is the binding limitation and it bounds every number above. More runs on a larger, noisier
-  test set is the single highest-value improvement.
-- **Run counts are capped by cost and quota**, not chosen for statistical power: the Claude runs
-  are billed, and the Gemini key has a small daily allowance of free requests.
-  Each condition is averaged over its own runs and the count is printed in the results table,
-  so an unequal batch would be visible rather than silently pooled.
-- **The Study 1 models are a generation apart** (`{bare.get('claude', '?')}` vs `{bare.get('gemini', '?')}`), so nothing
-  here ranks providers. Only within-model contrasts are fair. Re-running the Claude side on a
-  current model is the fix and costs API credit.
-- `gemini-3.7-flash`, the newest Flash at time of writing, returned HTTP 503 "high demand" or hung
-  on roughly three attempts in four and could not be used; `gemini-3.6-flash` is the newest Flash
-  that answered reliably.
-- The judge matcher shares a model family with the Claude parser, so it is not fully independent;
-  reporting deterministic word overlap as the primary matcher is the mitigation.
-- Ambiguous deadline phrases are annotated as single dates. Anchoring them during annotation, or
-  capturing a range, would make the exact-match metric more precise.
-- **A correction worth recording.** An earlier `BARE_TOOL` stripped every key named `description`,
-  which also removed the *field* named "description" from the property map, leaving the without-guidance configuration
-  requiring a field it did not define. That inflated its validation failures and depressed its
-  scores. The stripper now preserves field names and removes only annotation text, and
-  `eval/test_matching.py` has a regression test. All figures above are from a post-fix re-run.
+- **Synthetic meetings.** All eight are written text, not recorded speech. The pipeline was
+  also run end to end on a real AMI recording, which is not part of the scored sets.
+- **Who wrote the long set.** The long transcripts and their answer keys were drafted with an AI
+  assistant (Claude). Text from one candidate's model family could suit that family; here it
+  would favour Claude Sonnet, the opposite direction to the decision.
+- **One annotator.** Each answer key has a single labeller, so there is no agreement measure.
+- **Word-overlap matching** occasionally pairs the wrong items when two tasks share many words
+  (for example "remove the conflicts" and "review the mitigating controls for the conflicts");
+  those pairs show up as large deadline errors. They are rare and do not change any verdict.
+- **Eight meetings.** The long set shows the choice holds on harder meetings than the prompt was
+  built on; it does not show it holds for every kind of meeting.
+- **Models differ in tier and release date**, in both directions, so this is a decision for this
+  project rather than a ranking of vendors.
+- `gemini-3.7-flash` returned HTTP 503 "high demand" or hung on roughly three attempts in four
+  and could not be used; `gemini-3.6-flash` is the newest Flash that answered reliably.
+- **A correction worth recording.** An earlier `BARE_TOOL` stripped every key named
+  `description`, including the *field* of that name, so the without-guidance configuration
+  required a field it did not define. The stripper now removes only annotation text, and
+  `eval/test_matching.py` has a regression test. All figures are from runs after the fix.
 
 ## Raw results
 
-`eval/results.json` holds the scored metrics for every condition, including any LLM-judge
-figures that have been computed. `eval/predictions.json` holds the cached raw parser output
-each run was scored from, so scoring can be repeated offline without re-querying any model.
+`eval/results.json` holds every scored metric and test for the short set, the long set and all
+eight. `eval/predictions.json` and `eval/predictions_long.json` hold the raw parser output each
+run was scored from, so scoring can be repeated without calling any model.
 """
 
 # --------------------------------------------------------------------------- main
@@ -1420,95 +1364,101 @@ def main() -> None:
     ap = argparse.ArgumentParser(
         description="Evaluate the transcript-parsing pipeline and regenerate the report.")
     ap.add_argument("--parse", action="store_true",
-                    help="COSTS API CALLS. Parse the test set once more and append the run to "
-                         "eval/predictions.json.")
+                    help="COSTS API CALLS. Parse the chosen test set once more and append the run "
+                         "to its cache.")
+    ap.add_argument("--set", choices=sorted(TEST_SETS), default="short", dest="test_set",
+                    help="Which test set --parse runs: 'short' (the development set) or 'long' "
+                         "(the held-out set). Scoring always covers both. Default: short.")
     ap.add_argument("--provider", choices=GROUPS, default="claude",
-                    help="Which model group --parse should run. 'claude' (Sonnet 2x2) and "
-                         "'haiku' spend Anthropic credit; 'gemini' uses a free "
-                         "tiers. Default: claude.")
+                    help="Which model group --parse should run. 'claude' (Sonnet, with and "
+                         "without guidance) and 'haiku' spend Anthropic credit; 'gemini' spends "
+                         "Gemini credit. Default: claude.")
     ap.add_argument("--runs", type=int, default=1,
                     help="How many parse runs to append (only with --parse).")
     ap.add_argument("--rescore-judge", action="store_true",
-                    help="COSTS ANTHROPIC API CALLS. Re-run the LLM-judge matcher. Without this, "
-                         "stored judge scores are reused and missing ones are left blank.")
+                    help="COSTS ANTHROPIC API CALLS. Re-run the LLM-judge matcher on the short "
+                         "set. Without this, stored judge scores are reused.")
     ap.add_argument("--write-report", action="store_true",
-                    help="Refresh docs/evaluation-report.md (short) and "
-                         "docs/evaluation-appendix.md (detail). Free - no API calls.")
+                    help="Refresh docs/evaluation-report.md and docs/evaluation-appendix.md. "
+                         "Free - no API calls.")
     args = ap.parse_args()
 
-    annotations = json.loads(ANNOTATIONS.read_text())
-
     if args.parse:
-        cache = json.loads(PREDICTIONS_JSON.read_text()) if PREDICTIONS_JSON.exists() \
+        tdir, ann_path, cache_path = TEST_SETS[args.test_set]
+        annotations = json.loads(ann_path.read_text())
+        cache = json.loads(cache_path.read_text()) if cache_path.exists() \
             else {"note": "Cached raw parser output.", "runs": []}
         conds = [k for k, c in CONDITIONS.items() if c.group == args.provider]
         for i in range(args.runs):
-            print(f"--- {args.provider} parse run {i + 1}/{args.runs} (calling the model) ---")
-            cache["runs"].append(parse_run(annotations, conds))
-            PREDICTIONS_JSON.write_text(json.dumps(cache, indent=2, default=str) + "\n")
-        print(f"Cached to {PREDICTIONS_JSON.relative_to(REPO_ROOT)}")
-    else:
-        cache = load_cache()
+            print(f"--- {args.provider} parse run {i + 1}/{args.runs} on the {args.test_set} set "
+                  f"(calling the model) ---")
+            cache["runs"].append(parse_run(annotations, conds, tdir))
+            cache_path.write_text(json.dumps(cache, indent=2, default=str) + "\n")
+        print(f"Cached to {cache_path.relative_to(REPO_ROOT)}")
+
+    sets, profiles = {}, {}
+    for name, (tdir, ann_path, cache_path) in TEST_SETS.items():
+        if not cache_path.exists():
+            sys.exit(f"No cached predictions for the {name} set. Run: "
+                     f"python -m eval.run_eval --parse --set {name}")
+        ann = json.loads(ann_path.read_text())
+        sets[name] = (json.loads(cache_path.read_text()), ann)
+        profiles[name] = transcript_profile(tdir, ann)
+    sets["all"] = (merge_caches(sets["short"][0], sets["long"][0]),
+                   sets["short"][1] + sets["long"][1])
 
     # Word-overlap scoring is pure computation - never touches any API.
-    overlap = aggregate(cache, annotations, "overlap")
+    res = build_results(sets)
 
-    # The judge matcher costs one Anthropic call per transcript per condition. Scores are cached
-    # per condition, not for the run list as a whole: otherwise appending a Gemini run would
-    # invalidate the Claude judge scores and silently re-bill them.
+    # The judge matcher costs one Anthropic call per transcript per condition, so its scores are
+    # cached per condition and only ever computed on request. Short set only.
+    short_cache, short_ann = sets["short"]
+    overlap = res["short"]["overlap"]
     stored = json.loads(RESULTS_JSON.read_text()) if RESULTS_JSON.exists() else {}
     stored_judge = stored.get("judge", {})
     judge, need = {}, []
     for name in overlap:
         prev = stored_judge.get(name)
-        # How many runs a stored entry covers is derivable from the entry itself - it holds one
-        # score dict per run. Deriving it here rather than trusting a separate counter is what
-        # keeps Claude's cached scores valid when Gemini runs are appended: a global run count
-        # would change and needlessly re-bill the judge.
         prev_n = len(prev.get("runs", [])) if prev else None
         if prev and not args.rescore_judge and prev_n == overlap[name]["n_runs"]:
             judge[name] = prev
         else:
             need.append(name)
-
     if need and args.rescore_judge:
         print(f"Running the LLM judge on {need} - THIS CALLS THE ANTHROPIC API.")
         client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-        judge.update(aggregate(cache, annotations, "judge", client, only=need))
-    elif need:
-        print(f"No judge scores for {need} (reported as '-'). "
-              f"Pass --rescore-judge to compute them - COSTS ANTHROPIC API CALLS.")
-    if judge:
-        print("Judge scores reused from eval/results.json where available (no API calls).")
+        judge.update(aggregate(short_cache, short_ann, "judge", client, only=need))
 
-    print("\n=== mean over each condition's own runs ===")
-    hdr = (f"{'condition':32} {'runs':>5} {'F1 ovl':>8} {'F1 judge':>9} {'prec':>7} "
-           f"{'recall':>7} {'fail':>8}")
-    print(hdr); print("-" * len(hdr))
-    for name, agg in overlap.items():
-        j = judge.get(name, {}).get("f1", "-")
-        print(f"{LABELS.get(name, name):32} {agg['n_runs']:5} {agg['f1']:8} {str(j):>9} "
-              f"{agg['precision']:7} {agg['recall']:7} "
-              f"{str(agg['validation_failures']) + '/' + str(agg['parses']):>8}")
+    for name in ("short", "long", "all"):
+        print(f"\n=== {SET_LABELS[name]} ===")
+        hdr = f"{'condition':34} {'runs':>5} {'prec':>7} {'recall':>7} {'F1':>7} {'fail':>8}"
+        print(hdr)
+        print("-" * len(hdr))
+        for cond, agg in res[name]["overlap"].items():
+            print(f"{LABELS[cond]:34} {agg['n_runs']:5} {agg['precision']:7} {agg['recall']:7} "
+                  f"{agg['f1']:7} {str(agg['validation_failures']) + '/' + str(agg['parses']):>8}")
+        t = res[name]["tests"].get("gemini_prod|prod", {}).get("f1")
+        if t:
+            print(f"Gemini Flash - Claude Sonnet, F1: {_gap(t)}")
 
     RESULTS_JSON.write_text(json.dumps(
-        {"runs": len(cache["runs"]), "overlap": overlap, "judge": judge},
+        {"sets": {n: {k: v for k, v in r.items()} for n, r in res.items()}, "judge": judge},
         indent=2, default=str) + "\n")
     print(f"\nWrote {RESULTS_JSON.relative_to(REPO_ROOT)}")
 
     if args.write_report:
-        n_items = overlap["prod"]["runs"][0]["expected_items"]
-        comp = completeness(cache)
-        counts = pooled_field_counts(cache, annotations)
-        offsets = deadline_offsets(cache, annotations)
-        cal = confidence_calibration(cache, annotations)
-        REPORT_MD.write_text(render_report(
-            cache, overlap, len(annotations), n_items, comp=comp, offsets=offsets))
-        APPENDIX_MD.write_text(render_appendix(
-            cache, overlap, judge, len(annotations), n_items,
-            comp=comp, counts=counts, offsets=offsets, cal=cal))
-        print(f"Wrote {REPORT_MD.relative_to(REPO_ROOT)} (short) and "
-              f"{APPENDIX_MD.relative_to(REPO_ROOT)} (detail)")
+        if judge:
+            judge_note = _wrap(
+                "A semantic LLM-judge matcher was run on the short set for: "
+                + "; ".join(f"{LABELS[c]} F1 {judge[c]['f1']}" for c in judge) + ".")
+        else:
+            judge_note = _wrap("A semantic LLM-judge matcher is available (`--rescore-judge`) but "
+                               "has not been run, so every figure uses word overlap.")
+        models = _models_by_name(sets)
+        REPORT_MD.write_text(render_report(res, profiles))
+        APPENDIX_MD.write_text(render_appendix(res, profiles, models, judge_note))
+        print(f"Wrote {REPORT_MD.relative_to(REPO_ROOT)} and "
+              f"{APPENDIX_MD.relative_to(REPO_ROOT)}")
 
 
 if __name__ == "__main__":

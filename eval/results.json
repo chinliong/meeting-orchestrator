@@ -1,560 +1,3032 @@
 {
-  "runs": 26,
-  "overlap": {
-    "naive": {
-      "runs": [
-        {
-          "expected_items": 33,
-          "predicted_items": 22,
-          "matched_items": 18,
-          "precision": 0.818,
-          "recall": 0.545,
-          "f1": 0.655,
-          "owner_accuracy": 0.944,
-          "status_accuracy": 0.722,
-          "deadline_exact_accuracy": 0.9,
-          "deadline_within_3d_accuracy": 1.0
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 30,
-          "matched_items": 27,
-          "precision": 0.9,
-          "recall": 0.818,
-          "f1": 0.857,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.963,
-          "deadline_exact_accuracy": 0.8,
-          "deadline_within_3d_accuracy": 0.933
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 21,
-          "matched_items": 18,
-          "precision": 0.857,
-          "recall": 0.545,
-          "f1": 0.667,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.889,
-          "deadline_exact_accuracy": 0.909,
-          "deadline_within_3d_accuracy": 1.0
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 21,
-          "matched_items": 18,
-          "precision": 0.857,
-          "recall": 0.545,
-          "f1": 0.667,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.889,
-          "deadline_exact_accuracy": 0.727,
-          "deadline_within_3d_accuracy": 0.909
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 18,
-          "matched_items": 17,
-          "precision": 0.944,
-          "recall": 0.515,
-          "f1": 0.667,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.941,
-          "deadline_exact_accuracy": 0.727,
-          "deadline_within_3d_accuracy": 0.909
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 21,
-          "matched_items": 18,
-          "precision": 0.857,
-          "recall": 0.545,
-          "f1": 0.667,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.944,
-          "deadline_exact_accuracy": 0.727,
-          "deadline_within_3d_accuracy": 0.909
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 28,
-          "matched_items": 23,
-          "precision": 0.821,
-          "recall": 0.697,
-          "f1": 0.754,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.957,
-          "deadline_exact_accuracy": 0.727,
-          "deadline_within_3d_accuracy": 0.818
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 30,
-          "matched_items": 25,
-          "precision": 0.833,
-          "recall": 0.758,
-          "f1": 0.794,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.96,
-          "deadline_exact_accuracy": 0.733,
-          "deadline_within_3d_accuracy": 0.8
-        }
-      ],
-      "precision": 0.861,
-      "recall": 0.621,
-      "f1": 0.716,
-      "owner_accuracy": 0.993,
-      "status_accuracy": 0.908,
-      "deadline_exact_accuracy": 0.781,
-      "deadline_within_3d_accuracy": 0.91,
-      "validation_failures": 6,
-      "api_failures": 0,
-      "parses": 32,
-      "n_runs": 8
-    },
-    "prod": {
-      "runs": [
-        {
-          "expected_items": 33,
-          "predicted_items": 37,
-          "matched_items": 31,
-          "precision": 0.838,
-          "recall": 0.939,
-          "f1": 0.886,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.935,
-          "deadline_exact_accuracy": 0.867,
-          "deadline_within_3d_accuracy": 0.933
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 36,
-          "matched_items": 31,
+  "sets": {
+    "short": {
+      "overlap": {
+        "naive": {
+          "runs": [
+            {
+              "expected_items": 33,
+              "predicted_items": 22,
+              "matched_items": 18,
+              "precision": 0.818,
+              "recall": 0.545,
+              "f1": 0.655,
+              "owner_accuracy": 0.944,
+              "status_accuracy": 0.722,
+              "deadline_exact_accuracy": 0.9,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 30,
+              "matched_items": 27,
+              "precision": 0.9,
+              "recall": 0.818,
+              "f1": 0.857,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.963,
+              "deadline_exact_accuracy": 0.8,
+              "deadline_within_3d_accuracy": 0.933
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 21,
+              "matched_items": 18,
+              "precision": 0.857,
+              "recall": 0.545,
+              "f1": 0.667,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.889,
+              "deadline_exact_accuracy": 0.909,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 21,
+              "matched_items": 18,
+              "precision": 0.857,
+              "recall": 0.545,
+              "f1": 0.667,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.889,
+              "deadline_exact_accuracy": 0.727,
+              "deadline_within_3d_accuracy": 0.909
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 18,
+              "matched_items": 17,
+              "precision": 0.944,
+              "recall": 0.515,
+              "f1": 0.667,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.941,
+              "deadline_exact_accuracy": 0.727,
+              "deadline_within_3d_accuracy": 0.909
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 21,
+              "matched_items": 18,
+              "precision": 0.857,
+              "recall": 0.545,
+              "f1": 0.667,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.944,
+              "deadline_exact_accuracy": 0.727,
+              "deadline_within_3d_accuracy": 0.909
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 28,
+              "matched_items": 23,
+              "precision": 0.821,
+              "recall": 0.697,
+              "f1": 0.754,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.957,
+              "deadline_exact_accuracy": 0.727,
+              "deadline_within_3d_accuracy": 0.818
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 30,
+              "matched_items": 25,
+              "precision": 0.833,
+              "recall": 0.758,
+              "f1": 0.794,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.96,
+              "deadline_exact_accuracy": 0.733,
+              "deadline_within_3d_accuracy": 0.8
+            }
+          ],
           "precision": 0.861,
-          "recall": 0.939,
-          "f1": 0.899,
-          "owner_accuracy": 0.968,
-          "status_accuracy": 0.935,
-          "deadline_exact_accuracy": 0.8,
-          "deadline_within_3d_accuracy": 0.867
+          "recall": 0.621,
+          "f1": 0.716,
+          "owner_accuracy": 0.993,
+          "status_accuracy": 0.908,
+          "deadline_exact_accuracy": 0.781,
+          "deadline_within_3d_accuracy": 0.91,
+          "validation_failures": 6,
+          "api_failures": 0,
+          "parses": 32,
+          "n_runs": 8
         },
-        {
-          "expected_items": 33,
-          "predicted_items": 33,
-          "matched_items": 30,
-          "precision": 0.909,
-          "recall": 0.909,
-          "f1": 0.909,
-          "owner_accuracy": 0.967,
-          "status_accuracy": 0.9,
-          "deadline_exact_accuracy": 0.786,
-          "deadline_within_3d_accuracy": 0.857
+        "prod": {
+          "runs": [
+            {
+              "expected_items": 33,
+              "predicted_items": 37,
+              "matched_items": 31,
+              "precision": 0.838,
+              "recall": 0.939,
+              "f1": 0.886,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.935,
+              "deadline_exact_accuracy": 0.867,
+              "deadline_within_3d_accuracy": 0.933
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 36,
+              "matched_items": 31,
+              "precision": 0.861,
+              "recall": 0.939,
+              "f1": 0.899,
+              "owner_accuracy": 0.968,
+              "status_accuracy": 0.935,
+              "deadline_exact_accuracy": 0.8,
+              "deadline_within_3d_accuracy": 0.867
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 33,
+              "matched_items": 30,
+              "precision": 0.909,
+              "recall": 0.909,
+              "f1": 0.909,
+              "owner_accuracy": 0.967,
+              "status_accuracy": 0.9,
+              "deadline_exact_accuracy": 0.786,
+              "deadline_within_3d_accuracy": 0.857
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 33,
+              "matched_items": 28,
+              "precision": 0.848,
+              "recall": 0.848,
+              "f1": 0.848,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.893,
+              "deadline_exact_accuracy": 0.8,
+              "deadline_within_3d_accuracy": 0.867
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 31,
+              "matched_items": 25,
+              "precision": 0.806,
+              "recall": 0.758,
+              "f1": 0.781,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.96,
+              "deadline_exact_accuracy": 0.8,
+              "deadline_within_3d_accuracy": 0.867
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 33,
+              "matched_items": 27,
+              "precision": 0.818,
+              "recall": 0.818,
+              "f1": 0.818,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.926,
+              "deadline_exact_accuracy": 0.8,
+              "deadline_within_3d_accuracy": 0.867
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 37,
+              "matched_items": 30,
+              "precision": 0.811,
+              "recall": 0.909,
+              "f1": 0.857,
+              "owner_accuracy": 0.967,
+              "status_accuracy": 0.933,
+              "deadline_exact_accuracy": 0.867,
+              "deadline_within_3d_accuracy": 0.933
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 36,
+              "matched_items": 29,
+              "precision": 0.806,
+              "recall": 0.879,
+              "f1": 0.841,
+              "owner_accuracy": 0.966,
+              "status_accuracy": 0.931,
+              "deadline_exact_accuracy": 0.8,
+              "deadline_within_3d_accuracy": 0.867
+            }
+          ],
+          "precision": 0.837,
+          "recall": 0.875,
+          "f1": 0.855,
+          "owner_accuracy": 0.984,
+          "status_accuracy": 0.927,
+          "deadline_exact_accuracy": 0.815,
+          "deadline_within_3d_accuracy": 0.882,
+          "validation_failures": 0,
+          "api_failures": 0,
+          "parses": 32,
+          "n_runs": 8
         },
-        {
-          "expected_items": 33,
-          "predicted_items": 33,
-          "matched_items": 28,
-          "precision": 0.848,
-          "recall": 0.848,
-          "f1": 0.848,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.893,
-          "deadline_exact_accuracy": 0.8,
-          "deadline_within_3d_accuracy": 0.867
+        "gemini_naive": {
+          "runs": [
+            {
+              "expected_items": 33,
+              "predicted_items": 35,
+              "matched_items": 31,
+              "precision": 0.886,
+              "recall": 0.939,
+              "f1": 0.912,
+              "owner_accuracy": 0.968,
+              "status_accuracy": 1.0,
+              "deadline_exact_accuracy": 0.933,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 35,
+              "matched_items": 32,
+              "precision": 0.914,
+              "recall": 0.97,
+              "f1": 0.941,
+              "owner_accuracy": 0.969,
+              "status_accuracy": 0.969,
+              "deadline_exact_accuracy": 0.933,
+              "deadline_within_3d_accuracy": 0.933
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 36,
+              "matched_items": 33,
+              "precision": 0.917,
+              "recall": 1.0,
+              "f1": 0.957,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.909,
+              "deadline_exact_accuracy": 0.867,
+              "deadline_within_3d_accuracy": 0.867
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 35,
+              "matched_items": 33,
+              "precision": 0.943,
+              "recall": 1.0,
+              "f1": 0.971,
+              "owner_accuracy": 0.97,
+              "status_accuracy": 0.909,
+              "deadline_exact_accuracy": 0.8,
+              "deadline_within_3d_accuracy": 0.8
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 27,
+              "matched_items": 24,
+              "precision": 0.889,
+              "recall": 0.727,
+              "f1": 0.8,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.958,
+              "deadline_exact_accuracy": 0.917,
+              "deadline_within_3d_accuracy": 0.917
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 35,
+              "matched_items": 32,
+              "precision": 0.914,
+              "recall": 0.97,
+              "f1": 0.941,
+              "owner_accuracy": 0.969,
+              "status_accuracy": 0.969,
+              "deadline_exact_accuracy": 0.933,
+              "deadline_within_3d_accuracy": 0.933
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 26,
+              "matched_items": 23,
+              "precision": 0.885,
+              "recall": 0.697,
+              "f1": 0.78,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 1.0,
+              "deadline_exact_accuracy": 1.0,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 24,
+              "matched_items": 22,
+              "precision": 0.917,
+              "recall": 0.667,
+              "f1": 0.772,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.955,
+              "deadline_exact_accuracy": 0.917,
+              "deadline_within_3d_accuracy": 0.917
+            }
+          ],
+          "precision": 0.908,
+          "recall": 0.871,
+          "f1": 0.884,
+          "owner_accuracy": 0.984,
+          "status_accuracy": 0.959,
+          "deadline_exact_accuracy": 0.913,
+          "deadline_within_3d_accuracy": 0.921,
+          "validation_failures": 3,
+          "api_failures": 0,
+          "parses": 32,
+          "n_runs": 8
         },
-        {
-          "expected_items": 33,
-          "predicted_items": 31,
-          "matched_items": 25,
-          "precision": 0.806,
-          "recall": 0.758,
+        "gemini_prod": {
+          "runs": [
+            {
+              "expected_items": 33,
+              "predicted_items": 37,
+              "matched_items": 33,
+              "precision": 0.892,
+              "recall": 1.0,
+              "f1": 0.943,
+              "owner_accuracy": 0.97,
+              "status_accuracy": 0.97,
+              "deadline_exact_accuracy": 0.867,
+              "deadline_within_3d_accuracy": 0.867
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 36,
+              "matched_items": 31,
+              "precision": 0.861,
+              "recall": 0.939,
+              "f1": 0.899,
+              "owner_accuracy": 0.968,
+              "status_accuracy": 0.968,
+              "deadline_exact_accuracy": 0.933,
+              "deadline_within_3d_accuracy": 0.933
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 34,
+              "matched_items": 31,
+              "precision": 0.912,
+              "recall": 0.939,
+              "f1": 0.925,
+              "owner_accuracy": 0.968,
+              "status_accuracy": 0.968,
+              "deadline_exact_accuracy": 0.867,
+              "deadline_within_3d_accuracy": 0.867
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 37,
+              "matched_items": 33,
+              "precision": 0.892,
+              "recall": 1.0,
+              "f1": 0.943,
+              "owner_accuracy": 0.97,
+              "status_accuracy": 0.97,
+              "deadline_exact_accuracy": 0.867,
+              "deadline_within_3d_accuracy": 0.867
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 36,
+              "matched_items": 32,
+              "precision": 0.889,
+              "recall": 0.97,
+              "f1": 0.928,
+              "owner_accuracy": 0.969,
+              "status_accuracy": 0.969,
+              "deadline_exact_accuracy": 0.867,
+              "deadline_within_3d_accuracy": 0.867
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 35,
+              "matched_items": 32,
+              "precision": 0.914,
+              "recall": 0.97,
+              "f1": 0.941,
+              "owner_accuracy": 0.969,
+              "status_accuracy": 0.906,
+              "deadline_exact_accuracy": 0.8,
+              "deadline_within_3d_accuracy": 0.867
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 36,
+              "matched_items": 32,
+              "precision": 0.889,
+              "recall": 0.97,
+              "f1": 0.928,
+              "owner_accuracy": 0.969,
+              "status_accuracy": 1.0,
+              "deadline_exact_accuracy": 1.0,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 34,
+              "matched_items": 31,
+              "precision": 0.912,
+              "recall": 0.939,
+              "f1": 0.925,
+              "owner_accuracy": 0.968,
+              "status_accuracy": 1.0,
+              "deadline_exact_accuracy": 0.933,
+              "deadline_within_3d_accuracy": 0.933
+            }
+          ],
+          "precision": 0.895,
+          "recall": 0.966,
+          "f1": 0.929,
+          "owner_accuracy": 0.969,
+          "status_accuracy": 0.969,
+          "deadline_exact_accuracy": 0.892,
+          "deadline_within_3d_accuracy": 0.9,
+          "validation_failures": 0,
+          "api_failures": 0,
+          "parses": 32,
+          "n_runs": 8
+        },
+        "haiku_prod": {
+          "runs": [
+            {
+              "expected_items": 33,
+              "predicted_items": 22,
+              "matched_items": 22,
+              "precision": 1.0,
+              "recall": 0.667,
+              "f1": 0.8,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.864,
+              "deadline_exact_accuracy": 0.286,
+              "deadline_within_3d_accuracy": 0.857
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 24,
+              "matched_items": 23,
+              "precision": 0.958,
+              "recall": 0.697,
+              "f1": 0.807,
+              "owner_accuracy": 0.957,
+              "status_accuracy": 0.87,
+              "deadline_exact_accuracy": 0.2,
+              "deadline_within_3d_accuracy": 0.867
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 24,
+              "matched_items": 23,
+              "precision": 0.958,
+              "recall": 0.697,
+              "f1": 0.807,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.87,
+              "deadline_exact_accuracy": 0.286,
+              "deadline_within_3d_accuracy": 0.857
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 23,
+              "matched_items": 20,
+              "precision": 0.87,
+              "recall": 0.606,
+              "f1": 0.714,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.9,
+              "deadline_exact_accuracy": 0.231,
+              "deadline_within_3d_accuracy": 0.846
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 27,
+              "matched_items": 25,
+              "precision": 0.926,
+              "recall": 0.758,
+              "f1": 0.833,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.92,
+              "deadline_exact_accuracy": 0.357,
+              "deadline_within_3d_accuracy": 0.857
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 23,
+              "matched_items": 21,
+              "precision": 0.913,
+              "recall": 0.636,
+              "f1": 0.75,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.857,
+              "deadline_exact_accuracy": 0.231,
+              "deadline_within_3d_accuracy": 0.846
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 23,
+              "matched_items": 21,
+              "precision": 0.913,
+              "recall": 0.636,
+              "f1": 0.75,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.857,
+              "deadline_exact_accuracy": 0.308,
+              "deadline_within_3d_accuracy": 0.923
+            },
+            {
+              "expected_items": 33,
+              "predicted_items": 23,
+              "matched_items": 22,
+              "precision": 0.957,
+              "recall": 0.667,
+              "f1": 0.786,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.909,
+              "deadline_exact_accuracy": 0.154,
+              "deadline_within_3d_accuracy": 0.846
+            }
+          ],
+          "precision": 0.937,
+          "recall": 0.67,
           "f1": 0.781,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.96,
-          "deadline_exact_accuracy": 0.8,
-          "deadline_within_3d_accuracy": 0.867
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 33,
-          "matched_items": 27,
-          "precision": 0.818,
-          "recall": 0.818,
-          "f1": 0.818,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.926,
-          "deadline_exact_accuracy": 0.8,
-          "deadline_within_3d_accuracy": 0.867
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 37,
-          "matched_items": 30,
-          "precision": 0.811,
-          "recall": 0.909,
-          "f1": 0.857,
-          "owner_accuracy": 0.967,
-          "status_accuracy": 0.933,
-          "deadline_exact_accuracy": 0.867,
-          "deadline_within_3d_accuracy": 0.933
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 36,
-          "matched_items": 29,
-          "precision": 0.806,
-          "recall": 0.879,
-          "f1": 0.841,
-          "owner_accuracy": 0.966,
-          "status_accuracy": 0.931,
-          "deadline_exact_accuracy": 0.8,
-          "deadline_within_3d_accuracy": 0.867
+          "owner_accuracy": 0.995,
+          "status_accuracy": 0.881,
+          "deadline_exact_accuracy": 0.257,
+          "deadline_within_3d_accuracy": 0.862,
+          "validation_failures": 0,
+          "api_failures": 0,
+          "parses": 32,
+          "n_runs": 8
         }
-      ],
-      "precision": 0.837,
-      "recall": 0.875,
-      "f1": 0.855,
-      "owner_accuracy": 0.984,
-      "status_accuracy": 0.927,
-      "deadline_exact_accuracy": 0.815,
-      "deadline_within_3d_accuracy": 0.882,
-      "validation_failures": 0,
-      "api_failures": 0,
-      "parses": 32,
-      "n_runs": 8
-    },
-    "gemini_naive": {
-      "runs": [
-        {
-          "expected_items": 33,
-          "predicted_items": 35,
-          "matched_items": 31,
-          "precision": 0.886,
-          "recall": 0.939,
-          "f1": 0.912,
-          "owner_accuracy": 0.968,
-          "status_accuracy": 1.0,
-          "deadline_exact_accuracy": 0.933,
-          "deadline_within_3d_accuracy": 1.0
+      },
+      "tests": {
+        "gemini_prod|prod": {
+          "precision": [
+            0.058,
+            0.0023
+          ],
+          "recall": [
+            0.091,
+            0.0016
+          ],
+          "f1": [
+            0.074,
+            0.0005
+          ]
         },
-        {
-          "expected_items": 33,
-          "predicted_items": 35,
-          "matched_items": 32,
-          "precision": 0.914,
-          "recall": 0.97,
-          "f1": 0.941,
-          "owner_accuracy": 0.969,
-          "status_accuracy": 0.969,
-          "deadline_exact_accuracy": 0.933,
-          "deadline_within_3d_accuracy": 0.933
+        "gemini_prod|haiku_prod": {
+          "precision": [
+            -0.042,
+            0.0163
+          ],
+          "recall": [
+            0.295,
+            0.0002
+          ],
+          "f1": [
+            0.148,
+            0.0002
+          ]
         },
-        {
-          "expected_items": 33,
-          "predicted_items": 36,
-          "matched_items": 33,
-          "precision": 0.917,
-          "recall": 1.0,
-          "f1": 0.957,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.909,
-          "deadline_exact_accuracy": 0.867,
-          "deadline_within_3d_accuracy": 0.867
+        "prod|haiku_prod": {
+          "precision": [
+            -0.1,
+            0.0003
+          ],
+          "recall": [
+            0.204,
+            0.0003
+          ],
+          "f1": [
+            0.074,
+            0.004
+          ]
         },
-        {
-          "expected_items": 33,
-          "predicted_items": 35,
-          "matched_items": 33,
-          "precision": 0.943,
-          "recall": 1.0,
-          "f1": 0.971,
-          "owner_accuracy": 0.97,
-          "status_accuracy": 0.909,
-          "deadline_exact_accuracy": 0.8,
-          "deadline_within_3d_accuracy": 0.8
+        "prod|naive": {
+          "precision": [
+            -0.024,
+            0.2491
+          ],
+          "recall": [
+            0.254,
+            0.0008
+          ],
+          "f1": [
+            0.139,
+            0.0019
+          ]
         },
-        {
-          "expected_items": 33,
-          "predicted_items": 27,
-          "matched_items": 24,
-          "precision": 0.889,
-          "recall": 0.727,
-          "f1": 0.8,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.958,
-          "deadline_exact_accuracy": 0.917,
-          "deadline_within_3d_accuracy": 0.917
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 35,
-          "matched_items": 32,
-          "precision": 0.914,
-          "recall": 0.97,
-          "f1": 0.941,
-          "owner_accuracy": 0.969,
-          "status_accuracy": 0.969,
-          "deadline_exact_accuracy": 0.933,
-          "deadline_within_3d_accuracy": 0.933
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 26,
-          "matched_items": 23,
-          "precision": 0.885,
-          "recall": 0.697,
-          "f1": 0.78,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 1.0,
-          "deadline_exact_accuracy": 1.0,
-          "deadline_within_3d_accuracy": 1.0
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 24,
-          "matched_items": 22,
-          "precision": 0.917,
-          "recall": 0.667,
-          "f1": 0.772,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.955,
-          "deadline_exact_accuracy": 0.917,
-          "deadline_within_3d_accuracy": 0.917
+        "gemini_prod|gemini_naive": {
+          "precision": [
+            -0.013,
+            0.2275
+          ],
+          "recall": [
+            0.095,
+            0.1675
+          ],
+          "f1": [
+            0.045,
+            0.184
+          ]
         }
-      ],
-      "precision": 0.908,
-      "recall": 0.871,
-      "f1": 0.884,
-      "owner_accuracy": 0.984,
-      "status_accuracy": 0.959,
-      "deadline_exact_accuracy": 0.913,
-      "deadline_within_3d_accuracy": 0.921,
-      "validation_failures": 3,
-      "api_failures": 0,
-      "parses": 32,
-      "n_runs": 8
+      },
+      "completeness": {
+        "naive": {
+          "items": 191,
+          "source_decision_rate": 0.435,
+          "owner_set_rate": 0.958,
+          "confidence_min": 0.85,
+          "confidence_max": 1.0,
+          "confidence_distinct": 9,
+          "validation_failures": 6,
+          "parses": 32
+        },
+        "prod": {
+          "items": 276,
+          "source_decision_rate": 1.0,
+          "owner_set_rate": 0.957,
+          "confidence_min": 0.78,
+          "confidence_max": 0.99,
+          "confidence_distinct": 13,
+          "validation_failures": 0,
+          "parses": 32
+        },
+        "gemini_naive": {
+          "items": 253,
+          "source_decision_rate": 0.162,
+          "owner_set_rate": 0.98,
+          "confidence_min": 0.9,
+          "confidence_max": 1.0,
+          "confidence_distinct": 3,
+          "validation_failures": 3,
+          "parses": 32
+        },
+        "gemini_prod": {
+          "items": 285,
+          "source_decision_rate": 1.0,
+          "owner_set_rate": 0.972,
+          "confidence_min": 0.85,
+          "confidence_max": 1.0,
+          "confidence_distinct": 5,
+          "validation_failures": 0,
+          "parses": 32
+        },
+        "haiku_prod": {
+          "items": 189,
+          "source_decision_rate": 1.0,
+          "owner_set_rate": 0.947,
+          "confidence_min": 0.65,
+          "confidence_max": 0.98,
+          "confidence_distinct": 18,
+          "validation_failures": 0,
+          "parses": 32
+        }
+      },
+      "offsets": {
+        "naive": {
+          "total": 95,
+          "exact": 74,
+          "counts": {
+            "0": 74,
+            "1": 2,
+            "-1": 7,
+            "-7": 2,
+            "-6": 3,
+            "-2": 3,
+            "none": 3,
+            "7": 1
+          },
+          "dominant_offset": -1,
+          "dominant_share": 0.074
+        },
+        "prod": {
+          "total": 119,
+          "exact": 97,
+          "counts": {
+            "0": 97,
+            "-1": 8,
+            "none": 8,
+            "-7": 5,
+            "7": 1
+          },
+          "dominant_offset": -1,
+          "dominant_share": 0.067
+        },
+        "gemini_naive": {
+          "total": 111,
+          "exact": 101,
+          "counts": {
+            "0": 101,
+            "-1": 1,
+            "none": 8,
+            "-7": 1
+          },
+          "dominant_offset": "none",
+          "dominant_share": 0.072
+        },
+        "gemini_prod": {
+          "total": 120,
+          "exact": 107,
+          "counts": {
+            "0": 107,
+            "-7": 5,
+            "none": 7,
+            "-1": 1
+          },
+          "dominant_offset": "none",
+          "dominant_share": 0.058
+        },
+        "haiku_prod": {
+          "total": 109,
+          "exact": 28,
+          "counts": {
+            "1": 57,
+            "-6": 14,
+            "0": 28,
+            "-2": 6,
+            "-1": 2,
+            "-7": 1,
+            "-3": 1
+          },
+          "dominant_offset": 1,
+          "dominant_share": 0.523
+        }
+      },
+      "counts": {
+        "naive": {
+          "owner": [
+            163,
+            164
+          ],
+          "status": [
+            150,
+            164
+          ],
+          "deadline": [
+            74,
+            95
+          ]
+        },
+        "prod": {
+          "owner": [
+            227,
+            231
+          ],
+          "status": [
+            214,
+            231
+          ],
+          "deadline": [
+            97,
+            119
+          ]
+        },
+        "gemini_naive": {
+          "owner": [
+            226,
+            230
+          ],
+          "status": [
+            220,
+            230
+          ],
+          "deadline": [
+            101,
+            111
+          ]
+        },
+        "gemini_prod": {
+          "owner": [
+            247,
+            255
+          ],
+          "status": [
+            247,
+            255
+          ],
+          "deadline": [
+            107,
+            120
+          ]
+        },
+        "haiku_prod": {
+          "owner": [
+            176,
+            177
+          ],
+          "status": [
+            156,
+            177
+          ],
+          "deadline": [
+            28,
+            109
+          ]
+        }
+      },
+      "status_recall": {
+        "naive": {
+          "in_progress": [
+            33,
+            56
+          ],
+          "todo": [
+            101,
+            120
+          ],
+          "done": [
+            30,
+            88
+          ]
+        },
+        "prod": {
+          "in_progress": [
+            43,
+            56
+          ],
+          "todo": [
+            119,
+            120
+          ],
+          "done": [
+            69,
+            88
+          ]
+        },
+        "gemini_naive": {
+          "in_progress": [
+            48,
+            56
+          ],
+          "todo": [
+            108,
+            120
+          ],
+          "done": [
+            74,
+            88
+          ]
+        },
+        "gemini_prod": {
+          "in_progress": [
+            54,
+            56
+          ],
+          "todo": [
+            120,
+            120
+          ],
+          "done": [
+            81,
+            88
+          ]
+        },
+        "haiku_prod": {
+          "in_progress": [
+            47,
+            56
+          ],
+          "todo": [
+            116,
+            120
+          ],
+          "done": [
+            14,
+            88
+          ]
+        }
+      },
+      "empty": {
+        "naive": 0,
+        "prod": 0,
+        "gemini_naive": 0,
+        "gemini_prod": 0,
+        "haiku_prod": 0
+      },
+      "below_threshold": {
+        "naive": [
+          0,
+          0
+        ],
+        "prod": [
+          0,
+          8
+        ],
+        "gemini_naive": [
+          0,
+          0
+        ],
+        "gemini_prod": [
+          0,
+          0
+        ],
+        "haiku_prod": [
+          8,
+          4
+        ]
+      },
+      "confidence": {
+        "gemini_prod": {
+          "condition": "gemini_prod",
+          "matched": {
+            "n": 255,
+            "mean": 0.964
+          },
+          "spurious": {
+            "n": 30,
+            "mean": 0.955
+          },
+          "buckets": [
+            {
+              "lo": 0.8,
+              "hi": 0.9,
+              "n": 2,
+              "matched_rate": 0.0
+            },
+            {
+              "lo": 0.9,
+              "hi": 0.95,
+              "n": 17,
+              "matched_rate": 0.824
+            },
+            {
+              "lo": 0.95,
+              "hi": 0.99,
+              "n": 175,
+              "matched_rate": 0.914
+            },
+            {
+              "lo": 0.99,
+              "hi": 1.01,
+              "n": 91,
+              "matched_rate": 0.89
+            }
+          ]
+        },
+        "prod": {
+          "condition": "prod",
+          "matched": {
+            "n": 231,
+            "mean": 0.972
+          },
+          "spurious": {
+            "n": 45,
+            "mean": 0.94
+          },
+          "buckets": [
+            {
+              "lo": 0.0,
+              "hi": 0.8,
+              "n": 2,
+              "matched_rate": 0.0
+            },
+            {
+              "lo": 0.8,
+              "hi": 0.9,
+              "n": 15,
+              "matched_rate": 0.533
+            },
+            {
+              "lo": 0.9,
+              "hi": 0.95,
+              "n": 7,
+              "matched_rate": 1.0
+            },
+            {
+              "lo": 0.95,
+              "hi": 0.99,
+              "n": 167,
+              "matched_rate": 0.868
+            },
+            {
+              "lo": 0.99,
+              "hi": 1.01,
+              "n": 85,
+              "matched_rate": 0.835
+            }
+          ]
+        }
+      }
     },
-    "gemini_prod": {
-      "runs": [
-        {
-          "expected_items": 33,
-          "predicted_items": 37,
-          "matched_items": 33,
-          "precision": 0.892,
-          "recall": 1.0,
-          "f1": 0.943,
-          "owner_accuracy": 0.97,
+    "long": {
+      "overlap": {
+        "naive": {
+          "runs": [
+            {
+              "expected_items": 123,
+              "predicted_items": 96,
+              "matched_items": 93,
+              "precision": 0.969,
+              "recall": 0.756,
+              "f1": 0.849,
+              "owner_accuracy": 0.978,
+              "status_accuracy": 0.978,
+              "deadline_exact_accuracy": 0.893,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 95,
+              "matched_items": 90,
+              "precision": 0.947,
+              "recall": 0.732,
+              "f1": 0.826,
+              "owner_accuracy": 0.956,
+              "status_accuracy": 0.989,
+              "deadline_exact_accuracy": 0.671,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 71,
+              "matched_items": 67,
+              "precision": 0.944,
+              "recall": 0.545,
+              "f1": 0.691,
+              "owner_accuracy": 0.97,
+              "status_accuracy": 1.0,
+              "deadline_exact_accuracy": 0.836,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 96,
+              "matched_items": 93,
+              "precision": 0.969,
+              "recall": 0.756,
+              "f1": 0.849,
+              "owner_accuracy": 0.978,
+              "status_accuracy": 0.978,
+              "deadline_exact_accuracy": 0.928,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 101,
+              "matched_items": 94,
+              "precision": 0.931,
+              "recall": 0.764,
+              "f1": 0.839,
+              "owner_accuracy": 0.968,
+              "status_accuracy": 0.979,
+              "deadline_exact_accuracy": 0.821,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 94,
+              "matched_items": 90,
+              "precision": 0.957,
+              "recall": 0.732,
+              "f1": 0.829,
+              "owner_accuracy": 0.978,
+              "status_accuracy": 0.978,
+              "deadline_exact_accuracy": 0.867,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 96,
+              "matched_items": 91,
+              "precision": 0.948,
+              "recall": 0.74,
+              "f1": 0.831,
+              "owner_accuracy": 0.978,
+              "status_accuracy": 1.0,
+              "deadline_exact_accuracy": 0.89,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 97,
+              "matched_items": 90,
+              "precision": 0.928,
+              "recall": 0.732,
+              "f1": 0.818,
+              "owner_accuracy": 0.944,
+              "status_accuracy": 0.967,
+              "deadline_exact_accuracy": 0.765,
+              "deadline_within_3d_accuracy": 1.0
+            }
+          ],
+          "precision": 0.949,
+          "recall": 0.72,
+          "f1": 0.817,
+          "owner_accuracy": 0.969,
+          "status_accuracy": 0.984,
+          "deadline_exact_accuracy": 0.834,
+          "deadline_within_3d_accuracy": 1.0,
+          "validation_failures": 1,
+          "api_failures": 0,
+          "parses": 32,
+          "n_runs": 8
+        },
+        "prod": {
+          "runs": [
+            {
+              "expected_items": 123,
+              "predicted_items": 98,
+              "matched_items": 93,
+              "precision": 0.949,
+              "recall": 0.756,
+              "f1": 0.842,
+              "owner_accuracy": 0.978,
+              "status_accuracy": 0.978,
+              "deadline_exact_accuracy": 0.988,
+              "deadline_within_3d_accuracy": 0.988
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 104,
+              "matched_items": 98,
+              "precision": 0.942,
+              "recall": 0.797,
+              "f1": 0.863,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.98,
+              "deadline_exact_accuracy": 1.0,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 108,
+              "matched_items": 103,
+              "precision": 0.954,
+              "recall": 0.837,
+              "f1": 0.892,
+              "owner_accuracy": 0.99,
+              "status_accuracy": 0.981,
+              "deadline_exact_accuracy": 0.976,
+              "deadline_within_3d_accuracy": 0.988
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 101,
+              "matched_items": 96,
+              "precision": 0.95,
+              "recall": 0.78,
+              "f1": 0.857,
+              "owner_accuracy": 0.99,
+              "status_accuracy": 0.979,
+              "deadline_exact_accuracy": 0.976,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 109,
+              "matched_items": 103,
+              "precision": 0.945,
+              "recall": 0.837,
+              "f1": 0.888,
+              "owner_accuracy": 0.981,
+              "status_accuracy": 0.961,
+              "deadline_exact_accuracy": 0.965,
+              "deadline_within_3d_accuracy": 0.976
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 78,
+              "matched_items": 74,
+              "precision": 0.949,
+              "recall": 0.602,
+              "f1": 0.736,
+              "owner_accuracy": 0.986,
+              "status_accuracy": 0.986,
+              "deadline_exact_accuracy": 0.983,
+              "deadline_within_3d_accuracy": 0.983
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 116,
+              "matched_items": 110,
+              "precision": 0.948,
+              "recall": 0.894,
+              "f1": 0.921,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.973,
+              "deadline_exact_accuracy": 0.988,
+              "deadline_within_3d_accuracy": 0.988
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 106,
+              "matched_items": 99,
+              "precision": 0.934,
+              "recall": 0.805,
+              "f1": 0.865,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.96,
+              "deadline_exact_accuracy": 1.0,
+              "deadline_within_3d_accuracy": 1.0
+            }
+          ],
+          "precision": 0.946,
+          "recall": 0.788,
+          "f1": 0.858,
+          "owner_accuracy": 0.991,
+          "status_accuracy": 0.975,
+          "deadline_exact_accuracy": 0.984,
+          "deadline_within_3d_accuracy": 0.99,
+          "validation_failures": 0,
+          "api_failures": 0,
+          "parses": 32,
+          "n_runs": 8
+        },
+        "gemini_naive": {
+          "runs": [
+            {
+              "expected_items": 123,
+              "predicted_items": 85,
+              "matched_items": 83,
+              "precision": 0.976,
+              "recall": 0.675,
+              "f1": 0.798,
+              "owner_accuracy": 0.976,
+              "status_accuracy": 0.916,
+              "deadline_exact_accuracy": 1.0,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 87,
+              "matched_items": 85,
+              "precision": 0.977,
+              "recall": 0.691,
+              "f1": 0.81,
+              "owner_accuracy": 0.965,
+              "status_accuracy": 0.988,
+              "deadline_exact_accuracy": 1.0,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 84,
+              "matched_items": 82,
+              "precision": 0.976,
+              "recall": 0.667,
+              "f1": 0.792,
+              "owner_accuracy": 0.976,
+              "status_accuracy": 0.988,
+              "deadline_exact_accuracy": 1.0,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 92,
+              "matched_items": 91,
+              "precision": 0.989,
+              "recall": 0.74,
+              "f1": 0.847,
+              "owner_accuracy": 0.967,
+              "status_accuracy": 0.978,
+              "deadline_exact_accuracy": 1.0,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 95,
+              "matched_items": 93,
+              "precision": 0.979,
+              "recall": 0.756,
+              "f1": 0.853,
+              "owner_accuracy": 0.968,
+              "status_accuracy": 1.0,
+              "deadline_exact_accuracy": 0.987,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 93,
+              "matched_items": 92,
+              "precision": 0.989,
+              "recall": 0.748,
+              "f1": 0.852,
+              "owner_accuracy": 0.978,
+              "status_accuracy": 0.989,
+              "deadline_exact_accuracy": 0.987,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 85,
+              "matched_items": 83,
+              "precision": 0.976,
+              "recall": 0.675,
+              "f1": 0.798,
+              "owner_accuracy": 0.976,
+              "status_accuracy": 0.988,
+              "deadline_exact_accuracy": 0.987,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 88,
+              "matched_items": 85,
+              "precision": 0.966,
+              "recall": 0.691,
+              "f1": 0.806,
+              "owner_accuracy": 0.965,
+              "status_accuracy": 0.976,
+              "deadline_exact_accuracy": 0.987,
+              "deadline_within_3d_accuracy": 1.0
+            }
+          ],
+          "precision": 0.978,
+          "recall": 0.705,
+          "f1": 0.82,
+          "owner_accuracy": 0.971,
+          "status_accuracy": 0.978,
+          "deadline_exact_accuracy": 0.994,
+          "deadline_within_3d_accuracy": 1.0,
+          "validation_failures": 0,
+          "api_failures": 0,
+          "parses": 32,
+          "n_runs": 8
+        },
+        "gemini_prod": {
+          "runs": [
+            {
+              "expected_items": 123,
+              "predicted_items": 103,
+              "matched_items": 103,
+              "precision": 1.0,
+              "recall": 0.837,
+              "f1": 0.912,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.961,
+              "deadline_exact_accuracy": 0.915,
+              "deadline_within_3d_accuracy": 0.939
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 101,
+              "matched_items": 100,
+              "precision": 0.99,
+              "recall": 0.813,
+              "f1": 0.893,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.97,
+              "deadline_exact_accuracy": 0.987,
+              "deadline_within_3d_accuracy": 0.987
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 101,
+              "matched_items": 99,
+              "precision": 0.98,
+              "recall": 0.805,
+              "f1": 0.884,
+              "owner_accuracy": 1.0,
+              "status_accuracy": 0.98,
+              "deadline_exact_accuracy": 1.0,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 83,
+              "matched_items": 82,
+              "precision": 0.988,
+              "recall": 0.667,
+              "f1": 0.796,
+              "owner_accuracy": 0.988,
+              "status_accuracy": 0.976,
+              "deadline_exact_accuracy": 0.987,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 105,
+              "matched_items": 104,
+              "precision": 0.99,
+              "recall": 0.846,
+              "f1": 0.912,
+              "owner_accuracy": 0.971,
+              "status_accuracy": 0.981,
+              "deadline_exact_accuracy": 0.975,
+              "deadline_within_3d_accuracy": 0.988
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 108,
+              "matched_items": 105,
+              "precision": 0.972,
+              "recall": 0.854,
+              "f1": 0.909,
+              "owner_accuracy": 0.99,
+              "status_accuracy": 0.962,
+              "deadline_exact_accuracy": 1.0,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 104,
+              "matched_items": 102,
+              "precision": 0.981,
+              "recall": 0.829,
+              "f1": 0.899,
+              "owner_accuracy": 0.98,
+              "status_accuracy": 0.971,
+              "deadline_exact_accuracy": 0.988,
+              "deadline_within_3d_accuracy": 0.988
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 106,
+              "matched_items": 103,
+              "precision": 0.972,
+              "recall": 0.837,
+              "f1": 0.9,
+              "owner_accuracy": 0.981,
+              "status_accuracy": 0.971,
+              "deadline_exact_accuracy": 0.975,
+              "deadline_within_3d_accuracy": 0.975
+            }
+          ],
+          "precision": 0.984,
+          "recall": 0.811,
+          "f1": 0.888,
+          "owner_accuracy": 0.989,
+          "status_accuracy": 0.972,
+          "deadline_exact_accuracy": 0.978,
+          "deadline_within_3d_accuracy": 0.985,
+          "validation_failures": 0,
+          "api_failures": 0,
+          "parses": 32,
+          "n_runs": 8
+        },
+        "haiku_prod": {
+          "runs": [
+            {
+              "expected_items": 123,
+              "predicted_items": 92,
+              "matched_items": 87,
+              "precision": 0.946,
+              "recall": 0.707,
+              "f1": 0.809,
+              "owner_accuracy": 0.954,
+              "status_accuracy": 0.966,
+              "deadline_exact_accuracy": 0.432,
+              "deadline_within_3d_accuracy": 0.988
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 90,
+              "matched_items": 84,
+              "precision": 0.933,
+              "recall": 0.683,
+              "f1": 0.789,
+              "owner_accuracy": 0.976,
+              "status_accuracy": 0.929,
+              "deadline_exact_accuracy": 0.474,
+              "deadline_within_3d_accuracy": 0.974
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 92,
+              "matched_items": 88,
+              "precision": 0.957,
+              "recall": 0.715,
+              "f1": 0.819,
+              "owner_accuracy": 0.92,
+              "status_accuracy": 0.943,
+              "deadline_exact_accuracy": 0.575,
+              "deadline_within_3d_accuracy": 0.963
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 89,
+              "matched_items": 84,
+              "precision": 0.944,
+              "recall": 0.683,
+              "f1": 0.792,
+              "owner_accuracy": 0.94,
+              "status_accuracy": 0.952,
+              "deadline_exact_accuracy": 0.692,
+              "deadline_within_3d_accuracy": 0.962
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 88,
+              "matched_items": 86,
+              "precision": 0.977,
+              "recall": 0.699,
+              "f1": 0.815,
+              "owner_accuracy": 0.93,
+              "status_accuracy": 0.93,
+              "deadline_exact_accuracy": 0.537,
+              "deadline_within_3d_accuracy": 0.975
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 88,
+              "matched_items": 86,
+              "precision": 0.977,
+              "recall": 0.699,
+              "f1": 0.815,
+              "owner_accuracy": 0.942,
+              "status_accuracy": 0.93,
+              "deadline_exact_accuracy": 0.506,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 92,
+              "matched_items": 88,
+              "precision": 0.957,
+              "recall": 0.715,
+              "f1": 0.819,
+              "owner_accuracy": 0.955,
+              "status_accuracy": 0.955,
+              "deadline_exact_accuracy": 0.585,
+              "deadline_within_3d_accuracy": 0.976
+            },
+            {
+              "expected_items": 123,
+              "predicted_items": 99,
+              "matched_items": 94,
+              "precision": 0.949,
+              "recall": 0.764,
+              "f1": 0.847,
+              "owner_accuracy": 0.926,
+              "status_accuracy": 0.915,
+              "deadline_exact_accuracy": 0.565,
+              "deadline_within_3d_accuracy": 0.988
+            }
+          ],
+          "precision": 0.955,
+          "recall": 0.708,
+          "f1": 0.813,
+          "owner_accuracy": 0.943,
+          "status_accuracy": 0.94,
+          "deadline_exact_accuracy": 0.546,
+          "deadline_within_3d_accuracy": 0.978,
+          "validation_failures": 0,
+          "api_failures": 0,
+          "parses": 32,
+          "n_runs": 8
+        }
+      },
+      "tests": {
+        "gemini_prod|prod": {
+          "precision": [
+            0.038,
+            0.0002
+          ],
+          "recall": [
+            0.022,
+            0.5549
+          ],
+          "f1": [
+            0.03,
+            0.2521
+          ]
+        },
+        "gemini_prod|haiku_prod": {
+          "precision": [
+            0.029,
+            0.0016
+          ],
+          "recall": [
+            0.103,
+            0.0017
+          ],
+          "f1": [
+            0.075,
+            0.0011
+          ]
+        },
+        "prod|haiku_prod": {
+          "precision": [
+            -0.009,
+            0.1854
+          ],
+          "recall": [
+            0.08,
+            0.0242
+          ],
+          "f1": [
+            0.045,
+            0.0474
+          ]
+        },
+        "prod|naive": {
+          "precision": [
+            -0.003,
+            0.6597
+          ],
+          "recall": [
+            0.069,
+            0.1176
+          ],
+          "f1": [
+            0.041,
+            0.1605
+          ]
+        },
+        "gemini_prod|gemini_naive": {
+          "precision": [
+            0.006,
+            0.2247
+          ],
+          "recall": [
+            0.106,
+            0.003
+          ],
+          "f1": [
+            0.069,
+            0.0033
+          ]
+        }
+      },
+      "completeness": {
+        "naive": {
+          "items": 746,
+          "source_decision_rate": 0.556,
+          "owner_set_rate": 0.997,
+          "confidence_min": 0.85,
+          "confidence_max": 1.0,
+          "confidence_distinct": 11,
+          "validation_failures": 1,
+          "parses": 32
+        },
+        "prod": {
+          "items": 820,
+          "source_decision_rate": 1.0,
+          "owner_set_rate": 0.98,
+          "confidence_min": 0.75,
+          "confidence_max": 0.99,
+          "confidence_distinct": 16,
+          "validation_failures": 0,
+          "parses": 32
+        },
+        "gemini_naive": {
+          "items": 709,
+          "source_decision_rate": 0.214,
+          "owner_set_rate": 1.0,
+          "confidence_min": 0.9,
+          "confidence_max": 1.0,
+          "confidence_distinct": 3,
+          "validation_failures": 0,
+          "parses": 32
+        },
+        "gemini_prod": {
+          "items": 811,
+          "source_decision_rate": 1.0,
+          "owner_set_rate": 0.974,
+          "confidence_min": 0.85,
+          "confidence_max": 1.0,
+          "confidence_distinct": 4,
+          "validation_failures": 0,
+          "parses": 32
+        },
+        "haiku_prod": {
+          "items": 730,
+          "source_decision_rate": 1.0,
+          "owner_set_rate": 0.979,
+          "confidence_min": 0.75,
+          "confidence_max": 1.0,
+          "confidence_distinct": 17,
+          "validation_failures": 0,
+          "parses": 32
+        }
+      },
+      "offsets": {
+        "naive": {
+          "total": 640,
+          "exact": 534,
+          "counts": {
+            "0": 534,
+            "-1": 3,
+            "1": 103
+          },
+          "dominant_offset": 1,
+          "dominant_share": 0.161
+        },
+        "prod": {
+          "total": 648,
+          "exact": 638,
+          "counts": {
+            "0": 638,
+            "none": 6,
+            "-1": 4
+          },
+          "dominant_offset": "none",
+          "dominant_share": 0.009
+        },
+        "gemini_naive": {
+          "total": 629,
+          "exact": 625,
+          "counts": {
+            "0": 625,
+            "-1": 3,
+            "2": 1
+          },
+          "dominant_offset": -1,
+          "dominant_share": 0.005
+        },
+        "gemini_prod": {
+          "total": 640,
+          "exact": 626,
+          "counts": {
+            "0": 626,
+            "none": 7,
+            "-1": 3,
+            "-3": 1,
+            "-41": 3
+          },
+          "dominant_offset": "none",
+          "dominant_share": 0.011
+        },
+        "haiku_prod": {
+          "total": 645,
+          "exact": 352,
+          "counts": {
+            "1": 257,
+            "0": 352,
+            "2": 11,
+            "none": 10,
+            "3": 4,
+            "-3": 2,
+            "-1": 3,
+            "-2": 2,
+            "-41": 1,
+            "-40": 3
+          },
+          "dominant_offset": 1,
+          "dominant_share": 0.398
+        }
+      },
+      "counts": {
+        "naive": {
+          "owner": [
+            686,
+            708
+          ],
+          "status": [
+            696,
+            708
+          ],
+          "deadline": [
+            534,
+            640
+          ]
+        },
+        "prod": {
+          "owner": [
+            769,
+            776
+          ],
+          "status": [
+            756,
+            776
+          ],
+          "deadline": [
+            638,
+            648
+          ]
+        },
+        "gemini_naive": {
+          "owner": [
+            674,
+            694
+          ],
+          "status": [
+            679,
+            694
+          ],
+          "deadline": [
+            625,
+            629
+          ]
+        },
+        "gemini_prod": {
+          "owner": [
+            789,
+            798
+          ],
+          "status": [
+            775,
+            798
+          ],
+          "deadline": [
+            626,
+            640
+          ]
+        },
+        "haiku_prod": {
+          "owner": [
+            657,
+            697
+          ],
+          "status": [
+            655,
+            697
+          ],
+          "deadline": [
+            352,
+            645
+          ]
+        }
+      },
+      "status_recall": {
+        "naive": {
+          "todo": [
+            551,
+            616
+          ],
+          "in_progress": [
+            152,
+            168
+          ],
+          "done": [
+            5,
+            200
+          ]
+        },
+        "prod": {
+          "todo": [
+            554,
+            616
+          ],
+          "in_progress": [
+            155,
+            168
+          ],
+          "done": [
+            67,
+            200
+          ]
+        },
+        "gemini_naive": {
+          "todo": [
+            520,
+            616
+          ],
+          "in_progress": [
+            153,
+            168
+          ],
+          "done": [
+            21,
+            200
+          ]
+        },
+        "gemini_prod": {
+          "todo": [
+            528,
+            616
+          ],
+          "in_progress": [
+            155,
+            168
+          ],
+          "done": [
+            115,
+            200
+          ]
+        },
+        "haiku_prod": {
+          "todo": [
+            544,
+            616
+          ],
+          "in_progress": [
+            148,
+            168
+          ],
+          "done": [
+            5,
+            200
+          ]
+        }
+      },
+      "empty": {
+        "naive": 0,
+        "prod": 1,
+        "gemini_naive": 0,
+        "gemini_prod": 0,
+        "haiku_prod": 0
+      },
+      "below_threshold": {
+        "naive": [
+          0,
+          0
+        ],
+        "prod": [
+          0,
+          3
+        ],
+        "gemini_naive": [
+          0,
+          0
+        ],
+        "gemini_prod": [
+          0,
+          0
+        ],
+        "haiku_prod": [
+          19,
+          6
+        ]
+      },
+      "confidence": {
+        "gemini_prod": {
+          "condition": "gemini_prod",
+          "matched": {
+            "n": 798,
+            "mean": 0.963
+          },
+          "spurious": {
+            "n": 13,
+            "mean": 0.946
+          },
+          "buckets": [
+            {
+              "lo": 0.8,
+              "hi": 0.9,
+              "n": 4,
+              "matched_rate": 1.0
+            },
+            {
+              "lo": 0.9,
+              "hi": 0.95,
+              "n": 50,
+              "matched_rate": 0.92
+            },
+            {
+              "lo": 0.95,
+              "hi": 0.99,
+              "n": 494,
+              "matched_rate": 0.988
+            },
+            {
+              "lo": 0.99,
+              "hi": 1.01,
+              "n": 263,
+              "matched_rate": 0.989
+            }
+          ]
+        },
+        "prod": {
+          "condition": "prod",
+          "matched": {
+            "n": 776,
+            "mean": 0.962
+          },
+          "spurious": {
+            "n": 44,
+            "mean": 0.909
+          },
+          "buckets": [
+            {
+              "lo": 0.0,
+              "hi": 0.8,
+              "n": 2,
+              "matched_rate": 0.0
+            },
+            {
+              "lo": 0.8,
+              "hi": 0.9,
+              "n": 41,
+              "matched_rate": 0.707
+            },
+            {
+              "lo": 0.9,
+              "hi": 0.95,
+              "n": 79,
+              "matched_rate": 0.823
+            },
+            {
+              "lo": 0.95,
+              "hi": 0.99,
+              "n": 591,
+              "matched_rate": 0.973
+            },
+            {
+              "lo": 0.99,
+              "hi": 1.01,
+              "n": 107,
+              "matched_rate": 1.0
+            }
+          ]
+        }
+      }
+    },
+    "all": {
+      "overlap": {
+        "naive": {
+          "runs": [
+            {
+              "expected_items": 156,
+              "predicted_items": 118,
+              "matched_items": 111,
+              "precision": 0.941,
+              "recall": 0.712,
+              "f1": 0.81,
+              "owner_accuracy": 0.973,
+              "status_accuracy": 0.937,
+              "deadline_exact_accuracy": 0.894,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 125,
+              "matched_items": 117,
+              "precision": 0.936,
+              "recall": 0.75,
+              "f1": 0.833,
+              "owner_accuracy": 0.966,
+              "status_accuracy": 0.983,
+              "deadline_exact_accuracy": 0.691,
+              "deadline_within_3d_accuracy": 0.99
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 92,
+              "matched_items": 85,
+              "precision": 0.924,
+              "recall": 0.545,
+              "f1": 0.685,
+              "owner_accuracy": 0.976,
+              "status_accuracy": 0.976,
+              "deadline_exact_accuracy": 0.847,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 117,
+              "matched_items": 111,
+              "precision": 0.949,
+              "recall": 0.712,
+              "f1": 0.813,
+              "owner_accuracy": 0.982,
+              "status_accuracy": 0.964,
+              "deadline_exact_accuracy": 0.904,
+              "deadline_within_3d_accuracy": 0.989
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 119,
+              "matched_items": 111,
+              "precision": 0.933,
+              "recall": 0.712,
+              "f1": 0.807,
+              "owner_accuracy": 0.973,
+              "status_accuracy": 0.973,
+              "deadline_exact_accuracy": 0.811,
+              "deadline_within_3d_accuracy": 0.989
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 115,
+              "matched_items": 108,
+              "precision": 0.939,
+              "recall": 0.692,
+              "f1": 0.797,
+              "owner_accuracy": 0.981,
+              "status_accuracy": 0.972,
+              "deadline_exact_accuracy": 0.851,
+              "deadline_within_3d_accuracy": 0.989
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 124,
+              "matched_items": 114,
+              "precision": 0.919,
+              "recall": 0.731,
+              "f1": 0.814,
+              "owner_accuracy": 0.982,
+              "status_accuracy": 0.991,
+              "deadline_exact_accuracy": 0.871,
+              "deadline_within_3d_accuracy": 0.978
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 127,
+              "matched_items": 115,
+              "precision": 0.906,
+              "recall": 0.737,
+              "f1": 0.813,
+              "owner_accuracy": 0.957,
+              "status_accuracy": 0.965,
+              "deadline_exact_accuracy": 0.76,
+              "deadline_within_3d_accuracy": 0.969
+            }
+          ],
+          "precision": 0.931,
+          "recall": 0.699,
+          "f1": 0.796,
+          "owner_accuracy": 0.974,
           "status_accuracy": 0.97,
-          "deadline_exact_accuracy": 0.867,
-          "deadline_within_3d_accuracy": 0.867
+          "deadline_exact_accuracy": 0.829,
+          "deadline_within_3d_accuracy": 0.988,
+          "validation_failures": 7,
+          "api_failures": 0,
+          "parses": 64,
+          "n_runs": 8
         },
-        {
-          "expected_items": 33,
-          "predicted_items": 36,
-          "matched_items": 31,
-          "precision": 0.861,
-          "recall": 0.939,
-          "f1": 0.899,
-          "owner_accuracy": 0.968,
-          "status_accuracy": 0.968,
-          "deadline_exact_accuracy": 0.933,
-          "deadline_within_3d_accuracy": 0.933
+        "prod": {
+          "runs": [
+            {
+              "expected_items": 156,
+              "predicted_items": 135,
+              "matched_items": 124,
+              "precision": 0.919,
+              "recall": 0.795,
+              "f1": 0.852,
+              "owner_accuracy": 0.984,
+              "status_accuracy": 0.968,
+              "deadline_exact_accuracy": 0.97,
+              "deadline_within_3d_accuracy": 0.98
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 140,
+              "matched_items": 129,
+              "precision": 0.921,
+              "recall": 0.827,
+              "f1": 0.872,
+              "owner_accuracy": 0.992,
+              "status_accuracy": 0.969,
+              "deadline_exact_accuracy": 0.97,
+              "deadline_within_3d_accuracy": 0.98
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 141,
+              "matched_items": 133,
+              "precision": 0.943,
+              "recall": 0.853,
+              "f1": 0.896,
+              "owner_accuracy": 0.985,
+              "status_accuracy": 0.962,
+              "deadline_exact_accuracy": 0.949,
+              "deadline_within_3d_accuracy": 0.969
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 134,
+              "matched_items": 124,
+              "precision": 0.925,
+              "recall": 0.795,
+              "f1": 0.855,
+              "owner_accuracy": 0.992,
+              "status_accuracy": 0.96,
+              "deadline_exact_accuracy": 0.949,
+              "deadline_within_3d_accuracy": 0.98
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 140,
+              "matched_items": 128,
+              "precision": 0.914,
+              "recall": 0.821,
+              "f1": 0.865,
+              "owner_accuracy": 0.984,
+              "status_accuracy": 0.961,
+              "deadline_exact_accuracy": 0.94,
+              "deadline_within_3d_accuracy": 0.96
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 111,
+              "matched_items": 101,
+              "precision": 0.91,
+              "recall": 0.647,
+              "f1": 0.757,
+              "owner_accuracy": 0.99,
+              "status_accuracy": 0.97,
+              "deadline_exact_accuracy": 0.947,
+              "deadline_within_3d_accuracy": 0.96
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 153,
+              "matched_items": 140,
+              "precision": 0.915,
+              "recall": 0.897,
+              "f1": 0.906,
+              "owner_accuracy": 0.993,
+              "status_accuracy": 0.964,
+              "deadline_exact_accuracy": 0.97,
+              "deadline_within_3d_accuracy": 0.98
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 142,
+              "matched_items": 128,
+              "precision": 0.901,
+              "recall": 0.821,
+              "f1": 0.859,
+              "owner_accuracy": 0.992,
+              "status_accuracy": 0.953,
+              "deadline_exact_accuracy": 0.97,
+              "deadline_within_3d_accuracy": 0.98
+            }
+          ],
+          "precision": 0.918,
+          "recall": 0.807,
+          "f1": 0.858,
+          "owner_accuracy": 0.989,
+          "status_accuracy": 0.963,
+          "deadline_exact_accuracy": 0.958,
+          "deadline_within_3d_accuracy": 0.974,
+          "validation_failures": 0,
+          "api_failures": 0,
+          "parses": 64,
+          "n_runs": 8
         },
-        {
-          "expected_items": 33,
-          "predicted_items": 34,
-          "matched_items": 31,
-          "precision": 0.912,
-          "recall": 0.939,
-          "f1": 0.925,
-          "owner_accuracy": 0.968,
-          "status_accuracy": 0.968,
-          "deadline_exact_accuracy": 0.867,
-          "deadline_within_3d_accuracy": 0.867
+        "gemini_naive": {
+          "runs": [
+            {
+              "expected_items": 156,
+              "predicted_items": 120,
+              "matched_items": 114,
+              "precision": 0.95,
+              "recall": 0.731,
+              "f1": 0.826,
+              "owner_accuracy": 0.974,
+              "status_accuracy": 0.939,
+              "deadline_exact_accuracy": 0.989,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 122,
+              "matched_items": 117,
+              "precision": 0.959,
+              "recall": 0.75,
+              "f1": 0.842,
+              "owner_accuracy": 0.966,
+              "status_accuracy": 0.983,
+              "deadline_exact_accuracy": 0.989,
+              "deadline_within_3d_accuracy": 0.989
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 120,
+              "matched_items": 115,
+              "precision": 0.958,
+              "recall": 0.737,
+              "f1": 0.833,
+              "owner_accuracy": 0.983,
+              "status_accuracy": 0.965,
+              "deadline_exact_accuracy": 0.978,
+              "deadline_within_3d_accuracy": 0.978
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 127,
+              "matched_items": 124,
+              "precision": 0.976,
+              "recall": 0.795,
+              "f1": 0.876,
+              "owner_accuracy": 0.968,
+              "status_accuracy": 0.96,
+              "deadline_exact_accuracy": 0.968,
+              "deadline_within_3d_accuracy": 0.968
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 122,
+              "matched_items": 117,
+              "precision": 0.959,
+              "recall": 0.75,
+              "f1": 0.842,
+              "owner_accuracy": 0.974,
+              "status_accuracy": 0.991,
+              "deadline_exact_accuracy": 0.978,
+              "deadline_within_3d_accuracy": 0.989
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 128,
+              "matched_items": 124,
+              "precision": 0.969,
+              "recall": 0.795,
+              "f1": 0.873,
+              "owner_accuracy": 0.976,
+              "status_accuracy": 0.984,
+              "deadline_exact_accuracy": 0.979,
+              "deadline_within_3d_accuracy": 0.989
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 111,
+              "matched_items": 106,
+              "precision": 0.955,
+              "recall": 0.679,
+              "f1": 0.794,
+              "owner_accuracy": 0.981,
+              "status_accuracy": 0.991,
+              "deadline_exact_accuracy": 0.989,
+              "deadline_within_3d_accuracy": 1.0
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 112,
+              "matched_items": 107,
+              "precision": 0.955,
+              "recall": 0.686,
+              "f1": 0.799,
+              "owner_accuracy": 0.972,
+              "status_accuracy": 0.972,
+              "deadline_exact_accuracy": 0.978,
+              "deadline_within_3d_accuracy": 0.989
+            }
+          ],
+          "precision": 0.96,
+          "recall": 0.74,
+          "f1": 0.836,
+          "owner_accuracy": 0.974,
+          "status_accuracy": 0.973,
+          "deadline_exact_accuracy": 0.981,
+          "deadline_within_3d_accuracy": 0.988,
+          "validation_failures": 3,
+          "api_failures": 0,
+          "parses": 64,
+          "n_runs": 8
         },
-        {
-          "expected_items": 33,
-          "predicted_items": 37,
-          "matched_items": 33,
-          "precision": 0.892,
-          "recall": 1.0,
-          "f1": 0.943,
-          "owner_accuracy": 0.97,
-          "status_accuracy": 0.97,
-          "deadline_exact_accuracy": 0.867,
-          "deadline_within_3d_accuracy": 0.867
+        "gemini_prod": {
+          "runs": [
+            {
+              "expected_items": 156,
+              "predicted_items": 140,
+              "matched_items": 136,
+              "precision": 0.971,
+              "recall": 0.872,
+              "f1": 0.919,
+              "owner_accuracy": 0.993,
+              "status_accuracy": 0.963,
+              "deadline_exact_accuracy": 0.907,
+              "deadline_within_3d_accuracy": 0.928
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 137,
+              "matched_items": 131,
+              "precision": 0.956,
+              "recall": 0.84,
+              "f1": 0.894,
+              "owner_accuracy": 0.992,
+              "status_accuracy": 0.969,
+              "deadline_exact_accuracy": 0.979,
+              "deadline_within_3d_accuracy": 0.979
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 135,
+              "matched_items": 130,
+              "precision": 0.963,
+              "recall": 0.833,
+              "f1": 0.893,
+              "owner_accuracy": 0.992,
+              "status_accuracy": 0.977,
+              "deadline_exact_accuracy": 0.979,
+              "deadline_within_3d_accuracy": 0.979
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 120,
+              "matched_items": 115,
+              "precision": 0.958,
+              "recall": 0.737,
+              "f1": 0.833,
+              "owner_accuracy": 0.983,
+              "status_accuracy": 0.974,
+              "deadline_exact_accuracy": 0.967,
+              "deadline_within_3d_accuracy": 0.978
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 141,
+              "matched_items": 136,
+              "precision": 0.965,
+              "recall": 0.872,
+              "f1": 0.916,
+              "owner_accuracy": 0.971,
+              "status_accuracy": 0.978,
+              "deadline_exact_accuracy": 0.958,
+              "deadline_within_3d_accuracy": 0.968
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 143,
+              "matched_items": 137,
+              "precision": 0.958,
+              "recall": 0.878,
+              "f1": 0.916,
+              "owner_accuracy": 0.985,
+              "status_accuracy": 0.949,
+              "deadline_exact_accuracy": 0.969,
+              "deadline_within_3d_accuracy": 0.979
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 140,
+              "matched_items": 134,
+              "precision": 0.957,
+              "recall": 0.859,
+              "f1": 0.905,
+              "owner_accuracy": 0.978,
+              "status_accuracy": 0.978,
+              "deadline_exact_accuracy": 0.99,
+              "deadline_within_3d_accuracy": 0.99
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 140,
+              "matched_items": 134,
+              "precision": 0.957,
+              "recall": 0.859,
+              "f1": 0.905,
+              "owner_accuracy": 0.978,
+              "status_accuracy": 0.978,
+              "deadline_exact_accuracy": 0.968,
+              "deadline_within_3d_accuracy": 0.968
+            }
+          ],
+          "precision": 0.961,
+          "recall": 0.844,
+          "f1": 0.898,
+          "owner_accuracy": 0.984,
+          "status_accuracy": 0.971,
+          "deadline_exact_accuracy": 0.965,
+          "deadline_within_3d_accuracy": 0.971,
+          "validation_failures": 0,
+          "api_failures": 0,
+          "parses": 64,
+          "n_runs": 8
         },
-        {
-          "expected_items": 33,
-          "predicted_items": 36,
-          "matched_items": 32,
-          "precision": 0.889,
-          "recall": 0.97,
-          "f1": 0.928,
-          "owner_accuracy": 0.969,
-          "status_accuracy": 0.969,
-          "deadline_exact_accuracy": 0.867,
-          "deadline_within_3d_accuracy": 0.867
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 35,
-          "matched_items": 32,
-          "precision": 0.914,
-          "recall": 0.97,
-          "f1": 0.941,
-          "owner_accuracy": 0.969,
-          "status_accuracy": 0.906,
-          "deadline_exact_accuracy": 0.8,
-          "deadline_within_3d_accuracy": 0.867
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 36,
-          "matched_items": 32,
-          "precision": 0.889,
-          "recall": 0.97,
-          "f1": 0.928,
-          "owner_accuracy": 0.969,
-          "status_accuracy": 1.0,
-          "deadline_exact_accuracy": 1.0,
-          "deadline_within_3d_accuracy": 1.0
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 34,
-          "matched_items": 31,
-          "precision": 0.912,
-          "recall": 0.939,
-          "f1": 0.925,
-          "owner_accuracy": 0.968,
-          "status_accuracy": 1.0,
-          "deadline_exact_accuracy": 0.933,
-          "deadline_within_3d_accuracy": 0.933
+        "haiku_prod": {
+          "runs": [
+            {
+              "expected_items": 156,
+              "predicted_items": 114,
+              "matched_items": 109,
+              "precision": 0.956,
+              "recall": 0.699,
+              "f1": 0.807,
+              "owner_accuracy": 0.963,
+              "status_accuracy": 0.945,
+              "deadline_exact_accuracy": 0.411,
+              "deadline_within_3d_accuracy": 0.968
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 114,
+              "matched_items": 107,
+              "precision": 0.939,
+              "recall": 0.686,
+              "f1": 0.793,
+              "owner_accuracy": 0.972,
+              "status_accuracy": 0.916,
+              "deadline_exact_accuracy": 0.43,
+              "deadline_within_3d_accuracy": 0.957
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 116,
+              "matched_items": 111,
+              "precision": 0.957,
+              "recall": 0.712,
+              "f1": 0.816,
+              "owner_accuracy": 0.937,
+              "status_accuracy": 0.928,
+              "deadline_exact_accuracy": 0.532,
+              "deadline_within_3d_accuracy": 0.947
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 112,
+              "matched_items": 104,
+              "precision": 0.929,
+              "recall": 0.667,
+              "f1": 0.776,
+              "owner_accuracy": 0.952,
+              "status_accuracy": 0.942,
+              "deadline_exact_accuracy": 0.626,
+              "deadline_within_3d_accuracy": 0.945
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 115,
+              "matched_items": 111,
+              "precision": 0.965,
+              "recall": 0.712,
+              "f1": 0.819,
+              "owner_accuracy": 0.946,
+              "status_accuracy": 0.928,
+              "deadline_exact_accuracy": 0.511,
+              "deadline_within_3d_accuracy": 0.957
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 111,
+              "matched_items": 107,
+              "precision": 0.964,
+              "recall": 0.686,
+              "f1": 0.801,
+              "owner_accuracy": 0.953,
+              "status_accuracy": 0.916,
+              "deadline_exact_accuracy": 0.468,
+              "deadline_within_3d_accuracy": 0.979
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 115,
+              "matched_items": 109,
+              "precision": 0.948,
+              "recall": 0.699,
+              "f1": 0.804,
+              "owner_accuracy": 0.963,
+              "status_accuracy": 0.936,
+              "deadline_exact_accuracy": 0.547,
+              "deadline_within_3d_accuracy": 0.968
+            },
+            {
+              "expected_items": 156,
+              "predicted_items": 122,
+              "matched_items": 116,
+              "precision": 0.951,
+              "recall": 0.744,
+              "f1": 0.835,
+              "owner_accuracy": 0.94,
+              "status_accuracy": 0.914,
+              "deadline_exact_accuracy": 0.51,
+              "deadline_within_3d_accuracy": 0.969
+            }
+          ],
+          "precision": 0.951,
+          "recall": 0.701,
+          "f1": 0.806,
+          "owner_accuracy": 0.953,
+          "status_accuracy": 0.928,
+          "deadline_exact_accuracy": 0.504,
+          "deadline_within_3d_accuracy": 0.961,
+          "validation_failures": 0,
+          "api_failures": 0,
+          "parses": 64,
+          "n_runs": 8
         }
-      ],
-      "precision": 0.895,
-      "recall": 0.966,
-      "f1": 0.929,
-      "owner_accuracy": 0.969,
-      "status_accuracy": 0.969,
-      "deadline_exact_accuracy": 0.892,
-      "deadline_within_3d_accuracy": 0.9,
-      "validation_failures": 0,
-      "api_failures": 0,
-      "parses": 32,
-      "n_runs": 8
-    },
-    "haiku_prod": {
-      "runs": [
-        {
-          "expected_items": 33,
-          "predicted_items": 22,
-          "matched_items": 22,
-          "precision": 1.0,
-          "recall": 0.667,
-          "f1": 0.8,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.864,
-          "deadline_exact_accuracy": 0.286,
-          "deadline_within_3d_accuracy": 0.857
+      },
+      "tests": {
+        "gemini_prod|prod": {
+          "precision": [
+            0.042,
+            0.0002
+          ],
+          "recall": [
+            0.037,
+            0.2797
+          ],
+          "f1": [
+            0.04,
+            0.0371
+          ]
         },
-        {
-          "expected_items": 33,
-          "predicted_items": 24,
-          "matched_items": 23,
-          "precision": 0.958,
-          "recall": 0.697,
-          "f1": 0.807,
-          "owner_accuracy": 0.957,
-          "status_accuracy": 0.87,
-          "deadline_exact_accuracy": 0.2,
-          "deadline_within_3d_accuracy": 0.867
+        "gemini_prod|haiku_prod": {
+          "precision": [
+            0.009,
+            0.0676
+          ],
+          "recall": [
+            0.143,
+            0.0003
+          ],
+          "f1": [
+            0.091,
+            0.0003
+          ]
         },
-        {
-          "expected_items": 33,
-          "predicted_items": 24,
-          "matched_items": 23,
-          "precision": 0.958,
-          "recall": 0.697,
-          "f1": 0.807,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.87,
-          "deadline_exact_accuracy": 0.286,
-          "deadline_within_3d_accuracy": 0.857
+        "prod|haiku_prod": {
+          "precision": [
+            -0.033,
+            0.0006
+          ],
+          "recall": [
+            0.106,
+            0.0026
+          ],
+          "f1": [
+            0.051,
+            0.0112
+          ]
         },
-        {
-          "expected_items": 33,
-          "predicted_items": 23,
-          "matched_items": 20,
-          "precision": 0.87,
-          "recall": 0.606,
-          "f1": 0.714,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.9,
-          "deadline_exact_accuracy": 0.231,
-          "deadline_within_3d_accuracy": 0.846
+        "prod|naive": {
+          "precision": [
+            -0.012,
+            0.083
+          ],
+          "recall": [
+            0.108,
+            0.0065
+          ],
+          "f1": [
+            0.061,
+            0.012
+          ]
         },
-        {
-          "expected_items": 33,
-          "predicted_items": 27,
-          "matched_items": 25,
-          "precision": 0.926,
-          "recall": 0.758,
-          "f1": 0.833,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.92,
-          "deadline_exact_accuracy": 0.357,
-          "deadline_within_3d_accuracy": 0.857
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 23,
-          "matched_items": 21,
-          "precision": 0.913,
-          "recall": 0.636,
-          "f1": 0.75,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.857,
-          "deadline_exact_accuracy": 0.231,
-          "deadline_within_3d_accuracy": 0.846
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 23,
-          "matched_items": 21,
-          "precision": 0.913,
-          "recall": 0.636,
-          "f1": 0.75,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.857,
-          "deadline_exact_accuracy": 0.308,
-          "deadline_within_3d_accuracy": 0.923
-        },
-        {
-          "expected_items": 33,
-          "predicted_items": 23,
-          "matched_items": 22,
-          "precision": 0.957,
-          "recall": 0.667,
-          "f1": 0.786,
-          "owner_accuracy": 1.0,
-          "status_accuracy": 0.909,
-          "deadline_exact_accuracy": 0.154,
-          "deadline_within_3d_accuracy": 0.846
+        "gemini_prod|gemini_naive": {
+          "precision": [
+            0.0,
+            0.9134
+          ],
+          "recall": [
+            0.103,
+            0.0012
+          ],
+          "f1": [
+            0.062,
+            0.0019
+          ]
         }
-      ],
-      "precision": 0.937,
-      "recall": 0.67,
-      "f1": 0.781,
-      "owner_accuracy": 0.995,
-      "status_accuracy": 0.881,
-      "deadline_exact_accuracy": 0.257,
-      "deadline_within_3d_accuracy": 0.862,
-      "validation_failures": 0,
-      "api_failures": 0,
-      "parses": 32,
-      "n_runs": 8
+      },
+      "completeness": {
+        "naive": {
+          "items": 937,
+          "source_decision_rate": 0.531,
+          "owner_set_rate": 0.989,
+          "confidence_min": 0.85,
+          "confidence_max": 1.0,
+          "confidence_distinct": 11,
+          "validation_failures": 7,
+          "parses": 64
+        },
+        "prod": {
+          "items": 1096,
+          "source_decision_rate": 1.0,
+          "owner_set_rate": 0.974,
+          "confidence_min": 0.75,
+          "confidence_max": 0.99,
+          "confidence_distinct": 17,
+          "validation_failures": 0,
+          "parses": 64
+        },
+        "gemini_naive": {
+          "items": 962,
+          "source_decision_rate": 0.201,
+          "owner_set_rate": 0.995,
+          "confidence_min": 0.9,
+          "confidence_max": 1.0,
+          "confidence_distinct": 3,
+          "validation_failures": 3,
+          "parses": 64
+        },
+        "gemini_prod": {
+          "items": 1096,
+          "source_decision_rate": 1.0,
+          "owner_set_rate": 0.974,
+          "confidence_min": 0.85,
+          "confidence_max": 1.0,
+          "confidence_distinct": 5,
+          "validation_failures": 0,
+          "parses": 64
+        },
+        "haiku_prod": {
+          "items": 919,
+          "source_decision_rate": 1.0,
+          "owner_set_rate": 0.973,
+          "confidence_min": 0.65,
+          "confidence_max": 1.0,
+          "confidence_distinct": 20,
+          "validation_failures": 0,
+          "parses": 64
+        }
+      },
+      "offsets": {
+        "naive": {
+          "total": 735,
+          "exact": 608,
+          "counts": {
+            "0": 608,
+            "1": 105,
+            "-1": 10,
+            "-7": 2,
+            "-6": 3,
+            "-2": 3,
+            "none": 3,
+            "7": 1
+          },
+          "dominant_offset": 1,
+          "dominant_share": 0.143
+        },
+        "prod": {
+          "total": 767,
+          "exact": 735,
+          "counts": {
+            "0": 735,
+            "-1": 12,
+            "none": 14,
+            "-7": 5,
+            "7": 1
+          },
+          "dominant_offset": "none",
+          "dominant_share": 0.018
+        },
+        "gemini_naive": {
+          "total": 740,
+          "exact": 726,
+          "counts": {
+            "0": 726,
+            "-1": 4,
+            "none": 8,
+            "-7": 1,
+            "2": 1
+          },
+          "dominant_offset": "none",
+          "dominant_share": 0.011
+        },
+        "gemini_prod": {
+          "total": 760,
+          "exact": 733,
+          "counts": {
+            "0": 733,
+            "-7": 5,
+            "none": 14,
+            "-1": 4,
+            "-3": 1,
+            "-41": 3
+          },
+          "dominant_offset": "none",
+          "dominant_share": 0.018
+        },
+        "haiku_prod": {
+          "total": 754,
+          "exact": 380,
+          "counts": {
+            "1": 314,
+            "-6": 14,
+            "0": 380,
+            "-2": 8,
+            "2": 11,
+            "none": 10,
+            "3": 4,
+            "-3": 3,
+            "-1": 5,
+            "-7": 1,
+            "-41": 1,
+            "-40": 3
+          },
+          "dominant_offset": 1,
+          "dominant_share": 0.416
+        }
+      },
+      "counts": {
+        "naive": {
+          "owner": [
+            849,
+            872
+          ],
+          "status": [
+            846,
+            872
+          ],
+          "deadline": [
+            608,
+            735
+          ]
+        },
+        "prod": {
+          "owner": [
+            996,
+            1007
+          ],
+          "status": [
+            970,
+            1007
+          ],
+          "deadline": [
+            735,
+            767
+          ]
+        },
+        "gemini_naive": {
+          "owner": [
+            900,
+            924
+          ],
+          "status": [
+            899,
+            924
+          ],
+          "deadline": [
+            726,
+            740
+          ]
+        },
+        "gemini_prod": {
+          "owner": [
+            1036,
+            1053
+          ],
+          "status": [
+            1022,
+            1053
+          ],
+          "deadline": [
+            733,
+            760
+          ]
+        },
+        "haiku_prod": {
+          "owner": [
+            833,
+            874
+          ],
+          "status": [
+            811,
+            874
+          ],
+          "deadline": [
+            380,
+            754
+          ]
+        }
+      },
+      "status_recall": {
+        "naive": {
+          "in_progress": [
+            185,
+            224
+          ],
+          "todo": [
+            652,
+            736
+          ],
+          "done": [
+            35,
+            288
+          ]
+        },
+        "prod": {
+          "in_progress": [
+            198,
+            224
+          ],
+          "todo": [
+            673,
+            736
+          ],
+          "done": [
+            136,
+            288
+          ]
+        },
+        "gemini_naive": {
+          "in_progress": [
+            201,
+            224
+          ],
+          "todo": [
+            628,
+            736
+          ],
+          "done": [
+            95,
+            288
+          ]
+        },
+        "gemini_prod": {
+          "in_progress": [
+            209,
+            224
+          ],
+          "todo": [
+            648,
+            736
+          ],
+          "done": [
+            196,
+            288
+          ]
+        },
+        "haiku_prod": {
+          "in_progress": [
+            195,
+            224
+          ],
+          "todo": [
+            660,
+            736
+          ],
+          "done": [
+            19,
+            288
+          ]
+        }
+      },
+      "empty": {
+        "naive": 0,
+        "prod": 1,
+        "gemini_naive": 0,
+        "gemini_prod": 0,
+        "haiku_prod": 0
+      },
+      "below_threshold": {
+        "naive": [
+          0,
+          0
+        ],
+        "prod": [
+          0,
+          11
+        ],
+        "gemini_naive": [
+          0,
+          0
+        ],
+        "gemini_prod": [
+          0,
+          0
+        ],
+        "haiku_prod": [
+          27,
+          10
+        ]
+      },
+      "confidence": {
+        "gemini_prod": {
+          "condition": "gemini_prod",
+          "matched": {
+            "n": 1053,
+            "mean": 0.963
+          },
+          "spurious": {
+            "n": 43,
+            "mean": 0.952
+          },
+          "buckets": [
+            {
+              "lo": 0.8,
+              "hi": 0.9,
+              "n": 6,
+              "matched_rate": 0.667
+            },
+            {
+              "lo": 0.9,
+              "hi": 0.95,
+              "n": 67,
+              "matched_rate": 0.896
+            },
+            {
+              "lo": 0.95,
+              "hi": 0.99,
+              "n": 669,
+              "matched_rate": 0.969
+            },
+            {
+              "lo": 0.99,
+              "hi": 1.01,
+              "n": 354,
+              "matched_rate": 0.963
+            }
+          ]
+        },
+        "prod": {
+          "condition": "prod",
+          "matched": {
+            "n": 1007,
+            "mean": 0.964
+          },
+          "spurious": {
+            "n": 89,
+            "mean": 0.925
+          },
+          "buckets": [
+            {
+              "lo": 0.0,
+              "hi": 0.8,
+              "n": 4,
+              "matched_rate": 0.0
+            },
+            {
+              "lo": 0.8,
+              "hi": 0.9,
+              "n": 56,
+              "matched_rate": 0.661
+            },
+            {
+              "lo": 0.9,
+              "hi": 0.95,
+              "n": 86,
+              "matched_rate": 0.837
+            },
+            {
+              "lo": 0.95,
+              "hi": 0.99,
+              "n": 758,
+              "matched_rate": 0.95
+            },
+            {
+              "lo": 0.99,
+              "hi": 1.01,
+              "n": 192,
+              "matched_rate": 0.927
+            }
+          ]
+        }
+      }
     }
   },
   "judge": {}

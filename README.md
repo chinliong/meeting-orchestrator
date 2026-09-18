@@ -249,29 +249,37 @@ python -m pytest eval/
 
 ## Evaluation
 
-Parsing and scoring are separated: `--parse` calls the model and caches every predicted item to
-`eval/predictions.json`; scoring then reads that cache. Without the split, any change to the
-scoring step also re-samples the model, and on a 33-item test set that noise is larger than most
-effects worth measuring. It also means regenerating the report is free and repeatable.
+Extraction is scored on **two test sets** of synthetic SAP programme meetings:
+
+| Set | Transcripts | Words each | Annotated action items | Role |
+|---|---|---|---|---|
+| Short | 4 | 838-1,209 | 33 | Development: the prompt was refined against it |
+| Long | 4 | 3,102-4,089 | 123 | Held out: written after the prompt was fixed, never used to tune it |
+
+Parsing and scoring are separated: `--parse` calls the model and caches every predicted item
+(`eval/predictions.json`, `eval/predictions_long.json`); scoring reads the caches. Re-scoring
+therefore never re-samples the model, and regenerating the reports is free and repeatable.
 
 ```bash
 # from the repo root, with the backend venv active
 python -m eval.run_eval --write-report      # FREE - no API calls, no key needed
 ```
 
-This scores the cached predictions, writes `eval/results.json`, and refreshes **two** documents:
+This scores both sets, writes `eval/results.json`, and refreshes:
 
-- **[docs/evaluation-report.md](docs/evaluation-report.md)**: the findings and the
-  recommendation, two tables, readable in a couple of minutes. Start here.
-- **[docs/asr-evaluation.md](docs/asr-evaluation.md)**: speech-to-text model comparison and the transcription choice.
-- **[docs/evaluation-appendix.md](docs/evaluation-appendix.md)**: full methodology, every
-  condition's precision / recall / F1, the confounds, and the corrections.
+- **[docs/evaluation-report.md](docs/evaluation-report.md)**: the decision and two tables,
+  readable in a couple of minutes. Start here.
+- **[docs/evaluation-appendix.md](docs/evaluation-appendix.md)**: method, every condition on every
+  set, the permutation tests, deadline errors, the confidence score, and the limitations.
 
-Both are generated from the same cached predictions, so they cannot disagree.
+Two further reports have their own scripts:
+**[docs/subtask-evaluation-report.md](docs/subtask-evaluation-report.md)** (`eval.subtask_eval`)
+and **[docs/asr-evaluation.md](docs/asr-evaluation.md)** (`eval.asr_eval`, speech-to-text on AMI
+meeting audio, which the text transcripts cannot be used for).
 
-It answers **two** questions with two sets of conditions.
+The extraction evaluation answers two questions.
 
-**1. Does the guidance layer help?** A 2×2: guidance level crossed with model family:
+**1. Does the guidance layer help?** Guidance level crossed with model family:
 
 | | Without guidance | With guidance |
 |---|---|---|
@@ -279,61 +287,65 @@ It answers **two** questions with two sets of conditions.
 | **Claude Sonnet** (`CLAUDE_MODEL`) | `naive` | `prod` |
 | **Gemini Flash** (`GEMINI_MODEL`) | `gemini_naive` | `gemini_prod`, implemented |
 
-Within a model the two configurations differ *only* in guidance text: identical fields, types, enum and
-required list. Both families are measured so the guidance effect is shown to replicate rather
-than being a quirk of one model.
-
-> These two rows are **not** a provider ranking: the cached models are a generation apart. Only
-> the within-model with/without-guidance contrast is a fair comparison.
+Within a model the two configurations differ *only* in guidance text: identical fields, types,
+enum and required list. Across all eight transcripts the guidance removes every validation
+failure and raises F1 significantly on both models.
 
 **2. Which model should the project use?** Claude Sonnet, Claude Haiku and Gemini Flash on the
-implemented configuration only (`prod`, `haiku_prod`, `gemini_prod`). Over eight runs each, Gemini leads
-Sonnet on recall, precision and F1, every gap separated by an exact permutation test,
-so extraction runs on Gemini. Subtask generation moved with it on a different basis: quality is
-indistinguishable from Claude (p = 0.53), so the reason is cost and a single provider.
+with-guidance configuration (`prod`, `haiku_prod`, `gemini_prod`), eight runs each per set, tested
+with an exact permutation test. Gemini Flash is never significantly behind Claude Sonnet on F1:
+ahead on the short set, level on the long set, and ahead across all eight (p = 0.037). It costs a
+tenth of Sonnet's input price, so extraction runs on Gemini. Claude Haiku is rejected for
+resolving deadlines one day late. Subtask generation is indistinguishable between the two models
+on both sets (p = 0.652 and p = 1.0), so it runs on Gemini for cost and a single provider.
 
-Predictions are matched to the annotated ground truth by word overlap: deterministic, with no
-model involved, so scoring is repeatable. A semantic LLM-judge matcher is available behind
-`--rescore-judge` but has not been run against the current cache, so no judge figures are
-reported.
+The models differ in tier and release date in both directions, so this is a decision for this
+project, not a ranking of vendors.
 
-`--parse` runs one model group at a time. `claude` and `haiku` **spend Anthropic credit**:
+Predictions are matched to the annotated items by word overlap, with no model involved, so
+scoring is repeatable. A semantic LLM-judge matcher is available behind `--rescore-judge` but has
+not been run, so no judge figures are reported.
+
+`--parse` runs one model group on one set. Every group spends API credit:
 
 ```bash
-python -m eval.run_eval --parse --provider gemini  --runs 3   # free (20 req/day/model)
-python -m eval.run_eval --parse --provider haiku   --runs 3   # ~$0.04/run
-python -m eval.run_eval --parse --provider claude  --runs 1   # Sonnet 2x2
-python -m eval.run_eval --rescore-judge                       # LLM-judge column
+python -m eval.run_eval --parse --set long --provider gemini --runs 8   # Gemini Flash, both configurations
+python -m eval.run_eval --parse --set long --provider claude --runs 8   # Claude Sonnet, both configurations
+python -m eval.run_eval --parse --set long --provider haiku  --runs 8   # Claude Haiku
+python -m eval.run_eval --rescore-judge                                 # LLM-judge column
 ```
 
-Gemini needs `GEMINI_API_KEY` in `backend/.env`.
+Omit `--set` for the short set. Gemini needs `GEMINI_API_KEY` in `backend/.env`, Claude needs
+`ANTHROPIC_API_KEY`. The Claude conditions always run on Anthropic, whatever `LLM_PROVIDER` says.
 
-Because each run holds one group, adding runs for a free model cannot disturb another model's
-cached figures. Judge scores are cached **per condition** for the same reason: conditions
-without them print as `-` until `--rescore-judge` is passed. Requests that never completed (rate
-limit, capacity) are recorded as API failures and excluded from scoring, so an exhausted quota is
-never counted as the model failing to find items. Each run records which model produced it. Keep
-`eval/predictions.json`: without it the report can only be rebuilt by re-parsing.
+Because each run holds one group, adding runs for one model cannot disturb another model's
+cached figures. Requests that never completed (rate limit, capacity) are recorded as API failures
+and excluded from scoring, so an exhausted quota is never counted as the model failing to find
+items. Each run records which model produced it. Keep the prediction caches: without them the
+reports can only be rebuilt by re-parsing.
 
 The AI **subtask** generator is open-ended (no single correct breakdown, so no ground truth):
-it's assessed qualitatively with an LLM-as-judge rubric (relevance, actionability, coverage,
-non-redundancy) over a sample of the annotated action items.
+it's assessed with an LLM-as-judge rubric (relevance, actionability, coverage, non-redundancy)
+over 12 annotated action items per set.
 
 ```bash
-python -m eval.subtask_eval --write-report        # calls the model; --limit N for a smaller sample
+python -m eval.subtask_eval --runs 5 --write-report              # short set; calls both models
+python -m eval.subtask_eval --set long --runs 5 --write-report   # long set
+python -m eval.subtask_eval --report-only                        # re-render, no API calls
 ```
 
-This writes `eval/subtask_results.json` and refreshes
+This writes `eval/subtask_results.json` or `eval/subtask_results_long.json` and refreshes
 [docs/subtask-evaluation-report.md](docs/subtask-evaluation-report.md). Unlike the transcript
-evaluation there is no cache, so every run calls the model twice per task (generate, then judge).
+evaluation there is no prediction cache, so every run calls the model twice per task (generate,
+then judge).
 
 ## Project layout
 
 ```
 backend/      FastAPI app (api/, llm/, models/, schemas/, auth.py, email.py, notifications.py), tests, Dockerfile
 frontend/     Next.js app (src/app, src/components, src/lib); Dockerfile for local compose, Render hosts it as a static export (out/)
-data/         synthetic-transcripts/ (inputs) + annotated-test-set/ (ground truth)
-eval/         evaluation framework, cached predictions (predictions.json), matcher tests
+data/         synthetic-transcripts/ and synthetic-transcripts-long/ (inputs), annotated-test-set/ and annotated-test-set-long/ (ground truth)
+eval/         evaluation framework, cached predictions (predictions.json, predictions_long.json), tests
 docs/         architecture, API spec, evaluation report
 render.yaml   Render deployment blueprint
 ```

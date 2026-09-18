@@ -92,9 +92,9 @@ origin identifiable; leave it null only when the item genuinely has no identifia
 Always respond by calling the record_extraction tool."""
 
 
-# Which model family runs the extraction. Gemini is the default because it leads Claude Sonnet
-# on recall, precision and F1 over eight runs, each separated by an exact permutation test - see
-# docs/evaluation-report.md. Set LLM_PROVIDER=anthropic to fall back to Claude; both backends
+# Which model family runs the extraction. Gemini is the default: across the short and long test
+# sets it is never significantly behind Claude Sonnet on F1, leads across all eight transcripts,
+# and costs a fraction of the price - see docs/evaluation-report.md. Set LLM_PROVIDER=anthropic to fall back to Claude; both backends
 # receive the same system prompt, the same tool schema and the same user turn, so the only
 # variable is the model.
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini").strip().lower()

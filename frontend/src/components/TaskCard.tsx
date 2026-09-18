@@ -258,7 +258,7 @@ export default function TaskCard({
               className="ml-auto inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-1 ring-1 ring-amber-300/70"
               title={`The AI was unsure about this one (${Math.round(
                 task.confidence * 100
-              )}% confidence). In evaluation, items scoring this low were usually wrong — check the owner and deadline before relying on it.`}
+              )}% confidence). Check the owner and deadline before relying on it.`}
             >
               <svg viewBox="0 0 20 20" className="h-3 w-3 text-amber-600" fill="currentColor">
                 <path
