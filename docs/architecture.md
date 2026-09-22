@@ -20,8 +20,9 @@
 
 ## Component diagram
 
-The request path. Every router resolves access through one dependency before touching the
-database; the routers themselves are listed in full under **Components** below.
+The request path. Every endpoint that reads or changes a board, meeting, task, subtask or
+attachment resolves access through one function before touching the database; the routers
+themselves are listed in full under **Components** below.
 
 ```mermaid
 flowchart LR
@@ -74,7 +75,7 @@ flowchart LR
 
 - **Frontend (Next.js/React):** auth gate (sign in / create account / continue as guest), a
   **Kanban board** and a **month calendar** view (toggle), owner filter / deadline sort / text
-  search, an **undo** stack (button + ⌘Z/Ctrl+Z) over status/edit/reschedule/delete actions,
+  search, an **undo** stack (button + ⌘Z/Ctrl+Z) over status/edit/reschedule/subtask/delete actions,
   transcript-and-audio upload, and a share dialog exposing view/edit links. A small session layer
   persists the account token and guest boards in `localStorage`. Talks to the backend via
   `src/lib/api.ts`, which attaches the `Authorization` bearer and `X-Workspace-Token` headers.
@@ -126,12 +127,13 @@ flowchart LR
     different problem from extraction and was measured on its own rubric.
   - **Gemini client** (`app/llm/gemini.py`): the forced function call plus the JSON-Schema to
     OpenAPI translation both LLM modules share, so the tool schema is defined once.
-  - **Transcription module** (`app/llm/transcription.py`): optional, lazily imported, resolved by
-    configuration in three tiers: Deepgram Nova-3 first, then any OpenAI-compatible endpoint via
-    `TRANSCRIPTION_BASE_URL` (Groq, OpenAI), then an optional local Whisper install. The first two
-    are hosted, so nothing loads into memory and the core app runs without the heavy local
-    dependency; with none configured the audio endpoint returns a clear unavailable status rather
-    than failing at import. Model choice is measured in [asr-evaluation.md](asr-evaluation.md).
+  - **Transcription module** (`app/llm/transcription.py`): optional and lazily imported. Uploads
+    are transcribed by Deepgram Nova-3, the most accurate service measured in
+    [asr-evaluation.md](asr-evaluation.md). It is hosted, so nothing loads into memory and the core
+    app runs without the heavy local dependency. The other configurations measured there, a hosted
+    Whisper endpoint set through `TRANSCRIPTION_BASE_URL` and a local Whisper install, are
+    supported by configuration. With none configured the audio endpoint returns a clear
+    unavailable status rather than failing at import.
 - **Database:** PostgreSQL (prod) / SQLite (dev), via SQLAlchemy. Tables: `users`, `projects`,
   `meetings`, `stakeholders`, `tasks`, `subtasks`, `attachments`, `password_resets`. Attachment
   bytes are stored in the `attachments` row (the deploy target has an ephemeral filesystem and no
@@ -153,8 +155,12 @@ flowchart LR
 - A project is owned by a user (`owner_user_id`) or unowned (guest-created).
 - Each project has two permanent capability tokens: `view_token` (read-only) and `edit_token`
   (read/write). A request gains access by being the owner (JWT) **or** presenting a matching token.
-- `ProjectOut` returns the `edit_token` only to edit-level callers, so a view link never leaks
+- `ProjectOut` returns the `edit_token` only to edit-level callers, so a view link never gives
   write access. On sign-up, a guest's `edit_token`s can be supplied to claim those boards.
+- The owner can regenerate either token (`POST /projects/{id}/rotate-token`), which cancels every
+  copy of the old link while the other keeps working. Tokens do not otherwise expire.
+- Edit access covers every write on the board, including deleting it. The `stakeholders`
+  endpoints are not tied to a board and check no credentials.
 - Sharing is asynchronous (no live sync); concurrent edits are last-write-wins.
 
 ## Deadline reminders
@@ -221,6 +227,7 @@ erDiagram
         int project_id FK
         string title
         text transcript_text
+        date meeting_date
         enum status
         text error_message
     }

@@ -17,15 +17,16 @@ recordings for end-to-end processing.
 - **Two views, Kanban and calendar**: a Kanban board (auto-generated cards in To Do / In Progress
   / Done with drag-and-drop status changes) and a month calendar that plots tasks by their deadline
   with drag-to-reschedule (drag onto a "no deadline" tray to clear it). Both support owner filtering
-  and a search across task text, owners, and source meetings; cards show extraction confidence.
+  and a search across task text, owners, and source meetings, and the Kanban board can be sorted
+  by deadline. Cards show extraction confidence, or a "Check this" flag below 0.85.
 - **Task detail, AI subtasks and attachments**: open any task to break it into a checklist of
   subtasks (add them by hand, or have the LLM generate them from the task's own details or from
   your free-text instructions) and to attach files (stored in the database, up to 10 MB each).
   Card fields and both lists **save automatically** as you go; cards show subtask progress
   (e.g. `2/5`) and an attachment count.
 - **Undo**: an Undo button (in the toolbar and inside the task card) and ⌘Z / Ctrl+Z reverse
-  status changes, field edits, reschedules, and deletes; a deleted task is restored with its
-  original id.
+  status changes, field edits, reschedules, subtask changes, and deletes; a deleted task is
+  restored with its original id.
 - **Manual & sourced tasks**: tasks are usually extracted from a meeting (the source meeting
   title shows on each card and can be renamed inline), but you can also add tasks by hand for
   work raised outside a captured meeting.
@@ -36,9 +37,9 @@ recordings for end-to-end processing.
   destroyed, so existing share links keep working).
 - **Deadline email reminders**: opt-in (off by default) digest emails for tasks about to be due
   or just gone overdue, with a configurable "remind me N days before" and **per-project selection**. In Account settings you pick exactly which of your boards should remind you.
-- **Shareable boards**: every board has a permanent **view link** and **edit link**; anyone
-  with a link can open it (no account needed). View links are read-only; the UI hides every
-  editing control on a view-only board.
+- **Shareable boards**: every board has a **view link** and an **edit link** that do not expire;
+  anyone with a link can open it (no account needed), and the owner can regenerate either link.
+  View links are read-only; the UI hides every editing control on a view-only board.
 - **Optional audio/video input**: upload a recording; it is transcribed with Deepgram Nova-3
   before parsing.
 - **Evaluation frameworks**: scores transcript-extraction quality against an annotated test set,
@@ -79,13 +80,16 @@ for the full API.
 ## Access model (accounts, guests, sharing)
 
 - **Accounts** identify an owner. `GET /projects` returns the signed-in user's own boards.
-- **Capability links** are the sharing mechanism: each project carries a permanent `view_token`
-  and `edit_token`. The frontend sends a board's token in an `X-Workspace-Token` header; an edit
+- **Capability links** are the sharing mechanism: each project carries a `view_token` and an
+  `edit_token`. The frontend sends a board's token in an `X-Workspace-Token` header; an edit
   token grants read/write, a view token grants read-only.
 - **Guests** have no account; they reach boards purely by capability link, and their boards are
   remembered in the browser. On sign-up, guest boards are claimed into the new account.
-- Links are **permanent and not revocable** by design (documented in the share dialog); treat
-  them like passwords.
+- Links do not expire. The board owner can regenerate either link
+  (`POST /projects/{id}/rotate-token`), which cancels every copy of the old one while the other
+  keeps working. The share dialog warns that anyone with a link can open the board.
+- An edit link grants every write on the board, including deleting it. The stakeholder endpoints
+  are not tied to a board and check no credentials.
 
 ## Quick start (local)
 
@@ -219,6 +223,7 @@ against the deployed `DATABASE_URL` (idempotent, non-destructive):
 
 ```bash
 cd backend
+DATABASE_URL="<your Postgres connection string>" python -m app.migrate_add_meeting_date    # adds meetings.meeting_date
 DATABASE_URL="<your Postgres connection string>" python -m app.migrate_add_notifications   # deadline-reminder columns
 DATABASE_URL="<your Postgres connection string>" python -m app.migrate_reminder_optin      # adds projects.notify_enabled (opt-in reminders)
 ```

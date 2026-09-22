@@ -1,6 +1,6 @@
 # Render Blueprint — deploys backend + frontend from this repo.
 # In the Render dashboard: New → Blueprint → point at this repo. After the first deploy,
-# set ANTHROPIC_API_KEY (marked sync:false) in the backend service's Environment tab.
+# set GEMINI_API_KEY (marked sync:false) in the backend service's Environment tab.
 #
 # Docs: https://render.com/docs/blueprint-spec
 services:
@@ -12,21 +12,22 @@ services:
     plan: free
     healthCheckPath: /api/v1/health
     envVars:
-      # Transcript extraction runs on Gemini: it leads Claude Sonnet on recall, precision and
-      # F1 over eight runs, each separated by an exact permutation test (docs/evaluation-report.md).
+      # Transcript extraction runs on Gemini Flash: on both test sets it is never significantly
+      # behind Claude Sonnet on F1, is more precise, and costs a tenth of the input price
+      # (docs/evaluation-report.md).
       - key: GEMINI_API_KEY
         sync: false # set manually in the dashboard (secret)
       - key: GEMINI_MODEL
         value: gemini-3.6-flash
-      # Set to "anthropic" to run extraction on Claude instead; the prompt and schema are shared.
+      # Extraction provider, chosen by the evaluation.
       - key: LLM_PROVIDER
         value: gemini
-      # Subtask generation also runs on Gemini: quality is indistinguishable from Claude
-      # (4.88 vs 4.81 on the judge rubric, p = 0.53) at roughly a tenth of the token cost.
+      # Subtask generation also runs on Gemini: quality is indistinguishable from Claude Sonnet
+      # (4.79 vs 4.82 and 4.87 vs 4.88 on the judge rubric, p = 0.652 and 1.0) at a tenth of the
+      # input price (docs/subtask-evaluation-report.md).
       - key: SUBTASK_PROVIDER
         value: gemini
-      # Optional. Both paths fall back to Claude if the Gemini key is missing; without this the
-      # fallback has nothing to fall back to and the endpoints return a clear error instead.
+      # Optional; not used while GEMINI_API_KEY is set.
       - key: ANTHROPIC_API_KEY
         sync: false
       - key: CLAUDE_MODEL
@@ -51,17 +52,12 @@ services:
       # e.g. https://orchestrator-frontend.onrender.com
       - key: CORS_ORIGINS
         sync: false
-      # Speech-to-text (Objective 4). Deepgram is tried first and hosted Whisper is the
-      # fallback, so set both: Deepgram is more accurate (13.0%/15.3% word error rate against
-      # 16.6%/17.2% on the two AMI meetings) but its free tier is a one-off $200 credit, while
-      # Groq's 8 audio-hours reset daily and keep the app working once that credit is gone.
+      # Speech-to-text (Objective 4): Deepgram Nova-3, the most accurate service measured
+      # (13.0% / 15.3% word error rate on the two AMI meetings; docs/asr-evaluation.md).
       - key: DEEPGRAM_API_KEY
         sync: false
-      # Hosted Whisper transcription, the fallback. Set all three in the dashboard.
-      # Groq is the measured choice (docs/asr-evaluation.md). Accuracy ties the best local
-      # model (16.6% vs 17.5%, inside the confidence interval) but it returns in ~2s rather
-      # than 212s and loads nothing into memory - the local fallback needs ~1.5 GB this
-      # instance does not have, which is the actual reason. Free tier, no card.
+      # Optional hosted Whisper endpoint (OpenAI-compatible), also measured in
+      # docs/asr-evaluation.md. For Groq, set all three:
       #   TRANSCRIPTION_BASE_URL = https://api.groq.com/openai/v1
       #   TRANSCRIPTION_MODEL    = whisper-large-v3-turbo
       # For OpenAI instead, set only the key and leave BASE_URL/MODEL unset.

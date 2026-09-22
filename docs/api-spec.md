@@ -146,6 +146,7 @@ Response `201 Created`, a meeting object with its extracted tasks:
   "id": 12,
   "project_id": 1,
   "title": "SAP FI/CO Finance Workshop #4",
+  "meeting_date": "2026-06-17",
   "status": "complete",
   "error_message": null,
   "created_at": "2026-06-17T09:30:00",
@@ -165,13 +166,18 @@ On LLM/API failure the meeting is returned with `status: "failed"` and an `error
 (still `201`), and no tasks.
 
 ### `POST /transcripts/audio`
-Submit an audio/video file (`multipart/form-data`, fields `project_id`, `title`, `meeting_date`, `file`). Transcribed, then parsed.
-Requires edit access to `project_id`.
+Submit an audio/video file (`multipart/form-data`). Requires edit access to `project_id`.
 
-Form fields: `project_id` (int), `title` (string, optional), `file` (the upload).
+Form fields: `project_id` (int), `title` (string, optional), `meeting_date` (`YYYY-MM-DD`,
+optional; omitted means today), `file` (the upload).
 
-Responses: `201` (same shape as above) · `400` empty file · `403` no edit access ·
-`404` unknown project · `503` if no transcription backend is configured.
+Returns at once with the meeting in `processing` status and no tasks. Transcription and
+extraction then run in the background, and the client polls `GET /transcripts/{meeting_id}`
+until the status is `complete` or `failed`.
+
+Responses: `201` meeting object (as above, `status: "processing"`, `tasks: []`) · `400` empty
+file · `403` no edit access · `404` unknown project · `503` if no transcription service is
+configured.
 
 ### `GET /transcripts/{meeting_id}`
 Returns the meeting's status and its extracted tasks. Requires view access. `404` if not found.
@@ -262,6 +268,9 @@ Removes the attachment. Requires edit access. `204`. `404` if not found.
 
 ## Stakeholders
 
+A list of named people, not linked to tasks or to any board. These endpoints check no
+credentials.
+
 ### `GET /stakeholders`
 List stakeholders (alphabetical).
 
@@ -297,6 +306,10 @@ The parser forces the model to call a `record_extraction` tool with this shape (
   ]
 }
 ```
-`description`, `status`, and `confidence` are required per item; the rest default to null/`todo`.
+The tool schema requires `description`, `status`, and `confidence` per item. When Pydantic
+validates the response, only `description` is mandatory: a missing `owner`, `deadline` or
+`source_decision` becomes null, a missing `status` becomes `todo`, and a missing `confidence`
+becomes `1.0`. A malformed date or an unknown status fails validation. `decisions` is validated
+but not stored; each action item is stored as a task.
 `deadline` is inferred relative to the meeting date; `owner` is set only when a named person is
 clearly responsible; `status` is inferred from the transcript.

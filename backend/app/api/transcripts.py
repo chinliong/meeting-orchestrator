@@ -174,9 +174,9 @@ async def submit_audio(
         raise HTTPException(
             status_code=503,
             detail=(
-                "Audio transcription is not configured. Set TRANSCRIPTION_API_KEY to use a "
-                "hosted Whisper API, or install local Whisper with "
-                "`pip install -r requirements-audio.txt`."
+                "Audio transcription is not configured. Set DEEPGRAM_API_KEY, or "
+                "TRANSCRIPTION_API_KEY for a hosted Whisper endpoint, or install local Whisper "
+                "with `pip install -r requirements-audio.txt`."
             ),
         )
 
