@@ -251,19 +251,13 @@ export default function TaskCard({
         {task.meeting_id !== null &&
           (isLowConfidence(task.confidence) ? (
             <span
-              className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-md bg-amber-50 px-2 py-1 ring-1 ring-amber-300/70"
+              className="ml-auto inline-flex shrink-0 cursor-help items-center gap-1.5 whitespace-nowrap rounded-full bg-amber-50 py-0.5 pl-2 pr-2.5 text-[11.5px] font-medium text-amber-700"
               title={`The AI was unsure about this one (${Math.round(
                 task.confidence * 100
               )}% confidence). Check the owner and deadline before relying on it.`}
             >
-              <svg viewBox="0 0 20 20" className="h-3 w-3 text-amber-600" fill="currentColor">
-                <path
-                  fillRule="evenodd"
-                  d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="text-xs font-semibold text-amber-700">Check this</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden />
+              Check this
             </span>
           ) : (
             <span
