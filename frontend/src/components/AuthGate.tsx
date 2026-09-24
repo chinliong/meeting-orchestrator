@@ -7,7 +7,7 @@ import type { AuthResponse } from "@/lib/types";
 import PasswordInput from "@/components/PasswordInput";
 
 interface Props {
-  /** Edit tokens of guest boards to carry into a new account on sign-up. */
+  /** Edit tokens of guest boards to carry into the account on sign-up or log-in. */
   claimTokens: string[];
   onAuthed: (auth: AuthResponse) => void;
   onGuest: () => void;
@@ -68,7 +68,7 @@ export default function AuthGate({ claimTokens, onAuthed, onGuest, allowGuest = 
       const auth =
         mode === "signup"
           ? await api.signup(email.trim(), password, claimTokens)
-          : await api.login(email.trim(), password);
+          : await api.login(email.trim(), password, claimTokens);
       onAuthed(auth);
     } catch (err) {
       setError(readableError(err));

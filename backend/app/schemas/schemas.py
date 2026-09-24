@@ -40,6 +40,8 @@ class SignupRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: str
     password: str
+    # Edit tokens of guest boards to adopt into the account, as on signup.
+    claim_tokens: list[str] = []
 
 
 class ChangePasswordRequest(BaseModel):

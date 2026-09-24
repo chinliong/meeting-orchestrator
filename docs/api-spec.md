@@ -9,6 +9,8 @@ All request/response bodies are JSON unless noted. Dates are ISO 8601 (`YYYY-MM-
 Two credentials are accepted, together or alone:
 
 - `Authorization: Bearer <jwt>` identifies a signed-in user, who owns the boards they create.
+  Tokens last 30 days. An expired or invalid token, or one for a deleted account, returns `401`;
+  it is never treated as a guest request.
 - `X-Workspace-Token: <token>` is a board's capability token from a share link. An **edit** token
   grants read/write; a **view** token grants read-only.
 
@@ -39,8 +41,9 @@ Returns `201` `{ "token": "<jwt>", "user": { "id", "email", "created_at", "notif
 `409` if the email already exists.
 
 ### `POST /auth/login`
-Body `{ "email": "string", "password": "string" }` → `200` `{ "token", "user" }`; `401` on bad
-credentials.
+Body `{ "email": "string", "password": "string", "claim_tokens": ["edit_token", ...] }` → `200`
+`{ "token", "user" }`; `401` on bad credentials. `claim_tokens` is optional and works as on signup:
+unowned guest boards are adopted into the account.
 
 ### `GET /auth/me`
 Returns the current user (requires bearer). `401` if unauthenticated.

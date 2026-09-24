@@ -25,6 +25,31 @@ export function setWorkspaceToken(token: string | null) {
   workspaceToken = token;
 }
 
+/** An HTTP error from the API, carrying the status so callers can tell a 401 from the rest. */
+export class ApiError extends Error {
+  constructor(message: string, public status: number) {
+    super(message);
+  }
+}
+
+// Called when a signed-in request comes back 401, meaning the login has expired or the account
+// is gone. The app registers a handler that signs the user out.
+let onSessionExpired: (() => void) | null = null;
+
+export function setSessionExpiredHandler(handler: (() => void) | null) {
+  onSessionExpired = handler;
+}
+
+// A wrong password on these routes is also a 401, so it must not end the session.
+const PASSWORD_ROUTES = ["/auth/login", "/auth/signup", "/auth/password"];
+
+async function throwIfFailed(res: Response, method: string, path: string): Promise<void> {
+  if (res.ok) return;
+  const body = await res.text();
+  if (res.status === 401 && authToken && !PASSWORD_ROUTES.includes(path)) onSessionExpired?.();
+  throw new ApiError(`${method} ${path} failed (${res.status}): ${body}`, res.status);
+}
+
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Render's free tier sleeps after inactivity. The first request that wakes it is answered by
@@ -61,10 +86,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   if (workspaceToken) headers["X-Workspace-Token"] = workspaceToken;
 
   const res = await fetchWithRetry(`${API_BASE}${path}`, { ...options, headers });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`${options?.method ?? "GET"} ${path} failed (${res.status}): ${body}`);
-  }
+  await throwIfFailed(res, options?.method ?? "GET", path);
   if (res.status === 204) return undefined as T;
   return res.json();
 }
@@ -79,10 +101,10 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ email, password, claim_tokens: claimTokens }),
     }),
-  login: (email: string, password: string) =>
+  login: (email: string, password: string, claimTokens: string[] = []) =>
     request<AuthResponse>("/auth/login", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, claim_tokens: claimTokens }),
     }),
   me: () => request<User>("/auth/me"),
   changePassword: (currentPassword: string, newPassword: string) =>
@@ -198,10 +220,7 @@ export const api = {
       body: form,
       headers: authHeaders(),
     });
-    if (!res.ok) {
-      const body = await res.text();
-      throw new Error(`POST /tasks/${taskId}/attachments failed (${res.status}): ${body}`);
-    }
+    await throwIfFailed(res, "POST", `/tasks/${taskId}/attachments`);
     return res.json();
   },
 
@@ -214,10 +233,7 @@ export const api = {
       method: "GET",
       headers: authHeaders(),
     });
-    if (!res.ok) {
-      const body = await res.text();
-      throw new Error(`GET /attachments/${id} failed (${res.status}): ${body}`);
-    }
+    await throwIfFailed(res, "GET", `/attachments/${id}`);
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -258,10 +274,7 @@ export const api = {
     if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
     if (workspaceToken) headers["X-Workspace-Token"] = workspaceToken;
     const res = await fetchWithRetry(`${API_BASE}/transcripts/audio`, { method: "POST", body: form, headers });
-    if (!res.ok) {
-      const body = await res.text();
-      throw new Error(`POST /transcripts/audio failed (${res.status}): ${body}`);
-    }
+    await throwIfFailed(res, "POST", "/transcripts/audio");
     return res.json();
   },
 };

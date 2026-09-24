@@ -31,7 +31,7 @@ recordings for end-to-end processing.
   title shows on each card and can be renamed inline), but you can also add tasks by hand for
   work raised outside a captured meeting.
 - **Accounts & guest mode**: sign up to keep your boards under an account, or continue as a
-  guest (guest boards are kept on the device and can be carried into an account on sign-up).
+  guest (guest boards are kept on the device and are carried into the account on sign-up or log-in).
 - **Account self-service**: change your password, reset a forgotten one with a 6-digit code
   emailed to you, or delete your account (owned boards are released as guest boards rather than
   destroyed, so existing share links keep working).
@@ -85,7 +85,7 @@ for the full API.
   `edit_token`. The frontend sends a board's token in an `X-Workspace-Token` header; an edit
   token grants read/write, a view token grants read-only.
 - **Guests** have no account; they reach boards purely by capability link, and their boards are
-  remembered in the browser. On sign-up, guest boards are claimed into the new account.
+  remembered in the browser. On sign-up or log-in, guest boards are claimed into the account.
 - Links do not expire. The board owner can regenerate either link
   (`POST /projects/{id}/rotate-token`), which cancels every copy of the old one while the other
   keeps working. The share dialog warns that anyone with a link can open the board.

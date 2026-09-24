@@ -59,13 +59,19 @@ def get_optional_user(
     authorization: Optional[str] = Header(None),
     db: Session = Depends(get_db),
 ) -> Optional[User]:
-    """Resolve the bearer token to a user, or None for anonymous/guest requests."""
+    """Resolve the bearer token to a user, or None for anonymous/guest requests.
+
+    A bearer token that is expired, invalid, or names a deleted account is a 401, not a guest
+    request: treating it as anonymous would, for example, create a board with no owner that
+    the signed-in user can no longer find.
+    """
     if not authorization or not authorization.lower().startswith("bearer "):
         return None
     user_id = _decode_user_id(authorization.split(" ", 1)[1].strip())
-    if user_id is None:
-        return None
-    return db.get(User, user_id)
+    user = db.get(User, user_id) if user_id is not None else None
+    if user is None:
+        raise HTTPException(status_code=401, detail="Your session has expired. Please sign in again.")
+    return user
 
 
 def get_current_user(user: Optional[User] = Depends(get_optional_user)) -> User:

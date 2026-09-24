@@ -30,7 +30,7 @@ RESET_MAX_ATTEMPTS = 5
 
 
 def _claim_guest_projects(db: Session, user: User, edit_tokens: list[str]) -> None:
-    """Adopt guest-created boards into a freshly registered account.
+    """Adopt guest-created boards into an account on signup or login.
 
     Only unowned projects are claimable, and only via their edit token — so a viewer's
     link can never be used to seize a board.
@@ -66,6 +66,11 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == email).first()
     if user is None or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
+    # A guest signing in to an existing account keeps their boards, as on signup.
+    if payload.claim_tokens:
+        _claim_guest_projects(db, user, payload.claim_tokens)
+        db.commit()
+        db.refresh(user)
     return AuthResponse(token=create_access_token(user.id), user=UserOut.model_validate(user))
 
 

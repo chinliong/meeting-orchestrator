@@ -352,6 +352,50 @@ def test_guest_board_claimed_on_signup(client):
     assert [p["id"] for p in owned] == [guest["id"]]
 
 
+def test_guest_board_claimed_on_login(client, account):
+    guest = client.post("/api/v1/projects", json={"name": "Guest board"}).json()
+    auth = client.post(
+        "/api/v1/auth/login",
+        json={"email": "owner@example.com", "password": "pw12345", "claim_tokens": [guest["edit_token"]]},
+    )
+    assert auth.status_code == 200
+    owned = client.get("/api/v1/projects", headers={"Authorization": f"Bearer {auth.json()['token']}"}).json()
+    assert [p["id"] for p in owned] == [guest["id"]]
+
+
+def test_login_does_not_claim_an_owned_board(client, account):
+    owned = client.post("/api/v1/projects", json={"name": "Mine"}, headers=account["headers"]).json()
+    other = client.post("/api/v1/auth/signup", json={"email": "other@b.com", "password": "pw"}).json()
+    client.post(
+        "/api/v1/auth/login",
+        json={"email": "other@b.com", "password": "pw", "claim_tokens": [owned["edit_token"]]},
+    )
+    theirs = client.get("/api/v1/projects", headers={"Authorization": f"Bearer {other['token']}"}).json()
+    assert theirs == []
+
+
+def test_expired_token_is_rejected_not_treated_as_guest(client, account):
+    """An expired login must not silently create an unowned board the user then loses."""
+    import jwt
+    from datetime import datetime, timedelta, timezone
+
+    from app import auth
+
+    expired = jwt.encode(
+        {"sub": str(account["user"]["id"]), "exp": datetime.now(timezone.utc) - timedelta(days=1)},
+        auth.AUTH_SECRET,
+        algorithm=auth.ALGORITHM,
+    )
+    resp = client.post("/api/v1/projects", json={"name": "Lost?"}, headers={"Authorization": f"Bearer {expired}"})
+    assert resp.status_code == 401
+
+
+def test_token_of_deleted_account_is_rejected(client, account):
+    client.delete("/api/v1/auth/me", headers=account["headers"])
+    resp = client.post("/api/v1/projects", json={"name": "Lost?"}, headers=account["headers"])
+    assert resp.status_code == 401
+
+
 # --- transcripts & tasks ---
 
 def test_submit_transcript_creates_tasks(client, project, stub_parser):

@@ -13,7 +13,7 @@ import ShareModal from "@/components/ShareModal";
 import StatsBar from "@/components/StatsBar";
 import TopBar from "@/components/TopBar";
 import TranscriptUpload from "@/components/TranscriptUpload";
-import { api, setAuthToken, setWorkspaceToken } from "@/lib/api";
+import { ApiError, api, setAuthToken, setSessionExpiredHandler, setWorkspaceToken } from "@/lib/api";
 import {
   clearAuth,
   clearGuestChosen,
@@ -107,9 +107,19 @@ export default function DashboardPage() {
         try {
           projs = await api.listProjects();
         } catch (err) {
-          setLoadError((err as Error).message);
+          if (err instanceof ApiError && err.status === 401) {
+            // The stored login has expired (or the account was deleted): sign out and show the
+            // sign-in screen, rather than a signed-in view whose every request fails.
+            clearAuth();
+            setAuthToken(null);
+            sess = wToken ? { mode: "guest" } : null;
+            setSession(sess);
+          } else {
+            setLoadError((err as Error).message);
+          }
         }
-      } else if (sess?.mode === "guest") {
+      }
+      if (sess?.mode === "guest") {
         projs = loadGuestWorkspaces();
       }
 
@@ -240,7 +250,14 @@ export default function DashboardPage() {
   const handleStatusChange = async (taskId: number, status: TaskStatus) => {
     const prev = tasks.find((t) => t.id === taskId)?.status;
     setTasks((cur) => cur.map((t) => (t.id === taskId ? { ...t, status } : t)));
-    await api.updateTask(taskId, { status });
+    try {
+      await api.updateTask(taskId, { status });
+    } catch (err) {
+      // The save failed: move the card back to its column and say why.
+      if (prev) setTasks((cur) => cur.map((t) => (t.id === taskId ? { ...t, status: prev } : t)));
+      setLoadError((err as Error).message);
+      return;
+    }
     if (prev && prev !== status) {
       pushUndo({
         label: "status change",
@@ -455,6 +472,17 @@ export default function DashboardPage() {
     setShowAccount(false);
     handleLogout();
   };
+
+  // A login that expires while the app is open signs the user out on their next request.
+  useEffect(() => {
+    if (!ready) return;
+    setSessionExpiredHandler(() => {
+      setShowAccount(false);
+      handleLogout();
+    });
+    return () => setSessionExpiredHandler(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready]);
 
   if (!ready) {
     return <LoadingScreen slow={slow} />;

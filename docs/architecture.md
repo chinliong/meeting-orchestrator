@@ -82,7 +82,7 @@ flowchart LR
 - **Backend (FastAPI):** every route below is mounted under `/api/v1` (so `POST /auth/signup` is
   served at `/api/v1/auth/signup`). The complete surface, with request and response shapes, is in
   [api-spec.md](api-spec.md).
-  - `POST /auth/signup` (with optional guest-board claim), `POST /auth/login`, `GET /auth/me`,
+  - `POST /auth/signup` and `POST /auth/login` (both with optional guest-board claim), `GET /auth/me`,
     `POST /auth/password` (change password), `DELETE /auth/me` (delete account; owned boards are
     orphaned to guest boards and the user's reset codes are deleted), and `POST /auth/forgot-password` + `POST /auth/reset-password`
     (emailed 6-digit reset code).
@@ -156,7 +156,7 @@ flowchart LR
 - Each project has two capability tokens: `view_token` (read-only) and `edit_token`
   (read/write). A request gains access by being the owner (JWT) **or** presenting a matching token.
 - `ProjectOut` returns the `edit_token` only to edit-level callers, so a view link never gives
-  write access. On sign-up, a guest's `edit_token`s can be supplied to claim those boards.
+  write access. On sign-up or log-in, a guest's `edit_token`s can be supplied to claim those boards.
 - The owner can regenerate either token (`POST /projects/{id}/rotate-token`), which cancels every
   copy of the old link while the other keeps working. Tokens do not otherwise expire.
 - Edit access covers every write on the board, including deleting it. The `stakeholders`
@@ -285,6 +285,9 @@ unusable.
   whole, so a long recording cannot exhaust the free instance's RAM; the limit is 500 MB (`413`
   above it, also checked in the browser). The background job deletes the file when it finishes.
   Attachments are checked against their 10 MB limit before being read.
+- An expired login (tokens last 30 days) returns `401` rather than being treated as a guest, so
+  it cannot create a board with no owner. The frontend then signs the user out and shows the
+  sign-in screen. A board drag whose save fails moves the card back and shows the error.
 - The schema is created on startup via `create_all`, which adds missing tables but never alters
   existing ones. New tables (e.g. `subtasks`, `attachments`) appear automatically; a new column on
   an existing table needs an additive migration (`app/migrate_add_meeting_date.py`,
