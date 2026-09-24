@@ -153,7 +153,7 @@ flowchart LR
 ## Access model
 
 - A project is owned by a user (`owner_user_id`) or unowned (guest-created).
-- Each project has two permanent capability tokens: `view_token` (read-only) and `edit_token`
+- Each project has two capability tokens: `view_token` (read-only) and `edit_token`
   (read/write). A request gains access by being the owner (JWT) **or** presenting a matching token.
 - `ProjectOut` returns the `edit_token` only to edit-level callers, so a view link never gives
   write access. On sign-up, a guest's `edit_token`s can be supplied to claim those boards.

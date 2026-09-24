@@ -39,7 +39,8 @@ recordings for end-to-end processing.
   or just gone overdue, with a configurable "remind me N days before" and **per-project selection**. In Account settings you pick exactly which of your boards should remind you.
 - **Shareable boards**: every board has a **view link** and an **edit link** that do not expire;
   anyone with a link can open it (no account needed), and the owner can regenerate either link.
-  View links are read-only; the UI hides every editing control on a view-only board.
+  View links are read-only; the UI hides every control that changes a view-only board and opens
+  task fields read-only.
 - **Optional audio/video input**: upload a recording (up to 500 MB); it is transcribed with
   Deepgram Nova-3 before parsing.
 - **Evaluation frameworks**: scores transcript-extraction quality against an annotated test set,
