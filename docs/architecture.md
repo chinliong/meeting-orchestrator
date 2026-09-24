@@ -84,7 +84,7 @@ flowchart LR
   [api-spec.md](api-spec.md).
   - `POST /auth/signup` (with optional guest-board claim), `POST /auth/login`, `GET /auth/me`,
     `POST /auth/password` (change password), `DELETE /auth/me` (delete account; owned boards are
-    orphaned to guest boards), and `POST /auth/forgot-password` + `POST /auth/reset-password`
+    orphaned to guest boards and the user's reset codes are deleted), and `POST /auth/forgot-password` + `POST /auth/reset-password`
     (emailed 6-digit reset code).
   - `GET|POST /projects`, `GET /projects/{id}`, `GET /projects/by-token/{token}` (open a share
     link), `PATCH|DELETE /projects/{id}`, `POST /projects/{id}/rotate-token` (owner-only; replaces
@@ -276,9 +276,15 @@ unusable.
 ## Reliability notes
 
 - LLM/API failures during parsing are caught and recorded on the meeting (`status = failed`,
-  `error_message`) rather than crashing the request, so the client always gets a response.
+  `error_message`) rather than crashing the request, so the client always gets a response. The
+  request still returns `201`, so the frontend checks `status` and shows the error, keeping the
+  pasted transcript in the form.
 - The audio endpoint degrades gracefully: if no transcription backend is configured it returns `503`
   with an actionable message instead of failing at import time.
+- Audio/video uploads are streamed to a temporary file in 1 MB chunks and never held in memory
+  whole, so a long recording cannot exhaust the free instance's RAM; the limit is 500 MB (`413`
+  above it, also checked in the browser). The background job deletes the file when it finishes.
+  Attachments are checked against their 10 MB limit before being read.
 - The schema is created on startup via `create_all`, which adds missing tables but never alters
   existing ones. New tables (e.g. `subtasks`, `attachments`) appear automatically; a new column on
   an existing table needs an additive migration (`app/migrate_add_meeting_date.py`,

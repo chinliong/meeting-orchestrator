@@ -40,8 +40,8 @@ recordings for end-to-end processing.
 - **Shareable boards**: every board has a **view link** and an **edit link** that do not expire;
   anyone with a link can open it (no account needed), and the owner can regenerate either link.
   View links are read-only; the UI hides every editing control on a view-only board.
-- **Optional audio/video input**: upload a recording; it is transcribed with Deepgram Nova-3
-  before parsing.
+- **Optional audio/video input**: upload a recording (up to 500 MB); it is transcribed with
+  Deepgram Nova-3 before parsing.
 - **Evaluation frameworks**: scores transcript-extraction quality against an annotated test set,
   measured with and without the structured guidance layer
   (see [docs/evaluation-report.md](docs/evaluation-report.md)); a separate LLM-as-judge rubric

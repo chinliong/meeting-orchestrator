@@ -63,7 +63,7 @@ trigger a reminder, or a "nothing due" confirmation if none do. Requires bearer 
 ### `DELETE /auth/me`
 Delete the signed-in user's account. Requires bearer. The user's owned boards are **orphaned**
 (`owner_user_id` set to null) rather than deleted, so they revert to guest boards still reachable
-by their share links. `204`.
+by their share links. Any password-reset codes for the user are deleted with the account. `204`.
 
 ### `POST /auth/forgot-password`
 Request a password-reset code. Body `{ "email": "string" }`. Always returns `204`, whether or not
