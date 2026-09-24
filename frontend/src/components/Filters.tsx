@@ -2,6 +2,7 @@
 
 import { avatarColor, initials } from "@/lib/format";
 
+
 interface Props {
   owners: string[];
   selectedOwner: string;
@@ -30,7 +31,7 @@ export default function Filters({
         className={`rounded-full px-3 py-1 text-sm font-medium transition ${
           selectedOwner === ""
             ? "bg-slate-900 text-white"
-            : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+            : "text-slate-600 hover:bg-slate-900/5"
         }`}
       >
         All owners
@@ -45,11 +46,11 @@ export default function Filters({
             className={`inline-flex items-center gap-1.5 rounded-full py-1 pl-1 pr-3 text-sm font-medium transition ${
               active
                 ? "bg-slate-900 text-white"
-                : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+                : "text-slate-600 hover:bg-slate-900/5"
             }`}
           >
             <span
-              className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-semibold text-white ${avatarColor(
+              className={`flex h-5 w-5 items-center justify-center rounded-full text-[9.5px] font-semibold ${avatarColor(
                 owner
               )}`}
             >
@@ -66,7 +67,7 @@ export default function Filters({
           className={`ml-auto inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
             sortByDeadline
               ? "bg-slate-900 text-white"
-              : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+              : "text-slate-600 hover:bg-slate-900/5"
           }`}
         >
           <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">

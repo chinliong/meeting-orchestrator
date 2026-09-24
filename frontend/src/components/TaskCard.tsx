@@ -5,7 +5,6 @@ import { useState } from "react";
 import type { Task } from "@/lib/types";
 import {
   avatarColor,
-  confidenceColor,
   formatDate,
   formatMeetingDate,
   initials,
@@ -80,7 +79,7 @@ export default function TaskCard({
     <div
       draggable={canEdit && !renaming}
       onDragStart={(e) => onDragStart(e, task)}
-      className={`group relative mb-2.5 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 pl-4 shadow-card transition duration-150 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-card-hover ${
+      className={`group relative mb-2 overflow-hidden rounded-xl border border-slate-200/80 bg-white p-3.5 pl-[18px] transition duration-150 hover:border-slate-300 hover:shadow-card-hover ${
         canEdit ? "cursor-grab active:cursor-grabbing" : ""
       }`}
     >
@@ -88,7 +87,7 @@ export default function TaskCard({
       <span className={`absolute inset-y-0 left-0 w-1 ${edgeColor}`} aria-hidden />
 
       <div
-        className={`absolute right-1.5 top-1.5 flex gap-0.5 opacity-0 transition group-hover:opacity-100 [@media(hover:none)]:opacity-100 ${
+        className={`absolute right-1.5 top-1.5 flex gap-0.5 rounded-md bg-white/95 p-0.5 opacity-0 shadow-sm ring-1 ring-slate-200/70 transition group-hover:opacity-100 [@media(hover:none)]:opacity-100 ${
           canEdit ? "" : "hidden"
         }`}
       >
@@ -113,7 +112,7 @@ export default function TaskCard({
       </div>
 
       {projectName && (
-        <div className="mb-1 flex items-center gap-1 pr-12 text-[11px] font-medium text-slate-500">
+        <div className="mb-1 flex items-center gap-1 [@media(hover:none)]:pr-12 text-[11.5px] font-medium text-slate-500">
           <svg viewBox="0 0 20 20" className="h-3 w-3 shrink-0" fill="currentColor">
             <path d="M3 5a2 2 0 012-2h3.5l1.5 1.5H15a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" />
           </svg>
@@ -125,12 +124,9 @@ export default function TaskCard({
       {task.meeting_id !== null ? (
         !canEdit ? (
           <div
-            className="mb-1.5 flex items-center gap-1 pr-12 text-[11px] font-medium text-slate-400"
+            className="mb-1 flex items-center gap-1 [@media(hover:none)]:pr-12 text-[11.5px] font-medium text-slate-400"
             title={`From meeting: ${meetingLabel}`}
           >
-            <svg viewBox="0 0 20 20" className="h-3 w-3 shrink-0" fill="currentColor">
-              <path d="M4 4a2 2 0 012-2h5.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 5a.75.75 0 000 1.5h6a.75.75 0 000-1.5H7zm0 3a.75.75 0 000 1.5h4a.75.75 0 000-1.5H7z" />
-            </svg>
             <span className="truncate">{task.meeting_title}</span>
             {showMeetingDate && <span className="shrink-0">· {shortMeetingDate}</span>}
           </div>
@@ -146,18 +142,15 @@ export default function TaskCard({
                 if (e.key === "Escape") setRenaming(false);
               }}
               disabled={savingTitle}
-              className="w-full rounded border border-slate-300 px-1.5 py-0.5 text-[11px] font-medium text-slate-700 outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-200"
+              className="w-full rounded border border-slate-300 px-1.5 py-0.5 text-xs font-medium text-slate-700 outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-200"
             />
           </div>
         ) : (
           <button
             onClick={startRename}
             title={`From meeting: ${meetingLabel}\nClick to rename (updates all its tasks)`}
-            className="group/title mb-1.5 flex max-w-full items-center gap-1 rounded pr-12 text-[11px] font-medium text-slate-400 transition hover:text-slate-600"
+            className="group/title mb-1 flex max-w-full items-center gap-1 rounded [@media(hover:none)]:pr-12 text-[11.5px] font-medium text-slate-400 transition hover:text-slate-600"
           >
-            <svg viewBox="0 0 20 20" className="h-3 w-3 shrink-0" fill="currentColor">
-              <path d="M4 4a2 2 0 012-2h5.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 5a.75.75 0 000 1.5h6a.75.75 0 000-1.5H7zm0 3a.75.75 0 000 1.5h4a.75.75 0 000-1.5H7z" />
-            </svg>
             <span className="truncate">{task.meeting_title}</span>
             {showMeetingDate && <span className="shrink-0">· {shortMeetingDate}</span>}
             <svg
@@ -170,7 +163,7 @@ export default function TaskCard({
           </button>
         )
       ) : (
-        <div className="mb-1.5 flex items-center gap-1 pr-12 text-[11px] font-medium text-slate-400">
+        <div className="mb-1 flex items-center gap-1 [@media(hover:none)]:pr-12 text-[11.5px] font-medium text-slate-400">
           <svg viewBox="0 0 20 20" className="h-3 w-3 shrink-0" fill="currentColor">
             <path d="M13.586 3.586a2 2 0 112.828 2.828l-8.5 8.5a2 2 0 01-.879.506l-3.012.86a.5.5 0 01-.617-.617l.86-3.012a2 2 0 01.506-.879l8.5-8.5z" />
           </svg>
@@ -180,36 +173,39 @@ export default function TaskCard({
 
       <p
         onClick={() => setExpanded((v) => !v)}
-        className={`pr-12 text-sm font-medium leading-snug text-slate-800 ${
+        className={`text-[14.5px] font-medium leading-snug text-slate-800 ${
           expanded ? "" : "line-clamp-3"
         }`}
       >
         {task.description}
       </p>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
         {task.owner ? (
-          <span className="inline-flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-1.5" title="Owner">
             <span
-              className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-semibold text-white ${avatarColor(
+              className={`flex h-[22px] w-[22px] items-center justify-center rounded-full text-[10px] font-semibold ${avatarColor(
                 task.owner
               )}`}
             >
               {initials(task.owner)}
             </span>
-            <span className="text-xs font-medium text-slate-600">{task.owner}</span>
+            <span className="text-[12.5px] font-medium text-slate-700">{task.owner}</span>
           </span>
         ) : (
-          <span className="text-xs italic text-slate-400">Unassigned</span>
+          <span className="inline-flex items-center gap-1.5 text-[12.5px] italic text-slate-400">
+            <span className="h-[22px] w-[22px] rounded-full border border-dashed border-slate-300" aria-hidden />
+            Unassigned
+          </span>
         )}
 
         {task.deadline && (
           <span
-            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-              overdue ? "bg-rose-50 text-rose-600" : "bg-slate-100 text-slate-600"
+            className={`inline-flex items-center gap-1 whitespace-nowrap text-[12.5px] font-medium ${
+              overdue ? "text-rose-600" : "text-slate-500"
             }`}
           >
-            <svg viewBox="0 0 20 20" className="h-3 w-3" fill="currentColor">
+            <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="currentColor">
               <path d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v9a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zM4 7h12v8H4V7z" />
             </svg>
             {formatDate(task.deadline)}
@@ -219,14 +215,14 @@ export default function TaskCard({
 
         {task.subtask_total > 0 && (
           <span
-            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+            className={`inline-flex items-center gap-1 whitespace-nowrap text-[12.5px] font-medium ${
               task.subtask_done === task.subtask_total
-                ? "bg-emerald-50 text-emerald-700"
-                : "bg-slate-100 text-slate-600"
+                ? "text-emerald-600"
+                : "text-slate-500"
             }`}
             title={`${task.subtask_done} of ${task.subtask_total} subtasks done`}
           >
-            <svg viewBox="0 0 20 20" className="h-3 w-3" fill="currentColor">
+            <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="currentColor">
               <path d="M3 5.5A1.5 1.5 0 014.5 4h.7l1 1H4.5v9h11V8.8l1.5-1.5v7.2A1.5 1.5 0 0115.5 16h-11A1.5 1.5 0 013 14.5v-9zm14.7-1.2a1 1 0 010 1.4l-7 7a1 1 0 01-1.4 0L6 9.4a1 1 0 011.4-1.4l1.6 1.6 6.3-6.3a1 1 0 011.4 0z" />
             </svg>
             {task.subtask_done}/{task.subtask_total}
@@ -235,10 +231,10 @@ export default function TaskCard({
 
         {task.attachment_count > 0 && (
           <span
-            className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600"
+            className="inline-flex items-center gap-1 whitespace-nowrap text-[12.5px] font-medium text-slate-500"
             title={`${task.attachment_count} attachment${task.attachment_count === 1 ? "" : "s"}`}
           >
-            <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.2">
+            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.2">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -255,7 +251,7 @@ export default function TaskCard({
         {task.meeting_id !== null &&
           (isLowConfidence(task.confidence) ? (
             <span
-              className="ml-auto inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-1 ring-1 ring-amber-300/70"
+              className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-md bg-amber-50 px-2 py-1 ring-1 ring-amber-300/70"
               title={`The AI was unsure about this one (${Math.round(
                 task.confidence * 100
               )}% confidence). Check the owner and deadline before relying on it.`}
@@ -267,26 +263,16 @@ export default function TaskCard({
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="text-[11px] font-semibold text-amber-700">Check this</span>
+              <span className="text-xs font-semibold text-amber-700">Check this</span>
             </span>
           ) : (
             <span
-              className="ml-auto inline-flex items-center gap-1.5 rounded-md bg-slate-50 px-2 py-1 ring-1 ring-slate-200/70"
+              className="ml-auto whitespace-nowrap text-[11.5px] tabular-nums text-slate-400"
               title={`The AI is confident this is a real action item (${Math.round(
                 task.confidence * 100
               )}%). Items it is unsure about are flagged for review instead.`}
             >
-              <svg
-                viewBox="0 0 20 20"
-                className={`h-3 w-3 ${confidenceColor(task.confidence)}`}
-                fill="currentColor"
-              >
-                <path d="M2 12a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1H3a1 1 0 01-1-1v-4zm6-4a1 1 0 011-1h2a1 1 0 011 1v8a1 1 0 01-1 1H9a1 1 0 01-1-1V8zm6-4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-              </svg>
-              <span className={`text-[11px] font-semibold tabular-nums ${confidenceColor(task.confidence)}`}>
-                {Math.round(task.confidence * 100)}%
-              </span>
-              <span className="text-[10px] font-medium text-slate-400">confidence</span>
+              {Math.round(task.confidence * 100)}% confidence
             </span>
           ))}
       </div>

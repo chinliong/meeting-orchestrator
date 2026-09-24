@@ -63,13 +63,13 @@ export default function KanbanBoard({
             className={`flex min-h-[240px] flex-col rounded-xl border p-3 transition-colors ${
               isDropTarget
                 ? "border-slate-400 bg-slate-200/70"
-                : "border-slate-200 bg-slate-100/70"
+                : "border-transparent bg-slate-900/[0.035]"
             }`}
           >
             <div className="mb-3 flex items-center gap-2 px-1">
               <span className={`h-2.5 w-2.5 rounded-full ${column.dot}`} />
-              <h2 className="font-display text-sm font-bold text-slate-700">{column.title}</h2>
-              <span className="ml-auto rounded-full bg-white px-2 py-0.5 font-display text-xs font-bold text-slate-500 shadow-sm">
+              <h2 className="font-display text-[15px] font-bold text-slate-700">{column.title}</h2>
+              <span className="ml-auto font-display text-xs font-semibold text-slate-400">
                 {columnTasks.length}
               </span>
             </div>

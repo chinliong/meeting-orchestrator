@@ -63,29 +63,21 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
   return (
     <form
       onSubmit={handleSubmit}
-      className="relative overflow-hidden rounded-2xl bg-ink p-6 text-slate-100 shadow-ink"
+      className="relative overflow-hidden rounded-2xl bg-ink p-6 text-slate-100 shadow-card"
     >
       {/* Concentric arc motif — the geometric signature, kept quiet in the corner. */}
       <span className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full border border-white/15" />
       <span className="pointer-events-none absolute -right-5 -top-5 h-24 w-24 rounded-full border border-white/10" />
-      {/* Soft brand wash for depth. */}
-      <span
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(440px 220px at 112% -12%, rgba(37,99,217,.22) 0%, transparent 62%)",
-        }}
-      />
 
       <div className="relative">
         <div className="mb-3">
-          <h2 className="flex items-center gap-2 font-display text-lg font-bold text-white">
+          <h2 className="flex items-center gap-2 font-display text-[19px] font-bold text-white">
             <svg viewBox="0 0 24 24" className="h-4 w-4 text-brand-100" fill="currentColor">
               <path d="M12 2l1.9 5.1L19 9l-5.1 1.9L12 16l-1.9-5.1L5 9l5.1-1.9L12 2z" />
             </svg>
             New meeting
           </h2>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-[13px] text-slate-400">
             AI extracts decisions, action items, owners &amp; deadlines.
           </p>
         </div>
@@ -107,7 +99,7 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Meeting title (optional)"
-            className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-brand focus:bg-white/10 focus:ring-2 focus:ring-brand/30"
+            className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-[14.5px] text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-brand focus:bg-white/10 focus:ring-2 focus:ring-brand/30"
           />
           <label className="flex w-full items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 transition focus-within:border-brand focus-within:bg-white/10 focus-within:ring-2 focus-within:ring-brand/30">
             <span className="shrink-0 text-xs text-slate-400">Meeting date</span>
@@ -116,7 +108,7 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
               value={meetingDate}
               onChange={(e) => setMeetingDate(e.target.value)}
               title={'When the meeting took place. Deadlines such as "by Friday" are resolved from this date.'}
-              className="min-w-0 flex-1 bg-transparent text-sm text-slate-100 outline-none [color-scheme:dark]"
+              className="min-w-0 flex-1 bg-transparent text-[14.5px] text-slate-100 outline-none [color-scheme:dark]"
             />
           </label>
         </div>
@@ -127,7 +119,7 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
             onChange={(e) => setText(e.target.value)}
             placeholder="Paste the raw meeting transcript here."
             rows={6}
-            className="w-full resize-y rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-brand focus:bg-white/10 focus:ring-2 focus:ring-brand/30"
+            className="w-full resize-y rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-[14.5px] text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-brand focus:bg-white/10 focus:ring-2 focus:ring-brand/30"
           />
         ) : (
           <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/20 bg-white/5 px-4 py-8 text-center transition hover:border-white/40 hover:bg-white/10">
@@ -158,22 +150,14 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
         <button
           type="submit"
           disabled={submitting}
-          className="group mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-ink-700 to-ink px-4 py-2.5 font-display text-sm font-semibold text-white shadow-brand ring-1 ring-brand/40 transition hover:brightness-110 disabled:opacity-50"
+          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 font-display text-[14.5px] font-semibold text-ink transition hover:bg-slate-100 disabled:opacity-60"
         >
           {submitting ? (
             <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
             </svg>
-          ) : (
-            <svg
-              viewBox="0 0 24 24"
-              className="h-4 w-4 text-brand-100 transition-transform group-hover:scale-110"
-              fill="currentColor"
-            >
-              <path d="M12 2l1.9 5.1L19 9l-5.1 1.9L12 16l-1.9-5.1L5 9l5.1-1.9L12 2z" />
-            </svg>
-          )}
+          ) : null}
           {submitting
             ? mode === "audio"
               ? "Transcribing & parsing..."

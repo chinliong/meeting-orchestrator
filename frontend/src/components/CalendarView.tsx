@@ -130,7 +130,8 @@ export default function CalendarView({ tasks, canEdit, onEditTask, onDeleteTask,
 
         {task.owner && (
           <span
-            className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[8px] font-semibold text-white ${avatarColor(
+            title={task.owner}
+            className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[8px] font-semibold ${avatarColor(
               task.owner
             )} ${canEdit ? "group-hover/chip:hidden [@media(hover:none)]:hidden" : ""}`}
           >

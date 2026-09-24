@@ -10,27 +10,35 @@ export function initials(name: string): string {
     .toUpperCase();
 }
 
-// Distinct per-person colours with warm/cool variety so owners are easy to tell apart.
-// Deliberately avoids brand blue (the To Do status) and emerald (Done) so an avatar is
-// never confused with a status colour.
+// Soft per-person tints: a pale fill with the initials in a deep shade of the same hue. Kept pale
+// so they never compete with the saturated status colours on the board, and written out in full so
+// Tailwind keeps every class.
 const AVATAR_COLORS = [
-  "bg-indigo-500",
-  "bg-rose-500",
-  "bg-amber-500",
-  "bg-violet-500",
-  "bg-orange-500",
-  "bg-teal-500",
-  "bg-fuchsia-500",
-  "bg-cyan-600",
-  "bg-pink-500",
+  "bg-indigo-100 text-indigo-700",
+  "bg-violet-100 text-violet-700",
+  "bg-fuchsia-100 text-fuchsia-700",
+  "bg-pink-100 text-pink-700",
+  "bg-sky-100 text-sky-700",
+  "bg-teal-100 text-teal-700",
+  "bg-orange-100 text-orange-700",
+  "bg-stone-200 text-stone-700",
 ];
 
+/**
+ * The avatar colour for a name; the same name always gets the same colour. FNV-1a with a final
+ * mix, so names spread evenly over the palette (a plain `hash * 31` leaves the low bits, which pick
+ * the colour, poorly mixed, and many names collide).
+ */
 export function avatarColor(name: string): string {
-  let hash = 0;
+  let x = 0x811c9dc5;
   for (let i = 0; i < name.length; i++) {
-    hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+    x ^= name.charCodeAt(i);
+    x = Math.imul(x, 0x01000193);
   }
-  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+  x ^= x >>> 15;
+  x = Math.imul(x, 0x2c1b3c6d);
+  x ^= x >>> 12;
+  return AVATAR_COLORS[(x >>> 0) % AVATAR_COLORS.length];
 }
 
 /** Format an ISO date (YYYY-MM-DD) as e.g. "Jun 19". */

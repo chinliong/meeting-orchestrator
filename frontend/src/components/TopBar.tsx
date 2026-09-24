@@ -40,8 +40,8 @@ export default function TopBar({
               className="h-10 w-10 shrink-0 rounded-full object-cover"
             />
             <div className="min-w-0 leading-tight">
-              <h1 className="truncate font-display text-base font-bold tracking-tight text-slate-900">Meeting Orchestrator</h1>
-              <p className="hidden truncate text-xs text-slate-500 sm:block">
+              <h1 className="truncate font-display text-[17px] font-bold tracking-tight text-slate-900">Meeting Orchestrator</h1>
+              <p className="hidden truncate text-[13px] text-slate-500 sm:block">
                 AI action items from meeting transcripts
               </p>
             </div>
