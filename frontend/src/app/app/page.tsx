@@ -578,7 +578,7 @@ export default function DashboardPage() {
           <EmptyProjects onCreate={() => setProjectModal("create")} />
         ) : (
           <>
-            <div className="mb-5 flex items-start justify-between gap-3">
+            <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="font-display text-[26px] font-bold tracking-tight text-slate-900">{selectedProject?.name}</h2>
@@ -592,7 +592,7 @@ export default function DashboardPage() {
                   <p className="mt-0.5 text-[15px] text-slate-500">{selectedProject.description}</p>
                 )}
               </div>
-              <div className="flex shrink-0 gap-0.5">
+              <div className="-ml-2.5 flex shrink-0 flex-wrap gap-0.5 sm:ml-0">
                 <button
                   onClick={() => setShareProject(selectedProject)}
                   className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-900/5 hover:text-slate-900"

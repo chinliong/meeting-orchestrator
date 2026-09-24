@@ -86,8 +86,10 @@ export default function TaskCard({
       {/* Status accent edge — quietly colour-codes each card to its column. */}
       <span className={`absolute inset-y-0 left-0 w-1 ${edgeColor}`} aria-hidden />
 
+      {/* z-10: the meeting line runs underneath these buttons, and its hidden rename icon would
+          otherwise sit on top and take the click. */}
       <div
-        className={`absolute right-1.5 top-1.5 flex gap-0.5 rounded-md bg-white/95 p-0.5 opacity-0 shadow-sm ring-1 ring-slate-200/70 transition group-hover:opacity-100 [@media(hover:none)]:opacity-100 ${
+        className={`absolute right-1.5 top-1.5 z-10 flex gap-0.5 rounded-md bg-white/95 p-0.5 opacity-0 shadow-sm ring-1 ring-slate-200/70 transition group-hover:opacity-100 [@media(hover:none)]:opacity-100 ${
           canEdit ? "" : "hidden"
         }`}
       >

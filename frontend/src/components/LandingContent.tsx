@@ -253,6 +253,9 @@ export default function LandingContent() {
             <Figure dot="bg-amber-400" tone="text-amber-400" label="Deadlines" value="96%" body="of deadlines it sets fall on exactly the right date." />
             <Figure dot="bg-emerald-500" tone="text-emerald-500" label="Valid output" value="100%" body="of results came back complete and in the right format." />
           </div>
+          <p className="mt-5 text-center text-sm text-slate-500">
+            Measured with Gemini Flash on eight annotated meeting transcripts, eight runs each.
+          </p>
         </section>
 
         {/* ---------- closing ---------- */}
@@ -284,14 +287,9 @@ export default function LandingContent() {
       </main>
 
       {/* ---------- footer ---------- */}
-      <footer className="border-t border-slate-200 bg-white/60 px-5 pb-10 pt-6 text-xs text-slate-500 sm:px-6">
+      <footer className="border-t border-slate-200 bg-white/60 px-5 py-8 text-xs text-slate-500 sm:px-6">
         <div className="mx-auto max-w-6xl leading-relaxed">
-          <p>
-            Accuracy figures: measured on eight annotated meeting transcripts, eight runs each, using
-            Gemini Flash with the structured prompt the app runs. Recordings are transcribed with
-            Deepgram Nova-3.
-          </p>
-          <div className="mt-5 flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo.png" alt="" className="h-6 w-6 rounded-full object-cover" />
