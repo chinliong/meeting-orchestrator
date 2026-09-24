@@ -372,37 +372,39 @@ function Figure({
 /**
  * A modern Pro Max-style phone drawn in CSS (titanium band, black bezel, Dynamic Island, side
  * buttons and a 9:41 status bar) around a screenshot captured at a 440 x 956 point screen. Drawn
- * rather than using a manufacturer's device artwork.
+ * rather than using a manufacturer's device artwork. Every part is sized in container units
+ * (cqw, a percentage of the frame's width), so the island, status bar and corners keep their
+ * proportions however small the frame is drawn, e.g. on a phone.
  */
 function PhoneFrame({ src, width, height, alt }: { src: string; width: number; height: number; alt: string }) {
   return (
-    <div className="relative mx-auto w-[60%] max-w-[270px]">
-      <span aria-hidden className="absolute -left-[3px] top-[15%] h-7 w-[3px] rounded-l-sm bg-[#3b3b40]" />
-      <span aria-hidden className="absolute -left-[3px] top-[24%] h-12 w-[3px] rounded-l-sm bg-[#3b3b40]" />
-      <span aria-hidden className="absolute -left-[3px] top-[33%] h-12 w-[3px] rounded-l-sm bg-[#3b3b40]" />
-      <span aria-hidden className="absolute -right-[3px] top-[26%] h-16 w-[3px] rounded-r-sm bg-[#3b3b40]" />
-      <div className="rounded-[3.1rem] bg-gradient-to-b from-[#5b5b61] via-[#2e2e33] to-[#1d1d20] p-[3px] shadow-ink">
-        <div className="rounded-[2.95rem] bg-black p-[7px]">
-          <div className="relative overflow-hidden rounded-[2.55rem] bg-white">
-            <div className="flex h-8 items-center justify-between px-6 pt-1 text-[11px] font-semibold text-slate-900">
+    <div className="relative mx-auto w-[60%] max-w-[270px] [container-type:inline-size]">
+      <span aria-hidden className="absolute -left-[1.1cqw] top-[15%] h-[9cqw] w-[1.1cqw] rounded-l-sm bg-[#3b3b40]" />
+      <span aria-hidden className="absolute -left-[1.1cqw] top-[24%] h-[15cqw] w-[1.1cqw] rounded-l-sm bg-[#3b3b40]" />
+      <span aria-hidden className="absolute -left-[1.1cqw] top-[33%] h-[15cqw] w-[1.1cqw] rounded-l-sm bg-[#3b3b40]" />
+      <span aria-hidden className="absolute -right-[1.1cqw] top-[26%] h-[20cqw] w-[1.1cqw] rounded-r-sm bg-[#3b3b40]" />
+      <div className="rounded-[17.5cqw] bg-gradient-to-b from-[#5b5b61] via-[#2e2e33] to-[#1d1d20] p-[1.1cqw] shadow-ink">
+        <div className="rounded-[16.4cqw] bg-black p-[2.6cqw]">
+          <div className="relative overflow-hidden rounded-[13.8cqw] bg-white">
+            <div className="flex h-[11.5cqw] items-center justify-between px-[8cqw] pt-[1cqw] text-[4.1cqw] font-semibold leading-none text-slate-900">
               <span>9:41</span>
-              <span className="flex items-center gap-1" aria-hidden>
-                <svg viewBox="0 0 18 12" className="h-2.5 w-3.5" fill="currentColor">
+              <span className="flex items-center gap-[1.3cqw]" aria-hidden>
+                <svg viewBox="0 0 18 12" className="h-[3cqw] w-[4.5cqw]" fill="currentColor">
                   <rect x="0" y="8" width="3" height="4" rx="1" />
                   <rect x="5" y="5.5" width="3" height="6.5" rx="1" />
                   <rect x="10" y="3" width="3" height="9" rx="1" />
                   <rect x="15" y="0" width="3" height="12" rx="1" />
                 </svg>
-                <svg viewBox="0 0 16 12" className="h-2.5 w-3" fill="currentColor">
+                <svg viewBox="0 0 16 12" className="h-[3cqw] w-[4cqw]" fill="currentColor">
                   <path d="M8 2.2c2.3 0 4.4.9 6 2.4l1.1-1.2A10.2 10.2 0 008 .5 10.2 10.2 0 00.9 3.4L2 4.6a8.5 8.5 0 016-2.4zm0 3.4c1.4 0 2.6.5 3.6 1.4l1.1-1.2A6.9 6.9 0 008 3.9a6.9 6.9 0 00-4.7 1.9L4.4 7A5.2 5.2 0 018 5.6zm0 3.3c.5 0 1 .2 1.3.5L8 10.8 6.7 9.4c.3-.3.8-.5 1.3-.5z" />
                 </svg>
-                <span className="relative flex h-[11px] w-[22px] items-center rounded-[3px] border border-slate-900/40 p-[1.5px]">
-                  <span className="h-full w-[78%] rounded-[1.5px] bg-slate-900" />
-                  <span className="absolute -right-[3px] top-1/2 h-1 w-[1.5px] -translate-y-1/2 rounded-r bg-slate-900/40" />
+                <span className="relative flex h-[3.4cqw] w-[6.8cqw] items-center rounded-[1cqw] border border-slate-900/40 p-[0.5cqw]">
+                  <span className="h-full w-[78%] rounded-[0.5cqw] bg-slate-900" />
+                  <span className="absolute -right-[1cqw] top-1/2 h-[1.3cqw] w-[0.5cqw] -translate-y-1/2 rounded-r bg-slate-900/40" />
                 </span>
               </span>
             </div>
-            <span aria-hidden className="absolute left-1/2 top-[7px] h-[21px] w-[31%] -translate-x-1/2 rounded-full bg-black" />
+            <span aria-hidden className="absolute left-1/2 top-[2.6cqw] h-[8cqw] w-[28cqw] -translate-x-1/2 rounded-full bg-black" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={src} width={width} height={height} loading="lazy" alt={alt} className="block w-full" />
           </div>
