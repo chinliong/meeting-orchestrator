@@ -288,6 +288,12 @@ unusable.
 - An expired login (tokens last 30 days) returns `401` rather than being treated as a guest, so
   it cannot create a board with no owner. The frontend then signs the user out and shows the
   sign-in screen. A board drag whose save fails moves the card back and shows the error.
+- The dashboard only shows the tasks of the board on screen: a slow task load for a board the
+  user has since left is discarded, and a transcript or recording that finishes processing
+  refreshes the current board. The owner filter and the undo history are reset on switching
+  boards. Polling a recording keeps its own board's token and rides out brief network errors,
+  and waits up to 20 minutes, since converting a long recording alone takes minutes on the free
+  server; past that it tells the user the tasks will still arrive rather than invite a re-upload.
 - The schema is created on startup via `create_all`, which adds missing tables but never alters
   existing ones. New tables (e.g. `subtasks`, `attachments`) appear automatically; a new column on
   an existing table needs an additive migration (`app/migrate_add_meeting_date.py`,

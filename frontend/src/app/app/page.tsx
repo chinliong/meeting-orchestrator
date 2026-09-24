@@ -159,36 +159,63 @@ export default function DashboardPage() {
     [projects]
   );
 
+  // Numbers each task load, so a slow response for a board the user has since left cannot
+  // overwrite the tasks of the board they are now looking at.
+  const loadSeqRef = useRef(0);
+
   // Set the active board's capability token, then (re)load its tasks.
   const reloadTasks = useCallback(() => {
+    const seq = ++loadSeqRef.current;
+    const apply = (list: Task[]) => {
+      if (seq === loadSeqRef.current) setTasks(list);
+    };
+    const fail = (err: Error) => {
+      if (seq === loadSeqRef.current) setLoadError(err.message);
+    };
     if (searchAllProjects && session?.mode === "user") {
       setWorkspaceToken(null);
-      api.listTasks({}).then(setTasks).catch((err) => setLoadError(err.message));
+      api.listTasks({}).then(apply).catch(fail);
       return;
     }
     const proj = projects.find((p) => p.id === selectedProjectId) ?? null;
     setWorkspaceToken(proj ? workspaceTokenFor(proj) : null);
     if (selectedProjectId) {
-      api
-        .listTasks({ projectId: selectedProjectId })
-        .then(setTasks)
-        .catch((err) => setLoadError(err.message));
+      api.listTasks({ projectId: selectedProjectId }).then(apply).catch(fail);
     } else {
       setTasks([]);
     }
   }, [selectedProjectId, searchAllProjects, projects, session]);
 
+  // The latest reloadTasks. A transcript or recording can take minutes to process, and the user
+  // may switch boards meanwhile; reloading through this ref refreshes the board now on screen,
+  // not the one that was open when the upload started.
+  const reloadTasksRef = useRef(reloadTasks);
+  reloadTasksRef.current = reloadTasks;
+
   useEffect(() => {
     if (ready) reloadTasks();
   }, [ready, reloadTasks]);
+
+  // A board's owner filter does not carry over to another board, where it could hide every task.
+  useEffect(() => {
+    setSelectedOwner("");
+  }, [selectedProjectId, searchAllProjects]);
 
   const owners = useMemo(
     () => Array.from(new Set(tasks.map((t) => t.owner).filter(Boolean))) as string[],
     [tasks]
   );
 
+  // The filter only applies while some task still has that owner (e.g. not after the owner's last
+  // task is deleted or reassigned); otherwise it would hide every task with no way to clear it.
+  const activeOwner = owners.includes(selectedOwner) ? selectedOwner : "";
+  // Clear it for good, so it does not silently come back if that owner reappears (e.g. on undo).
+  useEffect(() => {
+    if (selectedOwner && !owners.includes(selectedOwner)) setSelectedOwner("");
+  }, [owners, selectedOwner]);
+
   const visibleTasks = useMemo(() => {
-    let result = selectedOwner ? tasks.filter((t) => t.owner === selectedOwner) : tasks;
+    let result = activeOwner ? tasks.filter((t) => t.owner === activeOwner) : tasks;
     const q = search.trim().toLowerCase();
     if (q) {
       result = result.filter((t) =>
@@ -205,7 +232,7 @@ export default function DashboardPage() {
       });
     }
     return result;
-  }, [tasks, selectedOwner, sortByDeadline, search]);
+  }, [tasks, activeOwner, sortByDeadline, search]);
 
   // Calendar plots task deadlines; it works in any task view (single board or across all).
   const activeView: BoardView = view;
@@ -213,8 +240,20 @@ export default function DashboardPage() {
   // --- undo: a shared stack whose entries each perform the inverse of an action ---
   const undoStackRef = useRef<UndoAction[]>([]);
   const [undoDepth, setUndoDepth] = useState(0);
+  // Bumped whenever the history is cleared. A handler notes it before its request, so an action
+  // that finishes after the user has switched boards is not added to the new board's history.
+  const undoGenRef = useRef(0);
 
-  const pushUndo = useCallback((action: UndoAction) => {
+  // Undo runs with the current board's credentials and updates the tasks on screen, so its
+  // history is cleared on switching board or view, and on signing in or out.
+  useEffect(() => {
+    undoGenRef.current += 1;
+    undoStackRef.current = [];
+    setUndoDepth(0);
+  }, [selectedProjectId, searchAllProjects, session?.mode, user?.id]);
+
+  const pushUndo = useCallback((action: UndoAction, gen?: number) => {
+    if (gen !== undefined && gen !== undoGenRef.current) return;
     undoStackRef.current.push(action);
     if (undoStackRef.current.length > 50) undoStackRef.current.shift();
     setUndoDepth(undoStackRef.current.length);
@@ -249,6 +288,7 @@ export default function DashboardPage() {
   // --- task handlers ---
   const handleStatusChange = async (taskId: number, status: TaskStatus) => {
     const prev = tasks.find((t) => t.id === taskId)?.status;
+    const gen = undoGenRef.current;
     setTasks((cur) => cur.map((t) => (t.id === taskId ? { ...t, status } : t)));
     try {
       await api.updateTask(taskId, { status });
@@ -265,7 +305,7 @@ export default function DashboardPage() {
           setTasks((cur) => cur.map((t) => (t.id === taskId ? { ...t, status: prev } : t)));
           await api.updateTask(taskId, { status: prev });
         },
-      });
+      }, gen);
     }
   };
 
@@ -274,6 +314,7 @@ export default function DashboardPage() {
     patch: { description?: string; owner?: string | null; deadline?: string | null; status?: TaskStatus }
   ) => {
     const before = tasks.find((t) => t.id === taskId);
+    const gen = undoGenRef.current;
     const updated = await api.updateTask(taskId, patch);
     setTasks((cur) => cur.map((t) => (t.id === taskId ? updated : t)));
     if (before) {
@@ -289,7 +330,7 @@ export default function DashboardPage() {
           const reverted = await api.updateTask(taskId, revert);
           setTasks((cur) => cur.map((t) => (t.id === taskId ? reverted : t)));
         },
-      });
+      }, gen);
     }
   };
 
@@ -317,6 +358,7 @@ export default function DashboardPage() {
   };
 
   const handleDelete = async (taskId: number) => {
+    const gen = undoGenRef.current;
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
     try {
       const snapshot = await api.deleteTask(taskId);
@@ -326,10 +368,10 @@ export default function DashboardPage() {
           const restored = await api.restoreTask(snapshot);
           setTasks((cur) => (cur.some((t) => t.id === restored.id) ? cur : [restored, ...cur]));
         },
-      });
+      }, gen);
     } catch (err) {
       setLoadError((err as Error).message);
-      reloadTasks(); // delete failed — resync so the card isn't wrongly hidden
+      reloadTasksRef.current(); // delete failed — resync so the card isn't wrongly hidden
     }
   };
 
@@ -341,25 +383,40 @@ export default function DashboardPage() {
     if (meeting.status === "failed") {
       throw new Error(meeting.error_message || "The transcript could not be processed. Please try again.");
     }
-    reloadTasks();
+    reloadTasksRef.current();
   };
 
   const handleAudioSubmit = async (title: string, file: File, meetingDate: string) => {
     if (!selectedProjectId) return;
+    // The board this recording belongs to, whose token the polling keeps using.
+    const board = projects.find((p) => p.id === selectedProjectId);
+    const boardToken = board ? workspaceTokenFor(board) : undefined;
     const meeting = await api.submitAudio(selectedProjectId, title, file, meetingDate);
-    const deadline = Date.now() + 5 * 60 * 1000;
+    // A long recording can take many minutes on the free server (converting the audio alone runs
+    // for minutes). The job keeps going on the server whatever the browser does, so give up
+    // waiting only after a generous limit, and then say so rather than invite a second upload.
+    const deadline = Date.now() + 20 * 60 * 1000;
     let current = meeting;
     while (current.status === "processing" || current.status === "pending") {
       if (Date.now() > deadline) {
-        throw new Error("Transcription is taking too long. Please try again or use a shorter file.");
+        throw new Error(
+          "This recording is still being processed. Its tasks will be added to the board when it " +
+            "finishes, so there is no need to upload it again. Refresh the page later to see them."
+        );
       }
       await new Promise((resolve) => setTimeout(resolve, 2500));
-      current = await api.getMeeting(meeting.id);
+      try {
+        current = await api.getMeeting(meeting.id, boardToken);
+      } catch (err) {
+        // A network error (e.g. the server restarting) is temporary: keep polling. An HTTP error
+        // such as a 404 (the board was deleted) is final.
+        if (err instanceof ApiError) throw err;
+      }
     }
     if (current.status === "failed") {
       throw new Error(current.error_message || "Transcription failed.");
     }
-    reloadTasks();
+    reloadTasksRef.current();
   };
 
   // --- project handlers ---
@@ -692,7 +749,7 @@ export default function DashboardPage() {
                 {owners.length > 0 && (
                   <Filters
                     owners={owners}
-                    selectedOwner={selectedOwner}
+                    selectedOwner={activeOwner}
                     onOwnerChange={setSelectedOwner}
                     sortByDeadline={sortByDeadline}
                     onSortToggle={() => setSortByDeadline((v) => !v)}

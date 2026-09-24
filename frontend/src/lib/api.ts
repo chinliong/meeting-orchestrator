@@ -83,7 +83,8 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     ...(options?.headers as Record<string, string> | undefined),
   };
   if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
-  if (workspaceToken) headers["X-Workspace-Token"] = workspaceToken;
+  // A caller may pin a specific board's token (see getMeeting); otherwise use the active board's.
+  if (workspaceToken && !headers["X-Workspace-Token"]) headers["X-Workspace-Token"] = workspaceToken;
 
   const res = await fetchWithRetry(`${API_BASE}${path}`, { ...options, headers });
   await throwIfFailed(res, options?.method ?? "GET", path);
@@ -258,7 +259,10 @@ export const api = {
       }),
     }),
 
-  getMeeting: (id: number) => request<Meeting>(`/transcripts/${id}`),
+  // `boardToken` pins the token of the board the meeting belongs to, so polling a recording keeps
+  // working after the user switches to another board.
+  getMeeting: (id: number, boardToken?: string) =>
+    request<Meeting>(`/transcripts/${id}`, boardToken ? { headers: { "X-Workspace-Token": boardToken } } : undefined),
 
   updateMeeting: (id: number, title: string) =>
     request<Meeting>(`/transcripts/${id}`, { method: "PATCH", body: JSON.stringify({ title }) }),

@@ -26,7 +26,8 @@ recordings for end-to-end processing.
   (e.g. `2/5`) and an attachment count.
 - **Undo**: an Undo button (in the toolbar and inside the task card) and ⌘Z / Ctrl+Z reverse
   status changes, field edits, reschedules, subtask changes, and deletes; a deleted task is
-  restored with its original id.
+  restored with its original id. The undo history covers the board on screen and is cleared on
+  switching boards or signing in or out.
 - **Manual & sourced tasks**: tasks are usually extracted from a meeting (the source meeting
   title shows on each card and can be renamed inline), but you can also add tasks by hand for
   work raised outside a captured meeting.
