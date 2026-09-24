@@ -1,6 +1,6 @@
 "use client";
 
-import ProjectPicker from "@/components/ProjectPicker";
+import ProjectPicker, { type ProjectScope } from "@/components/ProjectPicker";
 import type { Project, User } from "@/lib/types";
 
 interface Props {
@@ -12,6 +12,8 @@ interface Props {
   onLogin: () => void;
   onLogout: () => void;
   onOpenAccount: () => void;
+  /** Offers "All projects" / "Choose projects…" in the picker (signed-in owners of 2+ boards). */
+  scope?: ProjectScope;
 }
 
 const ACCOUNT_ICON = "M10 10a4 4 0 100-8 4 4 0 000 8zm0 2c-4 0-7 2.2-7 5v1h14v-1c0-2.8-3-5-7-5z";
@@ -25,6 +27,7 @@ export default function TopBar({
   onLogin,
   onLogout,
   onOpenAccount,
+  scope,
 }: Props) {
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur">
@@ -87,6 +90,7 @@ export default function TopBar({
               projects={projects}
               selectedProjectId={selectedProjectId}
               onSelect={onSelectProject}
+              scope={scope}
             />
           )}
           <button

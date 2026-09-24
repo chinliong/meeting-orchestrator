@@ -9,7 +9,7 @@ import EditTaskModal from "@/components/EditTaskModal";
 import Filters from "@/components/Filters";
 import KanbanBoard from "@/components/KanbanBoard";
 import ProjectModal from "@/components/ProjectModal";
-import ProjectScopePicker from "@/components/ProjectScopePicker";
+import type { ProjectScope } from "@/components/ProjectPicker";
 import ShareModal from "@/components/ShareModal";
 import StatsBar from "@/components/StatsBar";
 import TopBar from "@/components/TopBar";
@@ -153,6 +153,10 @@ export default function DashboardPage() {
 
   const selectedProject = projects.find((p) => p.id === selectedProjectId) ?? null;
   const canEdit = selectedProject?.access_level === "edit";
+  // Several projects at once is for reviewing: the cards stay editable (they are the user's own
+  // boards), but adding a meeting or task needs one project, so capture shows for one only.
+  const cardsEditable = searchAllProjects || !!canEdit;
+  const showCapture = !searchAllProjects && !!canEdit;
 
   // The task the card is editing, resolved live from state so edits/undo are reflected.
   const editingTask = editingTaskId != null ? tasks.find((t) => t.id === editingTaskId) ?? null : null;
@@ -162,6 +166,49 @@ export default function DashboardPage() {
     () => (user ? projects.filter((p) => p.owner_user_id === user.id) : []),
     [projects, user]
   );
+
+  const shownProjects = useMemo(
+    () => (boardScope ? ownedProjects.filter((p) => boardScope.includes(p.id)) : ownedProjects),
+    [ownedProjects, boardScope]
+  );
+  const viewTitle =
+    boardScope && shownProjects.length < ownedProjects.length
+      ? `${shownProjects.length} project${shownProjects.length === 1 ? "" : "s"}`
+      : "All projects";
+  // Which projects are shown, kept to one short line however many there are: all of them are
+  // summarised by count, and a long chosen list names the first two and counts the rest.
+  const shownNames = shownProjects.map((p) => p.name);
+  const viewSummary =
+    viewTitle === "All projects"
+      ? `all ${ownedProjects.length} of your projects`
+      : shownNames.length <= 3
+        ? shownNames.length === 1
+          ? shownNames[0]
+          : `${shownNames.slice(0, -1).join(", ")} and ${shownNames[shownNames.length - 1]}`
+        : `${shownNames.slice(0, 2).join(", ")} and ${shownNames.length - 2} more projects`;
+
+  const handleSelectProject = (id: number) => {
+    setSearchAllProjects(false);
+    setSelectedProjectId(id);
+  };
+
+  // The multi-project view lives in the project picker, for signed-in owners of 2+ boards.
+  const projectScope: ProjectScope | undefined =
+    user && ownedProjects.length > 1
+      ? {
+          ownedIds: ownedProjects.map((p) => p.id),
+          active: searchAllProjects,
+          selected: boardScope,
+          onShowAll: () => {
+            setBoardScope(null);
+            setSearchAllProjects(true);
+          },
+          onShowSome: (ids) => {
+            setBoardScope(ids);
+            setSearchAllProjects(true);
+          },
+        }
+      : undefined;
 
   const projectNames = useMemo(
     () => new Map(projects.map((p) => [p.id, p.name])),
@@ -220,6 +267,7 @@ export default function DashboardPage() {
   // A board selection belongs to the account that made it.
   useEffect(() => {
     setBoardScope(null);
+    setSearchAllProjects(false);
   }, [user?.id]);
 
   const owners = useMemo(
@@ -580,7 +628,8 @@ export default function DashboardPage() {
       <TopBar
         projects={projects}
         selectedProjectId={selectedProjectId}
-        onSelectProject={setSelectedProjectId}
+        onSelectProject={handleSelectProject}
+        scope={projectScope}
         onNewProject={() => setProjectModal("create")}
         user={user}
         onLogin={() => setShowAuth(true)}
@@ -602,17 +651,26 @@ export default function DashboardPage() {
             <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="font-display text-[26px] font-bold tracking-tight text-slate-900">{selectedProject?.name}</h2>
-                  {!canEdit && (
+                  <h2 className="font-display text-[26px] font-bold tracking-tight text-slate-900">
+                    {searchAllProjects ? viewTitle : selectedProject?.name}
+                  </h2>
+                  {!searchAllProjects && !canEdit && (
                     <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
                       View only
                     </span>
                   )}
                 </div>
-                {selectedProject?.description && (
-                  <p className="mt-0.5 text-[15px] text-slate-500">{selectedProject.description}</p>
+                {searchAllProjects ? (
+                  <p className="mt-0.5 text-[15px] text-slate-500" title={shownNames.join(", ")}>
+                    Showing tasks from {viewSummary}. Pick a single project to add meetings or tasks.
+                  </p>
+                ) : (
+                  selectedProject?.description && (
+                    <p className="mt-0.5 text-[15px] text-slate-500">{selectedProject.description}</p>
+                  )
                 )}
               </div>
+              {!searchAllProjects && (
               <div className="-ml-2.5 flex shrink-0 flex-wrap gap-0.5 sm:ml-0">
                 <button
                   onClick={() => setShareProject(selectedProject)}
@@ -649,14 +707,15 @@ export default function DashboardPage() {
                   </>
                 )}
               </div>
+              )}
             </div>
 
             <div className="mb-6">
               <StatsBar tasks={tasks} />
             </div>
 
-            <div className={canEdit ? "grid gap-6 lg:grid-cols-[340px_1fr]" : ""}>
-              {canEdit && (
+            <div className={showCapture ? "grid gap-6 lg:grid-cols-[340px_1fr]" : ""}>
+              {showCapture && (
                 <div className="lg:sticky lg:top-20 lg:self-start">
                   <TranscriptUpload onSubmitText={handleTranscriptSubmit} onSubmitAudio={handleAudioSubmit} />
                 </div>
@@ -698,16 +757,6 @@ export default function DashboardPage() {
                   {/* Action controls: keep these on one tidy row (they share a line on mobile,
                       while the search box gets its own full-width row above). */}
                   <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-normal">
-                  {user && ownedProjects.length > 1 && (
-                    <ProjectScopePicker
-                      projects={ownedProjects}
-                      active={searchAllProjects}
-                      selected={boardScope}
-                      onThisProject={() => setSearchAllProjects(false)}
-                      onActivate={() => setSearchAllProjects(true)}
-                      onChange={setBoardScope}
-                    />
-                  )}
                   <div className="flex shrink-0 rounded-lg bg-slate-900/[0.05] p-1 text-sm font-medium">
                     <button
                       onClick={() => setView("board")}
@@ -729,7 +778,7 @@ export default function DashboardPage() {
                       Calendar
                     </button>
                   </div>
-                  {canEdit && (
+                  {cardsEditable && (
                     <div className="flex items-center gap-2">
                       <button
                         onClick={handleUndo}
@@ -743,6 +792,7 @@ export default function DashboardPage() {
                         </svg>
                         <span className="hidden sm:inline">Undo</span>
                       </button>
+                      {showCapture && (
                       <button
                         onClick={() => setCreatingTask(true)}
                         className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-ink px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-ink-700"
@@ -752,6 +802,7 @@ export default function DashboardPage() {
                         </svg>
                         Add task
                       </button>
+                      )}
                     </div>
                   )}
                   </div>
@@ -771,7 +822,7 @@ export default function DashboardPage() {
                 {activeView === "calendar" ? (
                   <CalendarView
                     tasks={visibleTasks}
-                    canEdit={!!canEdit}
+                    canEdit={cardsEditable}
                     onEditTask={(t) => setEditingTaskId(t.id)}
                     onDeleteTask={handleDelete}
                     onReschedule={(taskId, deadline) => handleEditTask(taskId, { deadline })}
@@ -784,7 +835,7 @@ export default function DashboardPage() {
                   <KanbanBoard
                     tasks={visibleTasks}
                     projectNames={searchAllProjects ? projectNames : undefined}
-                    canEdit={!!canEdit}
+                    canEdit={cardsEditable}
                     onStatusChange={handleStatusChange}
                     onEdit={(t) => setEditingTaskId(t.id)}
                     onDelete={handleDelete}
@@ -826,7 +877,7 @@ export default function DashboardPage() {
       <EditTaskModal
         task={editingTask}
         createMode={creatingTask}
-        canEdit={!!canEdit}
+        canEdit={cardsEditable}
         canUndo={undoDepth > 0}
         syncNonce={undoNonce}
         onUndo={handleUndo}

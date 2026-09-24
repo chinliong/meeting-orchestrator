@@ -75,7 +75,8 @@ flowchart LR
 
 - **Frontend (Next.js/React):** auth gate (sign in / create account / continue as guest), a
   **Kanban board** and a **month calendar** view (toggle), a one-board / all-boards / chosen-boards
-  scope for signed-in users (the chosen set filters the all-boards task list in the browser),
+  scope for signed-in users, picked in the top-bar project picker (the chosen set filters the
+  all-boards task list in the browser; adding meetings or tasks needs a single board),
   owner filter / deadline sort / text search, an **undo** stack (button + ⌘Z/Ctrl+Z) over status/edit/reschedule/subtask/delete actions,
   transcript-and-audio upload, and a share dialog exposing view/edit links. A small session layer
   persists the account token and guest boards in `localStorage`. Talks to the backend via
