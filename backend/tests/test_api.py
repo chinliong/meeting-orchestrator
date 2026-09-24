@@ -1,5 +1,7 @@
 """End-to-end API tests with the LLM stubbed out."""
 import json
+import os
+import tempfile
 from datetime import date
 
 import pytest
@@ -94,6 +96,18 @@ def test_change_password(client, account):
 def test_change_password_requires_auth(client):
     resp = client.post("/api/v1/auth/password", json={"current_password": "a", "new_password": "b"})
     assert resp.status_code == 401
+
+
+def test_delete_account_after_password_reset_request(client, account, monkeypatch):
+    # A reset request leaves a password_resets row pointing at the user. Deleting the account
+    # must remove it too, or the foreign key blocks the delete (a 500 on Postgres).
+    monkeypatch.setattr("app.api.auth.send_email", lambda **kw: None)
+    assert client.post("/api/v1/auth/forgot-password", json={"email": "owner@example.com"}).status_code == 204
+
+    resp = client.request("DELETE", "/api/v1/auth/me", headers=account["headers"])
+    assert resp.status_code == 204
+    login = client.post("/api/v1/auth/login", json={"email": "owner@example.com", "password": "pw12345"})
+    assert login.status_code == 401
 
 
 def test_delete_account_orphans_projects(client, account):
@@ -593,6 +607,86 @@ def test_audio_endpoint_unavailable_without_whisper(client, project, monkeypatch
     )
     assert resp.status_code == 503
     assert "whisper" in resp.json()["detail"].lower()
+
+
+def test_audio_upload_over_the_limit_is_rejected(client, project, monkeypatch):
+    monkeypatch.setattr("app.api.transcripts.transcription.is_available", lambda: True)
+    monkeypatch.setattr("app.api.transcripts.MAX_AUDIO_BYTES", 1024)
+    resp = client.post(
+        "/api/v1/transcripts/audio",
+        data={"project_id": str(project["id"]), "title": "Long meeting"},
+        files={"file": ("m.mp4", b"x" * 2048, "video/mp4")},
+    )
+    assert resp.status_code == 413
+    assert "too large" in resp.json()["detail"].lower()
+
+
+def test_audio_upload_reaches_transcription_as_a_file_on_disk(client, project, monkeypatch):
+    # The recording is streamed to a temporary file rather than held in memory, so a large
+    # video cannot exhaust the server's RAM before transcription even starts.
+    captured = {}
+    monkeypatch.setattr("app.api.transcripts.transcription.is_available", lambda: True)
+    monkeypatch.setattr(
+        "app.api.transcripts._transcribe_and_extract",
+        lambda meeting_id, path: captured.update(meeting_id=meeting_id, path=path),
+    )
+    resp = client.post(
+        "/api/v1/transcripts/audio",
+        data={"project_id": str(project["id"]), "title": "Audio meeting"},
+        files={"file": ("m.wav", b"audio-bytes", "audio/wav")},
+    )
+    assert resp.status_code == 201
+    path = captured["path"]
+    try:
+        assert isinstance(path, str) and path.endswith(".wav")
+        with open(path, "rb") as f:
+            assert f.read() == b"audio-bytes"
+    finally:
+        os.unlink(path)
+
+
+def test_background_transcription_removes_its_temp_file(client, project, db_session, monkeypatch):
+    from app.api import transcripts as transcripts_api
+    from app.llm.transcription import TranscriptionError
+    from app.models.models import Meeting, MeetingStatus
+
+    meeting = Meeting(project_id=project["id"], title="m", transcript_text="",
+                      status=MeetingStatus.PROCESSING)
+    db_session.add(meeting)
+    db_session.commit()
+    fd, path = tempfile.mkstemp(suffix=".wav")
+    os.close(fd)
+
+    def failing_transcribe(_path):
+        raise TranscriptionError("provider down")
+
+    # The job opens and closes its own session; hand it the test session and keep it open.
+    monkeypatch.setattr(transcripts_api, "SessionLocal", lambda: db_session)
+    monkeypatch.setattr(db_session, "close", lambda: None)
+    monkeypatch.setattr(transcripts_api.transcription, "transcribe_file", failing_transcribe)
+    transcripts_api._transcribe_and_extract(meeting.id, path)
+
+    assert not os.path.exists(path)
+    assert meeting.status == MeetingStatus.FAILED
+    assert meeting.error_message == "provider down"
+
+
+def test_transcribe_audio_still_accepts_bytes(monkeypatch):
+    # eval/asr_transcribe.py calls transcribe_audio(bytes); it must keep working.
+    from app.llm import transcription
+
+    seen = {}
+
+    def fake_transcribe_file(path):
+        with open(path, "rb") as f:
+            seen["data"] = f.read()
+        seen["path"] = path
+        return "hello"
+
+    monkeypatch.setattr(transcription, "transcribe_file", fake_transcribe_file)
+    assert transcription.transcribe_audio(b"raw-bytes", suffix=".wav") == "hello"
+    assert seen["data"] == b"raw-bytes"
+    assert not os.path.exists(seen["path"])
 
 
 # --- Undo: delete snapshot + restore -----------------------------------------------

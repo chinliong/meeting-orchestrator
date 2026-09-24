@@ -60,14 +60,19 @@ async def upload_attachment(
 ):
     task = _task_for_edit(db, task_id, user, x_workspace_token)
 
+    too_large = HTTPException(
+        status_code=413,
+        detail=f"File is too large. The limit is {MAX_BYTES // (1024 * 1024)} MB.",
+    )
+    # The upload has already been spooled to disk, so its size is known: refuse an oversized
+    # file before reading it into memory.
+    if file.size is not None and file.size > MAX_BYTES:
+        raise too_large
     data = await file.read()
     if not data:
         raise HTTPException(status_code=400, detail="Uploaded file is empty")
     if len(data) > MAX_BYTES:
-        raise HTTPException(
-            status_code=413,
-            detail=f"File is too large. The limit is {MAX_BYTES // (1024 * 1024)} MB.",
-        )
+        raise too_large
 
     attachment = Attachment(
         task_id=task.id,

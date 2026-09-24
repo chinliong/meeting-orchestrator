@@ -129,6 +129,8 @@ def delete_account(
     """
     for project in db.query(Project).filter(Project.owner_user_id == user.id).all():
         project.owner_user_id = None
+    # Reset codes reference the user, so they go first or the foreign key blocks the delete.
+    db.query(PasswordReset).filter(PasswordReset.user_id == user.id).delete()
     db.delete(user)
     db.commit()
     return Response(status_code=204)

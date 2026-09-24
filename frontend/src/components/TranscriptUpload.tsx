@@ -12,6 +12,9 @@ type Mode = "text" | "audio";
 /** Today in the browser's own timezone. `toISOString()` is UTC and can land a day off. */
 const today = () => new Date().toLocaleDateString("en-CA");
 
+/** Largest recording accepted; matches MAX_AUDIO_BYTES in backend/app/api/transcripts.py. */
+const MAX_AUDIO_MB = 500;
+
 export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props) {
   const [mode, setMode] = useState<Mode>("text");
   const [title, setTitle] = useState("");
@@ -27,6 +30,11 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
     e.preventDefault();
     if (mode === "text" && !text.trim()) return;
     if (mode === "audio" && !file) return;
+    // Refuse an oversized recording here rather than upload hundreds of MB only to be rejected.
+    if (mode === "audio" && file && file.size > MAX_AUDIO_MB * 1024 * 1024) {
+      setError(`This file is too large. The limit is ${MAX_AUDIO_MB} MB; try an audio-only export of the meeting.`);
+      return;
+    }
 
     setSubmitting(true);
     setError(null);

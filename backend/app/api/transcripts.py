@@ -1,4 +1,6 @@
 import logging
+import os
+import tempfile
 from datetime import date
 from typing import Optional
 
@@ -24,6 +26,12 @@ from app.schemas.schemas import MeetingOut, MeetingUpdate, TranscriptSubmit
 router = APIRouter(prefix="/transcripts", tags=["transcripts"])
 
 log = logging.getLogger("uvicorn.error")
+
+# Largest audio/video upload accepted. Uploads are streamed to disk rather than held in memory,
+# so this bounds disk use and transcription time rather than RAM. Keep it in step with the
+# frontend check in TranscriptUpload.tsx.
+MAX_AUDIO_BYTES = 500 * 1024 * 1024  # 500 MB
+_UPLOAD_CHUNK = 1024 * 1024
 
 
 def _meeting_title(title: str, on: date) -> str:
@@ -106,13 +114,50 @@ def _process_transcript(project: Project, title: str, transcript_text: str, db: 
     return meeting
 
 
-def _transcribe_and_extract(meeting_id: int, data: bytes, suffix: str) -> None:
-    """Background job: transcribe uploaded audio, then run the parser.
+def _too_large() -> HTTPException:
+    return HTTPException(
+        status_code=413,
+        detail=f"File is too large. The limit is {MAX_AUDIO_BYTES // (1024 * 1024)} MB.",
+    )
+
+
+async def _save_upload(file: UploadFile, suffix: str) -> str:
+    """Stream an upload to a temporary file and return its path.
+
+    The recording is copied in chunks and never held in memory whole: a long meeting video can
+    be hundreds of megabytes, more than the free-tier instance's RAM. Raises 413 over the size
+    limit and 400 for an empty file, removing the partial file in both cases.
+    """
+    if file.size is not None and file.size > MAX_AUDIO_BYTES:
+        raise _too_large()
+    fd, path = tempfile.mkstemp(suffix=suffix)
+    written = 0
+    try:
+        with os.fdopen(fd, "wb") as out:
+            while True:
+                chunk = await file.read(_UPLOAD_CHUNK)
+                if not chunk:
+                    break
+                written += len(chunk)
+                if written > MAX_AUDIO_BYTES:
+                    raise _too_large()
+                out.write(chunk)
+        if written == 0:
+            raise HTTPException(status_code=400, detail="Uploaded file is empty")
+    except BaseException:
+        os.unlink(path)
+        raise
+    return path
+
+
+def _transcribe_and_extract(meeting_id: int, path: str) -> None:
+    """Background job: transcribe the uploaded recording at `path`, then run the parser.
 
     Runs after the HTTP response is sent (in a worker thread), so it opens its own DB session —
     the request-scoped session is already closed. Doing transcription here, off the request,
     keeps the connection from being held open long enough for an upstream proxy to time it out
-    (which the browser reported as an opaque "Failed to fetch").
+    (which the browser reported as an opaque "Failed to fetch"). The job owns the temporary
+    file and removes it whatever the outcome.
     """
     db = SessionLocal()
     try:
@@ -120,7 +165,7 @@ def _transcribe_and_extract(meeting_id: int, data: bytes, suffix: str) -> None:
         if meeting is None:  # deleted before the job ran
             return
         try:
-            meeting.transcript_text = transcription.transcribe_audio(data, suffix=suffix)
+            meeting.transcript_text = transcription.transcribe_file(path)
             db.commit()
         except (transcription.WhisperUnavailableError, transcription.TranscriptionError) as exc:
             meeting.status = MeetingStatus.FAILED
@@ -135,6 +180,10 @@ def _transcribe_and_extract(meeting_id: int, data: bytes, suffix: str) -> None:
         _extract_and_store_tasks(meeting, db)
     finally:
         db.close()
+        try:
+            os.unlink(path)
+        except FileNotFoundError:
+            pass
 
 
 @router.post("", response_model=MeetingOut, status_code=201)
@@ -180,24 +229,26 @@ async def submit_audio(
             ),
         )
 
-    data = await file.read()
-    if not data:
-        raise HTTPException(status_code=400, detail="Uploaded file is empty")
-
     suffix = "." + file.filename.rsplit(".", 1)[-1] if file.filename and "." in file.filename else ".wav"
-    on = _parse_form_date(meeting_date) or date.today()
-    meeting = Meeting(
-        project_id=project.id,
-        title=_meeting_title(title, on),
-        transcript_text="",
-        meeting_date=on,
-        status=MeetingStatus.PROCESSING,
-    )
-    db.add(meeting)
-    db.commit()
-    db.refresh(meeting)
+    path = await _save_upload(file, suffix)
 
-    background_tasks.add_task(_transcribe_and_extract, meeting.id, data, suffix)
+    on = _parse_form_date(meeting_date) or date.today()
+    try:
+        meeting = Meeting(
+            project_id=project.id,
+            title=_meeting_title(title, on),
+            transcript_text="",
+            meeting_date=on,
+            status=MeetingStatus.PROCESSING,
+        )
+        db.add(meeting)
+        db.commit()
+        db.refresh(meeting)
+    except BaseException:
+        os.unlink(path)  # no job will run to clean it up
+        raise
+
+    background_tasks.add_task(_transcribe_and_extract, meeting.id, path)
     return meeting
 
 

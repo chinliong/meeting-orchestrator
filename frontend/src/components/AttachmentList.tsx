@@ -6,6 +6,9 @@ import { api } from "@/lib/api";
 import { formatBytes } from "@/lib/format";
 import type { Attachment, TaskMeta } from "@/lib/types";
 
+/** Per-file limit; matches MAX_BYTES in backend/app/api/attachments.py. */
+const MAX_ATTACHMENT_MB = 10;
+
 interface Props {
   taskId: number;
   canEdit: boolean;
@@ -46,6 +49,12 @@ export default function AttachmentList({ taskId, canEdit, onMetaChange }: Props)
 
   const handleFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
+    const tooBig = Array.from(files).find((f) => f.size > MAX_ATTACHMENT_MB * 1024 * 1024);
+    if (tooBig) {
+      setError(`"${tooBig.name}" is too large. The limit is ${MAX_ATTACHMENT_MB} MB per file.`);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
     setUploading(true);
     setError(null);
     try {

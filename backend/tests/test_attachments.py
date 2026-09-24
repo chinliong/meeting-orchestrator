@@ -56,6 +56,19 @@ def test_oversized_upload_rejected(client, task):
     assert _upload(client, task["id"], content=big).status_code == 413
 
 
+def test_oversized_upload_rejected_without_reading_it(client, task, monkeypatch):
+    # The size is known once the upload is received, so an oversized file is refused before
+    # its bytes are loaded into memory.
+    from starlette.datastructures import UploadFile
+
+    async def fail_read(self, size=-1):
+        raise AssertionError("an oversized upload should not be read")
+
+    monkeypatch.setattr(UploadFile, "read", fail_read)
+    big = b"x" * (MAX_BYTES + 1)
+    assert _upload(client, task["id"], content=big).status_code == 413
+
+
 def test_delete_attachment(client, task):
     body = _upload(client, task["id"]).json()
     assert client.delete(f"/api/v1/attachments/{body['id']}").status_code == 204

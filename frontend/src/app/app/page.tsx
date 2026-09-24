@@ -318,7 +318,12 @@ export default function DashboardPage() {
 
   const handleTranscriptSubmit = async (title: string, transcriptText: string, meetingDate: string) => {
     if (!selectedProjectId) return;
-    await api.submitTranscript(selectedProjectId, title, transcriptText, meetingDate);
+    const meeting = await api.submitTranscript(selectedProjectId, title, transcriptText, meetingDate);
+    // A failed extraction still comes back as 201 with status "failed", so check it: throwing
+    // keeps the pasted transcript in the form and shows the error instead of a silent no-op.
+    if (meeting.status === "failed") {
+      throw new Error(meeting.error_message || "The transcript could not be processed. Please try again.");
+    }
     reloadTasks();
   };
 

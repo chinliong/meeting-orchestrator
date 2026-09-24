@@ -229,12 +229,28 @@ def _transcribe_locally(tmp_path: str) -> str:
 
 
 def transcribe_audio(data: bytes, suffix: str = ".wav") -> str:
-    """Transcribe raw audio/video bytes into text.
+    """Transcribe raw audio/video bytes into text (see `transcribe_file`).
+
+    Kept for callers that already hold the recording in memory, such as the ASR evaluation.
+    The upload endpoint streams to disk and calls `transcribe_file` directly instead.
+    """
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+        tmp.write(data)
+        tmp_path = tmp.name
+    try:
+        return transcribe_file(tmp_path)
+    finally:
+        os.unlink(tmp_path)
+
+
+def transcribe_file(path: str) -> str:
+    """Transcribe an audio/video file on disk into text.
 
     Tries each configured backend in accuracy order and falls through on failure, so an
     exhausted Deepgram credit or a provider outage degrades to a slightly less accurate
     transcript instead of an error. Each backend is attempted once: a retry chain is what made
-    an earlier provider time out the whole request rather than fail over.
+    an earlier provider time out the whole request rather than fail over. The caller owns the
+    file and removes it.
     """
     if not is_available():
         raise WhisperUnavailableError(
@@ -251,18 +267,12 @@ def transcribe_audio(data: bytes, suffix: str = ".wav") -> str:
     if _local_whisper_installed():
         backends.append(("local whisper", _transcribe_locally))
 
-    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
-        tmp.write(data)
-        tmp_path = tmp.name
-    try:
-        last: Exception | None = None
-        for name, call in backends:
-            try:
-                return call(tmp_path)
-            except (TranscriptionError, WhisperUnavailableError) as exc:
-                log.warning("transcription: %s failed (%s)", name, exc)
-                last = exc
-        raise last if last else WhisperUnavailableError(
-            "Audio transcription is not configured.")
-    finally:
-        os.unlink(tmp_path)
+    last: Exception | None = None
+    for name, call in backends:
+        try:
+            return call(path)
+        except (TranscriptionError, WhisperUnavailableError) as exc:
+            log.warning("transcription: %s failed (%s)", name, exc)
+            last = exc
+    raise last if last else WhisperUnavailableError(
+        "Audio transcription is not configured.")

@@ -175,9 +175,12 @@ Returns at once with the meeting in `processing` status and no tasks. Transcript
 extraction then run in the background, and the client polls `GET /transcripts/{meeting_id}`
 until the status is `complete` or `failed`.
 
+The upload is streamed to a temporary file on disk rather than held in memory, and is limited
+to 500 MB.
+
 Responses: `201` meeting object (as above, `status: "processing"`, `tasks: []`) · `400` empty
-file · `403` no edit access · `404` unknown project · `503` if no transcription service is
-configured.
+file · `403` no edit access · `404` unknown project · `413` over the 500 MB limit · `503` if no
+transcription service is configured.
 
 ### `GET /transcripts/{meeting_id}`
 Returns the meeting's status and its extracted tasks. Requires view access. `404` if not found.
