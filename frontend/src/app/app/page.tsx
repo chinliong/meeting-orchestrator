@@ -9,6 +9,7 @@ import EditTaskModal from "@/components/EditTaskModal";
 import Filters from "@/components/Filters";
 import KanbanBoard from "@/components/KanbanBoard";
 import ProjectModal from "@/components/ProjectModal";
+import ProjectScopePicker from "@/components/ProjectScopePicker";
 import ShareModal from "@/components/ShareModal";
 import StatsBar from "@/components/StatsBar";
 import TopBar from "@/components/TopBar";
@@ -63,6 +64,8 @@ export default function DashboardPage() {
   const [view, setView] = useState<BoardView>("board");
   const [search, setSearch] = useState("");
   const [searchAllProjects, setSearchAllProjects] = useState(false);
+  // Which boards the cross-board view includes; null means all of the user's boards.
+  const [boardScope, setBoardScope] = useState<number[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [projectModal, setProjectModal] = useState<"create" | "edit" | null>(null);
   // The card edits a *live* task looked up by id, so changes (incl. undo) flow back into it.
@@ -154,6 +157,12 @@ export default function DashboardPage() {
   // The task the card is editing, resolved live from state so edits/undo are reflected.
   const editingTask = editingTaskId != null ? tasks.find((t) => t.id === editingTaskId) ?? null : null;
 
+  // The cross-board view covers the boards the user owns (the API returns only those).
+  const ownedProjects = useMemo(
+    () => (user ? projects.filter((p) => p.owner_user_id === user.id) : []),
+    [projects, user]
+  );
+
   const projectNames = useMemo(
     () => new Map(projects.map((p) => [p.id, p.name])),
     [projects]
@@ -174,7 +183,10 @@ export default function DashboardPage() {
     };
     if (searchAllProjects && session?.mode === "user") {
       setWorkspaceToken(null);
-      api.listTasks({}).then(apply).catch(fail);
+      api
+        .listTasks({})
+        .then((list) => apply(boardScope ? list.filter((t) => boardScope.includes(t.project_id)) : list))
+        .catch(fail);
       return;
     }
     const proj = projects.find((p) => p.id === selectedProjectId) ?? null;
@@ -184,7 +196,11 @@ export default function DashboardPage() {
     } else {
       setTasks([]);
     }
-  }, [selectedProjectId, searchAllProjects, projects, session]);
+  }, [selectedProjectId, searchAllProjects, boardScope, projects, session]);
+
+  // What is on screen: one board, all boards, or a chosen set. The owner filter and undo history
+  // below reset whenever it changes.
+  const viewKey = searchAllProjects ? (boardScope ? boardScope.join(",") : "all") : `board:${selectedProjectId}`;
 
   // The latest reloadTasks. A transcript or recording can take minutes to process, and the user
   // may switch boards meanwhile; reloading through this ref refreshes the board now on screen,
@@ -199,7 +215,12 @@ export default function DashboardPage() {
   // A board's owner filter does not carry over to another board, where it could hide every task.
   useEffect(() => {
     setSelectedOwner("");
-  }, [selectedProjectId, searchAllProjects]);
+  }, [viewKey]);
+
+  // A board selection belongs to the account that made it.
+  useEffect(() => {
+    setBoardScope(null);
+  }, [user?.id]);
 
   const owners = useMemo(
     () => Array.from(new Set(tasks.map((t) => t.owner).filter(Boolean))) as string[],
@@ -250,7 +271,7 @@ export default function DashboardPage() {
     undoGenRef.current += 1;
     undoStackRef.current = [];
     setUndoDepth(0);
-  }, [selectedProjectId, searchAllProjects, session?.mode, user?.id]);
+  }, [viewKey, session?.mode, user?.id]);
 
   const pushUndo = useCallback((action: UndoAction, gen?: number) => {
     if (gen !== undefined && gen !== undoGenRef.current) return;
@@ -677,25 +698,15 @@ export default function DashboardPage() {
                   {/* Action controls: keep these on one tidy row (they share a line on mobile,
                       while the search box gets its own full-width row above). */}
                   <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-normal">
-                  {user && projects.length > 1 && (
-                    <div className="flex shrink-0 rounded-lg bg-slate-900/[0.05] p-1 text-sm font-medium">
-                      <button
-                        onClick={() => setSearchAllProjects(false)}
-                        className={`rounded-md px-3 py-1 transition ${
-                          searchAllProjects ? "text-slate-500 hover:text-slate-700" : "bg-ink text-white shadow-sm"
-                        }`}
-                      >
-                        This project
-                      </button>
-                      <button
-                        onClick={() => setSearchAllProjects(true)}
-                        className={`rounded-md px-3 py-1 transition ${
-                          searchAllProjects ? "bg-ink text-white shadow-sm" : "text-slate-500 hover:text-slate-700"
-                        }`}
-                      >
-                        All projects
-                      </button>
-                    </div>
+                  {user && ownedProjects.length > 1 && (
+                    <ProjectScopePicker
+                      projects={ownedProjects}
+                      active={searchAllProjects}
+                      selected={boardScope}
+                      onThisProject={() => setSearchAllProjects(false)}
+                      onActivate={() => setSearchAllProjects(true)}
+                      onChange={setBoardScope}
+                    />
                   )}
                   <div className="flex shrink-0 rounded-lg bg-slate-900/[0.05] p-1 text-sm font-medium">
                     <button

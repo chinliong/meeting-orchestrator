@@ -18,7 +18,8 @@ recordings for end-to-end processing.
   / Done with drag-and-drop status changes) and a month calendar that plots tasks by their deadline
   with drag-to-reschedule (drag onto a "no deadline" tray to clear it). Both support owner filtering
   and a search across task text, owners, and source meetings, and the Kanban board can be sorted
-  by deadline. Cards show extraction confidence, or a "Check this" flag below 0.85.
+  by deadline. Cards show extraction confidence, or a "Check this" flag below 0.85. Signed-in
+  users can view one project, all their projects, or a chosen set of them together.
 - **Task detail, AI subtasks and attachments**: open any task to break it into a checklist of
   subtasks (add them by hand, or have the LLM generate them from the task's own details or from
   your free-text instructions) and to attach files (stored in the database, up to 10 MB each).
