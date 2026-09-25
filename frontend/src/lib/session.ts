@@ -63,5 +63,26 @@ export function removeGuestWorkspace(id: number): Project[] {
 
 export const clearGuestWorkspaces = () => window.localStorage.removeItem(GUEST_WS_KEY);
 
+// --- boards other people shared with a signed-in user ---
+// A signed-in user's own boards come from the server, but a board someone shared with them is
+// reached only through its link. The links they have opened are remembered here, per account,
+// and reopened on each visit, as a guest's boards are; a link that stops working is dropped.
+interface SharedBoardLink {
+  id: number;
+  token: string;
+}
+const sharedKey = (userId: number) => `mo.sharedBoards.${userId}`;
+
+export const loadSharedBoards = (userId: number): SharedBoardLink[] => read<SharedBoardLink[]>(sharedKey(userId)) ?? [];
+
+/** Remember the link a board was opened with (most recent first, one entry per board). */
+export function rememberSharedBoard(userId: number, id: number, token: string) {
+  write(sharedKey(userId), [{ id, token }, ...loadSharedBoards(userId).filter((b) => b.id !== id)]);
+}
+
+export function forgetSharedBoard(userId: number, id: number) {
+  write(sharedKey(userId), loadSharedBoards(userId).filter((b) => b.id !== id));
+}
+
 /** The token used as X-Workspace-Token for a board: edit token if held, else view token. */
 export const workspaceTokenFor = (p: Project): string => p.edit_token ?? p.view_token;

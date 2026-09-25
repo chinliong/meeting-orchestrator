@@ -8,6 +8,11 @@ holder a single digest covering all of their newly-due tasks across every remind
 Idempotency is tracked per task via `Task.last_notified_for`: once a task has been notified
 for a given deadline, re-running the same day (or after the deadline) never re-sends. Changing
 a task's deadline clears that match, so a rescheduled task gets a fresh reminder.
+
+Someone a board was shared with can also ask for its reminders (`ReminderSubscription`). They
+get the same kind of digest, in their own window, folded into the one email a person receives.
+Their reminders are tracked per subscriber (`SubscriberReminder`) rather than on the task, so
+one person's email never marks a task as reminded for anyone else.
 """
 from __future__ import annotations
 
@@ -19,7 +24,14 @@ from zoneinfo import ZoneInfo
 from sqlalchemy.orm import Session, selectinload
 
 from app.email import send_email
-from app.models.models import Project, Task, TaskStatus, User
+from app.models.models import (
+    Project,
+    ReminderSubscription,
+    SubscriberReminder,
+    Task,
+    TaskStatus,
+    User,
+)
 
 # uvicorn configures this logger at INFO, so failures show up in the Render logs.
 log = logging.getLogger("uvicorn.error")
@@ -74,6 +86,32 @@ def _candidate_tasks(db: Session, user_id: int | None = None) -> list[Task]:
     return query.all()
 
 
+def _subscribed_tasks(db: Session, user_id: int | None = None) -> list[tuple[ReminderSubscription, Task]]:
+    """Open tasks with a deadline on boards that subscribers asked to be reminded about.
+
+    Only boards that still have an owner count: a board whose owner deleted their account
+    reverts to an unmanaged guest board, where nobody could revoke a subscriber's access.
+    The subscriber's own account-wide switch must be on; the owner's per-board switch is the
+    owner's own choice and does not apply to them.
+    """
+    query = (
+        db.query(ReminderSubscription, Task)
+        .join(Project, ReminderSubscription.project_id == Project.id)
+        .join(Task, Task.project_id == Project.id)
+        .join(User, ReminderSubscription.user_id == User.id)
+        .options(selectinload(Task.subtasks))
+        .filter(
+            Project.owner_user_id.isnot(None),
+            Task.status != TaskStatus.DONE,
+            Task.deadline.isnot(None),
+            User.notify_email.is_(True),
+        )
+    )
+    if user_id is not None:
+        query = query.filter(ReminderSubscription.user_id == user_id)
+    return query.all()
+
+
 def _format_digest(tasks: list[Task], today: date) -> tuple[str, str]:
     lines = []
     for task in sorted(tasks, key=lambda t: t.deadline):
@@ -98,7 +136,12 @@ def _format_digest(tasks: list[Task], today: date) -> tuple[str, str]:
                 lines.append(f"    ◦ {sub.title}")
 
     subject = f"{len(tasks)} task{'s' if len(tasks) != 1 else ''} need attention"
-    body = "Reminder from Meeting Orchestrator:\n\n" + "\n".join(lines)
+    body = (
+        "Reminder from Meeting Orchestrator:\n\n"
+        + "\n".join(lines)
+        # Reminders can reach people other than a board's owner, so every digest says how to stop.
+        + "\n\nTo change or stop these reminders, open Account settings in Meeting Orchestrator."
+    )
     return subject, body
 
 
@@ -122,17 +165,41 @@ def send_due_date_notifications(db: Session, today: date | None = None) -> int:
             continue
         by_user.setdefault(user.id, []).append(task)
 
+    # Boards shared with someone who asked for their reminders, tracked per subscriber.
+    shared_by_user: dict[int, list[tuple[ReminderSubscription, Task]]] = {}
+    records: dict[tuple[int, int], SubscriberReminder] = {}
+    candidates = _subscribed_tasks(db)
+    if candidates:
+        subscription_ids = {sub.id for sub, _ in candidates}
+        for record in db.query(SubscriberReminder).filter(SubscriberReminder.subscription_id.in_(subscription_ids)):
+            records[(record.subscription_id, record.task_id)] = record
+    for sub, task in candidates:
+        record = records.get((sub.id, task.id))
+        if record is not None and record.notified_for == task.deadline:
+            continue
+        if not _in_notify_window(today, task.deadline, sub.user.notify_days_before):
+            continue
+        shared_by_user.setdefault(sub.user_id, []).append((sub, task))
+
     sent = 0
-    for tasks in by_user.values():
-        user = tasks[0].project.owner
-        subject, body = _format_digest(tasks, today)
+    for user_id in list(by_user) + [u for u in shared_by_user if u not in by_user]:
+        own = by_user.get(user_id, [])
+        shared = shared_by_user.get(user_id, [])
+        user = own[0].project.owner if own else shared[0][0].user
+        subject, body = _format_digest(own + [task for _, task in shared], today)
         try:
             send_email(to=user.email, subject=subject, body=body)
         except Exception:
             log.exception("notifications: failed to send digest to %s", user.email)
             continue
-        for task in tasks:
+        for task in own:
             task.last_notified_for = task.deadline
+        for sub, task in shared:
+            record = records.get((sub.id, task.id))
+            if record is None:
+                db.add(SubscriberReminder(subscription_id=sub.id, task_id=task.id, notified_for=task.deadline))
+            else:
+                record.notified_for = task.deadline
         db.commit()  # commit per user, so one later failure can't lose an earlier success
         sent += 1
     return sent
@@ -147,6 +214,7 @@ def send_test_notification(db: Session, user: User) -> int:
     tasks = [
         task
         for task in _candidate_tasks(db, user_id=user.id)
+        + [task for _, task in _subscribed_tasks(db, user_id=user.id)]
         if _in_notify_window(today, task.deadline, user.notify_days_before)
     ]
     if tasks:

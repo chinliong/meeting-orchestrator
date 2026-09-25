@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import ConfirmDialog from "@/components/ConfirmDialog";
-import type { Project } from "@/lib/types";
+import { api } from "@/lib/api";
+import type { Project, Subscriber } from "@/lib/types";
 
 interface Props {
   project: Project | null;
@@ -67,7 +68,7 @@ function LinkRow({
       <ConfirmDialog
         open={confirming}
         title={`Regenerate the ${label.toLowerCase()}?`}
-        message="The current link stops working for everyone who has it. You'll need to share the new link again."
+        message="The current link stops working for everyone who has it, and anyone getting this board's reminders through it stops getting them. You'll need to share the new link again."
         confirmLabel="Regenerate link"
         onConfirm={regenerate}
         onCancel={() => setConfirming(false)}
@@ -125,7 +126,39 @@ export default function ShareModal({ project, isOwner, onRegenerate, onClose }: 
     return () => window.removeEventListener("keydown", onKey);
   }, [project, onClose]);
 
+  // The owner sees who asked for this board's reminders (from "Remind me" on the board).
+  const [subscribers, setSubscribers] = useState<Subscriber[] | null>(null);
+  const [subscriberError, setSubscriberError] = useState<string | null>(null);
+  const projectId = project?.id ?? null;
+  const loadSubscribers = useCallback(() => {
+    if (projectId === null || !isOwner) return;
+    api
+      .listSubscribers(projectId)
+      .then(setSubscribers)
+      .catch(() => setSubscribers([]));
+  }, [projectId, isOwner]);
+  useEffect(() => {
+    setSubscribers(null);
+    setSubscriberError(null);
+    loadSubscribers();
+  }, [loadSubscribers]);
+
   if (!project) return null;
+
+  // Regenerating a link also ends the reminders of people who joined through it.
+  const regenerate = async (which: "view" | "edit") => {
+    await onRegenerate(which);
+    loadSubscribers();
+  };
+  const removeSubscriber = async (userId: number) => {
+    setSubscriberError(null);
+    try {
+      await api.removeSubscriber(project.id, userId);
+      setSubscribers((cur) => (cur ? cur.filter((s) => s.user_id !== userId) : cur));
+    } catch {
+      setSubscriberError("Couldn't remove them. Please try again.");
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onMouseDown={onClose}>
@@ -150,7 +183,7 @@ export default function ShareModal({ project, isOwner, onRegenerate, onClose }: 
               hint="can view & modify"
               token={project.edit_token}
               accent="bg-emerald-500"
-              onRegenerate={isOwner ? () => onRegenerate("edit") : undefined}
+              onRegenerate={isOwner ? () => regenerate("edit") : undefined}
             />
           )}
           <LinkRow
@@ -158,7 +191,7 @@ export default function ShareModal({ project, isOwner, onRegenerate, onClose }: 
             hint="read-only"
             token={project.view_token}
             accent="bg-slate-400"
-            onRegenerate={isOwner ? () => onRegenerate("view") : undefined}
+            onRegenerate={isOwner ? () => regenerate("view") : undefined}
           />
         </div>
 
@@ -167,6 +200,41 @@ export default function ShareModal({ project, isOwner, onRegenerate, onClose }: 
             ? "Sharing a link grants access to anyone who has it. Regenerate a link to revoke the old one."
             : "These links can't be revoked from here — share them only with people you trust."}
         </p>
+
+        {isOwner && subscribers !== null && (
+          <div className="mt-5 border-t border-slate-100 pt-4">
+            <h3 className="text-sm font-medium text-slate-700">Reminder emails</h3>
+            {subscribers.length === 0 ? (
+              <p className="mt-1 text-xs text-slate-500">
+                Only you get this board&apos;s reminders. People you share it with can turn them on from the board
+                with &ldquo;Remind me&rdquo; once they sign in.
+              </p>
+            ) : (
+              <>
+                <p className="mt-1 text-xs text-slate-500">These people also get this board&apos;s deadline reminders.</p>
+                <ul className="mt-2 divide-y divide-slate-100 rounded-lg border border-slate-200">
+                  {subscribers.map((s) => (
+                    <li key={s.user_id} className="flex items-center gap-2 px-3 py-2 text-sm">
+                      <span className="min-w-0 flex-1 truncate text-slate-700" title={s.email}>
+                        {s.email}
+                      </span>
+                      <span className="shrink-0 text-xs text-slate-400">via {s.via} link</span>
+                      <button
+                        type="button"
+                        onClick={() => removeSubscriber(s.user_id)}
+                        aria-label={`Stop reminders for ${s.email}`}
+                        className="shrink-0 rounded-md px-2 py-0.5 text-xs font-medium text-slate-500 transition hover:bg-rose-50 hover:text-rose-600"
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+            {subscriberError && <p className="mt-1 text-xs text-red-600">{subscriberError}</p>}
+          </div>
+        )}
 
         <div className="mt-5 flex justify-end">
           <button

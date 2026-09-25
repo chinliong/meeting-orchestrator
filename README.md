@@ -52,6 +52,10 @@ recordings for end-to-end processing.
   destroyed, so existing share links keep working).
 - **Deadline email reminders**: opt-in (off by default) digest emails for tasks about to be due
   or just gone overdue, with a configurable "remind me N days before" and **per-project selection**. In Account settings you pick exactly which of your boards should remind you.
+  People you share a board with can get its reminders too: once signed in, they click **Remind me**
+  on the board. The owner sees and can remove them in the share dialog, and regenerating the link
+  they used also stops their reminders. Guests are asked to sign in first, and boards created by
+  guests cannot be subscribed to (nobody could revoke access).
 - **Shareable boards**: every board has a **view link** and an **edit link** that do not expire;
   anyone with a link can open it (no account needed), and the owner can regenerate either link.
   View links are read-only; the UI hides every control that changes a view-only board and opens
@@ -75,6 +79,7 @@ Next.js / React frontend  ──HTTP──>  FastAPI backend  ──>  Gemini AP
                                               v
                                      SQLite (dev) / PostgreSQL (prod)
        users · projects · meetings · tasks · subtasks · attachments · stakeholders · password_resets
+       reminder_subscriptions · subscriber_reminders
 ```
 
 See [docs/architecture.md](docs/architecture.md) for detail and [docs/api-spec.md](docs/api-spec.md)
@@ -101,9 +106,13 @@ for the full API.
   token grants read/write, a view token grants read-only.
 - **Guests** have no account; they reach boards purely by capability link, and their boards are
   remembered in the browser. On sign-up or log-in, guest boards are claimed into the account.
+- **Signed-in link recipients**: boards other people shared are remembered in the browser per
+  account too, and reopened on each visit. A board whose link was regenerated (or that was deleted)
+  is dropped from the list with a plain message.
 - Links do not expire. The board owner can regenerate either link
   (`POST /projects/{id}/rotate-token`), which cancels every copy of the old one while the other
-  keeps working. The share dialog warns that anyone with a link can open the board.
+  keeps working, and ends the reminders of anyone who subscribed through the old link. The share
+  dialog warns that anyone with a link can open the board.
 - An edit link grants every write on the board, including deleting it. The stakeholder endpoints
   are not tied to a board and check no credentials.
 
@@ -167,7 +176,8 @@ configured, the message is logged instead**, enough for local testing. To send f
 - **SMTP**: set `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASSWORD`/`SMTP_FROM`, e.g. Gmail with
   an App Password.
 
-Deadline reminders are opt-in per account (off by default; toggle in Account settings) and only
+Deadline reminders are opt-in per account (off by default; toggle in Account settings; people a
+board is shared with can also turn them on with "Remind me" on the board) and only
 send when a daily check runs: locally, run `python -m app.notify_due_tasks` (or schedule it via
 cron); on Render, see step 5 of the deploy steps below. Use the "Send test email" button in Account
 settings to verify delivery. See `backend/.env.example` for all email vars and

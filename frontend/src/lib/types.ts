@@ -22,6 +22,28 @@ export interface User {
   notify_days_before: number;
 }
 
+/** Whether the signed-in user gets reminders for a board shared with them. */
+export interface ReminderSubscriptionState {
+  subscribed: boolean;
+  /** Their account-wide reminders switch, which asking for a board's reminders turns on. */
+  notify_email: boolean;
+}
+
+/** Someone who asked for a board's reminders, as the board's owner sees them. */
+export interface Subscriber {
+  user_id: number;
+  email: string;
+  /** The share link that gave them access. */
+  via: "view" | "edit";
+  created_at: string | null;
+}
+
+/** A board shared with the signed-in user whose reminders they get. */
+export interface SharedReminder {
+  project_id: number;
+  project_name: string;
+}
+
 export interface AuthResponse {
   token: string;
   user: User;

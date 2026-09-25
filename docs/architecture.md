@@ -90,10 +90,14 @@ flowchart LR
   - `POST /auth/signup` and `POST /auth/login` (both with optional guest-board claim), `GET /auth/me`,
     `POST /auth/password` (change password), `DELETE /auth/me` (delete account; owned boards are
     orphaned to guest boards and the user's reset codes are deleted), and `POST /auth/forgot-password` + `POST /auth/reset-password`
-    (emailed 6-digit reset code).
+    (emailed 6-digit reset code). `GET /auth/reminder-subscriptions` lists the shared boards whose
+    reminders the user asked for.
   - `GET|POST /projects`, `GET /projects/{id}`, `GET /projects/by-token/{token}` (open a share
     link), `PATCH|DELETE /projects/{id}`, `POST /projects/{id}/rotate-token` (owner-only; replaces
-    the view or edit token, invalidating every copy of the old one while the other keeps working).
+    the view or edit token, invalidating every copy of the old one while the other keeps working,
+    and ending the reminders of anyone who subscribed through it). `GET|PUT|DELETE
+    /projects/{id}/reminders/me` (a signed-in link recipient asks for a board's reminders), and
+    owner-only `GET /projects/{id}/subscribers` and `DELETE /projects/{id}/subscribers/{user_id}`.
   - `POST /transcripts`, `POST /transcripts/audio`, `GET /transcripts/{id}`,
     `PATCH /transcripts/{id}` (rename a meeting; reflected on its tasks), `GET /transcripts?project_id=`
     (a board's meetings with task counts and summaries), `DELETE /transcripts/{id}` (a meeting with
@@ -149,7 +153,8 @@ flowchart LR
     supported by configuration. With none configured the audio endpoint returns a clear
     unavailable status rather than failing at import.
 - **Database:** PostgreSQL (prod) / SQLite (dev), via SQLAlchemy. Tables: `users`, `projects`,
-  `meetings`, `stakeholders`, `tasks`, `subtasks`, `attachments`, `password_resets`. Attachment
+  `meetings`, `stakeholders`, `tasks`, `subtasks`, `attachments`, `password_resets`,
+  `reminder_subscriptions`, `subscriber_reminders`. Attachment
   bytes are stored in the `attachments` row (the deploy target has an ephemeral filesystem and no
   object storage), size-capped in the API. The engine is created with `pool_pre_ping` (and a 5-min
   `pool_recycle`) because serverless Postgres (Neon) drops idle connections; without it, the first
@@ -190,6 +195,14 @@ flowchart LR
 - Idempotency: `Task.last_notified_for` records the deadline last notified for, so re-running the
   same day, or after the deadline, never double-sends. Rescheduling a task's deadline clears the
   match, re-opening the window.
+- **Shared-board reminders**: a signed-in user holding a board's share link can ask for its
+  reminders (`ReminderSubscription`, which records the link, `via`, that gave access). They get the
+  same kind of digest, in their own window and under their own account switch, folded into the one
+  email each person receives. Their reminders are tracked per subscriber (`SubscriberReminder`)
+  rather than on the task, so the owner's reminder never marks a task as reminded for them.
+  Regenerating the link they used, the owner removing them, or either account being deleted ends
+  it; guests cannot subscribe, and a board without an owner sends no subscriber reminders (nobody
+  could revoke access). Every digest ends with how to change or stop the reminders.
 - The window is date-based, so "today" is computed in `REMINDER_TIMEZONE` (IANA zone, default UTC).
   The server clock is UTC, which would otherwise put a reminder a day off for users elsewhere: a
   task due "Jun 24" with a one-day lead enters its window at 08:00 SGT on Jun 23 under plain UTC.
@@ -212,6 +225,10 @@ erDiagram
     MEETING ||--o{ TASK : produces
     TASK ||--o{ SUBTASK : "broken into"
     TASK ||--o{ ATTACHMENT : has
+    PROJECT ||--o{ REMINDER_SUBSCRIPTION : "shared reminders"
+    USER ||--o{ REMINDER_SUBSCRIPTION : "subscribes"
+    REMINDER_SUBSCRIPTION ||--o{ SUBSCRIBER_REMINDER : "sent"
+    TASK ||--o{ SUBSCRIBER_REMINDER : "reminded about"
     USER {
         int id PK
         string email
@@ -278,6 +295,18 @@ erDiagram
         string name
         string email
     }
+    REMINDER_SUBSCRIPTION {
+        int id PK
+        int project_id FK
+        int user_id FK
+        string via
+    }
+    SUBSCRIBER_REMINDER {
+        int id PK
+        int subscription_id FK
+        int task_id FK
+        date notified_for
+    }
 ```
 
 A task exposes its source meeting's title and date (`meeting_title`, `meeting_date`) for display,
@@ -294,6 +323,9 @@ unusable.
   `error_message`) rather than crashing the request, so the client always gets a response. The
   request still returns `201`, so the frontend checks `status` and shows the error, keeping the
   pasted transcript in the form.
+- A board reached through a share link that stops working (the link was regenerated: `403`; the
+  board was deleted: `404`) is taken off that browser's list with a plain message, instead of the
+  raw error reappearing on every visit. Signed-in users' shared boards are remembered per account.
 - A meeting summary that fails (`502`) leaves the meeting and its tasks as they were; the frontend
   shows "Try again" on the summary card, and the tasks are already on the board.
 - The audio endpoint degrades gracefully: if no transcription backend is configured it returns `503`

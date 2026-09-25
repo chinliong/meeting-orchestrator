@@ -63,10 +63,16 @@ Send a one-off preview digest to the signed-in user's own email: whatever tasks 
 trigger a reminder, or a "nothing due" confirmation if none do. Requires bearer and
 `notify_email` already enabled (`400` otherwise).
 
+### `GET /auth/reminder-subscriptions`
+The boards shared with the signed-in user whose reminders they asked for (see
+`PUT /projects/{id}/reminders/me`): `[{ "project_id", "project_name" }]`. Requires bearer.
+
 ### `DELETE /auth/me`
 Delete the signed-in user's account. Requires bearer. The user's owned boards are **orphaned**
 (`owner_user_id` set to null) rather than deleted, so they revert to guest boards still reachable
-by their share links. Any password-reset codes for the user are deleted with the account. `204`.
+by their share links; anyone subscribed to those boards' reminders is unsubscribed, since a guest
+board has nobody to revoke access. Any password-reset codes and the user's own reminder
+subscriptions are deleted with the account. `204`.
 
 ### `POST /auth/forgot-password`
 Request a password-reset code. Body `{ "email": "string" }`. Always returns `204`, whether or not
@@ -122,7 +128,29 @@ alone. Returns the project; `404`/`403` as above.
 Mints a fresh token for the chosen share link, invalidating every copy of the old link of that
 kind; the other link keeps working. Owner-only: a guest holding the edit link gets `403`. The
 owner reaches the board through their account rather than the token, so rotation never locks
-them out. Returns the project with its new token.
+them out. Anyone who subscribed to the board's reminders through the old link is unsubscribed.
+Returns the project with its new token.
+
+### `GET /projects/{project_id}/reminders/me`
+Whether the signed-in user gets this board's reminders: `{ "subscribed": bool, "notify_email": bool }`.
+Requires bearer and access to the board (usually its share link in `X-Workspace-Token`).
+
+### `PUT /projects/{project_id}/reminders/me`
+Ask for the deadline reminders of a board shared with you. Requires bearer (`401` for guests:
+reminders go only to a signed-in account) and the board's view or edit link (`403` without it).
+Records which link gave access, so regenerating that link ends the reminders. Turns on the
+account's `notify_email`, since that is what was asked for. `409` for the board's owner (who uses
+Account settings) and for a board with no owner. Returns `{ "subscribed": true, "notify_email": true }`.
+
+### `DELETE /projects/{project_id}/reminders/me`
+Stop them. Requires bearer only (always allowed, even after losing access). `204`.
+
+### `GET /projects/{project_id}/subscribers`
+Owner-only: who asked for this board's reminders, `[{ "user_id", "email", "via", "created_at" }]`
+(`via` is `"view"` or `"edit"`, the link that gave them access).
+
+### `DELETE /projects/{project_id}/subscribers/{user_id}`
+Owner-only: stop that person's reminders for this board (their link access is unchanged). `204`.
 
 ### `DELETE /projects/{project_id}`
 Removes the project and cascades to its meetings and tasks. Requires edit access. `204`.

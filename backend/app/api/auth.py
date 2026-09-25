@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.auth import create_access_token, get_current_user, hash_password, verify_password
 from app.db import get_db
 from app.email import send_email
-from app.models.models import PasswordReset, Project, User
+from app.models.models import PasswordReset, Project, ReminderSubscription, User
 from app.notifications import NotificationSendError, send_test_notification
 from app.schemas.schemas import (
     AuthResponse,
@@ -17,6 +17,7 @@ from app.schemas.schemas import (
     LoginRequest,
     NotificationSettingsUpdate,
     ResetPasswordRequest,
+    SharedReminderOut,
     SignupRequest,
     UserOut,
 )
@@ -107,6 +108,19 @@ def update_notifications(
     return user
 
 
+@router.get("/reminder-subscriptions", response_model=list[SharedReminderOut])
+def list_reminder_subscriptions(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """The boards shared with this user whose reminders they asked for (for Account settings)."""
+    rows = (
+        db.query(ReminderSubscription.project_id, Project.name)
+        .join(Project, ReminderSubscription.project_id == Project.id)
+        .filter(ReminderSubscription.user_id == user.id)
+        .order_by(Project.name, Project.id)
+        .all()
+    )
+    return [SharedReminderOut(project_id=r[0], project_name=r[1]) for r in rows]
+
+
 @router.post("/notifications/test", status_code=200)
 def send_test_notification_email(
     user: User = Depends(get_current_user),
@@ -134,6 +148,8 @@ def delete_account(
     """
     for project in db.query(Project).filter(Project.owner_user_id == user.id).all():
         project.owner_user_id = None
+        # A guest board has nobody to revoke access, so nobody keeps getting its reminders.
+        project.reminder_subscriptions.clear()
     # Reset codes reference the user, so they go first or the foreign key blocks the delete.
     db.query(PasswordReset).filter(PasswordReset.user_id == user.id).delete()
     db.delete(user)

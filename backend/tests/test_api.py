@@ -996,3 +996,102 @@ def test_notify_due_tasks_accepts_query_or_header_secret(client, monkeypatch):
         "/api/v1/internal/notify-due-tasks", headers={"X-Cron-Secret": "the-real-secret"}
     )
     assert via_header.status_code == 200
+
+
+# --- reminders for people a board is shared with ------------------------------------
+
+
+def _second_account(client, email="friend@example.com"):
+    body = client.post("/api/v1/auth/signup", json={"email": email, "password": "pw12345"}).json()
+    return {"Authorization": f"Bearer {body['token']}"}
+
+
+def test_signed_in_collaborator_can_get_a_shared_boards_reminders(client, account):
+    board = client.post("/api/v1/projects", json={"name": "Shared"}, headers=account["headers"]).json()
+    friend = _second_account(client)
+    via_view = {**friend, "X-Workspace-Token": board["view_token"]}
+
+    assert client.get(f"/api/v1/projects/{board['id']}/reminders/me", headers=via_view).json()["subscribed"] is False
+    resp = client.put(f"/api/v1/projects/{board['id']}/reminders/me", headers=via_view)
+    assert resp.status_code == 200
+    # Asking for a board's reminders turns on the account-wide switch.
+    assert resp.json() == {"subscribed": True, "notify_email": True}
+    assert client.get("/api/v1/auth/me", headers=friend).json()["notify_email"] is True
+    assert client.get(f"/api/v1/projects/{board['id']}/reminders/me", headers=via_view).json()["subscribed"] is True
+    assert client.get("/api/v1/auth/reminder-subscriptions", headers=friend).json() == [
+        {"project_id": board["id"], "project_name": "Shared"}
+    ]
+    # The owner sees who gets the reminders; nobody else can.
+    subs = client.get(f"/api/v1/projects/{board['id']}/subscribers", headers=account["headers"]).json()
+    assert [(s["email"], s["via"]) for s in subs] == [("friend@example.com", "view")]
+    assert client.get(f"/api/v1/projects/{board['id']}/subscribers", headers=via_view).status_code == 403
+
+    assert client.delete(f"/api/v1/projects/{board['id']}/reminders/me", headers=friend).status_code == 204
+    assert client.get("/api/v1/auth/reminder-subscriptions", headers=friend).json() == []
+
+
+def test_shared_reminders_need_a_sign_in_access_and_an_owned_board(client, account):
+    board = client.post("/api/v1/projects", json={"name": "Owned"}, headers=account["headers"]).json()
+    url = f"/api/v1/projects/{board['id']}/reminders/me"
+    # A guest holding the link: sign in first.
+    assert client.put(url, headers={"X-Workspace-Token": board["view_token"]}).status_code == 401
+    # Signed in, but without the link.
+    friend = _second_account(client)
+    assert client.put(url, headers=friend).status_code == 403
+    # The owner uses their own settings.
+    assert client.put(url, headers=account["headers"]).status_code == 409
+    # A guest-created board has no owner who could revoke access.
+    guest_board = client.post("/api/v1/projects", json={"name": "Guest"}).json()
+    resp = client.put(f"/api/v1/projects/{guest_board['id']}/reminders/me",
+                      headers={**friend, "X-Workspace-Token": guest_board["edit_token"]})
+    assert resp.status_code == 409
+
+
+def test_regenerating_a_link_ends_the_reminders_it_gave(client, account):
+    board = client.post("/api/v1/projects", json={"name": "Shared"}, headers=account["headers"]).json()
+    viewer = _second_account(client, "viewer@example.com")
+    editor = _second_account(client, "editor@example.com")
+    client.put(f"/api/v1/projects/{board['id']}/reminders/me", headers={**viewer, "X-Workspace-Token": board["view_token"]})
+    client.put(f"/api/v1/projects/{board['id']}/reminders/me", headers={**editor, "X-Workspace-Token": board["edit_token"]})
+
+    client.post(f"/api/v1/projects/{board['id']}/rotate-token?which=view", headers=account["headers"])
+    subs = client.get(f"/api/v1/projects/{board['id']}/subscribers", headers=account["headers"]).json()
+    assert [s["email"] for s in subs] == ["editor@example.com"]
+
+    # The owner can also remove someone directly.
+    editor_id = client.get("/api/v1/auth/me", headers=editor).json()["id"]
+    assert client.delete(f"/api/v1/projects/{board['id']}/subscribers/{editor_id}", headers=account["headers"]).status_code == 204
+    assert client.get(f"/api/v1/projects/{board['id']}/subscribers", headers=account["headers"]).json() == []
+
+
+def test_deleting_tasks_boards_and_accounts_clears_shared_reminders(client, account, db_session):
+    from datetime import date
+
+    from app.models.models import ReminderSubscription, SubscriberReminder
+
+    board = client.post("/api/v1/projects", json={"name": "Shared"}, headers=account["headers"]).json()
+    friend = _second_account(client)
+    client.put(f"/api/v1/projects/{board['id']}/reminders/me", headers={**friend, "X-Workspace-Token": board["view_token"]})
+    task = client.post("/api/v1/tasks", json={"project_id": board["id"], "description": "t", "deadline": "2026-06-21"},
+                       headers=account["headers"]).json()
+    sub = db_session.query(ReminderSubscription).one()
+    db_session.add(SubscriberReminder(subscription_id=sub.id, task_id=task["id"], notified_for=date(2026, 6, 21)))
+    db_session.commit()
+
+    # Deleting a task that someone was reminded about works (foreign keys are enforced).
+    assert client.delete(f"/api/v1/tasks/{task['id']}", headers=account["headers"]).status_code == 200
+    assert db_session.query(SubscriberReminder).count() == 0
+    # Deleting the subscriber's account removes their subscription.
+    assert client.delete("/api/v1/auth/me", headers=friend).status_code == 204
+    assert db_session.query(ReminderSubscription).count() == 0
+    # When the owner deletes their account, the board becomes a guest board: reminders stop.
+    other = _second_account(client, "other@example.com")
+    client.put(f"/api/v1/projects/{board['id']}/reminders/me", headers={**other, "X-Workspace-Token": board["view_token"]})
+    assert client.delete("/api/v1/auth/me", headers=account["headers"]).status_code == 204
+    assert db_session.query(ReminderSubscription).count() == 0
+    # And a deleted board takes its subscriptions with it.
+    owner2 = _second_account(client, "owner2@example.com")
+    board2 = client.post("/api/v1/projects", json={"name": "B2"}, headers=owner2).json()
+    client.put(f"/api/v1/projects/{board2['id']}/reminders/me", headers={**other, "X-Workspace-Token": board2["view_token"]})
+    assert client.delete(f"/api/v1/projects/{board2['id']}", headers=owner2).status_code == 204
+    assert db_session.query(ReminderSubscription).count() == 0

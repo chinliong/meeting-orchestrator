@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import AccountModal from "@/components/AccountModal";
+import BoardReminderButton from "@/components/BoardReminderButton";
 import AuthGate from "@/components/AuthGate";
 import CalendarView from "@/components/CalendarView";
 import EditTaskModal from "@/components/EditTaskModal";
@@ -25,8 +26,11 @@ import {
   clearGuestWorkspaces,
   isGuestChosen,
   loadAuth,
+  forgetSharedBoard,
   loadGuestWorkspaces,
+  loadSharedBoards,
   removeGuestWorkspace,
+  rememberSharedBoard,
   saveAuth,
   setGuestChosen,
   updateStoredUser,
@@ -91,6 +95,10 @@ export default function DashboardPage() {
   const [subtaskReloadNonce, setSubtaskReloadNonce] = useState(0);
   const [creatingTask, setCreatingTask] = useState(false);
   const [shareProject, setShareProject] = useState<Project | null>(null);
+  // Whether the signed-in user gets the reminders of the board on screen, when it is someone
+  // else's board shared with them (null while loading, or not applicable).
+  const [boardReminder, setBoardReminder] = useState<{ projectId: number; subscribed: boolean } | null>(null);
+  const [boardReminderBusy, setBoardReminderBusy] = useState(false);
   // The board's meeting list reloads whenever this changes (a meeting added, finished or deleted).
   const [meetingsKey, setMeetingsKey] = useState(0);
   // The meeting just added here: its row and its tasks are marked "New" until the board changes.
@@ -147,6 +155,7 @@ export default function DashboardPage() {
       if (sess?.mode === "user") {
         try {
           projs = await api.listProjects();
+          projs = await withSharedBoards(stored!.user.id, projs);
         } catch (err) {
           if (err instanceof ApiError && err.status === 401) {
             // The stored login has expired (or the account was deleted): sign out and show the
@@ -168,7 +177,14 @@ export default function DashboardPage() {
         try {
           const shared = await api.getProjectByToken(wToken);
           if (sess?.mode === "user") {
-            if (!projs.some((p) => p.id === shared.id)) projs = [shared, ...projs];
+            const userId = sess.user.id;
+            if (shared.owner_user_id !== userId) {
+              // Someone else's board: remember its link, and use this (possibly newer) one.
+              rememberSharedBoard(userId, shared.id, wToken);
+              projs = [shared, ...projs.filter((p) => p.id !== shared.id)];
+            } else if (!projs.some((p) => p.id === shared.id)) {
+              projs = [shared, ...projs];
+            }
           } else {
             projs = upsertGuestWorkspace(shared);
             if (!isGuestChosen()) setGuestChosen();
@@ -257,6 +273,23 @@ export default function DashboardPage() {
   // overwrite the tasks of the board they are now looking at.
   const loadSeqRef = useRef(0);
 
+  // A board reached through a share link that no longer works: its owner regenerated the link
+  // (403) or deleted the board (404). Take it off this device's list and say what happened,
+  // rather than showing the raw error on every visit.
+  const dropLostBoard = (board: Project, status: number) => {
+    if (session?.mode === "user") forgetSharedBoard(session.user.id, board.id);
+    else removeGuestWorkspace(board.id);
+    const remaining = projects.filter((p) => p.id !== board.id);
+    setProjects(remaining);
+    setSelectedProjectId(remaining[0]?.id ?? null);
+    setTasks([]);
+    setLoadError(
+      status === 404
+        ? `\u201c${board.name}\u201d is no longer available. It may have been deleted.`
+        : `You no longer have access to \u201c${board.name}\u201d. Its owner may have changed the share link.`
+    );
+  };
+
   // Set the active board's capability token, then (re)load its tasks.
   const reloadTasks = useCallback(() => {
     const seq = ++loadSeqRef.current;
@@ -277,7 +310,17 @@ export default function DashboardPage() {
     const proj = projects.find((p) => p.id === selectedProjectId) ?? null;
     setWorkspaceToken(proj ? workspaceTokenFor(proj) : null);
     if (selectedProjectId) {
-      api.listTasks({ projectId: selectedProjectId }).then(apply).catch(fail);
+      api
+        .listTasks({ projectId: selectedProjectId })
+        .then(apply)
+        .catch((err) => {
+          const viaLink = proj && !(session?.mode === "user" && proj.owner_user_id === session.user.id);
+          if (seq === loadSeqRef.current && viaLink && err instanceof ApiError && (err.status === 403 || err.status === 404)) {
+            dropLostBoard(proj, err.status);
+          } else {
+            fail(err);
+          }
+        });
     } else {
       setTasks([]);
     }
@@ -331,6 +374,30 @@ export default function DashboardPage() {
     };
   }, [ready, meetingsBoardId, meetingsBoardToken, meetingsKey]);
   const meetingFilterShown = meetingsBoardId !== null && meetings.length > 0;
+
+  // "Remind me" on a board shared with a signed-in user: load whether they already get its
+  // reminders. The owner uses Account settings instead, and a guest board has none to offer.
+  const reminderBoard =
+    !searchAllProjects && selectedProject && user && selectedProject.owner_user_id !== null &&
+    selectedProject.owner_user_id !== user.id
+      ? selectedProject
+      : null;
+  const reminderBoardId = reminderBoard ? reminderBoard.id : null;
+  const reminderBoardToken = reminderBoard ? workspaceTokenFor(reminderBoard) : undefined;
+  useEffect(() => {
+    setBoardReminder(null);
+    if (reminderBoardId === null) return;
+    let cancelled = false;
+    api
+      .getMyReminders(reminderBoardId, reminderBoardToken)
+      .then((state) => !cancelled && setBoardReminder({ projectId: reminderBoardId, subscribed: state.subscribed }))
+      .catch(() => !cancelled && setBoardReminder({ projectId: reminderBoardId, subscribed: false }));
+    return () => {
+      cancelled = true;
+    };
+  }, [reminderBoardId, reminderBoardToken]);
+  const boardReminderOn =
+    boardReminder && boardReminder.projectId === reminderBoardId ? boardReminder.subscribed : null;
   // A chosen meeting that is no longer listed (deleted elsewhere, or the list failed to load, which
   // also hides the filter) would leave the board filtered to nothing with no way to clear it.
   useEffect(() => {
@@ -703,6 +770,7 @@ export default function DashboardPage() {
     const remaining = projects.filter((p) => p.id !== id);
     setProjects(remaining);
     if (!user) removeGuestWorkspace(id);
+    else forgetSharedBoard(user.id, id); // a board shared with them, deleted through its edit link
     setSelectedProjectId(remaining[0]?.id ?? null);
     setTasks([]);
   };
@@ -714,16 +782,26 @@ export default function DashboardPage() {
   );
 
   const handleAuthed = async (auth: AuthResponse) => {
+    // Boards someone else shared with the guest stay on screen for this session, as a share
+    // link opened while signed in does, so signing in from a shared board (e.g. to get its
+    // reminders) keeps the user on it. The guest's own boards are claimed into the account.
+    const sharedWithGuest =
+      session?.mode === "guest"
+        ? loadGuestWorkspaces().filter((p) => p.owner_user_id !== null && p.owner_user_id !== auth.user.id)
+        : [];
+    const onScreen = selectedProjectId;
     saveAuth(auth);
     setAuthToken(auth.token);
     clearGuestChosen();
     clearGuestWorkspaces();
     setSession({ mode: "user", user: auth.user });
     setShowAuth(false);
+    for (const shared of sharedWithGuest) rememberSharedBoard(auth.user.id, shared.id, workspaceTokenFor(shared));
     try {
-      const projs = await api.listProjects();
+      let projs = await api.listProjects();
+      for (const shared of sharedWithGuest) if (!projs.some((p) => p.id === shared.id)) projs = [...projs, shared];
       setProjects(projs);
-      setSelectedProjectId(projs[0]?.id ?? null);
+      setSelectedProjectId(projs.some((p) => p.id === onScreen) ? onScreen : projs[0]?.id ?? null);
     } catch (err) {
       setLoadError((err as Error).message);
     }
@@ -755,6 +833,35 @@ export default function DashboardPage() {
     const updated = await api.updateNotificationSettings(notifyEmail, notifyDaysBefore);
     updateStoredUser(updated);
     setSession((cur) => (cur?.mode === "user" ? { mode: "user", user: updated } : cur));
+  };
+
+  // Turns the shared board's reminders on or off; returns whether they are now on.
+  const handleBoardReminderToggle = async (): Promise<boolean> => {
+    if (reminderBoardId === null || boardReminderOn === null) return false;
+    const projectId = reminderBoardId;
+    setBoardReminderBusy(true);
+    try {
+      if (boardReminderOn) {
+        await api.unsubscribeReminders(projectId);
+        setBoardReminder({ projectId, subscribed: false });
+        return false;
+      }
+      const state = await api.subscribeReminders(projectId, reminderBoardToken);
+      setBoardReminder({ projectId, subscribed: true });
+      // Asking for a board's reminders turns on the account-wide switch; keep the session in step.
+      setSession((cur) => {
+        if (cur?.mode !== "user" || cur.user.notify_email === state.notify_email) return cur;
+        const updated = { ...cur.user, notify_email: state.notify_email };
+        updateStoredUser(updated);
+        return { mode: "user", user: updated };
+      });
+      return true;
+    } catch (err) {
+      setLoadError((err as Error).message);
+      return false;
+    } finally {
+      setBoardReminderBusy(false);
+    }
   };
 
   const handleSendTestNotification = async () => {
@@ -851,6 +958,17 @@ export default function DashboardPage() {
                   </svg>
                   Share
                 </button>
+                {!(user && selectedProject?.owner_user_id === user.id) && (
+                  <BoardReminderButton
+                    owned={selectedProject?.owner_user_id != null}
+                    signedIn={!!user}
+                    subscribed={user ? boardReminderOn : false}
+                    busy={boardReminderBusy}
+                    email={user?.email ?? null}
+                    onToggle={handleBoardReminderToggle}
+                    onSignIn={() => setShowAuth(true)}
+                  />
+                )}
                 {canEdit && (
                   <>
                     <button
@@ -1048,7 +1166,8 @@ export default function DashboardPage() {
           className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/40 p-4 backdrop-blur-sm"
           onMouseDown={() => setShowAuth(false)}
         >
-          <div onMouseDown={(e) => e.stopPropagation()}>
+          {/* Full width up to the card's own max-width; without it the card shrinks to its content. */}
+          <div className="w-full max-w-sm" onMouseDown={(e) => e.stopPropagation()}>
             <AuthGate
               claimTokens={claimTokens}
               onAuthed={handleAuthed}
@@ -1157,6 +1276,9 @@ export default function DashboardPage() {
           user={user}
           reminderProjects={projects.filter((p) => p.owner_user_id === user.id)}
           onToggleProjectReminder={handleToggleProjectReminder}
+          onSharedReminderRemoved={(projectId) =>
+            setBoardReminder((cur) => (cur && cur.projectId === projectId ? { projectId, subscribed: false } : cur))
+          }
           onClose={() => setShowAccount(false)}
           onChangePassword={handleChangePassword}
           onDeleteAccount={handleDeleteAccount}
@@ -1166,6 +1288,32 @@ export default function DashboardPage() {
       )}
     </div>
   );
+}
+
+/**
+ * Adds the boards other people shared with this account (their remembered links) after its own.
+ * A link that no longer works (regenerated, or the board deleted) is forgotten; a board that has
+ * since become the user's own is already in their list; a network error just skips it this time.
+ */
+async function withSharedBoards(userId: number, own: Project[]): Promise<Project[]> {
+  const saved = loadSharedBoards(userId);
+  const opened = await Promise.all(
+    saved.map(async (link) => {
+      try {
+        return await api.getProjectByToken(link.token);
+      } catch (err) {
+        if (err instanceof ApiError && (err.status === 403 || err.status === 404)) forgetSharedBoard(userId, link.id);
+        return null;
+      }
+    })
+  );
+  let projs = own;
+  for (const board of opened) {
+    if (!board) continue;
+    if (board.owner_user_id === userId) forgetSharedBoard(userId, board.id);
+    else if (!projs.some((p) => p.id === board.id)) projs = [...projs, board];
+  }
+  return projs;
 }
 
 /** The earlier meeting, when a submit was refused as a duplicate transcript (409). */

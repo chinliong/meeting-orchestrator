@@ -6,6 +6,9 @@ import type {
   MeetingListItem,
   MeetingSummary,
   Project,
+  ReminderSubscriptionState,
+  SharedReminder,
+  Subscriber,
   Subtask,
   Task,
   TaskStatus,
@@ -279,6 +282,26 @@ export const api = {
 
   // Deletes the meeting with every task extracted from it.
   deleteMeeting: (id: number) => request<void>(`/transcripts/${id}`, { method: "DELETE" }),
+
+  // --- reminders for people a board is shared with ---
+  // `boardToken` pins the board's own share link, which is what gives a collaborator access.
+  getMyReminders: (projectId: number, boardToken?: string) =>
+    request<ReminderSubscriptionState>(
+      `/projects/${projectId}/reminders/me`,
+      boardToken ? { headers: { "X-Workspace-Token": boardToken } } : undefined
+    ),
+  subscribeReminders: (projectId: number, boardToken?: string) =>
+    request<ReminderSubscriptionState>(`/projects/${projectId}/reminders/me`, {
+      method: "PUT",
+      ...(boardToken ? { headers: { "X-Workspace-Token": boardToken } } : {}),
+    }),
+  unsubscribeReminders: (projectId: number) =>
+    request<void>(`/projects/${projectId}/reminders/me`, { method: "DELETE" }),
+  listSharedReminders: () => request<SharedReminder[]>("/auth/reminder-subscriptions"),
+  // Owner-only: who gets this board's reminders, and removing one of them.
+  listSubscribers: (projectId: number) => request<Subscriber[]>(`/projects/${projectId}/subscribers`),
+  removeSubscriber: (projectId: number, userId: number) =>
+    request<void>(`/projects/${projectId}/subscribers/${userId}`, { method: "DELETE" }),
 
   // Writes (or rewrites) the meeting's AI summary. `boardToken` pins the meeting's own board, as
   // the summary can arrive after the user has switched to another.

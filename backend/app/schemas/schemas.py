@@ -80,6 +80,30 @@ class NotificationSettingsUpdate(BaseModel):
     notify_days_before: int = Field(default=1, ge=0, le=14)
 
 
+class ReminderSubscriptionState(BaseModel):
+    """Whether the signed-in user gets reminders for a board shared with them."""
+
+    subscribed: bool
+    # Their account-wide reminders switch, which asking for a board's reminders turns on.
+    notify_email: bool
+
+
+class SubscriberOut(BaseModel):
+    """Someone receiving a board's reminders, as its owner sees them."""
+
+    user_id: int
+    email: str
+    via: str  # "view" or "edit": the share link that gave them access
+    created_at: Optional[datetime] = None
+
+
+class SharedReminderOut(BaseModel):
+    """A board shared with the signed-in user whose reminders they get."""
+
+    project_id: int
+    project_name: str
+
+
 class StakeholderCreate(BaseModel):
     name: str
     email: Optional[str] = None

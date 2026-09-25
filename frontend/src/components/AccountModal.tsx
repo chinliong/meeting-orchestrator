@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-import type { Project, User } from "@/lib/types";
+import { api } from "@/lib/api";
+import type { Project, SharedReminder, User } from "@/lib/types";
 import PasswordInput from "@/components/PasswordInput";
 
 interface Props {
@@ -11,6 +12,8 @@ interface Props {
   /** The user's own boards — each can individually opt in to deadline reminders. */
   reminderProjects: Project[];
   onToggleProjectReminder: (projectId: number, enabled: boolean) => Promise<void>;
+  /** A shared board's reminders were turned off here. */
+  onSharedReminderRemoved: (projectId: number) => void;
   onClose: () => void;
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   onDeleteAccount: () => Promise<void>;
@@ -30,6 +33,7 @@ export default function AccountModal({
   user,
   reminderProjects,
   onToggleProjectReminder,
+  onSharedReminderRemoved,
   onClose,
   onChangePassword,
   onDeleteAccount,
@@ -56,6 +60,8 @@ export default function AccountModal({
   const [notifyError, setNotifyError] = useState<string | null>(null);
   const [testSending, setTestSending] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
+  // Boards shared with the user whose reminders they asked for (from "Remind me" on the board).
+  const [sharedReminders, setSharedReminders] = useState<SharedReminder[]>([]);
 
   // Reset the form each time the modal opens, and close on Escape.
   useEffect(() => {
@@ -72,6 +78,7 @@ export default function AccountModal({
       setNotifyDaysBefore(user.notify_days_before);
       setNotifyError(null);
       setTestResult(null);
+      api.listSharedReminders().then(setSharedReminders).catch(() => setSharedReminders([]));
     }
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     if (open) window.addEventListener("keydown", onKey);
@@ -89,6 +96,16 @@ export default function AccountModal({
     reminderProjects.forEach((p) => {
       if (p.notify_enabled !== target) onToggleProjectReminder(p.id, target);
     });
+  };
+
+  const stopSharedReminder = async (projectId: number) => {
+    try {
+      await api.unsubscribeReminders(projectId);
+      setSharedReminders((cur) => cur.filter((r) => r.project_id !== projectId));
+      onSharedReminderRemoved(projectId);
+    } catch (err) {
+      setNotifyError(readableError(err, "Couldn't stop those reminders"));
+    }
   };
 
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -283,7 +300,33 @@ export default function AccountModal({
                   </div>
                 </div>
               ) : (
-                <p className="text-[13px] text-slate-400">Create a project to choose where reminders apply.</p>
+                sharedReminders.length === 0 && (
+                  <p className="text-[13px] text-slate-400">Create a project to choose where reminders apply.</p>
+                )
+              )}
+
+              {/* Boards other people shared, whose reminders the user asked for on the board. */}
+              {sharedReminders.length > 0 && (
+                <div>
+                  <p className="text-sm text-slate-700">Shared with you</p>
+                  <div className="mt-2 divide-y divide-slate-100 rounded-lg border border-slate-200">
+                    {sharedReminders.map((r) => (
+                      <label
+                        key={r.project_id}
+                        className="flex cursor-pointer items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
+                      >
+                        <input
+                          type="checkbox"
+                          checked
+                          onChange={() => stopSharedReminder(r.project_id)}
+                          aria-label={`Stop reminders for ${r.project_name}`}
+                          className="h-4 w-4 shrink-0 rounded border-slate-300 accent-[#0E1626]"
+                        />
+                        <span className="truncate">{r.project_name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
               )}
 
               <div className="flex flex-col items-start gap-1">

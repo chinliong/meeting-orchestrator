@@ -248,3 +248,104 @@ def test_test_notification_surfaces_provider_failure_as_clean_error(db_session, 
 
     with pytest.raises(NotificationSendError):
         send_test_notification(db_session, user)
+
+
+# --- reminders for people a board is shared with ---
+
+
+def _subscribe(db, project, user, via="view"):
+    from app.models.models import ReminderSubscription
+
+    sub = ReminderSubscription(project_id=project.id, user_id=user.id, via=via)
+    db.add(sub)
+    db.flush()
+    return sub
+
+
+def test_subscriber_gets_the_boards_reminder_alongside_the_owner(db_session, sent_emails):
+    owner = _make_user(db_session)
+    project = _make_project(db_session, owner)
+    _make_task(db_session, project, deadline=TODAY + timedelta(days=1))
+    friend = _make_user(db_session, email="friend@example.com")
+    _subscribe(db_session, project, friend)
+    db_session.commit()
+
+    assert send_due_date_notifications(db_session, today=TODAY) == 2
+    assert sorted(e["to"] for e in sent_emails) == ["friend@example.com", "owner@example.com"]
+    # Each is tracked separately, so a second run the same day sends to neither.
+    assert send_due_date_notifications(db_session, today=TODAY) == 0
+
+
+def test_subscriber_reminders_follow_their_own_settings_not_the_owners(db_session, sent_emails):
+    # The owner has reminders off for this board, and the subscriber reminds 3 days ahead.
+    owner = _make_user(db_session, notify=False)
+    project = _make_project(db_session, owner, enabled=False)
+    _make_task(db_session, project, deadline=TODAY + timedelta(days=3))
+    friend = _make_user(db_session, email="friend@example.com", days_before=3)
+    _subscribe(db_session, project, friend)
+    quiet = _make_user(db_session, email="quiet@example.com", notify=False, days_before=3)
+    _subscribe(db_session, project, quiet)
+    db_session.commit()
+
+    assert send_due_date_notifications(db_session, today=TODAY) == 1
+    assert [e["to"] for e in sent_emails] == ["friend@example.com"]
+
+
+def test_own_and_shared_boards_arrive_in_one_digest(db_session, sent_emails):
+    owner = _make_user(db_session)
+    shared = _make_project(db_session, owner)
+    shared.name = "Shared board"
+    _make_task(db_session, shared, deadline=TODAY + timedelta(days=1))
+    friend = _make_user(db_session, email="friend@example.com")
+    mine = _make_project(db_session, friend)
+    mine.name = "My board"
+    _make_task(db_session, mine, deadline=TODAY)
+    _subscribe(db_session, shared, friend)
+    db_session.commit()
+
+    send_due_date_notifications(db_session, today=TODAY)
+    to_friend = [e for e in sent_emails if e["to"] == "friend@example.com"]
+    assert len(to_friend) == 1
+    assert "(Shared board)" in to_friend[0]["body"] and "(My board)" in to_friend[0]["body"]
+    assert to_friend[0]["subject"] == "2 tasks need attention"
+    # Every digest says how to stop it, since it can reach people other than the owner.
+    assert "Account settings" in to_friend[0]["body"]
+
+
+def test_rescheduled_task_reminds_a_subscriber_again(db_session, sent_emails):
+    owner = _make_user(db_session, notify=False)
+    project = _make_project(db_session, owner)
+    task = _make_task(db_session, project, deadline=TODAY + timedelta(days=1))
+    friend = _make_user(db_session, email="friend@example.com")
+    _subscribe(db_session, project, friend)
+    db_session.commit()
+
+    assert send_due_date_notifications(db_session, today=TODAY) == 1
+    task.deadline = TODAY
+    db_session.commit()
+    assert send_due_date_notifications(db_session, today=TODAY) == 1
+
+
+def test_a_board_without_an_owner_sends_no_subscriber_reminders(db_session, sent_emails):
+    # E.g. the owner deleted their account: the board is now an unmanaged guest board.
+    owner = _make_user(db_session, notify=False)
+    project = _make_project(db_session, owner)
+    _make_task(db_session, project, deadline=TODAY + timedelta(days=1))
+    friend = _make_user(db_session, email="friend@example.com")
+    _subscribe(db_session, project, friend)
+    project.owner_user_id = None
+    db_session.commit()
+
+    assert send_due_date_notifications(db_session, today=TODAY) == 0
+
+
+def test_test_email_previews_shared_boards_too(db_session, sent_emails, monkeypatch):
+    owner = _make_user(db_session, notify=False)
+    project = _make_project(db_session, owner, enabled=False)
+    _make_task(db_session, project, deadline=TODAY)
+    friend = _make_user(db_session, email="friend@example.com")
+    _subscribe(db_session, project, friend)
+    db_session.commit()
+
+    monkeypatch.setattr("app.notifications._reminder_today", lambda: TODAY)
+    assert send_test_notification(db_session, friend) == 1

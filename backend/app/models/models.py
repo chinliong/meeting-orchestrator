@@ -16,6 +16,7 @@ from sqlalchemy import (
     LargeBinary,
     String,
     Text,
+    UniqueConstraint,
     select,
 )
 from sqlalchemy.orm import column_property, relationship
@@ -42,6 +43,10 @@ class User(Base):
     notify_days_before = Column(Integer, nullable=False, default=1)
 
     projects = relationship("Project", back_populates="owner")
+    # Boards shared with this user whose reminders they asked for; see ReminderSubscription.
+    reminder_subscriptions = relationship(
+        "ReminderSubscription", back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 class PasswordReset(Base):
@@ -96,6 +101,9 @@ class Project(Base):
     owner = relationship("User", back_populates="projects")
     meetings = relationship("Meeting", back_populates="project", cascade="all, delete-orphan")
     tasks = relationship("Task", back_populates="project", cascade="all, delete-orphan")
+    reminder_subscriptions = relationship(
+        "ReminderSubscription", back_populates="project", cascade="all, delete-orphan"
+    )
 
 
 class Stakeholder(Base):
@@ -161,6 +169,9 @@ class Task(Base):
         cascade="all, delete-orphan",
         order_by="Attachment.created_at",
     )
+    subscriber_reminders = relationship(
+        "SubscriberReminder", back_populates="task", cascade="all, delete-orphan"
+    )
 
     @property
     def meeting_title(self) -> str | None:
@@ -216,6 +227,50 @@ class Attachment(Base):
     created_at = Column(DateTime, server_default=func.now())
 
     task = relationship("Task", back_populates="attachments")
+
+
+class ReminderSubscription(Base):
+    """A signed-in collaborator who asked for a shared board's deadline reminders.
+
+    The board's owner is reminded through their own settings; this lets someone the board was
+    shared with receive the same digest for it. It records which share link (`via`: "view" or
+    "edit") gave them access, so regenerating that link, which revokes their access, also ends
+    their reminders. Only boards with an owner can be subscribed to, since a guest board has
+    nobody who could revoke access.
+    """
+
+    __tablename__ = "reminder_subscriptions"
+    __table_args__ = (UniqueConstraint("project_id", "user_id"),)
+
+    id = Column(Integer, primary_key=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    via = Column(String, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+    project = relationship("Project", back_populates="reminder_subscriptions")
+    user = relationship("User", back_populates="reminder_subscriptions")
+    sent = relationship("SubscriberReminder", back_populates="subscription", cascade="all, delete-orphan")
+
+
+class SubscriberReminder(Base):
+    """The deadline a subscriber was last reminded about for one task.
+
+    The owner's reminders are tracked on the task itself (`Task.last_notified_for`); each
+    subscriber needs their own record, or one person's email would mark the task as reminded
+    for everyone.
+    """
+
+    __tablename__ = "subscriber_reminders"
+    __table_args__ = (UniqueConstraint("subscription_id", "task_id"),)
+
+    id = Column(Integer, primary_key=True, index=True)
+    subscription_id = Column(Integer, ForeignKey("reminder_subscriptions.id"), nullable=False, index=True)
+    task_id = Column(Integer, ForeignKey("tasks.id"), nullable=False, index=True)
+    notified_for = Column(Date, nullable=False)
+
+    subscription = relationship("ReminderSubscription", back_populates="sent")
+    task = relationship("Task", back_populates="subscriber_reminders")
 
 
 # Lightweight rollup counts exposed on every Task without loading the child rows (in particular
