@@ -391,9 +391,9 @@ export default function AccountModal({
               </button>
             </div>
           ) : (
-            <div className="rounded-xl border border-rose-200 bg-rose-50/60 p-4">
+            <div className="rounded-xl border border-rose-200 bg-rose-50/30 p-4">
               <h3 className="text-sm font-semibold text-rose-700">Delete your account?</h3>
-              <p className="mt-1 text-[13px] text-rose-700/80">
+              <p className="mt-1 text-[13px] leading-relaxed text-slate-600">
                 This can&apos;t be undone. Your boards are kept and stay reachable by their existing share links.
               </p>
               {deleteError && (
@@ -404,7 +404,7 @@ export default function AccountModal({
                   type="button"
                   onClick={() => setConfirmingDelete(false)}
                   disabled={deleting}
-                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-white"
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
                 >
                   Cancel
                 </button>
