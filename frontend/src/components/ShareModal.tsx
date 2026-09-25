@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import ConfirmDialog from "@/components/ConfirmDialog";
 import type { Project } from "@/lib/types";
 
 interface Props {
@@ -33,6 +34,7 @@ function LinkRow({
 }) {
   const [copied, setCopied] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const url = linkFor(token);
 
@@ -48,12 +50,7 @@ function LinkRow({
 
   const regenerate = async () => {
     if (!onRegenerate) return;
-    if (
-      !window.confirm(
-        `Regenerate the ${label.toLowerCase()}? The current link will stop working for everyone and you'll need to reshare the new one.`,
-      )
-    )
-      return;
+    setConfirming(false);
     setRegenerating(true);
     setError(null);
     try {
@@ -67,6 +64,14 @@ function LinkRow({
 
   return (
     <div>
+      <ConfirmDialog
+        open={confirming}
+        title={`Regenerate the ${label.toLowerCase()}?`}
+        message="The current link stops working for everyone who has it. You'll need to share the new link again."
+        confirmLabel="Regenerate link"
+        onConfirm={regenerate}
+        onCancel={() => setConfirming(false)}
+      />
       <div className="mb-1 flex items-center gap-2">
         <span className={`h-2 w-2 rounded-full ${accent}`} />
         <span className="text-sm font-medium text-slate-700">{label}</span>
@@ -88,7 +93,7 @@ function LinkRow({
         {onRegenerate && (
           <button
             type="button"
-            onClick={regenerate}
+            onClick={() => setConfirming(true)}
             disabled={regenerating}
             aria-label={`Regenerate ${label.toLowerCase()}`}
             title={`Regenerate ${label.toLowerCase()}`}

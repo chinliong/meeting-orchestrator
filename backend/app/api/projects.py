@@ -96,7 +96,12 @@ def update_project(
     db: Session = Depends(get_db),
 ):
     project = require_project_edit(db, project_id, user, x_workspace_token)
-    for field, value in payload.model_dump(exclude_unset=True).items():
+    changes = payload.model_dump(exclude_unset=True)
+    if "notify_enabled" in changes:
+        # Reminders for a board are emailed to its owner alone, so only the owner decides whether
+        # they are sent; an edit-link holder can change the board but not the owner's reminders.
+        require_project_owner(db, project_id, user)
+    for field, value in changes.items():
         setattr(project, field, value)
     db.commit()
     db.refresh(project)

@@ -8,6 +8,7 @@ import CalendarView from "@/components/CalendarView";
 import EditTaskModal from "@/components/EditTaskModal";
 import Filters from "@/components/Filters";
 import KanbanBoard from "@/components/KanbanBoard";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import ProjectModal from "@/components/ProjectModal";
 import type { ProjectScope } from "@/components/ProjectPicker";
 import ShareModal from "@/components/ShareModal";
@@ -76,6 +77,8 @@ export default function DashboardPage() {
   const [subtaskReloadNonce, setSubtaskReloadNonce] = useState(0);
   const [creatingTask, setCreatingTask] = useState(false);
   const [shareProject, setShareProject] = useState<Project | null>(null);
+  // The Delete project confirmation: null while closed.
+  const [projectDeletion, setProjectDeletion] = useState<{ busy: boolean; error: string | null } | null>(null);
 
   const user = session?.mode === "user" ? session.user : null;
 
@@ -526,14 +529,27 @@ export default function DashboardPage() {
     setShareProject(updated);
   };
 
-  const handleDeleteProject = async () => {
-    if (!selectedProjectId) return;
-    if (!window.confirm("Delete this project and all its meetings and tasks? This cannot be undone."))
+  const handleDeleteProject = () => {
+    if (selectedProjectId) setProjectDeletion({ busy: false, error: null });
+  };
+
+  const performDeleteProject = async () => {
+    const id = selectedProjectId;
+    if (!id) return;
+    setProjectDeletion({ busy: true, error: null });
+    try {
+      await api.deleteProject(id);
+    } catch (err) {
+      // Keep the dialog open and say why, rather than failing silently.
+      const raw = (err as Error).message;
+      const detail = raw.match(/"detail":"([^"]+)"/)?.[1];
+      setProjectDeletion({ busy: false, error: detail ?? raw });
       return;
-    await api.deleteProject(selectedProjectId);
-    const remaining = projects.filter((p) => p.id !== selectedProjectId);
+    }
+    setProjectDeletion(null);
+    const remaining = projects.filter((p) => p.id !== id);
     setProjects(remaining);
-    if (!user) removeGuestWorkspace(selectedProjectId);
+    if (!user) removeGuestWorkspace(id);
     setSelectedProjectId(remaining[0]?.id ?? null);
     setTasks([]);
   };
@@ -891,6 +907,24 @@ export default function DashboardPage() {
         onSave={handleEditTask}
         onCreate={handleCreateTask}
         onMetaChange={handleTaskMetaChange}
+      />
+
+      <ConfirmDialog
+        open={projectDeletion !== null}
+        title={`Delete “${selectedProject?.name ?? "this project"}”?`}
+        message={
+          <>
+            This removes the project and everything in it: {tasks.length} task{tasks.length === 1 ? "" : "s"}, with
+            their meetings, subtasks and attachments. Anyone using its share links will lose access. This
+            can&apos;t be undone.
+          </>
+        }
+        confirmLabel="Delete project"
+        tone="danger"
+        busy={projectDeletion?.busy}
+        error={projectDeletion?.error}
+        onConfirm={performDeleteProject}
+        onCancel={() => setProjectDeletion(null)}
       />
 
       <ShareModal

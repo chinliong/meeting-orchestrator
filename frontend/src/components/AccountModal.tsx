@@ -42,6 +42,8 @@ export default function AccountModal({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  // The password form stays folded into one row until asked for: it is rarely needed.
+  const [changingPassword, setChangingPassword] = useState(false);
 
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -63,6 +65,7 @@ export default function AccountModal({
       setConfirmPassword("");
       setError(null);
       setSuccess(false);
+      setChangingPassword(false);
       setConfirmingDelete(false);
       setDeleteError(null);
       setNotifyEmail(user.notify_email);
@@ -101,6 +104,7 @@ export default function AccountModal({
     try {
       await onChangePassword(currentPassword, newPassword);
       setSuccess(true);
+      setChangingPassword(false);
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -170,74 +174,54 @@ export default function AccountModal({
     }
   };
 
+  const cancelPasswordChange = () => {
+    setChangingPassword(false);
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setError(null);
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/40 p-4 backdrop-blur-sm sm:items-center"
       onMouseDown={onClose}
     >
       <div
-        className="my-auto max-h-[90dvh] w-full max-w-md animate-fade-in overflow-y-auto rounded-2xl bg-white p-5 shadow-xl sm:p-6"
+        className="relative my-auto max-h-[90dvh] w-full max-w-md animate-fade-in overflow-y-auto rounded-2xl bg-white p-5 shadow-xl sm:p-6"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <h2 className="font-display text-lg font-bold tracking-tight text-slate-900">Account settings</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Signed in as <span className="font-medium text-slate-700">{user.email}</span>
-        </p>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute right-3 top-3 rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+        >
+          <svg viewBox="0 0 20 20" className="h-5 w-5" fill="currentColor" aria-hidden>
+            <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+          </svg>
+        </button>
 
-        {/* --- change password --- */}
-        <form onSubmit={handleChangePassword} className="mt-5 space-y-3">
-          <h3 className="font-display text-sm font-bold text-slate-900">Change password</h3>
-          <PasswordInput
-            autoComplete="current-password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            placeholder="Current password"
-          />
-          <PasswordInput
-            autoComplete="new-password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="New password"
-          />
-          <PasswordInput
-            autoComplete="new-password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Confirm new password"
-          />
+        <h2 className="pr-8 font-display text-lg font-bold tracking-tight text-slate-900">Account settings</h2>
+        <p className="mt-0.5 truncate pr-8 text-sm text-slate-500">{user.email}</p>
 
-          {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
-          {success && (
-            <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-              Password updated.
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={submitting || !currentPassword || !newPassword}
-            className="w-full rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-ink-700 disabled:opacity-50"
-          >
-            {submitting ? "Updating..." : "Update password"}
-          </button>
-        </form>
-
-        {/* --- deadline email notifications --- */}
-        <div className="mt-6 border-t border-slate-200 pt-5">
+        {/* --- deadline email reminders: the main setting, so it comes first --- */}
+        <section className="mt-5 border-t border-slate-100 pt-5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h3 className="font-display text-sm font-bold text-slate-900">Deadline reminders</h3>
-              <p className="mt-0.5 text-xs text-slate-500">
-                Get a digest email when a task is about to be due or has gone overdue.
+              <p className="mt-0.5 text-[13px] text-slate-500">
+                A digest email when tasks are about to be due or have gone overdue.
               </p>
             </div>
             <button
               type="button"
               role="switch"
               aria-checked={notifyEmail}
+              aria-label="Deadline reminders"
               onClick={handleToggleNotify}
               disabled={notifySaving}
-              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition disabled:opacity-50 ${
+              className={`relative mt-0.5 inline-flex h-6 w-11 shrink-0 items-center rounded-full transition disabled:opacity-50 ${
                 notifyEmail ? "bg-brand" : "bg-slate-200"
               }`}
             >
@@ -250,14 +234,14 @@ export default function AccountModal({
           </div>
 
           {notifyEmail && (
-            <div className="mt-3 space-y-3">
-              <label className="flex items-center gap-2 text-sm text-slate-700">
+            <div className="mt-4 space-y-4">
+              <label className="flex items-center justify-between gap-3 text-sm text-slate-700">
                 Remind me
                 <select
                   value={notifyDaysBefore}
                   onChange={(e) => handleDaysBeforeChange(Number(e.target.value))}
                   disabled={notifySaving}
-                  className="rounded-lg border border-slate-300 px-2 py-1 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                  className="rounded-lg border border-slate-200 bg-white py-1.5 pl-2.5 pr-8 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
                 >
                   <option value={0}>on the due date</option>
                   <option value={1}>1 day before</option>
@@ -267,112 +251,175 @@ export default function AccountModal({
                 </select>
               </label>
 
-              {/* Per-project opt-in: pick exactly which boards should remind you. */}
+              {/* Per-project opt-in: reminders are sent only for the boards ticked here. */}
               {reminderProjects.length > 0 ? (
                 <div>
                   <div className="flex items-center justify-between">
-                    <p className="text-xs font-medium text-slate-500">Projects to remind me about</p>
+                    <p className="text-sm text-slate-700">For these projects</p>
                     <button
                       type="button"
                       onClick={toggleAllReminders}
-                      className="text-xs font-medium text-slate-500 transition hover:text-slate-800"
+                      className="text-xs font-medium text-brand-600 transition hover:underline"
                     >
                       {allRemindersOn ? "Clear all" : "Select all"}
                     </button>
                   </div>
-                  <div className="mt-1.5 max-h-40 space-y-0.5 overflow-y-auto rounded-lg border border-slate-100 p-1">
+                  {/* No inner scroll: the list grows with the dialog, so there is one scrollbar. */}
+                  <div className="mt-2 divide-y divide-slate-100 rounded-lg border border-slate-200">
                     {reminderProjects.map((p) => (
                       <label
                         key={p.id}
-                        className="flex items-center gap-2 rounded px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+                        className="flex cursor-pointer items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
                       >
                         <input
                           type="checkbox"
                           checked={p.notify_enabled}
                           onChange={(e) => onToggleProjectReminder(p.id, e.target.checked)}
-                          className="h-4 w-4 shrink-0 rounded border-slate-300 text-slate-900 focus:ring-slate-400"
+                          className="h-4 w-4 shrink-0 rounded border-slate-300 accent-[#0E1626]"
                         />
                         <span className="truncate">{p.name}</span>
                       </label>
                     ))}
                   </div>
-                  <p className="mt-1 text-xs text-slate-400">
-                    Reminders are sent only for the projects you tick here.
-                  </p>
                 </div>
               ) : (
-                <p className="text-xs text-slate-400">
-                  You have no projects yet — create one to choose where reminders apply.
-                </p>
+                <p className="text-[13px] text-slate-400">Create a project to choose where reminders apply.</p>
               )}
 
-              <div>
+              <div className="flex flex-col items-start gap-1">
                 <button
                   type="button"
                   onClick={handleSendTest}
                   disabled={testSending}
-                  className="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 disabled:opacity-50"
+                  className="whitespace-nowrap text-[13px] font-medium text-slate-600 underline-offset-2 transition hover:text-slate-900 hover:underline disabled:opacity-50"
                 >
-                  {testSending ? "Sending..." : "Send test email"}
+                  {testSending ? "Sending…" : "Send me a test email"}
                 </button>
-                {testResult && <p className="mt-2 text-xs text-emerald-700">{testResult}</p>}
+                {testResult && <p className="text-xs text-emerald-700">{testResult}</p>}
               </div>
             </div>
           )}
 
           {notifyError && (
-            <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{notifyError}</p>
+            <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{notifyError}</p>
           )}
-        </div>
+        </section>
 
-        {/* --- danger zone --- */}
-        <div className="mt-6 border-t border-slate-200 pt-5">
-          <h3 className="text-sm font-semibold text-rose-600">Delete account</h3>
-          <p className="mt-1 text-sm text-slate-500">
-            Your account is removed permanently. Your boards are kept and stay reachable by their
-            existing share links.
-          </p>
-
-          {deleteError && (
-            <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{deleteError}</p>
-          )}
-
-          {confirmingDelete ? (
-            <div className="mt-3 flex gap-2">
+        {/* --- password: one row until the user asks to change it --- */}
+        <section className="mt-5 border-t border-slate-100 pt-5">
+          {!changingPassword ? (
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h3 className="font-display text-sm font-bold text-slate-900">Password</h3>
+                {success ? (
+                  <p className="mt-0.5 text-[13px] text-emerald-700">Password updated.</p>
+                ) : (
+                  <p className="mt-0.5 text-[13px] tracking-widest text-slate-400">••••••••</p>
+                )}
+              </div>
               <button
-                onClick={handleDelete}
-                disabled={deleting}
-                className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-rose-700 disabled:opacity-50"
+                type="button"
+                onClick={() => {
+                  setSuccess(false);
+                  setChangingPassword(true);
+                }}
+                className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-50"
               >
-                {deleting ? "Deleting..." : "Yes, delete my account"}
-              </button>
-              <button
-                onClick={() => setConfirmingDelete(false)}
-                disabled={deleting}
-                className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
-              >
-                Cancel
+                Change
               </button>
             </div>
           ) : (
-            <button
-              onClick={() => setConfirmingDelete(true)}
-              className="mt-3 rounded-lg px-4 py-2 text-sm font-medium text-rose-600 ring-1 ring-rose-200 transition hover:bg-rose-50"
-            >
-              Delete account
-            </button>
-          )}
-        </div>
+            <form onSubmit={handleChangePassword} className="space-y-2.5">
+              <h3 className="font-display text-sm font-bold text-slate-900">Change password</h3>
+              <PasswordInput
+                autoComplete="current-password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Current password"
+                autoFocus
+              />
+              <PasswordInput
+                autoComplete="new-password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="New password"
+              />
+              <PasswordInput
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+              />
 
-        <div className="mt-6 flex justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
-          >
-            Close
-          </button>
-        </div>
+              {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
+
+              <div className="flex justify-end gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={cancelPasswordChange}
+                  disabled={submitting}
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting || !currentPassword || !newPassword}
+                  className="rounded-lg bg-ink px-3.5 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-ink-700 disabled:opacity-40"
+                >
+                  {submitting ? "Updating…" : "Update password"}
+                </button>
+              </div>
+            </form>
+          )}
+        </section>
+
+        {/* --- danger zone: clearly marked, but not the loudest thing on the page --- */}
+        <section className="mt-5 border-t border-slate-100 pt-5">
+          {!confirmingDelete ? (
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h3 className="font-display text-sm font-bold text-slate-900">Delete account</h3>
+                <p className="mt-0.5 text-[13px] text-slate-500">Your boards stay reachable by their share links.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setConfirmingDelete(true)}
+                className="shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium text-rose-600 transition hover:bg-rose-50"
+              >
+                Delete…
+              </button>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-rose-200 bg-rose-50/60 p-4">
+              <h3 className="text-sm font-semibold text-rose-700">Delete your account?</h3>
+              <p className="mt-1 text-[13px] text-rose-700/80">
+                This can&apos;t be undone. Your boards are kept and stay reachable by their existing share links.
+              </p>
+              {deleteError && (
+                <p className="mt-2 rounded-lg bg-white px-3 py-2 text-sm text-red-600">{deleteError}</p>
+              )}
+              <div className="mt-3 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirmingDelete(false)}
+                  disabled={deleting}
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="rounded-lg bg-rose-600 px-3.5 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-rose-700 disabled:opacity-50"
+                >
+                  {deleting ? "Deleting…" : "Yes, delete my account"}
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );

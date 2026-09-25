@@ -829,10 +829,11 @@ def test_test_notification_provider_failure_returns_clean_502(client, account, m
     assert resp.status_code == 502
 
 
-def test_project_notify_enable_toggle(client, project):
-    # Reminders are opt-in: a new board starts off, and can be switched on per project.
-    assert client.get(f"/api/v1/projects/by-token/{project['edit_token']}").json()["notify_enabled"] is False
-    resp = client.patch(f"/api/v1/projects/{project['id']}", json={"notify_enabled": True})
+def test_project_notify_enable_toggle(client, account):
+    # Reminders are opt-in: a new board starts off, and its owner can switch them on per project.
+    project = client.post("/api/v1/projects", json={"name": "Mine"}, headers=account["headers"]).json()
+    assert project["notify_enabled"] is False
+    resp = client.patch(f"/api/v1/projects/{project['id']}", json={"notify_enabled": True}, headers=account["headers"])
     assert resp.status_code == 200
     assert resp.json()["notify_enabled"] is True
 

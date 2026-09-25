@@ -204,6 +204,22 @@ def test_send_due_date_notifications_never_raises_on_provider_failure(db_session
     assert send_due_date_notifications(db_session, today=TODAY) == 0
 
 
+def test_only_the_owner_can_switch_a_boards_reminders(client, account):
+    """Reminders go to the board owner alone, so an edit-link holder can't turn them on or off."""
+    board = client.post("/api/v1/projects", json={"name": "Owned"}, headers=account["headers"]).json()
+    editor = client.post("/api/v1/auth/signup", json={"email": "editor@example.com", "password": "pw"}).json()
+    as_editor = {"Authorization": f"Bearer {editor['token']}", "X-Workspace-Token": board["edit_token"]}
+
+    blocked = client.patch(f"/api/v1/projects/{board['id']}", json={"notify_enabled": True}, headers=as_editor)
+    assert blocked.status_code == 403
+    # The same link still allows ordinary edits to the board.
+    renamed = client.patch(f"/api/v1/projects/{board['id']}", json={"name": "Renamed"}, headers=as_editor)
+    assert renamed.status_code == 200 and renamed.json()["notify_enabled"] is False
+
+    owner = client.patch(f"/api/v1/projects/{board['id']}", json={"notify_enabled": True}, headers=account["headers"])
+    assert owner.status_code == 200 and owner.json()["notify_enabled"] is True
+
+
 def test_rescheduled_task_reopens_window(db_session, sent_emails):
     user = _make_user(db_session)
     project = _make_project(db_session, user)

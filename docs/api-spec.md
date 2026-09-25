@@ -114,8 +114,9 @@ token matches nothing.
 Returns one board. Requires view access; `403` without it, `404` if the board does not exist.
 
 ### `PATCH /projects/{project_id}`
-Update `name` / `description` / `notify_enabled`. Requires edit access. Returns the project;
-`404`/`403` as above.
+Update `name` / `description` / `notify_enabled`. Requires edit access; changing `notify_enabled`
+is owner-only (`403` for an edit-link holder), because the board's reminders go to its owner
+alone. Returns the project; `404`/`403` as above.
 
 ### `POST /projects/{project_id}/rotate-token?which=view|edit`
 Mints a fresh token for the chosen share link, invalidating every copy of the old link of that
