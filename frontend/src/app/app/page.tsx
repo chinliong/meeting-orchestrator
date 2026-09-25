@@ -331,6 +331,11 @@ export default function DashboardPage() {
     };
   }, [ready, meetingsBoardId, meetingsBoardToken, meetingsKey]);
   const meetingFilterShown = meetingsBoardId !== null && meetings.length > 0;
+  // A chosen meeting that is no longer listed (deleted elsewhere, or the list failed to load, which
+  // also hides the filter) would leave the board filtered to nothing with no way to clear it.
+  useEffect(() => {
+    if (selectedMeetingId !== null && !meetings.some((m) => m.id === selectedMeetingId)) setSelectedMeetingId(null);
+  }, [meetings, selectedMeetingId]);
 
   // Writes a meeting's summary with a separate request after its tasks are saved, so a slow or
   // failed summary never holds up or affects the tasks. `boardToken` pins the meeting's board.
@@ -568,6 +573,9 @@ export default function DashboardPage() {
       throw new Error(meeting.error_message || "The transcript could not be processed. Please try again.");
     }
     setLatestMeetingId(meeting.id);
+    // Show the whole board again, so the new meeting's tasks and summary are not hidden behind
+    // a meeting chosen earlier in the Meeting filter.
+    setSelectedMeetingId(null);
     reloadTasksRef.current();
     const board = projects.find((p) => p.id === projectId);
     setSummaryShownFor(meeting.id);
@@ -607,6 +615,7 @@ export default function DashboardPage() {
       throw new Error(current.error_message || "Transcription failed.");
     }
     setLatestMeetingId(meeting.id);
+    setSelectedMeetingId(null); // as for pasted text: show the new meeting's tasks and summary
     reloadTasksRef.current();
     setSummaryShownFor(meeting.id);
     requestSummary(meeting.id, boardToken);
