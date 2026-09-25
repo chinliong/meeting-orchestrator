@@ -931,7 +931,7 @@ export default function DashboardPage() {
                     {searchAllProjects ? viewTitle : selectedProject?.name}
                   </h2>
                   {!searchAllProjects && !canEdit && (
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+                    <span className="shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
                       View only
                     </span>
                   )}
