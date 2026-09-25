@@ -12,8 +12,10 @@ from fastapi import (
     Form,
     Header,
     HTTPException,
+    Response,
     UploadFile,
 )
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.auth import get_optional_user, require_project_edit, require_project_view
@@ -21,7 +23,7 @@ from app.db import SessionLocal, get_db
 from app.llm import transcription
 from app.llm.parser import TranscriptParser
 from app.models.models import Meeting, MeetingStatus, Project, Task, User
-from app.schemas.schemas import MeetingOut, MeetingUpdate, TranscriptSubmit
+from app.schemas.schemas import MeetingListItem, MeetingOut, MeetingUpdate, TranscriptSubmit
 
 router = APIRouter(prefix="/transcripts", tags=["transcripts"])
 
@@ -194,6 +196,27 @@ def submit_transcript(
     db: Session = Depends(get_db),
 ):
     project = require_project_edit(db, payload.project_id, user, x_workspace_token)
+    if payload.check_duplicate:
+        # An accidental second paste of the same transcript would duplicate every task.
+        existing = (
+            db.query(Meeting)
+            .filter(Meeting.project_id == project.id, Meeting.transcript_text == payload.transcript_text)
+            .order_by(Meeting.created_at.desc(), Meeting.id.desc())
+            .first()
+        )
+        if existing is not None:
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "code": "duplicate_transcript",
+                    "message": "This transcript has already been added to this board.",
+                    "meeting": {
+                        "id": existing.id,
+                        "title": existing.title,
+                        "created_at": existing.created_at.isoformat() if existing.created_at else None,
+                    },
+                },
+            )
     on = payload.meeting_date or date.today()
     return _process_transcript(project, _meeting_title(payload.title, on),
                                payload.transcript_text, db, meeting_date=on)
@@ -250,6 +273,58 @@ async def submit_audio(
 
     background_tasks.add_task(_transcribe_and_extract, meeting.id, path)
     return meeting
+
+
+@router.get("", response_model=list[MeetingListItem])
+def list_meetings(
+    project_id: int,
+    user: Optional[User] = Depends(get_optional_user),
+    x_workspace_token: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+):
+    """A board's meetings, newest first, each with its task count.
+
+    Reads only the columns the list shows, never the transcripts themselves.
+    """
+    require_project_view(db, project_id, user, x_workspace_token)
+    columns = (Meeting.id, Meeting.project_id, Meeting.title, Meeting.meeting_date, Meeting.status,
+               Meeting.error_message, Meeting.created_at)
+    rows = (
+        db.query(*columns, func.count(Task.id))
+        .outerjoin(Task, Task.meeting_id == Meeting.id)
+        .filter(Meeting.project_id == project_id)
+        .group_by(*columns)
+        .order_by(Meeting.created_at.desc(), Meeting.id.desc())
+        .all()
+    )
+    return [
+        MeetingListItem(id=r[0], project_id=r[1], title=r[2], meeting_date=r[3], status=r[4],
+                        error_message=r[5], created_at=r[6], task_count=r[7])
+        for r in rows
+    ]
+
+
+@router.delete("/{meeting_id}", status_code=204)
+def delete_meeting(
+    meeting_id: int,
+    user: Optional[User] = Depends(get_optional_user),
+    x_workspace_token: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+):
+    """Delete a meeting with every task extracted from it (and their subtasks and attachments).
+
+    Refused while a recording is still being processed: its background job still writes to the
+    meeting, so the user deletes it once it has finished (or failed).
+    """
+    meeting = db.get(Meeting, meeting_id)
+    if meeting is None:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+    require_project_edit(db, meeting.project_id, user, x_workspace_token)
+    if meeting.status in (MeetingStatus.PENDING, MeetingStatus.PROCESSING):
+        raise HTTPException(status_code=409, detail="This meeting is still being processed. Try again when it has finished.")
+    db.delete(meeting)
+    db.commit()
+    return Response(status_code=204)
 
 
 @router.get("/{meeting_id}", response_model=MeetingOut)

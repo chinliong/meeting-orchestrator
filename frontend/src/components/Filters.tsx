@@ -11,6 +11,8 @@ interface Props {
   onSortToggle: () => void;
   /** The "Sort by deadline" toggle is meaningless in the calendar view, so it can be hidden. */
   showSort?: boolean;
+  /** Further filters shown on the right, before Sort (the Meeting filter). */
+  extra?: React.ReactNode;
 }
 
 export default function Filters({
@@ -20,12 +22,14 @@ export default function Filters({
   sortByDeadline,
   onSortToggle,
   showSort = true,
+  extra,
 }: Props) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <span className="font-display text-sm font-semibold text-slate-500">Filter</span>
 
-      {/* "All" pill */}
+      {/* "All" pill, shown when there are owners to filter by */}
+      {owners.length > 0 && (
       <button
         onClick={() => onOwnerChange("")}
         className={`rounded-full px-3 py-1 text-sm font-medium transition ${
@@ -36,6 +40,7 @@ export default function Filters({
       >
         All owners
       </button>
+      )}
 
       {owners.map((owner) => {
         const active = selectedOwner === owner;
@@ -61,10 +66,12 @@ export default function Filters({
         );
       })}
 
+      <div className="ml-auto flex items-center gap-2">
+      {extra}
       {showSort && (
         <button
           onClick={onSortToggle}
-          className={`ml-auto inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
             sortByDeadline
               ? "bg-slate-900 text-white"
               : "text-slate-600 hover:bg-slate-900/5"
@@ -76,6 +83,7 @@ export default function Filters({
           Sort by deadline
         </button>
       )}
+      </div>
     </div>
   );
 }

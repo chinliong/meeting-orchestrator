@@ -398,6 +398,62 @@ def test_token_of_deleted_account_is_rejected(client, account):
 
 # --- transcripts & tasks ---
 
+def test_list_meetings_newest_first_with_task_counts(client, project, stub_parser):
+    first = client.post("/api/v1/transcripts", json={"project_id": project["id"], "title": "First", "transcript_text": "a"}).json()
+    second = client.post("/api/v1/transcripts", json={"project_id": project["id"], "title": "Second", "transcript_text": "b"}).json()
+    listed = client.get(f"/api/v1/transcripts?project_id={project['id']}")
+    assert listed.status_code == 200
+    rows = listed.json()
+    assert [m["id"] for m in rows] == [second["id"], first["id"]]
+    assert [m["task_count"] for m in rows] == [2, 2]
+    assert "transcript_text" not in rows[0] and "tasks" not in rows[0]
+    # Reading the list needs access to the board.
+    anon = client.get(f"/api/v1/transcripts?project_id={project['id']}", headers={"X-Workspace-Token": ""})
+    assert anon.status_code == 403
+
+
+def test_delete_meeting_removes_only_its_tasks(client, project, stub_parser):
+    keep = client.post("/api/v1/transcripts", json={"project_id": project["id"], "title": "Keep", "transcript_text": "a"}).json()
+    drop = client.post("/api/v1/transcripts", json={"project_id": project["id"], "title": "Oops", "transcript_text": "b"}).json()
+    doomed = drop["tasks"][0]["id"]
+    client.post(f"/api/v1/tasks/{doomed}/subtasks", json={"title": "step"})
+    client.post(f"/api/v1/tasks/{doomed}/attachments", files={"file": ("notes.txt", b"hello", "text/plain")})
+    # A view link can't delete a meeting.
+    view = client.delete(f"/api/v1/transcripts/{drop['id']}", headers={"X-Workspace-Token": project["view_token"]})
+    assert view.status_code == 403
+
+    assert client.delete(f"/api/v1/transcripts/{drop['id']}").status_code == 204
+    remaining = client.get(f"/api/v1/tasks?project_id={project['id']}").json()
+    assert {t["meeting_id"] for t in remaining} == {keep["id"]} and len(remaining) == 2
+    assert client.get(f"/api/v1/transcripts/{drop['id']}").status_code == 404
+    assert [m["id"] for m in client.get(f"/api/v1/transcripts?project_id={project['id']}").json()] == [keep["id"]]
+
+
+def test_meeting_still_processing_cannot_be_deleted(client, project, db_session):
+    from app.models.models import Meeting, MeetingStatus
+
+    meeting = Meeting(project_id=project["id"], title="Recording", transcript_text="", status=MeetingStatus.PROCESSING)
+    db_session.add(meeting)
+    db_session.commit()
+    resp = client.delete(f"/api/v1/transcripts/{meeting.id}")
+    assert resp.status_code == 409
+
+
+def test_duplicate_transcript_is_flagged_only_when_asked(client, project, stub_parser):
+    body = {"project_id": project["id"], "title": "Weekly", "transcript_text": "same words"}
+    first = client.post("/api/v1/transcripts", json=body).json()
+    flagged = client.post("/api/v1/transcripts", json={**body, "check_duplicate": True})
+    assert flagged.status_code == 409
+    detail = flagged.json()["detail"]
+    assert detail["code"] == "duplicate_transcript" and detail["meeting"]["id"] == first["id"]
+    # Without the flag, or on another board, the same text is simply added.
+    assert client.post("/api/v1/transcripts", json=body).status_code == 201
+    other = client.post("/api/v1/projects", json={"name": "Other"}).json()
+    elsewhere = client.post("/api/v1/transcripts", json={**body, "project_id": other["id"], "check_duplicate": True},
+                            headers={"X-Workspace-Token": other["edit_token"]})
+    assert elsewhere.status_code == 201
+
+
 def test_submit_transcript_creates_tasks(client, project, stub_parser):
     resp = client.post(
         "/api/v1/transcripts",

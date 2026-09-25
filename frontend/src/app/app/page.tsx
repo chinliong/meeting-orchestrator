@@ -8,6 +8,7 @@ import CalendarView from "@/components/CalendarView";
 import EditTaskModal from "@/components/EditTaskModal";
 import Filters from "@/components/Filters";
 import KanbanBoard from "@/components/KanbanBoard";
+import MeetingFilter from "@/components/MeetingFilter";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import ProjectModal from "@/components/ProjectModal";
 import type { ProjectScope } from "@/components/ProjectPicker";
@@ -16,6 +17,7 @@ import StatsBar from "@/components/StatsBar";
 import TopBar from "@/components/TopBar";
 import TranscriptUpload from "@/components/TranscriptUpload";
 import { ApiError, api, setAuthToken, setSessionExpiredHandler, setWorkspaceToken } from "@/lib/api";
+import { formatAddedAt } from "@/lib/format";
 import {
   clearAuth,
   clearGuestChosen,
@@ -30,7 +32,7 @@ import {
   upsertGuestWorkspace,
   workspaceTokenFor,
 } from "@/lib/session";
-import type { AuthResponse, Project, Task, TaskMeta, TaskStatus, UndoAction, User } from "@/lib/types";
+import type { AuthResponse, Meeting, MeetingListItem, Project, Task, TaskMeta, TaskStatus, UndoAction, User } from "@/lib/types";
 
 type Session = { mode: "user"; user: User } | { mode: "guest" } | null;
 type BoardView = "board" | "calendar";
@@ -77,6 +79,20 @@ export default function DashboardPage() {
   const [subtaskReloadNonce, setSubtaskReloadNonce] = useState(0);
   const [creatingTask, setCreatingTask] = useState(false);
   const [shareProject, setShareProject] = useState<Project | null>(null);
+  // The board's meeting list reloads whenever this changes (a meeting added, finished or deleted).
+  const [meetingsKey, setMeetingsKey] = useState(0);
+  // The meeting just added here: its row and its tasks are marked "New" until the board changes.
+  const [latestMeetingId, setLatestMeetingId] = useState<number | null>(null);
+  // The board's meetings (for the Meeting filter), and the one the board is filtered to.
+  const [meetings, setMeetings] = useState<MeetingListItem[]>([]);
+  const [selectedMeetingId, setSelectedMeetingId] = useState<number | null>(null);
+  // The Delete meeting confirmation, and the "add this transcript again?" question.
+  const [meetingDeletion, setMeetingDeletion] = useState<{ meeting: MeetingListItem; busy: boolean; error: string | null } | null>(null);
+  const [duplicatePrompt, setDuplicatePrompt] = useState<{
+    title: string;
+    createdAt: string | null;
+    resolve: (addAgain: boolean) => void;
+  } | null>(null);
   // The Delete project confirmation: null while closed.
   const [projectDeletion, setProjectDeletion] = useState<{ busy: boolean; error: string | null } | null>(null);
 
@@ -265,6 +281,8 @@ export default function DashboardPage() {
   // A board's owner filter does not carry over to another board, where it could hide every task.
   useEffect(() => {
     setSelectedOwner("");
+    setLatestMeetingId(null);
+    setSelectedMeetingId(null);
   }, [viewKey]);
 
   // A board selection belongs to the account that made it.
@@ -272,6 +290,27 @@ export default function DashboardPage() {
     setBoardScope(null);
     setSearchAllProjects(false);
   }, [user?.id]);
+
+  // The board's meetings, for the Meeting filter: one project at a time, reloaded whenever a
+  // meeting is added, finishes processing, is renamed or is deleted (meetingsKey). The board's own
+  // token is passed explicitly so the list loads for this board even mid-switch.
+  const meetingsBoardId = !searchAllProjects && selectedProject ? selectedProject.id : null;
+  const meetingsBoardToken = selectedProject ? workspaceTokenFor(selectedProject) : undefined;
+  useEffect(() => {
+    if (!ready || meetingsBoardId === null) {
+      setMeetings([]);
+      return;
+    }
+    let cancelled = false;
+    api
+      .listMeetings(meetingsBoardId, meetingsBoardToken)
+      .then((list) => !cancelled && setMeetings(list))
+      .catch(() => !cancelled && setMeetings([]));
+    return () => {
+      cancelled = true;
+    };
+  }, [ready, meetingsBoardId, meetingsBoardToken, meetingsKey]);
+  const meetingFilterShown = meetingsBoardId !== null && meetings.length > 0;
 
   const owners = useMemo(
     () => Array.from(new Set(tasks.map((t) => t.owner).filter(Boolean))) as string[],
@@ -288,6 +327,7 @@ export default function DashboardPage() {
 
   const visibleTasks = useMemo(() => {
     let result = activeOwner ? tasks.filter((t) => t.owner === activeOwner) : tasks;
+    if (selectedMeetingId !== null) result = result.filter((t) => t.meeting_id === selectedMeetingId);
     const q = search.trim().toLowerCase();
     if (q) {
       result = result.filter((t) =>
@@ -304,7 +344,7 @@ export default function DashboardPage() {
       });
     }
     return result;
-  }, [tasks, activeOwner, sortByDeadline, search]);
+  }, [tasks, activeOwner, selectedMeetingId, sortByDeadline, search]);
 
   // Calendar plots task deadlines; it works in any task view (single board or across all).
   const activeView: BoardView = view;
@@ -424,6 +464,7 @@ export default function DashboardPage() {
 
   const handleRenameMeeting = async (meetingId: number, title: string) => {
     const updated = await api.updateMeeting(meetingId, title);
+    setMeetingsKey((k) => k + 1);
     setTasks((prev) =>
       prev.map((t) => (t.meeting_id === meetingId ? { ...t, meeting_title: updated.title } : t))
     );
@@ -449,12 +490,30 @@ export default function DashboardPage() {
 
   const handleTranscriptSubmit = async (title: string, transcriptText: string, meetingDate: string) => {
     if (!selectedProjectId) return;
-    const meeting = await api.submitTranscript(selectedProjectId, title, transcriptText, meetingDate);
+    const projectId = selectedProjectId;
+    const submit = (checkDuplicate: boolean) =>
+      api.submitTranscript(projectId, title, transcriptText, meetingDate, checkDuplicate);
+    let meeting: Meeting;
+    try {
+      meeting = await submit(true);
+    } catch (err) {
+      // The same transcript already on this board: ask before adding a second copy of its tasks.
+      const earlier = duplicateOf(err);
+      if (!earlier) throw err;
+      const addAgain = await new Promise<boolean>((resolve) =>
+        setDuplicatePrompt({ title: earlier.title, createdAt: earlier.created_at, resolve })
+      );
+      setDuplicatePrompt(null);
+      if (!addAgain) throw new Error("Not added: this transcript is already on this board.");
+      meeting = await submit(false);
+    }
+    setMeetingsKey((k) => k + 1);
     // A failed extraction still comes back as 201 with status "failed", so check it: throwing
     // keeps the pasted transcript in the form and shows the error instead of a silent no-op.
     if (meeting.status === "failed") {
       throw new Error(meeting.error_message || "The transcript could not be processed. Please try again.");
     }
+    setLatestMeetingId(meeting.id);
     reloadTasksRef.current();
   };
 
@@ -464,6 +523,7 @@ export default function DashboardPage() {
     const board = projects.find((p) => p.id === selectedProjectId);
     const boardToken = board ? workspaceTokenFor(board) : undefined;
     const meeting = await api.submitAudio(selectedProjectId, title, file, meetingDate);
+    setMeetingsKey((k) => k + 1); // listed straight away, as "Processing…"
     // A long recording can take many minutes on the free server (converting the audio alone runs
     // for minutes). The job keeps going on the server whatever the browser does, so give up
     // waiting only after a generous limit, and then say so rather than invite a second upload.
@@ -485,9 +545,33 @@ export default function DashboardPage() {
         if (err instanceof ApiError) throw err;
       }
     }
+    setMeetingsKey((k) => k + 1);
     if (current.status === "failed") {
       throw new Error(current.error_message || "Transcription failed.");
     }
+    setLatestMeetingId(meeting.id);
+    reloadTasksRef.current();
+  };
+
+  const performDeleteMeeting = async () => {
+    if (!meetingDeletion) return;
+    const { meeting } = meetingDeletion;
+    setMeetingDeletion({ meeting, busy: true, error: null });
+    try {
+      await api.deleteMeeting(meeting.id);
+    } catch (err) {
+      const raw = (err as Error).message;
+      setMeetingDeletion({ meeting, busy: false, error: raw.match(/"detail":"([^"]+)"/)?.[1] ?? raw });
+      return;
+    }
+    setMeetingDeletion(null);
+    if (latestMeetingId === meeting.id) setLatestMeetingId(null);
+    if (selectedMeetingId === meeting.id) setSelectedMeetingId(null);
+    // Undo entries may refer to the tasks just removed, so the history starts afresh.
+    undoGenRef.current += 1;
+    undoStackRef.current = [];
+    setUndoDepth(0);
+    setMeetingsKey((k) => k + 1);
     reloadTasksRef.current();
   };
 
@@ -824,7 +908,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {owners.length > 0 && (
+                {(owners.length > 0 || meetingFilterShown) && (
                   <Filters
                     owners={owners}
                     selectedOwner={activeOwner}
@@ -832,6 +916,18 @@ export default function DashboardPage() {
                     sortByDeadline={sortByDeadline}
                     onSortToggle={() => setSortByDeadline((v) => !v)}
                     showSort={activeView === "board"}
+                    extra={
+                      meetingFilterShown ? (
+                        <MeetingFilter
+                          meetings={meetings}
+                          selectedMeetingId={selectedMeetingId}
+                          onSelect={setSelectedMeetingId}
+                          latestMeetingId={latestMeetingId}
+                          canEdit={!!canEdit}
+                          onDelete={(m) => setMeetingDeletion({ meeting: m, busy: false, error: null })}
+                        />
+                      ) : undefined
+                    }
                   />
                 )}
 
@@ -856,6 +952,7 @@ export default function DashboardPage() {
                     onEdit={(t) => setEditingTaskId(t.id)}
                     onDelete={handleDelete}
                     onRenameMeeting={handleRenameMeeting}
+                    newMeetingId={latestMeetingId}
                   />
                 )}
               </div>
@@ -910,6 +1007,44 @@ export default function DashboardPage() {
       />
 
       <ConfirmDialog
+        open={meetingDeletion !== null}
+        title={`Delete “${meetingDeletion?.meeting.title ?? ""}”?`}
+        message={
+          meetingDeletion && (
+            <>
+              {meetingDeletion.meeting.created_at && <>Added {formatAddedAt(meetingDeletion.meeting.created_at, true)}. </>}
+              This removes the meeting and its {meetingDeletion.meeting.task_count} task
+              {meetingDeletion.meeting.task_count === 1 ? "" : "s"}, with their subtasks and attachments. This
+              can&apos;t be undone.
+            </>
+          )
+        }
+        confirmLabel="Delete meeting"
+        tone="danger"
+        busy={meetingDeletion?.busy}
+        error={meetingDeletion?.error}
+        onConfirm={performDeleteMeeting}
+        onCancel={() => setMeetingDeletion(null)}
+      />
+
+      <ConfirmDialog
+        open={duplicatePrompt !== null}
+        title="Add this transcript again?"
+        message={
+          duplicatePrompt && (
+            <>
+              This exact transcript is already on this board as “{duplicatePrompt.title}”
+              {duplicatePrompt.createdAt && <>, added {formatAddedAt(duplicatePrompt.createdAt)}</>}. Adding it
+              again creates a second copy of its tasks.
+            </>
+          )
+        }
+        confirmLabel="Add again"
+        onConfirm={() => duplicatePrompt?.resolve(true)}
+        onCancel={() => duplicatePrompt?.resolve(false)}
+      />
+
+      <ConfirmDialog
         open={projectDeletion !== null}
         title={`Delete “${selectedProject?.name ?? "this project"}”?`}
         message={
@@ -949,6 +1084,17 @@ export default function DashboardPage() {
       )}
     </div>
   );
+}
+
+/** The earlier meeting, when a submit was refused as a duplicate transcript (409). */
+function duplicateOf(err: unknown): { title: string; created_at: string | null } | null {
+  if (!(err instanceof ApiError) || err.status !== 409) return null;
+  try {
+    const detail = JSON.parse(err.body).detail;
+    return detail?.code === "duplicate_transcript" ? detail.meeting : null;
+  } catch {
+    return null;
+  }
 }
 
 function LoadingScreen({ slow }: { slow: boolean }) {

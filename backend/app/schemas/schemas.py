@@ -97,6 +97,9 @@ class TranscriptSubmit(BaseModel):
     # The date the meeting took place; relative deadline cues resolve against it. Omitted
     # means "today", which is right for a meeting being uploaded as it happens.
     meeting_date: Optional[date] = None
+    # When true, a transcript identical to one already on this board is refused with 409 instead
+    # of being parsed again, so the client can ask the user first. Off by default.
+    check_duplicate: bool = False
 
 
 class TaskOut(BaseModel):
@@ -173,6 +176,19 @@ class MeetingOut(BaseModel):
     error_message: Optional[str]
     created_at: datetime
     tasks: list[TaskOut] = []
+
+
+class MeetingListItem(BaseModel):
+    """A meeting in a board's meeting list: no transcript or tasks, just what the list shows."""
+
+    id: int
+    project_id: int
+    title: str
+    meeting_date: Optional[date] = None
+    status: MeetingStatus
+    error_message: Optional[str] = None
+    created_at: Optional[datetime] = None
+    task_count: int
 
 
 class SubtaskOut(BaseModel):

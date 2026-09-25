@@ -22,6 +22,8 @@ interface Props {
   onEdit: (task: Task) => void;
   onDelete: (id: number) => void;
   onRenameMeeting: (meetingId: number, title: string) => Promise<void>;
+  /** True for tasks from the meeting just added, so the user sees what that transcript created. */
+  isNew?: boolean;
 }
 
 export default function TaskCard({
@@ -32,6 +34,7 @@ export default function TaskCard({
   onEdit,
   onDelete,
   onRenameMeeting,
+  isNew = false,
 }: Props) {
   const overdue = task.deadline && task.status !== "done" && isOverdue(task.deadline);
 
@@ -79,7 +82,7 @@ export default function TaskCard({
     <div
       draggable={canEdit && !renaming}
       onDragStart={(e) => onDragStart(e, task)}
-      className={`group relative mb-2 overflow-hidden rounded-xl border border-slate-200/80 bg-white p-3.5 pl-[18px] transition duration-150 hover:border-slate-300 hover:shadow-card-hover ${
+      className={`group relative mb-2 overflow-hidden rounded-xl border border-slate-200/80 bg-white p-3.5 pl-[18px] transition duration-150 hover:border-slate-300 hover:shadow-card-hover ${isNew ? "ring-2 ring-brand/25" : ""} ${
         canEdit ? "cursor-grab active:cursor-grabbing" : ""
       }`}
     >
@@ -112,6 +115,12 @@ export default function TaskCard({
           </svg>
         </button>
       </div>
+
+      {isNew && (
+        <span className="mb-1.5 inline-block rounded bg-brand-600 px-1.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+          New
+        </span>
+      )}
 
       {projectName && (
         <div className="mb-1 flex items-center gap-1 [@media(hover:none)]:pr-12 text-[11.5px] font-medium text-slate-500">

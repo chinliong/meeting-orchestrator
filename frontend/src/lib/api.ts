@@ -3,6 +3,7 @@ import type {
   AuthResponse,
   DeletedTask,
   Meeting,
+  MeetingListItem,
   Project,
   Subtask,
   Task,
@@ -27,7 +28,7 @@ export function setWorkspaceToken(token: string | null) {
 
 /** An HTTP error from the API, carrying the status so callers can tell a 401 from the rest. */
 export class ApiError extends Error {
-  constructor(message: string, public status: number) {
+  constructor(message: string, public status: number, public body = "") {
     super(message);
   }
 }
@@ -47,7 +48,7 @@ async function throwIfFailed(res: Response, method: string, path: string): Promi
   if (res.ok) return;
   const body = await res.text();
   if (res.status === 401 && authToken && !PASSWORD_ROUTES.includes(path)) onSessionExpired?.();
-  throw new ApiError(`${method} ${path} failed (${res.status}): ${body}`, res.status);
+  throw new ApiError(`${method} ${path} failed (${res.status}): ${body}`, res.status, body);
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -247,7 +248,15 @@ export const api = {
   },
 
   // --- transcripts ---
-  submitTranscript: (projectId: number, title: string, transcriptText: string, meetingDate: string) =>
+  // With `checkDuplicate`, a transcript already on this board is refused (409) so the user can
+  // be asked before its tasks are added a second time.
+  submitTranscript: (
+    projectId: number,
+    title: string,
+    transcriptText: string,
+    meetingDate: string,
+    checkDuplicate = false
+  ) =>
     request<Meeting>("/transcripts", {
       method: "POST",
       body: JSON.stringify({
@@ -256,8 +265,19 @@ export const api = {
         transcript_text: transcriptText,
         // Relative deadline cues ("by Friday") resolve against this date, not the upload date.
         meeting_date: meetingDate || null,
+        check_duplicate: checkDuplicate,
       }),
     }),
+
+  // The board's meetings, newest first. `boardToken` pins that board's token, as for getMeeting.
+  listMeetings: (projectId: number, boardToken?: string) =>
+    request<MeetingListItem[]>(
+      `/transcripts?project_id=${projectId}`,
+      boardToken ? { headers: { "X-Workspace-Token": boardToken } } : undefined
+    ),
+
+  // Deletes the meeting with every task extracted from it.
+  deleteMeeting: (id: number) => request<void>(`/transcripts/${id}`, { method: "DELETE" }),
 
   // `boardToken` pins the token of the board the meeting belongs to, so polling a recording keeps
   // working after the user switches to another board.

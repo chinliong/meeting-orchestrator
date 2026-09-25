@@ -61,6 +61,23 @@ export function formatMeetingDate(iso: string, short = false): string {
   });
 }
 
+/**
+ * When a meeting was added, in the viewer's time, e.g. "Sep 25, 2:41 PM", or with `seconds`
+ * "Sep 25, 2:41:05 PM" (to tell apart two meetings added in the same minute). The API sends UTC
+ * timestamps without a zone suffix, so one is added before parsing.
+ */
+export function formatAddedAt(iso: string, seconds = false): string {
+  const hasZone = /(Z|[+-]\d\d:?\d\d)$/.test(iso);
+  const d = new Date(hasZone ? iso : `${iso}Z`);
+  return d.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    ...(seconds ? { second: "2-digit" } : {}),
+  });
+}
+
 /** True if the deadline is strictly before today (local time). */
 export function isOverdue(iso: string): boolean {
   const d = new Date(`${iso}T00:00:00`);

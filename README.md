@@ -32,6 +32,10 @@ recordings for end-to-end processing.
 - **Manual & sourced tasks**: tasks are usually extracted from a meeting (the source meeting
   title shows on each card and can be renamed inline), but you can also add tasks by hand for
   work raised outside a captured meeting.
+- **Meeting filter**: the board's Filter row lists its meetings, newest first, with when each was
+  added and how many tasks it produced. Picking one shows only its tasks, and a meeting can be
+  deleted with its tasks from the same list. Tasks from the meeting just added are marked "New",
+  and pasting a transcript that is already on the board asks before adding a second copy.
 - **Accounts & guest mode**: sign up to keep your boards under an account, or continue as a
   guest (guest boards are kept on the device and are carried into the account on sign-up or log-in).
 - **Account self-service**: change your password, reset a forgotten one with a 6-digit code

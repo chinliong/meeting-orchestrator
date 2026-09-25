@@ -21,6 +21,8 @@ interface Props {
   onEdit: (task: Task) => void;
   onDelete: (taskId: number) => void;
   onRenameMeeting: (meetingId: number, title: string) => Promise<void>;
+  /** Tasks from this meeting (the one just added) are marked "New". */
+  newMeetingId?: number | null;
 }
 
 export default function KanbanBoard({
@@ -31,6 +33,7 @@ export default function KanbanBoard({
   onEdit,
   onDelete,
   onRenameMeeting,
+  newMeetingId = null,
 }: Props) {
   const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
 
@@ -98,6 +101,7 @@ export default function KanbanBoard({
                   onEdit={onEdit}
                   onDelete={onDelete}
                   onRenameMeeting={onRenameMeeting}
+                  isNew={newMeetingId !== null && task.meeting_id === newMeetingId}
                 />
               ))
             )}

@@ -92,7 +92,9 @@ flowchart LR
     link), `PATCH|DELETE /projects/{id}`, `POST /projects/{id}/rotate-token` (owner-only; replaces
     the view or edit token, invalidating every copy of the old one while the other keeps working).
   - `POST /transcripts`, `POST /transcripts/audio`, `GET /transcripts/{id}`,
-    `PATCH /transcripts/{id}` (rename a meeting; reflected on its tasks).
+    `PATCH /transcripts/{id}` (rename a meeting; reflected on its tasks), `GET /transcripts?project_id=`
+    (a board's meetings with task counts) and `DELETE /transcripts/{id}` (a meeting with its tasks).
+    `POST /transcripts` can refuse an identical transcript already on the board (`check_duplicate`).
   - `GET|POST /tasks`, `PATCH /tasks/{id}`, `DELETE /tasks/{id}` (returns a snapshot for undo),
     `POST /tasks/restore` (recreate a deleted task with its original id). `GET /tasks` filters by
     `project_id`, `owner`, `status`, `due_before`, `due_after`; with no `project_id` an

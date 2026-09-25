@@ -133,7 +133,10 @@ Removes the project and cascades to its meetings and tasks. Requires edit access
 Submit raw transcript text for parsing. Requires edit access to `project_id`. Synchronously runs
 the LLM and stores the extracted tasks. A blank `title` is given a dated default.
 `meeting_date` (optional, `YYYY-MM-DD`) is the date the meeting took place; relative deadline
-cues resolve against it. Omitted means today.
+cues resolve against it. Omitted means today. `check_duplicate` (optional, default `false`): when
+`true` and the identical transcript text is already on this board, the request is refused with
+`409` and `detail` `{ "code": "duplicate_transcript", "message", "meeting": { "id", "title",
+"created_at" } }`, so the client can ask before adding a second copy of its tasks.
 
 Request:
 ```json
@@ -192,6 +195,16 @@ Returns the meeting's status and its extracted tasks. Requires view access. `404
 ### `PATCH /transcripts/{meeting_id}`
 Rename a meeting. Body `{ "title": "string" }`. The new title is reflected on every task from that
 meeting. Requires edit access. `404` if not found.
+
+### `GET /transcripts?project_id=`
+The board's meetings, newest first: `id`, `project_id`, `title`, `meeting_date`, `status`,
+`error_message`, `created_at` (UTC) and `task_count`. No transcript text or tasks. Requires view
+access.
+
+### `DELETE /transcripts/{meeting_id}`
+Deletes the meeting and every task extracted from it, with their subtasks and attachments.
+Requires edit access. `204`; `404` if not found; `409` while the meeting is still `pending` or
+`processing` (a recording's background job still writes to it).
 
 ## Tasks
 

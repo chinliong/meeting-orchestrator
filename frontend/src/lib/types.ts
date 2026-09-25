@@ -84,6 +84,19 @@ export interface UndoAction {
 
 export type MeetingStatus = "pending" | "processing" | "complete" | "failed";
 
+/** A meeting as the board's meeting list shows it (GET /transcripts?project_id=). */
+export interface MeetingListItem {
+  id: number;
+  project_id: number;
+  title: string;
+  meeting_date: string | null;
+  status: MeetingStatus;
+  error_message: string | null;
+  /** When it was added, in UTC without a zone suffix (as the API sends it). */
+  created_at: string | null;
+  task_count: number;
+}
+
 export interface Meeting {
   id: number;
   project_id: number;
