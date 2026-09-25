@@ -9,6 +9,7 @@ import EditTaskModal from "@/components/EditTaskModal";
 import Filters from "@/components/Filters";
 import KanbanBoard from "@/components/KanbanBoard";
 import MeetingFilter from "@/components/MeetingFilter";
+import MeetingSummaryCard from "@/components/MeetingSummaryCard";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import ProjectModal from "@/components/ProjectModal";
 import type { ProjectScope } from "@/components/ProjectPicker";
@@ -32,7 +33,18 @@ import {
   upsertGuestWorkspace,
   workspaceTokenFor,
 } from "@/lib/session";
-import type { AuthResponse, Meeting, MeetingListItem, Project, Task, TaskMeta, TaskStatus, UndoAction, User } from "@/lib/types";
+import type {
+  AuthResponse,
+  Meeting,
+  MeetingListItem,
+  MeetingSummary,
+  Project,
+  Task,
+  TaskMeta,
+  TaskStatus,
+  UndoAction,
+  User,
+} from "@/lib/types";
 
 type Session = { mode: "user"; user: User } | { mode: "guest" } | null;
 type BoardView = "board" | "calendar";
@@ -86,6 +98,13 @@ export default function DashboardPage() {
   // The board's meetings (for the Meeting filter), and the one the board is filtered to.
   const [meetings, setMeetings] = useState<MeetingListItem[]>([]);
   const [selectedMeetingId, setSelectedMeetingId] = useState<number | null>(null);
+  // Meeting summaries: the meeting whose summary is shown after it was just added (until hidden),
+  // summaries written in this session (newer than the loaded list), and those being written or
+  // that failed, each by meeting id.
+  const [summaryShownFor, setSummaryShownFor] = useState<number | null>(null);
+  const [freshSummaries, setFreshSummaries] = useState<Record<number, MeetingSummary>>({});
+  const [summarising, setSummarising] = useState<Record<number, true>>({});
+  const [summaryErrors, setSummaryErrors] = useState<Record<number, string>>({});
   // The Delete meeting confirmation, and the "add this transcript again?" question.
   const [meetingDeletion, setMeetingDeletion] = useState<{ meeting: MeetingListItem; busy: boolean; error: string | null } | null>(null);
   const [duplicatePrompt, setDuplicatePrompt] = useState<{
@@ -283,6 +302,7 @@ export default function DashboardPage() {
     setSelectedOwner("");
     setLatestMeetingId(null);
     setSelectedMeetingId(null);
+    setSummaryShownFor(null);
   }, [viewKey]);
 
   // A board selection belongs to the account that made it.
@@ -312,9 +332,44 @@ export default function DashboardPage() {
   }, [ready, meetingsBoardId, meetingsBoardToken, meetingsKey]);
   const meetingFilterShown = meetingsBoardId !== null && meetings.length > 0;
 
+  // Writes a meeting's summary with a separate request after its tasks are saved, so a slow or
+  // failed summary never holds up or affects the tasks. `boardToken` pins the meeting's board.
+  const requestSummary = useCallback(async (meetingId: number, boardToken?: string) => {
+    setSummarising((cur) => ({ ...cur, [meetingId]: true }));
+    setSummaryErrors(({ [meetingId]: _cleared, ...rest }) => rest);
+    try {
+      const summary = await api.summariseMeeting(meetingId, boardToken);
+      setFreshSummaries((cur) => ({ ...cur, [meetingId]: summary }));
+    } catch {
+      setSummaryErrors((cur) => ({ ...cur, [meetingId]: "Couldn't write a summary right now. Please try again." }));
+    } finally {
+      setSummarising(({ [meetingId]: _done, ...rest }) => rest);
+    }
+  }, []);
+  // The card shows the meeting chosen in the Meeting filter, or else the one just added, or else a
+  // board's only meeting (whose tasks are the whole board).
+  const onlyMeetingId = meetings.length === 1 ? meetings[0].id : null;
+  const summaryMeeting =
+    meetings.find((m) => m.id === (selectedMeetingId ?? summaryShownFor ?? onlyMeetingId)) ?? null;
+  // It can be hidden only when it is not the board's current view: not the chosen meeting, nor the only one.
+  const summaryHideable =
+    summaryMeeting !== null && summaryMeeting.id !== selectedMeetingId && summaryMeeting.id !== onlyMeetingId;
+  // A viewer who cannot write a summary is not shown an empty one unless they chose that meeting.
+  const summaryWorthShowing =
+    summaryMeeting !== null &&
+    (cardsEditable ||
+      summaryMeeting.id === selectedMeetingId ||
+      !!(freshSummaries[summaryMeeting.id] ?? summaryMeeting.summary));
+
+  // The tasks of the meeting chosen in the Meeting filter (all tasks when none is chosen). The
+  // owner filter lists only their owners, so it never offers a name with no tasks on screen.
+  const meetingTasks = useMemo(
+    () => (selectedMeetingId === null ? tasks : tasks.filter((t) => t.meeting_id === selectedMeetingId)),
+    [tasks, selectedMeetingId]
+  );
   const owners = useMemo(
-    () => Array.from(new Set(tasks.map((t) => t.owner).filter(Boolean))) as string[],
-    [tasks]
+    () => Array.from(new Set(meetingTasks.map((t) => t.owner).filter(Boolean))) as string[],
+    [meetingTasks]
   );
 
   // The filter only applies while some task still has that owner (e.g. not after the owner's last
@@ -326,8 +381,7 @@ export default function DashboardPage() {
   }, [owners, selectedOwner]);
 
   const visibleTasks = useMemo(() => {
-    let result = activeOwner ? tasks.filter((t) => t.owner === activeOwner) : tasks;
-    if (selectedMeetingId !== null) result = result.filter((t) => t.meeting_id === selectedMeetingId);
+    let result = activeOwner ? meetingTasks.filter((t) => t.owner === activeOwner) : meetingTasks;
     const q = search.trim().toLowerCase();
     if (q) {
       result = result.filter((t) =>
@@ -344,7 +398,7 @@ export default function DashboardPage() {
       });
     }
     return result;
-  }, [tasks, activeOwner, selectedMeetingId, sortByDeadline, search]);
+  }, [meetingTasks, activeOwner, sortByDeadline, search]);
 
   // Calendar plots task deadlines; it works in any task view (single board or across all).
   const activeView: BoardView = view;
@@ -515,6 +569,9 @@ export default function DashboardPage() {
     }
     setLatestMeetingId(meeting.id);
     reloadTasksRef.current();
+    const board = projects.find((p) => p.id === projectId);
+    setSummaryShownFor(meeting.id);
+    requestSummary(meeting.id, board ? workspaceTokenFor(board) : undefined);
   };
 
   const handleAudioSubmit = async (title: string, file: File, meetingDate: string) => {
@@ -551,6 +608,8 @@ export default function DashboardPage() {
     }
     setLatestMeetingId(meeting.id);
     reloadTasksRef.current();
+    setSummaryShownFor(meeting.id);
+    requestSummary(meeting.id, boardToken);
   };
 
   const performDeleteMeeting = async () => {
@@ -567,6 +626,7 @@ export default function DashboardPage() {
     setMeetingDeletion(null);
     if (latestMeetingId === meeting.id) setLatestMeetingId(null);
     if (selectedMeetingId === meeting.id) setSelectedMeetingId(null);
+    if (summaryShownFor === meeting.id) setSummaryShownFor(null);
     // Undo entries may refer to the tasks just removed, so the history starts afresh.
     undoGenRef.current += 1;
     undoStackRef.current = [];
@@ -928,6 +988,19 @@ export default function DashboardPage() {
                         />
                       ) : undefined
                     }
+                  />
+                )}
+
+                {summaryMeeting && summaryMeeting.status !== "failed" && summaryWorthShowing && (
+                  <MeetingSummaryCard
+                    key={summaryMeeting.id}
+                    meeting={summaryMeeting}
+                    summary={freshSummaries[summaryMeeting.id] ?? summaryMeeting.summary}
+                    working={!!summarising[summaryMeeting.id]}
+                    error={summaryErrors[summaryMeeting.id] ?? null}
+                    canEdit={cardsEditable}
+                    onSummarise={() => requestSummary(summaryMeeting.id, meetingsBoardToken)}
+                    onDismiss={summaryHideable ? () => setSummaryShownFor(null) : undefined}
                   />
                 )}
 

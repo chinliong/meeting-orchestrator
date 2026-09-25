@@ -85,6 +85,11 @@ export interface UndoAction {
 export type MeetingStatus = "pending" | "processing" | "complete" | "failed";
 
 /** A meeting as the board's meeting list shows it (GET /transcripts?project_id=). */
+/** An AI overview of one meeting, written separately from the task extraction. */
+export interface MeetingSummary {
+  overview: string;
+}
+
 export interface MeetingListItem {
   id: number;
   project_id: number;
@@ -92,6 +97,8 @@ export interface MeetingListItem {
   meeting_date: string | null;
   status: MeetingStatus;
   error_message: string | null;
+  /** Null until a summary has been written. */
+  summary: MeetingSummary | null;
   /** When it was added, in UTC without a zone suffix (as the API sends it). */
   created_at: string | null;
   task_count: number;

@@ -4,6 +4,7 @@ import type {
   DeletedTask,
   Meeting,
   MeetingListItem,
+  MeetingSummary,
   Project,
   Subtask,
   Task,
@@ -278,6 +279,14 @@ export const api = {
 
   // Deletes the meeting with every task extracted from it.
   deleteMeeting: (id: number) => request<void>(`/transcripts/${id}`, { method: "DELETE" }),
+
+  // Writes (or rewrites) the meeting's AI summary. `boardToken` pins the meeting's own board, as
+  // the summary can arrive after the user has switched to another.
+  summariseMeeting: (id: number, boardToken?: string) =>
+    request<MeetingSummary>(`/transcripts/${id}/summary`, {
+      method: "POST",
+      ...(boardToken ? { headers: { "X-Workspace-Token": boardToken } } : {}),
+    }),
 
   // `boardToken` pins the token of the board the meeting belongs to, so polling a recording keeps
   // working after the user switches to another board.

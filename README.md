@@ -36,6 +36,15 @@ recordings for end-to-end processing.
   added and how many tasks it produced. Picking one shows only its tasks, and a meeting can be
   deleted with its tasks from the same list. Tasks from the meeting just added are marked "New",
   and pasting a transcript that is already on the board asks before adding a second copy.
+  Choosing a meeting also narrows the owner filter to the people with tasks in it.
+- **AI meeting summary**: each meeting gets a short overview (two to four sentences on what it
+  was about and what it agreed), so the tasks on the board keep their context. It is written by a
+  **separate request after extraction**, never part of it, so the evaluated extraction is
+  unchanged and a failed summary never affects a meeting's tasks. It appears above the board for
+  the meeting just added, the meeting chosen in the Meeting filter, or a board's only meeting;
+  meetings added earlier can be summarised on request from their saved transcript. It describes
+  the meeting as it happened (the board shows where the work stands now) and is labelled as
+  AI-written, since it is not covered by the evaluation.
 - **Accounts & guest mode**: sign up to keep your boards under an account, or continue as a
   guest (guest boards are kept on the device and are carried into the account on sign-up or log-in).
 - **Account self-service**: change your password, reset a forgotten one with a 6-digit code
@@ -233,7 +242,12 @@ cd backend
 DATABASE_URL="<your Postgres connection string>" python -m app.migrate_add_meeting_date    # adds meetings.meeting_date
 DATABASE_URL="<your Postgres connection string>" python -m app.migrate_add_notifications   # deadline-reminder columns
 DATABASE_URL="<your Postgres connection string>" python -m app.migrate_reminder_optin      # adds projects.notify_enabled (opt-in reminders)
+DATABASE_URL="<your Postgres connection string>" python -m app.migrate_add_meeting_summary # adds meetings.summary (AI meeting summaries)
 ```
+
+> Run `migrate_add_meeting_summary` **before** deploying the meeting-summary change: without
+> `meetings.summary` the meetings API will error. Existing meetings keep no summary until one is
+> requested, and their tasks are untouched.
 
 > Deploying the opt-in-reminders change to a database that predates it **requires**
 > `migrate_reminder_optin`: without `projects.notify_enabled` the projects API will error. It

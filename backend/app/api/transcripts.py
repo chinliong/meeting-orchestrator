@@ -20,10 +20,17 @@ from sqlalchemy.orm import Session
 
 from app.auth import get_optional_user, require_project_edit, require_project_view
 from app.db import SessionLocal, get_db
+from app.llm import summary as meeting_summary
 from app.llm import transcription
 from app.llm.parser import TranscriptParser
 from app.models.models import Meeting, MeetingStatus, Project, Task, User
-from app.schemas.schemas import MeetingListItem, MeetingOut, MeetingUpdate, TranscriptSubmit
+from app.schemas.schemas import (
+    MeetingListItem,
+    MeetingOut,
+    MeetingSummary,
+    MeetingUpdate,
+    TranscriptSubmit,
+)
 
 router = APIRouter(prefix="/transcripts", tags=["transcripts"])
 
@@ -288,7 +295,7 @@ def list_meetings(
     """
     require_project_view(db, project_id, user, x_workspace_token)
     columns = (Meeting.id, Meeting.project_id, Meeting.title, Meeting.meeting_date, Meeting.status,
-               Meeting.error_message, Meeting.created_at)
+               Meeting.error_message, Meeting.summary, Meeting.created_at)
     rows = (
         db.query(*columns, func.count(Task.id))
         .outerjoin(Task, Task.meeting_id == Meeting.id)
@@ -299,7 +306,7 @@ def list_meetings(
     )
     return [
         MeetingListItem(id=r[0], project_id=r[1], title=r[2], meeting_date=r[3], status=r[4],
-                        error_message=r[5], created_at=r[6], task_count=r[7])
+                        error_message=r[5], summary=r[6], created_at=r[7], task_count=r[8])
         for r in rows
     ]
 
@@ -325,6 +332,40 @@ def delete_meeting(
     db.delete(meeting)
     db.commit()
     return Response(status_code=204)
+
+
+@router.post("/{meeting_id}/summary", response_model=MeetingSummary)
+def summarise_meeting(
+    meeting_id: int,
+    user: Optional[User] = Depends(get_optional_user),
+    x_workspace_token: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+):
+    """Write (or rewrite) the meeting's AI summary from its saved transcript.
+
+    A separate request from extraction: the meeting's tasks are neither read nor changed, so it
+    works for meetings added before summaries existed, and a failure here leaves the meeting as
+    it was.
+    """
+    meeting = db.get(Meeting, meeting_id)
+    if meeting is None:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+    require_project_edit(db, meeting.project_id, user, x_workspace_token)
+    if meeting.status != MeetingStatus.COMPLETE or not meeting.transcript_text.strip():
+        raise HTTPException(status_code=409, detail="A meeting can be summarised once it has been processed.")
+    try:
+        result = meeting_summary.summarise(meeting.transcript_text, meeting.title, _anchor(meeting))
+    except Exception as exc:  # LLM/API failure: a clean error, and the meeting is untouched
+        log.warning("summary failed for meeting %s: %s", meeting.id, exc)
+        raise HTTPException(status_code=502, detail="Could not write a summary right now. Please try again.")
+    # Saved with a query rather than on the loaded row, so a meeting deleted while its summary was
+    # being written is simply not found instead of failing the save.
+    saved = db.query(Meeting).filter(Meeting.id == meeting_id).update(
+        {Meeting.summary: result.model_dump_json()}, synchronize_session=False)
+    db.commit()
+    if not saved:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+    return result
 
 
 @router.get("/{meeting_id}", response_model=MeetingOut)

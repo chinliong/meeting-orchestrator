@@ -439,6 +439,84 @@ def test_meeting_still_processing_cannot_be_deleted(client, project, db_session)
     assert resp.status_code == 409
 
 
+@pytest.fixture()
+def stub_summary(monkeypatch):
+    """Replace the Gemini call behind meeting summaries; records what it was sent."""
+    sent = {}
+
+    def fake_call_tool(system_prompt, tool, user_text, model=None):
+        sent.update(tool=tool["name"], text=user_text)
+        if "EMPTY" in user_text:
+            return {"overview": "   "}
+        return {"overview": "  The team reviewed the APAC mapping.  "}
+
+    monkeypatch.setattr("app.llm.summary.gemini.call_tool", fake_call_tool)
+    return sent
+
+
+def test_meeting_summary_is_saved_and_listed(client, project, stub_parser, stub_summary):
+    meeting = client.post("/api/v1/transcripts", json={
+        "project_id": project["id"], "title": "Steering", "transcript_text": "the words", "meeting_date": "2026-06-01",
+    }).json()
+    assert meeting["summary"] is None
+    tasks_before = client.get(f"/api/v1/tasks?project_id={project['id']}").json()
+
+    resp = client.post(f"/api/v1/transcripts/{meeting['id']}/summary")
+    assert resp.status_code == 200
+    summary = resp.json()
+    assert summary == {"overview": "The team reviewed the APAC mapping."}
+    # It is made from the saved transcript, with the meeting's title and date.
+    assert stub_summary["tool"] == "record_meeting_summary"
+    assert "Steering" in stub_summary["text"] and "2026-06-01" in stub_summary["text"] and "the words" in stub_summary["text"]
+
+    listed = client.get(f"/api/v1/transcripts?project_id={project['id']}").json()
+    assert listed[0]["summary"] == summary
+    assert client.get(f"/api/v1/transcripts/{meeting['id']}").json()["summary"] == summary
+    # The tasks are neither read nor changed.
+    assert client.get(f"/api/v1/tasks?project_id={project['id']}").json() == tasks_before
+
+
+def test_failed_summary_leaves_the_meeting_as_it_was(client, project, stub_parser, monkeypatch):
+    def boom(*a, **k):
+        raise RuntimeError("HTTP 503: overloaded")
+
+    monkeypatch.setattr("app.llm.summary.gemini.call_tool", boom)
+    meeting = client.post("/api/v1/transcripts", json={"project_id": project["id"], "title": "M", "transcript_text": "x"}).json()
+    resp = client.post(f"/api/v1/transcripts/{meeting['id']}/summary")
+    assert resp.status_code == 502
+    assert "overloaded" not in resp.json()["detail"]
+    after = client.get(f"/api/v1/transcripts/{meeting['id']}").json()
+    assert after["summary"] is None and after["status"] == "complete" and len(after["tasks"]) == 2
+
+
+def test_summary_needs_edit_access_and_a_processed_meeting(client, project, db_session, stub_parser, stub_summary):
+    from app.models.models import Meeting, MeetingStatus
+
+    meeting = client.post("/api/v1/transcripts", json={"project_id": project["id"], "title": "M", "transcript_text": "x"}).json()
+    view = client.post(f"/api/v1/transcripts/{meeting['id']}/summary", headers={"X-Workspace-Token": project["view_token"]})
+    assert view.status_code == 403
+    assert client.post("/api/v1/transcripts/999999/summary").status_code == 404
+
+    recording = Meeting(project_id=project["id"], title="Recording", transcript_text="", status=MeetingStatus.PROCESSING)
+    db_session.add(recording)
+    db_session.commit()
+    assert client.post(f"/api/v1/transcripts/{recording.id}/summary").status_code == 409
+    # A blank overview from the model is a failure, not an empty summary.
+    blank = client.post("/api/v1/transcripts", json={"project_id": project["id"], "title": "M", "transcript_text": "EMPTY"}).json()
+    assert client.post(f"/api/v1/transcripts/{blank['id']}/summary").status_code == 502
+    assert client.get(f"/api/v1/transcripts/{blank['id']}").json()["summary"] is None
+
+
+def test_unreadable_stored_summary_counts_as_none(client, project, db_session, stub_parser):
+    from app.models.models import Meeting
+
+    meeting = client.post("/api/v1/transcripts", json={"project_id": project["id"], "title": "M", "transcript_text": "x"}).json()
+    db_session.get(Meeting, meeting["id"]).summary = "not json"
+    db_session.commit()
+    assert client.get(f"/api/v1/transcripts?project_id={project['id']}").json()[0]["summary"] is None
+    assert client.get(f"/api/v1/transcripts/{meeting['id']}").json()["summary"] is None
+
+
 def test_duplicate_transcript_is_flagged_only_when_asked(client, project, stub_parser):
     body = {"project_id": project["id"], "title": "Weekly", "transcript_text": "same words"}
     first = client.post("/api/v1/transcripts", json=body).json()

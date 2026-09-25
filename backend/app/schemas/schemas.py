@@ -1,7 +1,8 @@
+import json
 from datetime import date, datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models.models import MeetingStatus, TaskStatus
 
@@ -165,6 +166,22 @@ class MeetingUpdate(BaseModel):
     title: str
 
 
+class MeetingSummary(BaseModel):
+    """An AI overview of one meeting. It is written separately from the task extraction."""
+
+    overview: str
+
+
+def _stored_summary(value):
+    """Read a summary as stored on the meeting (JSON text). Unreadable text counts as none."""
+    if isinstance(value, str):
+        try:
+            return MeetingSummary.model_validate(json.loads(value))
+        except ValueError:
+            return None
+    return value
+
+
 class MeetingOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -174,8 +191,11 @@ class MeetingOut(BaseModel):
     meeting_date: Optional[date] = None
     status: MeetingStatus
     error_message: Optional[str]
+    summary: Optional[MeetingSummary] = None
     created_at: datetime
     tasks: list[TaskOut] = []
+
+    _read_summary = field_validator("summary", mode="before")(_stored_summary)
 
 
 class MeetingListItem(BaseModel):
@@ -187,8 +207,11 @@ class MeetingListItem(BaseModel):
     meeting_date: Optional[date] = None
     status: MeetingStatus
     error_message: Optional[str] = None
+    summary: Optional[MeetingSummary] = None
     created_at: Optional[datetime] = None
     task_count: int
+
+    _read_summary = field_validator("summary", mode="before")(_stored_summary)
 
 
 class SubtaskOut(BaseModel):

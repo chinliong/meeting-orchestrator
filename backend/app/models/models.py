@@ -119,6 +119,9 @@ class Meeting(Base):
     meeting_date = Column(Date, nullable=True)
     status = Column(Enum(MeetingStatus), default=MeetingStatus.PENDING, nullable=False)
     error_message = Column(Text, nullable=True)
+    # An AI summary of the meeting (overview, decisions, open items) as JSON, written by a
+    # separate request after extraction (app/llm/summary.py). NULL until one has been made.
+    summary = Column(Text, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
 
     project = relationship("Project", back_populates="meetings")

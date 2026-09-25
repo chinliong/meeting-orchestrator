@@ -13,6 +13,8 @@
 5. The backend sends the transcript to Gemini with a forced function-call schema; the response
    is validated into decisions, action items, owners, deadlines, and confidence via Pydantic.
 6. The structured data is persisted to the relational database (a `Meeting` plus its `Task` rows).
+   The frontend then asks for a short AI summary of the meeting (`POST /transcripts/{id}/summary`),
+   a separate request that is stored on the meeting and never touches its tasks.
 7. The frontend fetches the task list and renders it two ways: a **Kanban board** (drag-and-drop
    status changes) and a **month calendar** (tasks plotted by deadline, drag-to-reschedule), both
    with search and owner filtering. Edits are written back with `PATCH /tasks/{id}`; deletes return
@@ -37,7 +39,7 @@ flowchart LR
         direction TB
         R[API routers<br/>auth, projects, transcripts, tasks,<br/>subtasks, attachments, stakeholders]
         AC[Access control<br/>owner JWT or workspace token]
-        L[LLM module<br/>parser + subtask generator]
+        L[LLM module<br/>parser, subtask generator,<br/>meeting summary]
         W[Transcription module]
     end
 
@@ -77,7 +79,8 @@ flowchart LR
   **Kanban board** and a **month calendar** view (toggle), a one-board / all-boards / chosen-boards
   scope for signed-in users, picked in the top-bar project picker (the chosen set filters the
   all-boards task list in the browser; adding meetings or tasks needs a single board),
-  owner filter / deadline sort / text search, an **undo** stack (button + ⌘Z/Ctrl+Z) over status/edit/reschedule/subtask/delete actions,
+  owner filter / Meeting filter / deadline sort / text search, an AI summary card for the chosen
+  or newest meeting, an **undo** stack (button + ⌘Z/Ctrl+Z) over status/edit/reschedule/subtask/delete actions,
   transcript-and-audio upload, and a share dialog exposing view/edit links. A small session layer
   persists the account token and guest boards in `localStorage`. Talks to the backend via
   `src/lib/api.ts`, which attaches the `Authorization` bearer and `X-Workspace-Token` headers.
@@ -93,7 +96,8 @@ flowchart LR
     the view or edit token, invalidating every copy of the old one while the other keeps working).
   - `POST /transcripts`, `POST /transcripts/audio`, `GET /transcripts/{id}`,
     `PATCH /transcripts/{id}` (rename a meeting; reflected on its tasks), `GET /transcripts?project_id=`
-    (a board's meetings with task counts) and `DELETE /transcripts/{id}` (a meeting with its tasks).
+    (a board's meetings with task counts and summaries), `DELETE /transcripts/{id}` (a meeting with
+    its tasks) and `POST /transcripts/{id}/summary` (write the meeting's AI summary).
     `POST /transcripts` can refuse an identical transcript already on the board (`check_duplicate`).
   - `GET|POST /tasks`, `PATCH /tasks/{id}`, `DELETE /tasks/{id}` (returns a snapshot for undo),
     `POST /tasks/restore` (recreate a deleted task with its original id). `GET /tasks` filters by
@@ -129,8 +133,14 @@ flowchart LR
     either from the task's own details or from user-supplied instructions. Provider is selected
     separately from the parser's (`SUBTASK_PROVIDER`), because open-ended decomposition is a
     different problem from extraction and was measured on its own rubric.
+  - **Meeting summary** (`app/llm/summary.py`): a two-to-four-sentence overview of what a meeting
+    was about and what it agreed, so the board's tasks keep their context. It is a separate request
+    made after extraction, never part of it, so the evaluated extraction prompt and schema are
+    unchanged and a failed summary cannot affect a meeting's tasks. It describes the meeting as it
+    happened rather than the current state of the work, which moves on on the board. It is not
+    covered by the evaluation and is labelled as AI-written in the app.
   - **Gemini client** (`app/llm/gemini.py`): the forced function call plus the JSON-Schema to
-    OpenAPI translation both LLM modules share, so the tool schema is defined once.
+    OpenAPI translation the LLM modules share, so each tool schema is defined once.
   - **Transcription module** (`app/llm/transcription.py`): optional and lazily imported. Uploads
     are transcribed by Deepgram Nova-3, the most accurate service measured in
     [asr-evaluation.md](asr-evaluation.md). It is hosted, so nothing loads into memory and the core
@@ -145,7 +155,7 @@ flowchart LR
   `pool_recycle`) because serverless Postgres (Neon) drops idle connections; without it, the first
   request after the free backend wakes from sleep fails with "SSL connection has been closed
   unexpectedly"; pre-ping validates and reconnects transparently instead.
-- **LLM provider:** Gemini Flash for both extraction and subtask generation, structured output
+- **LLM provider:** Gemini Flash for extraction, subtask generation and meeting summaries, structured output
   through a forced function call. The tool schema is defined once and translated into Gemini's
   OpenAPI subset (`app/llm/gemini.py`); the translation raises on anything it does not recognise
   rather than dropping it silently, so a schema change cannot weaken the contract unnoticed.
@@ -234,6 +244,7 @@ erDiagram
         date meeting_date
         enum status
         text error_message
+        text summary
     }
     TASK {
         int id PK
@@ -283,6 +294,8 @@ unusable.
   `error_message`) rather than crashing the request, so the client always gets a response. The
   request still returns `201`, so the frontend checks `status` and shows the error, keeping the
   pasted transcript in the form.
+- A meeting summary that fails (`502`) leaves the meeting and its tasks as they were; the frontend
+  shows "Try again" on the summary card, and the tasks are already on the board.
 - The audio endpoint degrades gracefully: if no transcription backend is configured it returns `503`
   with an actionable message instead of failing at import time.
 - Audio/video uploads are streamed to a temporary file in 1 MB chunks and never held in memory
@@ -301,4 +314,5 @@ unusable.
 - The schema is created on startup via `create_all`, which adds missing tables but never alters
   existing ones. New tables (e.g. `subtasks`, `attachments`) appear automatically; a new column on
   an existing table needs an additive migration (`app/migrate_add_meeting_date.py`,
-  `app/migrate_add_notifications.py`, `app/migrate_reminder_optin.py`). `python -m app.reset_db` rebuilds and re-seeds from scratch.
+  `app/migrate_add_notifications.py`, `app/migrate_reminder_optin.py`,
+  `app/migrate_add_meeting_summary.py`). `python -m app.reset_db` rebuilds and re-seeds from scratch.

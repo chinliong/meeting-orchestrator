@@ -156,6 +156,7 @@ Response `201 Created`, a meeting object with its extracted tasks:
   "meeting_date": "2026-06-17",
   "status": "complete",
   "error_message": null,
+  "summary": null,
   "created_at": "2026-06-17T09:30:00",
   "tasks": [
     {
@@ -190,7 +191,8 @@ file · `403` no edit access · `404` unknown project · `413` over the 500 MB l
 transcription service is configured.
 
 ### `GET /transcripts/{meeting_id}`
-Returns the meeting's status and its extracted tasks. Requires view access. `404` if not found.
+Returns the meeting's status, its summary (or `null`) and its extracted tasks. Requires view
+access. `404` if not found.
 
 ### `PATCH /transcripts/{meeting_id}`
 Rename a meeting. Body `{ "title": "string" }`. The new title is reflected on every task from that
@@ -198,8 +200,21 @@ meeting. Requires edit access. `404` if not found.
 
 ### `GET /transcripts?project_id=`
 The board's meetings, newest first: `id`, `project_id`, `title`, `meeting_date`, `status`,
-`error_message`, `created_at` (UTC) and `task_count`. No transcript text or tasks. Requires view
-access.
+`error_message`, `summary` (`{ "overview" }` or `null`), `created_at` (UTC) and `task_count`. No
+transcript text or tasks. Requires view access.
+
+### `POST /transcripts/{meeting_id}/summary`
+Writes (or rewrites) the meeting's AI summary from its saved transcript and stores it on the
+meeting. This is a separate LLM request from extraction: the meeting's tasks are neither read nor
+changed, so it also works for meetings added before summaries existed. The frontend calls it right
+after a meeting is parsed, and on request for older meetings. Requires edit access.
+
+Response `200`:
+```json
+{ "overview": "Aisha Rahman convened the team to review the cutover sequence ahead of the dress rehearsal. ..." }
+```
+`404` if not found · `409` if the meeting has not finished processing (or has no transcript) ·
+`502` if the model fails or returns an empty overview; the meeting is left unchanged.
 
 ### `DELETE /transcripts/{meeting_id}`
 Deletes the meeting and every task extracted from it, with their subtasks and attachments.
