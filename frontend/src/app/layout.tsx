@@ -25,7 +25,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+    // suppressHydrationWarning: the landing page's boot script adds a class to <html> before React
+    // hydrates (see ScrollReveal), which would otherwise be reported as a mismatch.
+    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`} suppressHydrationWarning>
       <body className="min-h-screen text-slate-900 antialiased">{children}</body>
     </html>
   );

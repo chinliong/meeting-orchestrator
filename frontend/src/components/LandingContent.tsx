@@ -1,11 +1,23 @@
 import Link from "next/link";
 
+import ScrollReveal from "@/components/ScrollReveal";
+
 // The marketing landing UI. Rendered both at /landing (direct) and at / for
 // first-time visitors via the entry gate in app/page.tsx.
 //
 // Styled in the app's own voice so the site and the product read as one: Space Grotesk headings,
 // the navy "ink" panel with its concentric-arc motif, white cards on the soft enterprise ground,
 // and real screenshots of the board (public/landing/*.webp) in place of illustrations.
+
+// Runs as the page's HTML is parsed, so content below is hidden for its reveal before it is first
+// painted (no flash). Skipped under "Reduce motion"; undone after 3s if ScrollReveal never starts.
+const REVEAL_BOOT =
+  "(function(){try{var d=document.documentElement;if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&'IntersectionObserver' in window){d.classList.add('reveal-ready');setTimeout(function(){if(!d.classList.contains('reveal-live'))d.classList.remove('reveal-ready')},3000)}}catch(e){}})()";
+
+/** Props that make an element fade and rise in when scrolled to; `order` staggers a row of cards. */
+function reveal(order = 0) {
+  return { "data-reveal": "", style: { "--reveal-delay": `${order * 90}ms` } as React.CSSProperties };
+}
 
 function Arrow({ className = "h-4 w-4" }: { className?: string }) {
   return (
@@ -55,6 +67,8 @@ function Kicker({ children }: { children: React.ReactNode }) {
 export default function LandingContent() {
   return (
     <div className="min-h-screen">
+      <script dangerouslySetInnerHTML={{ __html: REVEAL_BOOT }} />
+      <ScrollReveal />
       {/* ---------- nav (the app's top bar) ---------- */}
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-screen-2xl items-center justify-between px-5 py-3 sm:px-6">
@@ -89,34 +103,36 @@ export default function LandingContent() {
       <main id="top">
         {/* ---------- hero ---------- */}
         <section className="px-5 pt-16 text-center sm:px-6 sm:pt-24">
-          <Kicker>Meeting Orchestrator</Kicker>
-          <h1 className="mx-auto mt-3 max-w-4xl font-display text-5xl font-bold leading-[1.02] tracking-tight text-slate-900 sm:text-7xl">
-            Meetings in.
-            <br />
-            <span className="text-brand-600">Action out.</span>
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 sm:text-xl">
-            Paste a transcript or upload a recording. Every action item lands on a board, with an owner
-            and a deadline.
-          </p>
-          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              href="/app"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-6 py-3 font-display text-[15px] font-semibold text-white shadow-ink transition hover:bg-ink-700 sm:w-auto"
-            >
-              Try it free
-              <Arrow />
-            </Link>
-            <a
-              href="#how"
-              className="inline-flex w-full items-center justify-center rounded-xl bg-white px-6 py-3 font-display text-[15px] font-semibold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-50 sm:w-auto"
-            >
-              See how it works
-            </a>
+          <div {...reveal()}>
+            <Kicker>Meeting Orchestrator</Kicker>
+            <h1 className="mx-auto mt-3 max-w-4xl font-display text-5xl font-bold leading-[1.02] tracking-tight text-slate-900 sm:text-7xl">
+              Meetings in.
+              <br />
+              <span className="text-brand-600">Action out.</span>
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 sm:text-xl">
+              Paste a transcript or upload a recording. Every action item lands on a board, with an owner
+              and a deadline.
+            </p>
+            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link
+                href="/app"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-6 py-3 font-display text-[15px] font-semibold text-white shadow-ink transition hover:bg-ink-700 sm:w-auto"
+              >
+                Try it free
+                <Arrow />
+              </Link>
+              <a
+                href="#how"
+                className="inline-flex w-full items-center justify-center rounded-xl bg-white px-6 py-3 font-display text-[15px] font-semibold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-50 sm:w-auto"
+              >
+                See how it works
+              </a>
+            </div>
+            <p className="mt-4 text-sm text-slate-500">No sign-up needed. Create an account whenever you like.</p>
           </div>
-          <p className="mt-4 text-sm text-slate-500">No sign-up needed. Create an account whenever you like.</p>
 
-          <div className="mx-auto mt-14 max-w-[1232px] sm:mt-20">
+          <div {...reveal(2)} className="mx-auto mt-14 max-w-[1232px] sm:mt-20">
             {/* The same width as the sections below. A 1440px-wide capture from 1280px screens up; below that a 1200px one, so the board's text is not shrunk on smaller screens. */}
             <picture>
               <source media="(min-width: 1280px)" srcSet="/landing/board.webp" width={2880} height={1800} />
@@ -134,20 +150,22 @@ export default function LandingContent() {
 
         {/* ---------- statement ---------- */}
         <section className="mx-auto max-w-7xl px-5 py-24 sm:px-6">
-          <InkPanel className="px-8 py-14 sm:px-14 sm:py-20">
-            <p className="max-w-3xl font-display text-[26px] font-bold leading-[1.25] tracking-tight text-slate-400 sm:text-[36px]">
-              Every meeting ends with promises: who will do what, and by when.{" "}
-              <span className="text-white">
-                Meeting Orchestrator writes them down for you, and keeps them where the whole team can
-                see them.
-              </span>
-            </p>
-          </InkPanel>
+          <div {...reveal()}>
+            <InkPanel className="px-8 py-14 sm:px-14 sm:py-20">
+              <p className="max-w-3xl font-display text-[26px] font-bold leading-[1.25] tracking-tight text-slate-400 sm:text-[36px]">
+                Every meeting ends with promises: who will do what, and by when.{" "}
+                <span className="text-white">
+                  Meeting Orchestrator writes them down for you, and keeps them where the whole team can
+                  see them.
+                </span>
+              </p>
+            </InkPanel>
+          </div>
         </section>
 
         {/* ---------- how it works ---------- */}
         <section id="how" className="mx-auto max-w-7xl scroll-mt-20 px-5 pb-24 sm:px-6">
-          <div className="mx-auto max-w-2xl text-center">
+          <div {...reveal()} className="mx-auto max-w-2xl text-center">
             <Kicker>How it works</Kicker>
             <h2 className="mt-2 font-display text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
               Three steps. No minutes.
@@ -155,6 +173,7 @@ export default function LandingContent() {
           </div>
           <div className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-3">
             <Step
+              order={0}
               n="01"
               tone="text-brand"
               dot="bg-brand"
@@ -162,6 +181,7 @@ export default function LandingContent() {
               body="Paste the transcript, messy or not. Or upload the audio or video recording, up to 500 MB, and it is transcribed for you."
             />
             <Step
+              order={1}
               n="02"
               tone="text-amber-400"
               dot="bg-amber-400"
@@ -169,6 +189,7 @@ export default function LandingContent() {
               body="Each action item is pulled out with its owner and a deadline worked out from cues like “by Friday”, and linked to the decision it came from."
             />
             <Step
+              order={2}
               n="03"
               tone="text-emerald-500"
               dot="bg-emerald-500"
@@ -181,7 +202,7 @@ export default function LandingContent() {
         {/* ---------- features ---------- */}
         <section id="features" className="scroll-mt-20 border-y border-slate-200 bg-white/60">
           <div className="mx-auto max-w-7xl px-5 py-24 sm:px-6">
-            <div className="mx-auto max-w-2xl text-center">
+            <div {...reveal()} className="mx-auto max-w-2xl text-center">
               <Kicker>Features</Kicker>
               <h2 className="mt-2 font-display text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
                 Everything after the meeting.
@@ -190,6 +211,7 @@ export default function LandingContent() {
 
             <div className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-2">
               <Tile
+                order={0}
                 title="Big tasks, broken down"
                 body="Turn any task into a checklist, suggested from the task itself or from your own instructions. Attach the files it needs."
               >
@@ -204,6 +226,7 @@ export default function LandingContent() {
                 />
               </Tile>
               <Tile
+                order={1}
                 title="Right there on your phone"
                 body="The whole board works on a small screen, so you can check what is due on the way to the next meeting."
               >
@@ -211,7 +234,7 @@ export default function LandingContent() {
               </Tile>
             </div>
 
-            <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card md:grid md:grid-cols-[2fr_3fr]">
+            <div {...reveal()} className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card md:grid md:grid-cols-[2fr_3fr]">
               <div className="p-8 sm:p-10">
                 <h3 className="font-display text-2xl font-bold tracking-tight text-slate-900">The month, at a glance</h3>
                 <p className="mt-3 text-[15px] leading-relaxed text-slate-500">
@@ -233,17 +256,17 @@ export default function LandingContent() {
             </div>
 
             <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              <SmallTile dot="bg-brand" title="Recordings, transcribed" body="Upload audio or video and it is turned into a transcript first." />
-              <SmallTile dot="bg-amber-400" title="Share with a link" body="Send a view-only or an edit link. No account needed to open it." />
-              <SmallTile dot="bg-emerald-500" title="Reminders by email" body="Choose which boards remind you, and how many days before a deadline." />
-              <SmallTile dot="bg-rose-500" title="Undo anything" body="Moved, edited or deleted something by mistake? Undo puts it back." />
+              <SmallTile order={0} dot="bg-brand" title="Recordings, transcribed" body="Upload audio or video and it is turned into a transcript first." />
+              <SmallTile order={1} dot="bg-amber-400" title="Share with a link" body="Send a view-only or an edit link. No account needed to open it." />
+              <SmallTile order={2} dot="bg-emerald-500" title="Reminders by email" body="Choose which boards remind you, and how many days before a deadline." />
+              <SmallTile order={3} dot="bg-rose-500" title="Meeting summaries" body="Each meeting gets a short summary of what it discussed, so its tasks keep their context." />
             </div>
           </div>
         </section>
 
         {/* ---------- accuracy (in the app's stat-card style) ---------- */}
         <section id="accuracy" className="mx-auto max-w-7xl scroll-mt-20 px-5 py-24 sm:px-6">
-          <div className="mx-auto max-w-2xl text-center">
+          <div {...reveal()} className="mx-auto max-w-2xl text-center">
             <Kicker>Accuracy</Kicker>
             <h2 className="mt-2 font-display text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
               Accurate where it counts.
@@ -253,40 +276,42 @@ export default function LandingContent() {
             </p>
           </div>
           <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-3">
-            <Figure dot="bg-brand" tone="text-brand" label="Precision" value="96%" body="of the tasks it proposes are real action items." />
-            <Figure dot="bg-amber-400" tone="text-amber-400" label="Deadlines" value="96%" body="of deadlines it sets fall on exactly the right date." />
-            <Figure dot="bg-emerald-500" tone="text-emerald-500" label="Valid output" value="100%" body="of results came back complete and in the right format." />
+            <Figure order={0} dot="bg-brand" tone="text-brand" label="Precision" value="96%" body="of the tasks it proposes are real action items." />
+            <Figure order={1} dot="bg-amber-400" tone="text-amber-400" label="Deadlines" value="96%" body="of deadlines it sets fall on exactly the right date." />
+            <Figure order={2} dot="bg-emerald-500" tone="text-emerald-500" label="Valid output" value="100%" body="of results came back complete and in the right format." />
           </div>
-          <p className="mt-5 text-center text-sm text-slate-500">
+          <p {...reveal(3)} className="mt-5 text-center text-sm text-slate-500">
             Measured with Gemini Flash on eight annotated meeting transcripts, eight runs each.
           </p>
         </section>
 
         {/* ---------- closing ---------- */}
         <section className="mx-auto max-w-7xl px-5 pb-24 sm:px-6">
-          <InkPanel className="px-8 py-16 text-center sm:px-12">
-            <h2 className="font-display text-4xl font-bold tracking-tight text-white sm:text-5xl">
-              Your next meeting, handled.
-            </h2>
-            <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-slate-400">
-              Start as a guest in seconds, or sign in to keep your boards.
-            </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link
-                href="/app"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 font-display text-[15px] font-semibold text-ink shadow-sm transition hover:bg-slate-100"
-              >
-                Try it free
-                <Arrow />
-              </Link>
-              <Link
-                href="/app"
-                className="inline-flex items-center justify-center rounded-xl px-6 py-3 font-display text-[15px] font-semibold text-slate-200 ring-1 ring-white/20 transition hover:bg-white/10"
-              >
-                Sign in
-              </Link>
-            </div>
-          </InkPanel>
+          <div {...reveal()}>
+            <InkPanel className="px-8 py-16 text-center sm:px-12">
+              <h2 className="font-display text-4xl font-bold tracking-tight text-white sm:text-5xl">
+                Your next meeting, handled.
+              </h2>
+              <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-slate-400">
+                Start as a guest in seconds, or sign in to keep your boards.
+              </p>
+              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <Link
+                  href="/app"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 font-display text-[15px] font-semibold text-ink shadow-sm transition hover:bg-slate-100"
+                >
+                  Try it free
+                  <Arrow />
+                </Link>
+                <Link
+                  href="/app"
+                  className="inline-flex items-center justify-center rounded-xl px-6 py-3 font-display text-[15px] font-semibold text-slate-200 ring-1 ring-white/20 transition hover:bg-white/10"
+                >
+                  Sign in
+                </Link>
+              </div>
+            </InkPanel>
+          </div>
         </section>
       </main>
 
@@ -310,9 +335,23 @@ export default function LandingContent() {
 
 // ---- section components -----------------------------------------------------------
 
-function Step({ n, tone, dot, title, body }: { n: string; tone: string; dot: string; title: string; body: string }) {
+function Step({
+  order,
+  n,
+  tone,
+  dot,
+  title,
+  body,
+}: {
+  order: number;
+  n: string;
+  tone: string;
+  dot: string;
+  title: string;
+  body: string;
+}) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-7 shadow-card">
+    <div {...reveal(order)} className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-7 shadow-card">
       <Arcs tone={tone} className="bottom-0 right-0" />
       <div className="relative flex items-center gap-2">
         <span className={`h-2 w-2 rounded-full ${dot}`} />
@@ -324,9 +363,9 @@ function Step({ n, tone, dot, title, body }: { n: string; tone: string; dot: str
   );
 }
 
-function Tile({ title, body, children }: { title: string; body: string; children: React.ReactNode }) {
+function Tile({ order, title, body, children }: { order: number; title: string; body: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card">
+    <div {...reveal(order)} className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card">
       <div className="px-8 pt-10 text-center sm:px-10">
         <h3 className="font-display text-2xl font-bold tracking-tight text-slate-900">{title}</h3>
         <p className="mx-auto mt-3 max-w-sm text-[15px] leading-relaxed text-slate-500">{body}</p>
@@ -337,9 +376,9 @@ function Tile({ title, body, children }: { title: string; body: string; children
   );
 }
 
-function SmallTile({ dot, title, body }: { dot: string; title: string; body: string }) {
+function SmallTile({ order, dot, title, body }: { order: number; dot: string; title: string; body: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+    <div {...reveal(order)} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
       <span className={`block h-2 w-2 rounded-full ${dot}`} />
       <h3 className="mt-3 font-display text-lg font-bold tracking-tight text-slate-900">{title}</h3>
       <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{body}</p>
@@ -348,12 +387,14 @@ function SmallTile({ dot, title, body }: { dot: string; title: string; body: str
 }
 
 function Figure({
+  order,
   dot,
   tone,
   label,
   value,
   body,
 }: {
+  order: number;
   dot: string;
   tone: string;
   label: string;
@@ -361,13 +402,20 @@ function Figure({
   body: string;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+    <div {...reveal(order)} className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
       <Arcs tone={tone} className="bottom-0 right-0" />
       <div className="relative flex items-center gap-2">
         <span className={`h-2 w-2 rounded-full ${dot}`} />
         <span className="font-display text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</span>
       </div>
-      <p className="relative mt-3 font-display text-5xl font-bold tracking-tight text-slate-900">{value}</p>
+      {/* Counts up from zero as the card appears (ScrollReveal); tabular figures keep the width steady. */}
+      <p
+        data-count={parseInt(value, 10)}
+        data-suffix={value.replace(/^\d+/, "")}
+        className="relative mt-3 font-display text-5xl font-bold tabular-nums tracking-tight text-slate-900"
+      >
+        {value}
+      </p>
       <p className="relative mt-2 max-w-[15rem] text-[15px] leading-snug text-slate-500">{body}</p>
     </div>
   );
