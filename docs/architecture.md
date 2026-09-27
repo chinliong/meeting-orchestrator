@@ -187,7 +187,9 @@ flowchart LR
 - Opt-in per account (`User.notify_email`, default off) with a configurable
   `notify_days_before`, plus per-project opt-in (`Project.notify_enabled`, default off): a board
   is reminded only when both the account flag and that board's flag are on. The user picks which
-  boards remind them from the project checklist in Account settings.
+  boards remind them from the project checklist in Account settings. Past eight projects the
+  checklist scrolls inside a fixed height, gets a search box and a count of boards with
+  reminders on, and lists those boards first; "Select all" then acts on the search matches.
 - `app/notifications.py` finds tasks inside their reminder window, from `notify_days_before`
   days out through one day past the deadline (a one-time overdue nudge, not a repeat), and
   emails each affected account holder a single digest covering every newly-due task across their

@@ -22,6 +22,10 @@ interface Props {
 }
 
 // Pull the server's human-readable detail out of the api.ts error wrapper.
+// From this many projects on, the reminder list gets a search box and scrolls inside a fixed height,
+// so Password and Delete account stay in reach.
+const LONG_LIST = 8;
+
 function readableError(err: unknown, fallback: string): string {
   const raw = err instanceof Error ? err.message : fallback;
   const match = raw.match(/"detail":"([^"]+)"/);
@@ -62,6 +66,10 @@ export default function AccountModal({
   const [testResult, setTestResult] = useState<string | null>(null);
   // Boards shared with the user whose reminders they asked for (from "Remind me" on the board).
   const [sharedReminders, setSharedReminders] = useState<SharedReminder[]>([]);
+  const [projectQuery, setProjectQuery] = useState("");
+  // The list order, fixed when the modal opens: projects with reminders on first. It is not re-sorted
+  // while ticking, so a row never jumps out from under the pointer.
+  const [projectOrder, setProjectOrder] = useState<number[]>([]);
 
   // Reset the form each time the modal opens, and close on Escape.
   useEffect(() => {
@@ -78,6 +86,11 @@ export default function AccountModal({
       setNotifyDaysBefore(user.notify_days_before);
       setNotifyError(null);
       setTestResult(null);
+      setProjectQuery("");
+      setProjectOrder([
+        ...reminderProjects.filter((p) => p.notify_enabled).map((p) => p.id),
+        ...reminderProjects.filter((p) => !p.notify_enabled).map((p) => p.id),
+      ]);
       api.listSharedReminders().then(setSharedReminders).catch(() => setSharedReminders([]));
     }
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -88,12 +101,23 @@ export default function AccountModal({
 
   if (!open) return null;
 
-  // "Select all" is on only when every owned project already has reminders enabled.
-  const allRemindersOn =
-    reminderProjects.length > 0 && reminderProjects.every((p) => p.notify_enabled);
+  const longList = reminderProjects.length > LONG_LIST;
+  const rank = (id: number) => {
+    const i = projectOrder.indexOf(id);
+    return i === -1 ? projectOrder.length : i; // a project created since opening goes last
+  };
+  const query = projectQuery.trim().toLowerCase();
+  const shownProjects = [...reminderProjects]
+    .sort((a, b) => rank(a.id) - rank(b.id))
+    .filter((p) => !query || p.name.toLowerCase().includes(query));
+  const remindersOnCount = reminderProjects.filter((p) => p.notify_enabled).length;
+
+  // "Select all" acts on the projects shown (the search matches, if searching), and is on only when
+  // every one of them already has reminders enabled.
+  const allRemindersOn = shownProjects.length > 0 && shownProjects.every((p) => p.notify_enabled);
   const toggleAllReminders = () => {
     const target = !allRemindersOn;
-    reminderProjects.forEach((p) => {
+    shownProjects.forEach((p) => {
       if (p.notify_enabled !== target) onToggleProjectReminder(p.id, target);
     });
   };
@@ -271,32 +295,74 @@ export default function AccountModal({
               {/* Per-project opt-in: reminders are sent only for the boards ticked here. */}
               {reminderProjects.length > 0 ? (
                 <div>
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-slate-700">For these projects</p>
-                    <button
-                      type="button"
-                      onClick={toggleAllReminders}
-                      className="text-xs font-medium text-brand-600 transition hover:underline"
-                    >
-                      {allRemindersOn ? "Clear all" : "Select all"}
-                    </button>
-                  </div>
-                  {/* No inner scroll: the list grows with the dialog, so there is one scrollbar. */}
-                  <div className="mt-2 divide-y divide-slate-100 rounded-lg border border-slate-200">
-                    {reminderProjects.map((p) => (
-                      <label
-                        key={p.id}
-                        className="flex cursor-pointer items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm text-slate-700">
+                      For these projects
+                      {longList && (
+                        <span className="ml-1.5 text-xs text-slate-400">
+                          {remindersOnCount} of {reminderProjects.length} on
+                        </span>
+                      )}
+                    </p>
+                    {shownProjects.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={toggleAllReminders}
+                        className="shrink-0 text-xs font-medium text-brand-600 transition hover:underline"
                       >
+                        {allRemindersOn ? "Clear all" : "Select all"}
+                        {query && " shown"}
+                      </button>
+                    )}
+                  </div>
+                  {/* A long list is searchable and scrolls inside a fixed height; a short one just grows. */}
+                  <div className="mt-2 overflow-hidden rounded-lg border border-slate-200">
+                    {longList && (
+                      <div className="relative border-b border-slate-100">
+                        <svg viewBox="0 0 20 20" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="currentColor" aria-hidden>
+                          <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.45 4.39l3.08 3.08a.75.75 0 11-1.06 1.06l-3.08-3.08A7 7 0 012 9z" clipRule="evenodd" />
+                        </svg>
                         <input
-                          type="checkbox"
-                          checked={p.notify_enabled}
-                          onChange={(e) => onToggleProjectReminder(p.id, e.target.checked)}
-                          className="h-4 w-4 shrink-0 rounded border-slate-300 accent-[#0E1626]"
+                          type="search"
+                          value={projectQuery}
+                          onChange={(e) => setProjectQuery(e.target.value)}
+                          placeholder="Search projects"
+                          aria-label="Search projects"
+                          className="w-full bg-transparent py-2 pl-9 pr-9 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none [&::-webkit-search-cancel-button]:appearance-none"
                         />
-                        <span className="truncate">{p.name}</span>
-                      </label>
-                    ))}
+                        {projectQuery && (
+                          <button
+                            type="button"
+                            onClick={() => setProjectQuery("")}
+                            aria-label="Clear search"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                          >
+                            <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="currentColor" aria-hidden>
+                              <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    <div className={`divide-y divide-slate-100 ${longList ? "max-h-60 overflow-y-auto" : ""}`}>
+                      {shownProjects.length === 0 && (
+                        <p className="px-3 py-3 text-[13px] text-slate-400">No projects match “{projectQuery.trim()}”.</p>
+                      )}
+                      {shownProjects.map((p) => (
+                        <label
+                          key={p.id}
+                          className="flex cursor-pointer items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={p.notify_enabled}
+                            onChange={(e) => onToggleProjectReminder(p.id, e.target.checked)}
+                            className="h-4 w-4 shrink-0 rounded border-slate-300 accent-[#0E1626]"
+                          />
+                          <span className="truncate">{p.name}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -309,7 +375,11 @@ export default function AccountModal({
               {sharedReminders.length > 0 && (
                 <div>
                   <p className="text-sm text-slate-700">Shared with you</p>
-                  <div className="mt-2 divide-y divide-slate-100 rounded-lg border border-slate-200">
+                  <div
+                    className={`mt-2 divide-y divide-slate-100 rounded-lg border border-slate-200 ${
+                      sharedReminders.length > LONG_LIST ? "max-h-60 overflow-y-auto" : ""
+                    }`}
+                  >
                     {sharedReminders.map((r) => (
                       <label
                         key={r.project_id}

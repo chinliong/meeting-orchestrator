@@ -53,7 +53,8 @@ recordings for end-to-end processing.
   emailed to you, or delete your account (owned boards are released as guest boards rather than
   destroyed, so existing share links keep working).
 - **Deadline email reminders**: opt-in (off by default) digest emails for tasks about to be due
-  or just gone overdue, with a configurable "remind me N days before" and **per-project selection**. In Account settings you pick exactly which of your boards should remind you.
+  or just gone overdue, with a configurable "remind me N days before" and **per-project selection**. In Account settings you pick exactly which of your boards should remind you; a long list of
+  boards gets a search box and shows how many have reminders on.
   People you share a board with can get its reminders too: once signed in, they click **Remind me**
   on the board. The owner sees and can remove them in the share dialog, and regenerating the link
   they used also stops their reminders. Guests are asked to sign in first, and boards created by
