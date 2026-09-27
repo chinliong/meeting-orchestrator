@@ -157,10 +157,12 @@ export default function TaskCard({
             />
           </div>
         ) : (
+          // Below 1536px (the board's full width) the columns are narrow enough for a long meeting name
+          // to run under the card's hover buttons, so it keeps clear of them there, as on touch screens.
           <button
             onClick={startRename}
             title={`From meeting: ${meetingLabel}\nClick to rename (updates all its tasks)`}
-            className="group/title mb-1 flex max-w-full items-center gap-1 rounded [@media(hover:none)]:pr-12 text-[11.5px] font-medium text-slate-400 transition hover:text-slate-600"
+            className="group/title mb-1 flex max-w-full items-center gap-1 rounded [@media(hover:none)]:pr-12 max-2xl:pr-12 text-[11.5px] font-medium text-slate-400 transition hover:text-slate-600"
           >
             <span className="truncate">{task.meeting_title}</span>
             {showMeetingDate && <span className="shrink-0">· {shortMeetingDate}</span>}
