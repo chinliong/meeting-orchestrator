@@ -57,7 +57,7 @@ export default function LandingContent() {
     <div className="min-h-screen">
       {/* ---------- nav (the app's top bar) ---------- */}
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3 sm:px-6">
+        <div className="mx-auto flex max-w-screen-2xl items-center justify-between px-5 py-3 sm:px-6">
           <a href="#top" className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="Meeting Orchestrator logo" className="h-9 w-9 rounded-full object-cover" />
@@ -116,20 +116,24 @@ export default function LandingContent() {
           </div>
           <p className="mt-4 text-sm text-slate-500">No sign-up needed. Create an account whenever you like.</p>
 
-          <div className="mx-auto mt-14 max-w-[1180px] sm:mt-20">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/landing/board.webp"
-              width={2400}
-              height={1500}
-              alt="The Meeting Orchestrator board, with tasks from two meetings sorted into To Do, In Progress and Done"
-              className="w-full rounded-2xl border border-slate-200 shadow-ink sm:rounded-3xl"
-            />
+          <div className="mx-auto mt-14 max-w-[1232px] sm:mt-20">
+            {/* The same width as the sections below. A 1440px-wide capture from 1280px screens up; below that a 1200px one, so the board's text is not shrunk on smaller screens. */}
+            <picture>
+              <source media="(min-width: 1280px)" srcSet="/landing/board.webp" width={2880} height={1800} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/landing/board-sm.webp"
+                width={2400}
+                height={1500}
+                alt="The Meeting Orchestrator board, with tasks from two meetings sorted into To Do, In Progress and Done"
+                className="w-full rounded-2xl border border-slate-200 shadow-ink sm:rounded-3xl"
+              />
+            </picture>
           </div>
         </section>
 
         {/* ---------- statement ---------- */}
-        <section className="mx-auto max-w-6xl px-5 py-24 sm:px-6">
+        <section className="mx-auto max-w-7xl px-5 py-24 sm:px-6">
           <InkPanel className="px-8 py-14 sm:px-14 sm:py-20">
             <p className="max-w-3xl font-display text-[26px] font-bold leading-[1.25] tracking-tight text-slate-400 sm:text-[36px]">
               Every meeting ends with promises: who will do what, and by when.{" "}
@@ -142,7 +146,7 @@ export default function LandingContent() {
         </section>
 
         {/* ---------- how it works ---------- */}
-        <section id="how" className="mx-auto max-w-6xl scroll-mt-20 px-5 pb-24 sm:px-6">
+        <section id="how" className="mx-auto max-w-7xl scroll-mt-20 px-5 pb-24 sm:px-6">
           <div className="mx-auto max-w-2xl text-center">
             <Kicker>How it works</Kicker>
             <h2 className="mt-2 font-display text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
@@ -176,7 +180,7 @@ export default function LandingContent() {
 
         {/* ---------- features ---------- */}
         <section id="features" className="scroll-mt-20 border-y border-slate-200 bg-white/60">
-          <div className="mx-auto max-w-6xl px-5 py-24 sm:px-6">
+          <div className="mx-auto max-w-7xl px-5 py-24 sm:px-6">
             <div className="mx-auto max-w-2xl text-center">
               <Kicker>Features</Kicker>
               <h2 className="mt-2 font-display text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
@@ -238,7 +242,7 @@ export default function LandingContent() {
         </section>
 
         {/* ---------- accuracy (in the app's stat-card style) ---------- */}
-        <section id="accuracy" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-24 sm:px-6">
+        <section id="accuracy" className="mx-auto max-w-7xl scroll-mt-20 px-5 py-24 sm:px-6">
           <div className="mx-auto max-w-2xl text-center">
             <Kicker>Accuracy</Kicker>
             <h2 className="mt-2 font-display text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
@@ -259,7 +263,7 @@ export default function LandingContent() {
         </section>
 
         {/* ---------- closing ---------- */}
-        <section className="mx-auto max-w-6xl px-5 pb-24 sm:px-6">
+        <section className="mx-auto max-w-7xl px-5 pb-24 sm:px-6">
           <InkPanel className="px-8 py-16 text-center sm:px-12">
             <h2 className="font-display text-4xl font-bold tracking-tight text-white sm:text-5xl">
               Your next meeting, handled.
@@ -288,7 +292,7 @@ export default function LandingContent() {
 
       {/* ---------- footer ---------- */}
       <footer className="border-t border-slate-200 bg-white/60 px-5 py-8 text-xs text-slate-500 sm:px-6">
-        <div className="mx-auto max-w-6xl leading-relaxed">
+        <div className="mx-auto max-w-screen-2xl leading-relaxed">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
