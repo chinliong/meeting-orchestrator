@@ -73,10 +73,10 @@ export default function TaskCard({
 
   const edgeColor =
     task.status === "done"
-      ? "bg-emerald-500"
+      ? "bg-status-done"
       : task.status === "in_progress"
-        ? "bg-amber-400"
-        : "bg-brand";
+        ? "bg-status-progress"
+        : "bg-status-todo";
 
   return (
     <div
@@ -271,16 +271,46 @@ export default function TaskCard({
               Check this
             </span>
           ) : (
-            <span
-              className="ml-auto whitespace-nowrap text-[11.5px] tabular-nums text-slate-400"
-              title={`The AI is confident this is a real action item (${Math.round(
-                task.confidence * 100
-              )}%). Items it is unsure about are flagged for review instead.`}
-            >
-              {Math.round(task.confidence * 100)}% confidence
-            </span>
+            <ConfidenceMeter value={task.confidence} />
           ))}
       </div>
     </div>
+  );
+}
+
+/**
+ * Extraction confidence as the percentage inside a thin ring that fills to the score. Flat grey,
+ * like the other card details; the word "confidence" is in the hover text and the screen-reader
+ * label. Only shown above the review threshold; low scores get "Check this" instead.
+ */
+function ConfidenceMeter({ value }: { value: number }) {
+  const pct = Math.round(value * 100);
+  const radius = 13;
+  const circumference = 2 * Math.PI * radius;
+  return (
+    <span
+      className="relative ml-auto inline-flex h-8 w-8 shrink-0 cursor-help items-center justify-center"
+      title={`${pct}% confidence: how clearly the meeting supports this task. Items below 85% are marked "Check this" instead.`}
+      aria-label={`${pct}% confidence`}
+    >
+      <svg viewBox="0 0 32 32" className="absolute inset-0 h-8 w-8 -rotate-90" aria-hidden>
+        <circle cx="16" cy="16" r={radius} fill="none" strokeWidth="2.5" className="stroke-slate-200" />
+        <circle
+          cx="16"
+          cy="16"
+          r={radius}
+          fill="none"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={circumference * (1 - value)}
+          className="stroke-slate-400"
+        />
+      </svg>
+      <span className="relative text-[9.5px] font-semibold tabular-nums tracking-tight text-slate-500">
+        {pct}
+        <span className="text-[7px] font-medium">%</span>
+      </span>
+    </span>
   );
 }

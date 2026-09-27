@@ -10,7 +10,7 @@ import EditTaskModal from "@/components/EditTaskModal";
 import Filters from "@/components/Filters";
 import KanbanBoard from "@/components/KanbanBoard";
 import MeetingFilter from "@/components/MeetingFilter";
-import MeetingSummaryCard from "@/components/MeetingSummaryCard";
+import MeetingSummaryCard, { MeetingSummaryList } from "@/components/MeetingSummaryCard";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import ProjectModal from "@/components/ProjectModal";
 import type { ProjectScope } from "@/components/ProjectPicker";
@@ -78,7 +78,8 @@ export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [selectedOwner, setSelectedOwner] = useState("");
+  // Owners chosen in the owner filter; empty shows everyone.
+  const [selectedOwners, setSelectedOwners] = useState<string[]>([]);
   const [sortByDeadline, setSortByDeadline] = useState(false);
   const [view, setView] = useState<BoardView>("board");
   const [search, setSearch] = useState("");
@@ -105,7 +106,7 @@ export default function DashboardPage() {
   const [latestMeetingId, setLatestMeetingId] = useState<number | null>(null);
   // The board's meetings (for the Meeting filter), and the one the board is filtered to.
   const [meetings, setMeetings] = useState<MeetingListItem[]>([]);
-  const [selectedMeetingId, setSelectedMeetingId] = useState<number | null>(null);
+  const [selectedMeetingIds, setSelectedMeetingIds] = useState<number[]>([]);
   // Meeting summaries: the meeting whose summary is shown after it was just added (until hidden),
   // summaries written in this session (newer than the loaded list), and those being written or
   // that failed, each by meeting id.
@@ -342,9 +343,9 @@ export default function DashboardPage() {
 
   // A board's owner filter does not carry over to another board, where it could hide every task.
   useEffect(() => {
-    setSelectedOwner("");
+    setSelectedOwners([]);
     setLatestMeetingId(null);
-    setSelectedMeetingId(null);
+    setSelectedMeetingIds([]);
     setSummaryShownFor(null);
   }, [viewKey]);
 
@@ -401,8 +402,18 @@ export default function DashboardPage() {
   // A chosen meeting that is no longer listed (deleted elsewhere, or the list failed to load, which
   // also hides the filter) would leave the board filtered to nothing with no way to clear it.
   useEffect(() => {
-    if (selectedMeetingId !== null && !meetings.some((m) => m.id === selectedMeetingId)) setSelectedMeetingId(null);
-  }, [meetings, selectedMeetingId]);
+    const listed = selectedMeetingIds.filter((id) => meetings.some((m) => m.id === id));
+    if (listed.length !== selectedMeetingIds.length) setSelectedMeetingIds(listed);
+  }, [meetings, selectedMeetingIds]);
+  // The chosen meetings in date order (when each took place, else when it was added).
+  const chosenMeetings = useMemo(
+    () =>
+      meetings
+        .filter((m) => selectedMeetingIds.includes(m.id))
+        .sort((a, b) => (a.meeting_date ?? a.created_at ?? "").localeCompare(b.meeting_date ?? b.created_at ?? "")),
+    [meetings, selectedMeetingIds]
+  );
+  const singleChosenId = chosenMeetings.length === 1 ? chosenMeetings[0].id : null;
 
   // Writes a meeting's summary with a separate request after its tasks are saved, so a slow or
   // failed summary never holds up or affects the tasks. `boardToken` pins the meeting's board.
@@ -418,42 +429,76 @@ export default function DashboardPage() {
       setSummarising(({ [meetingId]: _done, ...rest }) => rest);
     }
   }, []);
-  // The card shows the meeting chosen in the Meeting filter, or else the one just added, or else a
-  // board's only meeting (whose tasks are the whole board).
+  // With two or more meetings chosen, their summaries share one list (see MeetingSummaryList).
+  // Otherwise the card shows the one chosen meeting, or else the one just added, or else a board's
+  // only meeting (whose tasks are the whole board).
   const onlyMeetingId = meetings.length === 1 ? meetings[0].id : null;
   const summaryMeeting =
-    meetings.find((m) => m.id === (selectedMeetingId ?? summaryShownFor ?? onlyMeetingId)) ?? null;
+    chosenMeetings.length > 1
+      ? null
+      : meetings.find((m) => m.id === (singleChosenId ?? summaryShownFor ?? onlyMeetingId)) ?? null;
   // It can be hidden only when it is not the board's current view: not the chosen meeting, nor the only one.
   const summaryHideable =
-    summaryMeeting !== null && summaryMeeting.id !== selectedMeetingId && summaryMeeting.id !== onlyMeetingId;
+    summaryMeeting !== null && summaryMeeting.id !== singleChosenId && summaryMeeting.id !== onlyMeetingId;
   // A viewer who cannot write a summary is not shown an empty one unless they chose that meeting.
   const summaryWorthShowing =
     summaryMeeting !== null &&
     (cardsEditable ||
-      summaryMeeting.id === selectedMeetingId ||
+      summaryMeeting.id === singleChosenId ||
       !!(freshSummaries[summaryMeeting.id] ?? summaryMeeting.summary));
 
-  // The tasks of the meeting chosen in the Meeting filter (all tasks when none is chosen). The
+  // The tasks of the meetings chosen in the Meeting filter (all tasks when none is chosen). The
   // owner filter lists only their owners, so it never offers a name with no tasks on screen.
-  const meetingTasks = useMemo(
-    () => (selectedMeetingId === null ? tasks : tasks.filter((t) => t.meeting_id === selectedMeetingId)),
-    [tasks, selectedMeetingId]
-  );
+  const meetingTasks = useMemo(() => {
+    if (selectedMeetingIds.length === 0) return tasks;
+    const chosen = new Set(selectedMeetingIds);
+    return tasks.filter((t) => t.meeting_id !== null && chosen.has(t.meeting_id));
+  }, [tasks, selectedMeetingIds]);
   const owners = useMemo(
     () => Array.from(new Set(meetingTasks.map((t) => t.owner).filter(Boolean))) as string[],
     [meetingTasks]
   );
 
-  // The filter only applies while some task still has that owner (e.g. not after the owner's last
-  // task is deleted or reassigned); otherwise it would hide every task with no way to clear it.
-  const activeOwner = owners.includes(selectedOwner) ? selectedOwner : "";
-  // Clear it for good, so it does not silently come back if that owner reappears (e.g. on undo).
+  // The filter only applies to owners who still have tasks here (e.g. not after an owner's last task
+  // is deleted or reassigned, or another meeting is chosen); otherwise it could hide every task.
+  const activeOwners = useMemo(() => selectedOwners.filter((o) => owners.includes(o)), [selectedOwners, owners]);
+  const ownerTasks = useMemo(() => {
+    if (activeOwners.length === 0) return meetingTasks;
+    const chosen = new Set(activeOwners);
+    return meetingTasks.filter((t) => t.owner !== null && chosen.has(t.owner));
+  }, [meetingTasks, activeOwners]);
+  const ownerCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const t of meetingTasks) if (t.owner) counts[t.owner] = (counts[t.owner] ?? 0) + 1;
+    return counts;
+  }, [meetingTasks]);
+  // The stats bar counts what the Meeting and owner filters show (not the search box, whose counts
+  // would jump while typing), and names that scope when either filter is on.
+  const statsTasks = ownerTasks;
+  const statsMeetingTitle =
+    chosenMeetings.length === 0
+      ? null
+      : chosenMeetings.length === 1
+        ? chosenMeetings[0].title
+        : chosenMeetings.length === 2
+          ? `${chosenMeetings[0].title} and ${chosenMeetings[1].title}`
+          : `${chosenMeetings.length} meetings`;
+  const statsOwners =
+    activeOwners.length === 0
+      ? null
+      : activeOwners.length === 1
+        ? `${activeOwners[0]}\u2019s tasks`
+        : activeOwners.length === 2
+          ? `${activeOwners[0]} and ${activeOwners[1]}\u2019s tasks`
+          : `${activeOwners.length} owners\u2019 tasks`;
+  const statsScope = [statsOwners, statsMeetingTitle].filter(Boolean).join(" \u00b7 ") || null;
+  // Drop owners who have left for good, so they do not silently come back if they reappear (e.g. on undo).
   useEffect(() => {
-    if (selectedOwner && !owners.includes(selectedOwner)) setSelectedOwner("");
-  }, [owners, selectedOwner]);
+    if (activeOwners.length !== selectedOwners.length) setSelectedOwners(activeOwners);
+  }, [activeOwners, selectedOwners]);
 
   const visibleTasks = useMemo(() => {
-    let result = activeOwner ? meetingTasks.filter((t) => t.owner === activeOwner) : meetingTasks;
+    let result = ownerTasks;
     const q = search.trim().toLowerCase();
     if (q) {
       result = result.filter((t) =>
@@ -470,7 +515,7 @@ export default function DashboardPage() {
       });
     }
     return result;
-  }, [meetingTasks, activeOwner, sortByDeadline, search]);
+  }, [ownerTasks, sortByDeadline, search]);
 
   // Calendar plots task deadlines; it works in any task view (single board or across all).
   const activeView: BoardView = view;
@@ -642,7 +687,7 @@ export default function DashboardPage() {
     setLatestMeetingId(meeting.id);
     // Show the whole board again, so the new meeting's tasks and summary are not hidden behind
     // a meeting chosen earlier in the Meeting filter.
-    setSelectedMeetingId(null);
+    setSelectedMeetingIds([]);
     reloadTasksRef.current();
     const board = projects.find((p) => p.id === projectId);
     setSummaryShownFor(meeting.id);
@@ -682,7 +727,7 @@ export default function DashboardPage() {
       throw new Error(current.error_message || "Transcription failed.");
     }
     setLatestMeetingId(meeting.id);
-    setSelectedMeetingId(null); // as for pasted text: show the new meeting's tasks and summary
+    setSelectedMeetingIds([]); // as for pasted text: show the new meeting's tasks and summary
     reloadTasksRef.current();
     setSummaryShownFor(meeting.id);
     requestSummary(meeting.id, boardToken);
@@ -701,7 +746,7 @@ export default function DashboardPage() {
     }
     setMeetingDeletion(null);
     if (latestMeetingId === meeting.id) setLatestMeetingId(null);
-    if (selectedMeetingId === meeting.id) setSelectedMeetingId(null);
+    setSelectedMeetingIds((ids) => ids.filter((id) => id !== meeting.id));
     if (summaryShownFor === meeting.id) setSummaryShownFor(null);
     // Undo entries may refer to the tasks just removed, so the history starts afresh.
     undoGenRef.current += 1;
@@ -998,7 +1043,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="mb-6">
-              <StatsBar tasks={tasks} />
+              <StatsBar tasks={statsTasks} scope={statsScope} />
             </div>
 
             <div className={showCapture ? "grid gap-6 lg:grid-cols-[340px_1fr]" : ""}>
@@ -1098,8 +1143,9 @@ export default function DashboardPage() {
                 {(owners.length > 0 || meetingFilterShown) && (
                   <Filters
                     owners={owners}
-                    selectedOwner={activeOwner}
-                    onOwnerChange={setSelectedOwner}
+                    ownerCounts={ownerCounts}
+                    selectedOwners={activeOwners}
+                    onOwnersChange={setSelectedOwners}
                     sortByDeadline={sortByDeadline}
                     onSortToggle={() => setSortByDeadline((v) => !v)}
                     showSort={activeView === "board"}
@@ -1107,8 +1153,8 @@ export default function DashboardPage() {
                       meetingFilterShown ? (
                         <MeetingFilter
                           meetings={meetings}
-                          selectedMeetingId={selectedMeetingId}
-                          onSelect={setSelectedMeetingId}
+                          selectedMeetingIds={selectedMeetingIds}
+                          onChange={setSelectedMeetingIds}
                           latestMeetingId={latestMeetingId}
                           canEdit={!!canEdit}
                           onDelete={(m) => setMeetingDeletion({ meeting: m, busy: false, error: null })}
@@ -1128,6 +1174,17 @@ export default function DashboardPage() {
                     canEdit={cardsEditable}
                     onSummarise={() => requestSummary(summaryMeeting.id, meetingsBoardToken)}
                     onDismiss={summaryHideable ? () => setSummaryShownFor(null) : undefined}
+                  />
+                )}
+
+                {chosenMeetings.length > 1 && (
+                  <MeetingSummaryList
+                    meetings={chosenMeetings.filter((m) => m.status !== "failed")}
+                    summaryFor={(m) => freshSummaries[m.id] ?? m.summary}
+                    workingFor={(m) => !!summarising[m.id]}
+                    errorFor={(m) => summaryErrors[m.id] ?? null}
+                    canEdit={cardsEditable}
+                    onSummarise={(m) => requestSummary(m.id, meetingsBoardToken)}
                   />
                 )}
 

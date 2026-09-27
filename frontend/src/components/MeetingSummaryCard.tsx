@@ -27,51 +27,11 @@ interface Props {
  */
 export default function MeetingSummaryCard({ meeting, summary, working, error, canEdit, onSummarise, onDismiss }: Props) {
   const [collapsed, setCollapsed] = useState(false);
-  const processed = meeting.status === "complete";
   const date = meeting.meeting_date ? formatMeetingDate(meeting.meeting_date) : null;
 
-  let body: React.ReactNode;
-  if (working) {
-    body = (
-      <div aria-live="polite">
-        <p className="text-sm text-slate-500">Writing a summary…</p>
-        <div className="mt-2 space-y-2" aria-hidden>
-          <div className="h-2.5 w-11/12 animate-pulse rounded-full bg-slate-100" />
-          <div className="h-2.5 w-3/4 animate-pulse rounded-full bg-slate-100" />
-        </div>
-      </div>
-    );
-  } else if (!processed) {
-    body = <p className="text-sm text-slate-500">A summary can be written once this meeting has been processed.</p>;
-  } else if (summary) {
-    body = (
-      <>
-        <p className="text-sm leading-relaxed text-slate-700">{summary.overview}</p>
-        {error && <p className="mt-2 text-[13px] text-rose-600">{error}</p>}
-        <p className="mt-2 text-[11.5px] text-slate-400">
-          Written by AI from the transcript, as a summary of the meeting. The tasks on the board show where the work stands now.
-        </p>
-      </>
-    );
-  } else {
-    body = (
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className={`text-sm ${error ? "text-rose-600" : "text-slate-500"}`}>
-          {error ?? (canEdit ? "No summary yet for this meeting." : "No summary has been written for this meeting yet.")}
-        </p>
-        {canEdit && (
-          <button
-            type="button"
-            onClick={onSummarise}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-ink-700"
-          >
-            <SparkIcon className="h-3.5 w-3.5" />
-            {error ? "Try again" : "Summarise this meeting"}
-          </button>
-        )}
-      </div>
-    );
-  }
+  const body = (
+    <SummaryBody meeting={meeting} summary={summary} working={working} error={error} canEdit={canEdit} onSummarise={onSummarise} />
+  );
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm" aria-label={`Summary of ${meeting.title}`}>
@@ -119,6 +79,144 @@ export default function MeetingSummaryCard({ meeting, summary, working, error, c
         )}
       </div>
       {!collapsed && <div className="mt-2.5">{body}</div>}
+    </section>
+  );
+}
+
+interface BodyProps {
+  meeting: MeetingListItem;
+  summary: MeetingSummary | null;
+  working: boolean;
+  error: string | null;
+  canEdit: boolean;
+  onSummarise: () => void;
+}
+
+/** A meeting's summary, or the state standing in for it (being written, not yet written, failed). */
+function SummaryBody({ meeting, summary, working, error, canEdit, onSummarise }: BodyProps) {
+  if (working) {
+    return (
+      <div aria-live="polite">
+        <p className="text-sm text-slate-500">Writing a summary…</p>
+        <div className="mt-2 space-y-2" aria-hidden>
+          <div className="h-2.5 w-11/12 animate-pulse rounded-full bg-slate-100" />
+          <div className="h-2.5 w-3/4 animate-pulse rounded-full bg-slate-100" />
+        </div>
+      </div>
+    );
+  }
+  if (meeting.status !== "complete") {
+    return <p className="text-sm text-slate-500">A summary can be written once this meeting has been processed.</p>;
+  }
+  if (summary) {
+    return (
+      <>
+        <p className="text-sm leading-relaxed text-slate-700">{summary.overview}</p>
+        {error && <p className="mt-2 text-[13px] text-rose-600">{error}</p>}
+        <p className="mt-2 text-[11.5px] text-slate-400">
+          Written by AI from the transcript, as a summary of the meeting. The tasks on the board show where the work stands now.
+        </p>
+      </>
+    );
+  }
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-2">
+      <p className={`text-sm ${error ? "text-rose-600" : "text-slate-500"}`}>
+        {error ?? (canEdit ? "No summary yet for this meeting." : "No summary has been written for this meeting yet.")}
+      </p>
+      {canEdit && (
+        <button
+          type="button"
+          onClick={onSummarise}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-ink-700"
+        >
+          <SparkIcon className="h-3.5 w-3.5" />
+          {error ? "Try again" : "Summarise this meeting"}
+        </button>
+      )}
+    </div>
+  );
+}
+
+interface ListProps {
+  /** The meetings chosen in the Meeting filter, in date order. */
+  meetings: MeetingListItem[];
+  summaryFor: (meeting: MeetingListItem) => MeetingSummary | null;
+  workingFor: (meeting: MeetingListItem) => boolean;
+  errorFor: (meeting: MeetingListItem) => string | null;
+  canEdit: boolean;
+  onSummarise: (meeting: MeetingListItem) => void;
+}
+
+/**
+ * The summaries of several chosen meetings in one card: a row per meeting, dates in their own
+ * column, folded by default. Opening a row shows its summary and closes any other, so the card
+ * stays short and the board below stays in view.
+ */
+export function MeetingSummaryList({ meetings, summaryFor, workingFor, errorFor, canEdit, onSummarise }: ListProps) {
+  const [openId, setOpenId] = useState<number | null>(null);
+  return (
+    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm" aria-label="Summaries of the chosen meetings">
+      <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-2.5">
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-700">
+          <SparkIcon className="h-3 w-3" />
+          AI summaries
+        </span>
+        <span className="text-sm text-slate-500">{meetings.length} meetings</span>
+      </div>
+      <ul className="divide-y divide-slate-100">
+        {meetings.map((m) => {
+          const open = openId === m.id;
+          const summary = summaryFor(m);
+          const working = workingFor(m);
+          // When it took place, or for a meeting stored without a date, the day it was added.
+          const day = m.meeting_date ?? m.created_at?.slice(0, 10) ?? null;
+          const date = day ? formatMeetingDate(day, true) : "";
+          return (
+            <li key={m.id}>
+              <button
+                type="button"
+                onClick={() => setOpenId(open ? null : m.id)}
+                aria-expanded={open}
+                className="flex w-full items-center gap-3 px-4 py-2.5 text-left outline-none transition hover:bg-slate-50 focus-visible:bg-slate-50"
+              >
+                <span className="w-14 shrink-0 text-[13px] tabular-nums text-slate-400">{date}</span>
+                <span className={`min-w-0 flex-1 truncate text-sm ${open ? "font-semibold text-slate-900" : "font-medium text-slate-700"}`} title={m.title}>
+                  {m.title}
+                </span>
+                {!summary && !working && m.status === "complete" && (
+                  <span className="hidden shrink-0 text-xs text-slate-400 sm:inline">No summary yet</span>
+                )}
+                <svg viewBox="0 0 20 20" className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${open ? "" : "-rotate-90"}`} fill="currentColor" aria-hidden>
+                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+                </svg>
+              </button>
+              {open && (
+                // Indented under the titles from sm up; full width on a phone.
+                <div className="px-4 pb-3 sm:pl-[5.25rem]">
+                  <SummaryBody
+                    meeting={m}
+                    summary={summary}
+                    working={working}
+                    error={errorFor(m)}
+                    canEdit={canEdit}
+                    onSummarise={() => onSummarise(m)}
+                  />
+                  {canEdit && summary && !working && (
+                    <button
+                      type="button"
+                      onClick={() => onSummarise(m)}
+                      className="mt-1.5 text-xs font-medium text-slate-500 underline-offset-2 transition hover:text-slate-800 hover:underline"
+                    >
+                      Rewrite summary
+                    </button>
+                  )}
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 }

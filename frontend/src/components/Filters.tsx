@@ -1,24 +1,27 @@
 "use client";
 
-import { avatarColor, initials } from "@/lib/format";
-
+import OwnerFilter from "@/components/OwnerFilter";
 
 interface Props {
   owners: string[];
-  selectedOwner: string;
-  onOwnerChange: (owner: string) => void;
+  /** Tasks per owner among the tasks on screen, for the owner dropdown. */
+  ownerCounts: Record<string, number>;
+  /** The owners chosen in the owner filter; empty for everyone. */
+  selectedOwners: string[];
+  onOwnersChange: (owners: string[]) => void;
   sortByDeadline: boolean;
   onSortToggle: () => void;
   /** The "Sort by deadline" toggle is meaningless in the calendar view, so it can be hidden. */
   showSort?: boolean;
-  /** Further filters shown on the right, before Sort (the Meeting filter). */
+  /** A further filter shown after the owner filter (the Meeting filter). */
   extra?: React.ReactNode;
 }
 
 export default function Filters({
   owners,
-  selectedOwner,
-  onOwnerChange,
+  ownerCounts,
+  selectedOwners,
+  onOwnersChange,
   sortByDeadline,
   onSortToggle,
   showSort = true,
@@ -28,46 +31,12 @@ export default function Filters({
     <div className="flex flex-wrap items-center gap-2">
       <span className="font-display text-sm font-semibold text-slate-500">Filter</span>
 
-      {/* "All" pill, shown when there are owners to filter by */}
       {owners.length > 0 && (
-      <button
-        onClick={() => onOwnerChange("")}
-        className={`rounded-full px-3 py-1 text-sm font-medium transition ${
-          selectedOwner === ""
-            ? "bg-slate-900 text-white"
-            : "text-slate-600 hover:bg-slate-900/5"
-        }`}
-      >
-        All owners
-      </button>
+        <OwnerFilter owners={owners} counts={ownerCounts} selected={selectedOwners} onChange={onOwnersChange} />
       )}
-
-      {owners.map((owner) => {
-        const active = selectedOwner === owner;
-        return (
-          <button
-            key={owner}
-            onClick={() => onOwnerChange(active ? "" : owner)}
-            className={`inline-flex items-center gap-1.5 rounded-full py-1 pl-1 pr-3 text-sm font-medium transition ${
-              active
-                ? "bg-slate-900 text-white"
-                : "text-slate-600 hover:bg-slate-900/5"
-            }`}
-          >
-            <span
-              className={`flex h-5 w-5 items-center justify-center rounded-full text-[9.5px] font-semibold ${avatarColor(
-                owner
-              )}`}
-            >
-              {initials(owner)}
-            </span>
-            {owner}
-          </button>
-        );
-      })}
+      {extra}
 
       <div className="ml-auto flex items-center gap-2">
-      {extra}
       {showSort && (
         <button
           onClick={onSortToggle}

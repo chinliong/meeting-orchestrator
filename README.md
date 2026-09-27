@@ -33,15 +33,17 @@ recordings for end-to-end processing.
   title shows on each card and can be renamed inline), but you can also add tasks by hand for
   work raised outside a captured meeting.
 - **Meeting filter**: the board's Filter row lists its meetings, newest first, with when each was
-  added and how many tasks it produced. Picking one shows only its tasks, and a meeting can be
+  added and how many tasks it produced. Ticking one or more shows only their tasks, and a meeting can be
   deleted with its tasks from the same list. Tasks from the meeting just added are marked "New",
   and pasting a transcript that is already on the board asks before adding a second copy.
-  Choosing a meeting also narrows the owner filter to the people with tasks in it.
+  Choosing meetings also narrows the owner filter to the people with tasks in them. The owner
+  filter is a dropdown too, and several owners can be ticked at once.
 - **AI meeting summary**: each meeting gets a short overview (two to four sentences on what it
   was about and what it agreed), so the tasks on the board keep their context. It is written by a
   **separate request after extraction**, never part of it, so the evaluated extraction is
   unchanged and a failed summary never affects a meeting's tasks. It appears above the board for
-  the meeting just added, the meeting chosen in the Meeting filter, or a board's only meeting;
+  the meeting just added, the meeting chosen in the Meeting filter (several chosen meetings share
+  one list, one summary open at a time), or a board's only meeting;
   meetings added earlier can be summarised on request from their saved transcript. It describes
   the meeting as it happened (the board shows where the work stands now) and is labelled as
   AI-written, since it is not covered by the evaluation.

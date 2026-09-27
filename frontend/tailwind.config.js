@@ -8,6 +8,12 @@ module.exports = {
         display: ["var(--font-display)", "var(--font-sans)", "ui-sans-serif", "sans-serif"],
       },
       colors: {
+        // Task status colours, shared by the column dots, card edges, calendar chips and stats bar.
+        status: {
+          todo: "#4F75E8",
+          progress: "#F0A53A",
+          done: "#23A77C",
+        },
         // One confident corporate blue carries every primary action across the app.
         brand: {
           DEFAULT: "#1F5BD6",

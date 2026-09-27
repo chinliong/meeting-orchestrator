@@ -6,9 +6,9 @@ import type { Task, TaskStatus } from "@/lib/types";
 import TaskCard from "./TaskCard";
 
 const COLUMNS: { status: TaskStatus; title: string; dot: string; empty: string }[] = [
-  { status: "todo", title: "To Do", dot: "bg-brand", empty: "Nothing to do yet" },
-  { status: "in_progress", title: "In Progress", dot: "bg-amber-400", empty: "Nothing in progress" },
-  { status: "done", title: "Done", dot: "bg-emerald-500", empty: "Nothing done yet" },
+  { status: "todo", title: "To Do", dot: "bg-status-todo", empty: "Nothing to do yet" },
+  { status: "in_progress", title: "In Progress", dot: "bg-status-progress", empty: "Nothing in progress" },
+  { status: "done", title: "Done", dot: "bg-status-done", empty: "Nothing done yet" },
 ];
 
 interface Props {

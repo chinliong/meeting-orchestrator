@@ -18,9 +18,9 @@ interface Props {
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const STATUS_DOT: Record<Task["status"], string> = {
-  todo: "bg-brand",
-  in_progress: "bg-amber-400",
-  done: "bg-emerald-500",
+  todo: "bg-status-todo",
+  in_progress: "bg-status-progress",
+  done: "bg-status-done",
 };
 
 function toISO(d: Date): string {

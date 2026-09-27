@@ -8,9 +8,9 @@ import type { MeetingListItem } from "@/lib/types";
 interface Props {
   /** The board's meetings, newest first. */
   meetings: MeetingListItem[];
-  /** The meeting the board is filtered to; null shows every meeting's tasks. */
-  selectedMeetingId: number | null;
-  onSelect: (meetingId: number | null) => void;
+  /** The meetings the board is filtered to; empty shows every meeting's tasks. */
+  selectedMeetingIds: number[];
+  onChange: (meetingIds: number[]) => void;
   /** The meeting just added in this session, marked "New". */
   latestMeetingId: number | null;
   canEdit: boolean;
@@ -19,10 +19,11 @@ interface Props {
 
 /**
  * The Meeting filter in the board's Filter row: shows the board's meetings, newest first, with
- * when each was added and how many tasks it produced. Picking one shows only that meeting's
- * tasks, so an accidental second paste is easy to see, and to remove with its delete button.
+ * when each was added and how many tasks it produced. Ticking meetings shows only their tasks (the
+ * list stays open while ticking), so an accidental second paste is easy to see, and to remove with
+ * its delete button.
  */
-export default function MeetingFilter({ meetings, selectedMeetingId, onSelect, latestMeetingId, canEdit, onDelete }: Props) {
+export default function MeetingFilter({ meetings, selectedMeetingIds, onChange, latestMeetingId, canEdit, onDelete }: Props) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -52,13 +53,18 @@ export default function MeetingFilter({ meetings, selectedMeetingId, onSelect, l
   }
   const addedLabel = (iso: string) => formatAddedAt(iso, (perMinute.get(formatAddedAt(iso)) ?? 0) > 1);
 
-  const selected = meetings.find((m) => m.id === selectedMeetingId) ?? null;
-  // Name the chosen meeting; if another meeting has the same name, add when it was added.
-  const selectedLabel =
+  const chosen = meetings.filter((m) => selectedMeetingIds.includes(m.id));
+  const selected = chosen[0] ?? null;
+  // Name the first chosen meeting (with when it was added, if another meeting has the same name),
+  // then how many more are chosen.
+  const firstLabel =
     selected &&
     (meetings.some((m) => m.id !== selected.id && m.title === selected.title) && selected.created_at
       ? `${selected.title} · ${formatAddedAt(selected.created_at, true).split(", ").pop()}`
       : selected.title);
+  const selectedLabel = selected && (chosen.length > 1 ? `${firstLabel} +${chosen.length - 1}` : firstLabel);
+  const toggle = (id: number) =>
+    onChange(selectedMeetingIds.includes(id) ? selectedMeetingIds.filter((x) => x !== id) : [...selectedMeetingIds, id]);
 
   return (
     <div ref={containerRef} className="relative">
@@ -67,7 +73,7 @@ export default function MeetingFilter({ meetings, selectedMeetingId, onSelect, l
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="true"
         aria-expanded={open}
-        title={selected ? `Showing tasks from ${selectedLabel}` : "Filter by meeting"}
+        title={selected ? `Showing tasks from ${chosen.map((m) => m.title).join(", ")}` : "Filter by meeting"}
         className={`inline-flex max-w-[19rem] items-center gap-1.5 rounded-full py-1 pl-3 pr-2 text-sm font-medium transition ${
           selected ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-900/5"
         }`}
@@ -85,11 +91,11 @@ export default function MeetingFilter({ meetings, selectedMeetingId, onSelect, l
       {open && (
         // On a phone the list opens as a sheet along the bottom of the screen, so it always fits
         // wherever the button has wrapped to; from sm up it is an ordinary dropdown.
-        <div className="fixed inset-x-4 bottom-4 z-40 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:mt-2 sm:w-80 sm:rounded-xl sm:shadow-lg">
+        <div className="fixed inset-x-4 bottom-4 z-40 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:mt-2 sm:w-80 sm:rounded-xl sm:shadow-lg">
           <button
             type="button"
             onClick={() => {
-              onSelect(null);
+              onChange([]);
               setOpen(false);
             }}
             className={`flex w-full items-center justify-between border-b border-slate-100 px-4 py-2.5 text-left text-sm transition hover:bg-slate-50 ${
@@ -97,7 +103,9 @@ export default function MeetingFilter({ meetings, selectedMeetingId, onSelect, l
             }`}
           >
             All meetings
-            {!selected && (
+            {selected ? (
+              <span className="text-xs font-medium text-slate-400">Clear {chosen.length}</span>
+            ) : (
               <svg viewBox="0 0 20 20" className="h-4 w-4 text-slate-900" fill="currentColor" aria-hidden>
                 <path fillRule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0l-3.5-3.5a1 1 0 011.4-1.4l2.8 2.79 6.8-6.79a1 1 0 011.4 0z" clipRule="evenodd" />
               </svg>
@@ -107,17 +115,30 @@ export default function MeetingFilter({ meetings, selectedMeetingId, onSelect, l
             {meetings.map((m) => {
               const busy = m.status === "processing" || m.status === "pending";
               const isNew = m.id === latestMeetingId;
-              const active = m.id === selectedMeetingId;
+              const active = selectedMeetingIds.includes(m.id);
               return (
                 <li key={m.id} className={`flex items-start gap-1 rounded-lg ${active ? "bg-slate-100" : "hover:bg-slate-50"}`}>
                   <button
                     type="button"
-                    onClick={() => {
-                      onSelect(m.id);
-                      setOpen(false);
-                    }}
-                    className="min-w-0 flex-1 px-3 py-2 text-left"
+                    role="checkbox"
+                    aria-checked={active}
+                    onClick={() => toggle(m.id)}
+                    className="flex min-w-0 flex-1 items-start gap-2.5 px-3 py-2 text-left"
                   >
+                    {/* Checkbox look: several meetings can be chosen. */}
+                    <span
+                      className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                        active ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300 bg-white"
+                      }`}
+                      aria-hidden
+                    >
+                      {active && (
+                        <svg viewBox="0 0 20 20" className="h-3 w-3" fill="currentColor">
+                          <path fillRule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0l-3.5-3.5a1 1 0 011.4-1.4l2.8 2.79 6.8-6.79a1 1 0 011.4 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </span>
+                    <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-1.5">
                       <span className={`truncate text-[13px] ${active ? "font-semibold text-slate-900" : "font-medium text-slate-800"}`} title={m.title}>
                         {m.title}
@@ -137,6 +158,7 @@ export default function MeetingFilter({ meetings, selectedMeetingId, onSelect, l
                       ) : (
                         `${m.task_count} task${m.task_count === 1 ? "" : "s"}`
                       )}
+                    </span>
                     </span>
                   </button>
                   {canEdit && (
