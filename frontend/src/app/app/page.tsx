@@ -7,6 +7,7 @@ import BoardReminderButton from "@/components/BoardReminderButton";
 import AuthGate from "@/components/AuthGate";
 import CalendarView from "@/components/CalendarView";
 import EditTaskModal from "@/components/EditTaskModal";
+import ExportButton from "@/components/ExportButton";
 import Filters from "@/components/Filters";
 import KanbanBoard from "@/components/KanbanBoard";
 import MeetingFilter from "@/components/MeetingFilter";
@@ -991,8 +992,8 @@ export default function DashboardPage() {
                   )
                 )}
               </div>
-              {!searchAllProjects && (
               <div className="-ml-2.5 flex shrink-0 flex-wrap gap-0.5 sm:ml-0">
+                {!searchAllProjects && (
                 <button
                   onClick={() => setShareProject(selectedProject)}
                   className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-900/5 hover:text-slate-900"
@@ -1003,7 +1004,8 @@ export default function DashboardPage() {
                   </svg>
                   Share
                 </button>
-                {!(user && selectedProject?.owner_user_id === user.id) && (
+                )}
+                {!searchAllProjects && !(user && selectedProject?.owner_user_id === user.id) && (
                   <BoardReminderButton
                     owned={selectedProject?.owner_user_id != null}
                     signedIn={!!user}
@@ -1014,7 +1016,15 @@ export default function DashboardPage() {
                     onSignIn={() => setShowAuth(true)}
                   />
                 )}
-                {canEdit && (
+                {/* Exports the tasks the board is showing, so it sits with the board's actions
+                    rather than among its editing controls. */}
+                <ExportButton
+                  tasks={visibleTasks}
+                  allTasks={tasks}
+                  fileLabel={searchAllProjects ? viewTitle : selectedProject?.name ?? "Tasks"}
+                  projectNames={searchAllProjects ? projectNames : undefined}
+                />
+                {!searchAllProjects && canEdit && (
                   <>
                     <button
                       onClick={() => setProjectModal("edit")}
@@ -1039,7 +1049,6 @@ export default function DashboardPage() {
                   </>
                 )}
               </div>
-              )}
             </div>
 
             <div className="mb-6">

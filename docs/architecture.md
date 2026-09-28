@@ -81,7 +81,8 @@ flowchart LR
   all-boards task list in the browser; adding meetings or tasks needs a single board),
   owner filter / Meeting filter / deadline sort / text search, an AI summary card for the chosen
   or newest meeting, an **undo** stack (button + ⌘Z/Ctrl+Z) over status/edit/reschedule/subtask/delete actions,
-  transcript-and-audio upload, and a share dialog exposing view/edit links. A small session layer
+  transcript-and-audio upload, a share dialog exposing view/edit links, and a CSV **export** of the
+  tasks shown (or all of the board's), built in the browser with no backend call. A small session layer
   persists the account token and guest boards in `localStorage`. Talks to the backend via
   `src/lib/api.ts`, which attaches the `Authorization` bearer and `X-Workspace-Token` headers.
 - **Backend (FastAPI):** every route below is mounted under `/api/v1` (so `POST /auth/signup` is

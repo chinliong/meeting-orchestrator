@@ -63,6 +63,11 @@ recordings for end-to-end processing.
   anyone with a link can open it (no account needed), and the owner can regenerate either link.
   View links are read-only; the UI hides every control that changes a view-only board and opens
   task fields read-only.
+- **Export to a spreadsheet**: **Export**, beside Share, downloads the tasks shown (filters and
+  search applied), or all of the board's, as a CSV file that opens in Excel, Numbers or Google
+  Sheets: task, owner, deadline, status, meeting, meeting date, subtasks done and overdue, with a
+  choice of columns. It is a snapshot for a status report or a follow-up email, built in the
+  browser from the tasks already loaded.
 - **Optional audio/video input**: upload a recording (up to 500 MB); it is transcribed with
   Deepgram Nova-3 before parsing.
 - **Evaluation frameworks**: scores transcript-extraction quality against an annotated test set,
