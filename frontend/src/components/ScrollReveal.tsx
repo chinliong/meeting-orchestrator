@@ -53,6 +53,7 @@ export default function ScrollReveal() {
             // Fully off screen: reset it, remembering which side it left by, so that it comes back in
             // from that side.
             el.classList.remove("is-visible");
+            el.classList.add("has-left");
             el.classList.toggle("from-above", entry.boundingClientRect.top < 0);
           }
         }

@@ -38,10 +38,11 @@ const COLUMNS: { key: ColumnKey; label: string; value: (t: Task, names?: Map<num
   },
 ];
 
-// Quote a cell when it holds a comma, quote or line break. A cell that starts with = + - or @
-// would be run as a formula by Excel, so it is prefixed with an apostrophe (shown as plain text).
+// Quote a cell when it holds a comma, quote or line break. A cell that starts with = + - @, a tab
+// or a carriage return could be run as a formula by a spreadsheet, so it is prefixed with an
+// apostrophe (shown as plain text).
 function cell(value: string): string {
-  const safe = /^[=+\-@]/.test(value) ? `'${value}` : value;
+  const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
   return /[",\r\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }
 

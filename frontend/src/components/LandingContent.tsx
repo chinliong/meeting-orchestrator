@@ -14,9 +14,13 @@ import ScrollReveal from "@/components/ScrollReveal";
 const REVEAL_BOOT =
   "(function(){try{var d=document.documentElement;if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&'IntersectionObserver' in window){d.classList.add('reveal-ready');setTimeout(function(){if(!d.classList.contains('reveal-live'))d.classList.remove('reveal-ready')},3000)}}catch(e){}})()";
 
-/** Props that make an element fade and rise in when scrolled to; `order` staggers a row of cards. */
-function reveal(order = 0) {
-  return { "data-reveal": "", style: { "--reveal-delay": `${order * 90}ms` } as React.CSSProperties };
+/**
+ * Props that make an element fade and rise in when scrolled to; `order` staggers a row of cards.
+ * `hero` marks the top of the page: it plays its entrance in CSS as soon as the page is painted,
+ * without waiting for the page's scripts, and only animates on scroll once it has left the screen.
+ */
+function reveal(order = 0, hero = false) {
+  return { "data-reveal": hero ? "hero" : "", style: { "--reveal-delay": `${order * 90}ms` } as React.CSSProperties };
 }
 
 function Arrow({ className = "h-4 w-4" }: { className?: string }) {
@@ -103,7 +107,7 @@ export default function LandingContent() {
       <main id="top">
         {/* ---------- hero ---------- */}
         <section className="px-5 pt-16 text-center sm:px-6 sm:pt-24">
-          <div {...reveal()}>
+          <div {...reveal(0, true)}>
             <Kicker>Meeting Orchestrator</Kicker>
             <h1 className="mx-auto mt-3 max-w-4xl font-display text-5xl font-bold leading-[1.02] tracking-tight text-slate-900 sm:text-7xl">
               Meetings in.
@@ -132,7 +136,7 @@ export default function LandingContent() {
             <p className="mt-4 text-sm text-slate-500">No sign-up needed. Create an account whenever you like.</p>
           </div>
 
-          <div {...reveal(2)} className="mx-auto mt-14 max-w-[1232px] sm:mt-20">
+          <div {...reveal(2, true)} className="mx-auto mt-14 max-w-[1232px] sm:mt-20">
             {/* The same width as the sections below. A 1440px-wide capture from 1280px screens up; below that a 1200px one, so the board's text is not shrunk on smaller screens. */}
             <picture>
               <source media="(min-width: 1280px)" srcSet="/landing/board.webp" width={2880} height={1800} />
