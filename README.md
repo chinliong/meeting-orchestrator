@@ -69,7 +69,7 @@ recordings for end-to-end processing.
   choice of columns. It is a snapshot for a status report or a follow-up email, built in the
   browser from the tasks already loaded.
 - **Optional audio/video input**: upload a recording (up to 500 MB); it is transcribed with
-  Deepgram Nova-3 before parsing.
+  Deepgram Nova-3, labelled by speaker, before parsing.
 - **Evaluation frameworks**: scores transcript-extraction quality against an annotated test set,
   measured with and without the structured guidance layer
   (see [docs/evaluation-report.md](docs/evaluation-report.md)); a separate LLM-as-judge rubric

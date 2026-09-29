@@ -8,6 +8,8 @@ production extraction (Gemini Flash, the prompt the app uses) on two versions of
     reference    the AMI manual transcript
     headset      the Deepgram Nova-3 transcript of the headset recording that the speech-to-text
                  evaluation scores (eval/asr_transcripts, 13.0% and 15.3% WER)
+    speakers     the same recording as the app transcribes it now, with Deepgram's speaker
+                 labels ("Speaker 1: ...")
 
 Two measures, using the extraction evaluation's semantic matcher (eval.run_eval's judge, with
 its one-to-one rule):
@@ -51,7 +53,7 @@ RESULTS = REPO / "eval" / "ami_actions_results.json"
 REPORT = REPO / "docs" / "ami-actions-check.md"
 
 MEETINGS = ["ES2008a", "ES2010a"]
-SOURCES = ["reference", "headset"]
+SOURCES = ["reference", "headset", "speakers"]
 JUDGE_MODEL = "claude-sonnet-4-6"   # the extraction evaluation's judge
 # AMI does not record calendar dates; a fixed one keeps deadline resolution identical across runs.
 MEETING_DATE = date(2026, 6, 1)
@@ -72,6 +74,8 @@ def summary_actions(zip_path: str) -> dict[str, list[str]]:
 def transcript(meeting: str, source: str) -> str:
     if source == "reference":
         return (AUDIO_DIR / f"{meeting}.reference.txt").read_text()
+    if source == "speakers":
+        return (TRANSCRIPTS / f"{meeting}.deepgram-nova-3-speakers.txt").read_text()
     return (TRANSCRIPTS / f"{meeting}.deepgram-nova-3.txt").read_text()
 
 
@@ -87,9 +91,9 @@ def render(results: dict, runs: int) -> str:
     rows = []
     for m in MEETINGS:
         r = results[m]
-        ref, head = r["reference"], r["headset"]
+        ref, head, spk = r["reference"], r["headset"], r["speakers"]
         rows.append(f"| {m} | {len(r['ami_actions'])} | {ref['found']:.0%} | {head['found']:.0%} "
-                    f"| {head['kept']:.0%} |")
+                    f"| {spk['found']:.0%} | {head['kept']:.0%} |")
     examples = "\n".join(f"- {m}: " + "; ".join(f"\"{a}\"" for a in results[m]["ami_actions"])
                          for m in MEETINGS)
     return f"""# Extraction on Real Meetings
@@ -102,15 +106,15 @@ check runs the production extraction on two real meetings from the AMI Meeting C
 annotators wrote the meeting's actions in its summary, from both the manual transcript and the
 Deepgram transcript of the headset recording. {runs} runs per version.
 
-| Meeting | Actions in AMI summary | Found, manual transcript | Found, Deepgram transcript | Tasks kept, Deepgram vs manual |
-|---|---|---|---|---|
+| Meeting | Actions in AMI summary | Found, manual transcript | Found, Deepgram transcript | Found, Deepgram with speaker labels (app) | Tasks kept, Deepgram vs manual |
+|---|---|---|---|---|---|
 {chr(10).join(rows)}
 
 **Result.** The actions AMI's annotators recorded are found from the manual transcript and from
-the Deepgram transcript alike, so at headset quality the transcription errors measured in the
-speech-to-text evaluation do not cost the board its actions. The one gap on the manual transcript
-is a run that folded two of the annotated actions, typing up the minutes and e-mailing the
-slides, into one task.
+the Deepgram transcript alike, with or without the speaker labels the app now requests, so at headset quality the transcription errors measured in the
+speech-to-text evaluation do not cost the board its actions. Each gap below 100% is one run that
+folded two of the annotated actions, typing up the minutes and e-mailing the slides, into a
+single task, so the content is on the board but counts as one match.
 
 **What changes is the spelling of names.** Deepgram writes names as it hears them, so an owner
 can be spelled differently from the manual transcript (Iain as "Ian", Bucciantini as
@@ -169,6 +173,7 @@ def main() -> None:
         ref_runs, head_runs = cache[m]["reference"][: args.runs], cache[m]["headset"][: args.runs]
         found = {s: [len(match(key, r)) / len(key) for r in cache[m][s][: args.runs]] for s in SOURCES}
         kept = [len(match(rr, hr)) / len(rr) for rr in ref_runs for hr in head_runs if rr]
+        spk_runs = cache[m]["speakers"][: args.runs]
         results[m] = {
             "ami_actions": actions[m],
             "reference": {"found": round(statistics.mean(found["reference"]), 3),
@@ -176,6 +181,8 @@ def main() -> None:
             "headset": {"found": round(statistics.mean(found["headset"]), 3),
                         "found_per_run": found["headset"], "tasks": [len(r) for r in head_runs],
                         "kept": round(statistics.mean(kept), 3)},
+            "speakers": {"found": round(statistics.mean(found["speakers"]), 3),
+                         "found_per_run": found["speakers"], "tasks": [len(r) for r in spk_runs]},
         }
     RESULTS.write_text(json.dumps(results, indent=2) + "\n")
     REPORT.write_text(render(results, args.runs))

@@ -8,16 +8,16 @@ check runs the production extraction on two real meetings from the AMI Meeting C
 annotators wrote the meeting's actions in its summary, from both the manual transcript and the
 Deepgram transcript of the headset recording. 3 runs per version.
 
-| Meeting | Actions in AMI summary | Found, manual transcript | Found, Deepgram transcript | Tasks kept, Deepgram vs manual |
-|---|---|---|---|---|
-| ES2008a | 5 | 93% | 100% | 90% |
-| ES2010a | 3 | 100% | 100% | 100% |
+| Meeting | Actions in AMI summary | Found, manual transcript | Found, Deepgram transcript | Found, Deepgram with speaker labels (app) | Tasks kept, Deepgram vs manual |
+|---|---|---|---|---|---|
+| ES2008a | 5 | 93% | 100% | 93% | 90% |
+| ES2010a | 3 | 100% | 100% | 100% | 100% |
 
 **Result.** The actions AMI's annotators recorded are found from the manual transcript and from
-the Deepgram transcript alike, so at headset quality the transcription errors measured in the
-speech-to-text evaluation do not cost the board its actions. The one gap on the manual transcript
-is a run that folded two of the annotated actions, typing up the minutes and e-mailing the
-slides, into one task.
+the Deepgram transcript alike, with or without the speaker labels the app now requests, so at headset quality the transcription errors measured in the
+speech-to-text evaluation do not cost the board its actions. Each gap below 100% is one run that
+folded two of the annotated actions, typing up the minutes and e-mailing the slides, into a
+single task, so the content is on the board but counts as one match.
 
 **What changes is the spelling of names.** Deepgram writes names as it hears them, so an owner
 can be spelled differently from the manual transcript (Iain as "Ian", Bucciantini as

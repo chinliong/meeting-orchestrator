@@ -6,7 +6,8 @@ Three backends, tried in order, each falling through to the next on failure:
    error rate on the two AMI reference meetings, against 16.6% and 17.2% for hosted Whisper -
    a gap the bootstrap separates on both. Its advantage is almost entirely fewer deletions
    (181 against 269 on ES2008a), i.e. it drops less overlapping speech. See
-   docs/asr-evaluation.md.
+   docs/asr-evaluation.md. It is asked to label speakers, and the transcript is returned as
+   "Speaker 1: ..." turns, so the parser can tell who took a task on with "I'll do it".
 
 2. **Hosted Whisper API** (fallback). An OpenAI-compatible endpoint - Groq by default. Slightly
    less accurate but its free tier resets daily, where Deepgram's is a one-off credit, so this
@@ -175,6 +176,29 @@ _MIME = {".flac": "audio/flac", ".ogg": "audio/ogg", ".wav": "audio/wav",
          ".webm": "audio/webm"}
 
 
+def _speaker_turns(results: dict) -> str | None:
+    """Deepgram's diarised utterances as "Speaker N: ..." lines, one per change of speaker.
+
+    Deepgram numbers speakers from 0; the labels start at 1 for readers. Consecutive utterances
+    by the same speaker are joined into one turn. None when the response has no utterances, so
+    the caller can fall back to the plain transcript.
+    """
+    lines: list[str] = []
+    current, words = None, []
+    for u in results.get("utterances") or []:
+        text = (u.get("transcript") or "").strip()
+        if not text:
+            continue
+        if u.get("speaker") != current and words:
+            lines.append(f"Speaker {current + 1}: " + " ".join(words))
+            words = []
+        current = u.get("speaker", 0)
+        words.append(text)
+    if words:
+        lines.append(f"Speaker {current + 1}: " + " ".join(words))
+    return "\n".join(lines) or None
+
+
 def _transcribe_via_deepgram(tmp_path: str) -> str:
     """Backend #1: Deepgram, one synchronous POST of the compressed audio.
 
@@ -191,7 +215,10 @@ def _transcribe_via_deepgram(tmp_path: str) -> str:
         with open(upload_path, "rb") as audio:
             resp = httpx.post(
                 _DEEPGRAM_URL,
-                params={"model": model, "smart_format": "true"},
+                # diarize + utterances: speaker-labelled turns, so self-assigned tasks keep
+                # the right owner (see _speaker_turns).
+                params={"model": model, "smart_format": "true", "diarize": "true",
+                        "utterances": "true"},
                 headers={"Authorization": f"Token {_deepgram_key()}",
                          "Content-Type": _MIME.get(os.path.splitext(upload_path)[1],
                                                    "application/octet-stream")},
@@ -200,7 +227,8 @@ def _transcribe_via_deepgram(tmp_path: str) -> str:
             raise TranscriptionError(
                 f"Deepgram rejected the request (HTTP {resp.status_code}).")
         log.info("transcription: deepgram %s %.1fs", model, time.perf_counter() - started)
-        alt = resp.json()["results"]["channels"][0]["alternatives"][0]
+        results = resp.json()["results"]
+        alt = results["channels"][0]["alternatives"][0]
     except httpx.HTTPError as exc:
         raise TranscriptionError(f"Could not reach Deepgram: {exc}") from exc
     except (KeyError, IndexError, ValueError) as exc:
@@ -208,7 +236,7 @@ def _transcribe_via_deepgram(tmp_path: str) -> str:
     finally:
         if compressed:
             os.unlink(compressed)
-    return alt["transcript"].strip()
+    return _speaker_turns(results) or alt["transcript"].strip()
 
 
 @lru_cache(maxsize=1)

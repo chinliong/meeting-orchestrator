@@ -9,7 +9,7 @@
 3. The frontend calls the FastAPI backend (`POST /transcripts` for text, `POST /transcripts/audio`
    for files). Write endpoints require edit access to the target board.
 4. For audio, the backend first transcribes the file with a hosted service (Deepgram Nova-3) to
-   obtain the transcript text.
+   obtain the transcript text, labelled by speaker ("Speaker 1: ...").
 5. The backend sends the transcript to Gemini with a forced function-call schema; the response
    is validated into decisions, action items, owners, deadlines, and confidence via Pydantic.
 6. The structured data is persisted to the relational database (a `Meeting` plus its `Task` rows).
@@ -149,7 +149,9 @@ flowchart LR
   - **Transcription module** (`app/llm/transcription.py`): optional and lazily imported. Uploads
     are transcribed by Deepgram Nova-3, the most accurate service measured in
     [asr-evaluation.md](asr-evaluation.md). It is hosted, so nothing loads into memory and the core
-    app runs without the heavy local dependency. The other configurations measured there, a hosted
+    app runs without the heavy local dependency. Deepgram is asked to label speakers
+    (`diarize`), and the transcript is passed on as "Speaker N: ..." turns so a task someone takes
+    on with "I'll do it" can be given to the right owner. The other configurations measured there, a hosted
     Whisper endpoint set through `TRANSCRIPTION_BASE_URL` and a local Whisper install, are
     supported by configuration. With none configured the audio endpoint returns a clear
     unavailable status rather than failing at import.
