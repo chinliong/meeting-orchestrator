@@ -1,0 +1,338 @@
+{
+  "ES2008a": {
+    "reference": [
+      [
+        {
+          "description": "Type up meeting minutes and email them to the team along with the presentation slides.",
+          "owner": "Rose Lindgren",
+          "deadline": null
+        },
+        {
+          "description": "Investigate whether the remote control product scope is strictly for televisions or should also include video recorder functions.",
+          "owner": "Rose Lindgren",
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Put together the agenda for the upcoming team meeting.",
+          "owner": "Rose Lindgren",
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Develop the industrial working design for the new remote control.",
+          "owner": "Alima Bucciantini",
+          "deadline": null
+        },
+        {
+          "description": "Design technical user interface functions, including button layout and sizing.",
+          "owner": "Iain",
+          "deadline": null
+        }
+      ],
+      [
+        {
+          "description": "Investigate whether the remote control scope is strictly for televisions or if multi-device functionality (e.g. VCR features) should be supported.",
+          "owner": "Rose Lindgren",
+          "deadline": null
+        },
+        {
+          "description": "Prepare and distribute the agenda for the next meeting.",
+          "owner": "Rose Lindgren",
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Type up meeting minutes and email them to all team members.",
+          "owner": "Rose Lindgren",
+          "deadline": null
+        },
+        {
+          "description": "Email the presentation slides to the team members.",
+          "owner": "Rose Lindgren",
+          "deadline": null
+        },
+        {
+          "description": "Perform individual work on the working/industrial design for the remote control.",
+          "owner": "Alima Bucciantini",
+          "deadline": null
+        },
+        {
+          "description": "Perform individual work on user interface design, focusing on technical functions and button usability.",
+          "owner": "Iain",
+          "deadline": null
+        },
+        {
+          "description": "Perform individual work researching user requirements, consumer trends, and market feedback.",
+          "owner": "Jessy",
+          "deadline": null
+        }
+      ],
+      [
+        {
+          "description": "Investigate whether the remote control scope is strictly limited to television control or includes other devices like video recorders.",
+          "owner": "Rose Lindgren",
+          "deadline": null
+        },
+        {
+          "description": "Prepare and distribute an agenda for the next team meeting.",
+          "owner": "Rose Lindgren",
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Type up the meeting minutes and email them to the team.",
+          "owner": "Rose Lindgren",
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Email the kickoff presentation slides as an attachment to all team members.",
+          "owner": "Rose Lindgren",
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Conduct individual industrial design work on the working design for the remote control.",
+          "owner": "Alima Bucciantini",
+          "deadline": null
+        },
+        {
+          "description": "Perform individual User Interface Design work on technical functions and button layout/sizing.",
+          "owner": "Iain",
+          "deadline": null
+        },
+        {
+          "description": "Research and compile user requirements and consumer trends for the remote control.",
+          "owner": "Jessy",
+          "deadline": null
+        }
+      ]
+    ],
+    "headset": [
+      [
+        {
+          "description": "Type up meeting minutes summarizing the discussion and email them to the team.",
+          "owner": "Rose Lindgren",
+          "deadline": null
+        },
+        {
+          "description": "Email the presentation slides to the team as an attachment.",
+          "owner": "Rose Lindgren",
+          "deadline": null
+        },
+        {
+          "description": "Investigate whether the product scope is limited strictly to television control or if video recorder functions can be included.",
+          "owner": "Rose Lindgren",
+          "deadline": null
+        },
+        {
+          "description": "Prepare and distribute the project agenda for upcoming meetings.",
+          "owner": "Rose Lindgren",
+          "deadline": null
+        },
+        {
+          "description": "Develop the industrial working design during the individual work phase.",
+          "owner": "Alima Bucontinini",
+          "deadline": null
+        },
+        {
+          "description": "Determine technical functions, button size/layout, and user requirements for the remote control interface.",
+          "owner": "Ian",
+          "deadline": null
+        }
+      ],
+      [
+        {
+          "description": "Type up the kickoff meeting minutes and email them to the team.",
+          "owner": "Rose",
+          "deadline": null
+        },
+        {
+          "description": "Email the kickoff presentation slides to the team as an attachment.",
+          "owner": "Rose",
+          "deadline": null
+        },
+        {
+          "description": "Investigate whether the product scope is restricted solely to television control or if video recorder functions should be supported.",
+          "owner": "Rose",
+          "deadline": null
+        },
+        {
+          "description": "Prepare and distribute a project agenda to the team.",
+          "owner": "Rose",
+          "deadline": null
+        },
+        {
+          "description": "Complete individual working design tasks for the industrial design component.",
+          "owner": "Alima",
+          "deadline": null
+        },
+        {
+          "description": "Develop technical function specifications and button/user interface design concepts based on user requirements.",
+          "owner": "Ian",
+          "deadline": null
+        }
+      ],
+      [
+        {
+          "description": "Investigate and clarify whether the project scope for the remote control is strictly limited to televisions or if video recorder/multimedia functions can be included.",
+          "owner": "Rose Lindgren",
+          "deadline": null
+        },
+        {
+          "description": "Prepare and distribute an agenda for upcoming project meetings.",
+          "owner": "Rose Lindgren",
+          "deadline": null
+        },
+        {
+          "description": "Type up the meeting minutes covering discussion points and email them to the team.",
+          "owner": "Rose Lindgren",
+          "deadline": null
+        },
+        {
+          "description": "Email the kickoff presentation PowerPoint slides as an attachment to all team members.",
+          "owner": "Rose Lindgren",
+          "deadline": null
+        },
+        {
+          "description": "Begin individual work on the working/functional design phase for industrial design once coach instructions are received.",
+          "owner": "Alima Bucontinini",
+          "deadline": null
+        },
+        {
+          "description": "Begin individual work on user interface technical functions and user requirements based on consumer needs.",
+          "owner": "Ian",
+          "deadline": null
+        }
+      ]
+    ]
+  },
+  "ES2010a": {
+    "reference": [
+      [
+        {
+          "description": "Create the user requirements specification for the remote control project.",
+          "owner": "Courtney",
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Develop the technical functions design to establish the functionality and compatibility of the remote control.",
+          "owner": null,
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Define the working design concept for the remote control.",
+          "owner": null,
+          "deadline": "2026-06-01"
+        }
+      ],
+      [
+        {
+          "description": "Prepare the user requirements specification for the remote control.",
+          "owner": "Courtney",
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Develop concepts and ideas for the working design (industrial design) of the remote control.",
+          "owner": null,
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Design the technical functions specification to ensure compatibility across various devices and signal variances.",
+          "owner": null,
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Email more specific task instructions to team members ahead of the next meeting.",
+          "owner": "Mandy",
+          "deadline": "2026-06-01"
+        }
+      ],
+      [
+        {
+          "description": "Prepare the user requirements specification for the new remote control.",
+          "owner": "Courtney",
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Develop working design concepts for the remote control.",
+          "owner": null,
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Design technical functions and feature functionality for the remote control.",
+          "owner": null,
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Email detailed instructions for the individual task assignments to team members.",
+          "owner": "Mandy",
+          "deadline": "2026-06-01"
+        }
+      ]
+    ],
+    "headset": [
+      [
+        {
+          "description": "Prepare the user requirements specification outlining what target users will be looking for in the remote.",
+          "owner": "Courtney",
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Develop the technical functions design to ensure the remote operates all target devices and covers signal variances.",
+          "owner": null,
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Brainstorm and draft the working design concept for the new remote control.",
+          "owner": null,
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Email specific task instructions to team members prior to the next meeting.",
+          "owner": "Mandy",
+          "deadline": "2026-06-01"
+        }
+      ],
+      [
+        {
+          "description": "Send detailed instructions via email to team members regarding their individual task assignments.",
+          "owner": "Mandy",
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Prepare the user requirements specification for the new remote control.",
+          "owner": "Courtney",
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Develop concepts and initial plans for the working industrial design of the remote control.",
+          "owner": null,
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Define the technical functions design to ensure the remote operates all required devices.",
+          "owner": null,
+          "deadline": "2026-06-01"
+        }
+      ],
+      [
+        {
+          "description": "Develop the user requirements specification (URS) for the new remote control.",
+          "owner": "Courtney",
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Brainstorm and draft the working design concept for the remote control.",
+          "owner": null,
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Design the technical functions and determine operational compatibility for the remote control.",
+          "owner": null,
+          "deadline": "2026-06-01"
+        },
+        {
+          "description": "Email specific task instructions to team members before the next session.",
+          "owner": "Mandy",
+          "deadline": "2026-06-01"
+        }
+      ]
+    ]
+  }
+}

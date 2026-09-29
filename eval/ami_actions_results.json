@@ -1,0 +1,72 @@
+{
+  "ES2008a": {
+    "ami_actions": [
+      "The project manager will investigate whether the team is to create a remote that is to be sued solely with televisions.",
+      "The industrial designer will work on the working design.",
+      "The user interface designer will work on technical functions.",
+      "The project manager will type up the minutes of the current meeting and e-mail those to the team members.",
+      "The project manager will e-mail her slides to the team members"
+    ],
+    "reference": {
+      "found": 0.933,
+      "found_per_run": [
+        0.8,
+        1.0,
+        1.0
+      ],
+      "tasks": [
+        5,
+        7,
+        7
+      ]
+    },
+    "headset": {
+      "found": 1.0,
+      "found_per_run": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tasks": [
+        6,
+        6,
+        6
+      ],
+      "kept": 0.905
+    }
+  },
+  "ES2010a": {
+    "ami_actions": [
+      "The Industrial Designer will work on the internal working design.",
+      "The User Interface Designer will work on the technical function design.",
+      "The Marketing Expert will research user requirements."
+    ],
+    "reference": {
+      "found": 1.0,
+      "found_per_run": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tasks": [
+        3,
+        4,
+        4
+      ]
+    },
+    "headset": {
+      "found": 1.0,
+      "found_per_run": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tasks": [
+        4,
+        4,
+        4
+      ],
+      "kept": 1.0
+    }
+  }
+}
