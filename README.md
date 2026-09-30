@@ -293,9 +293,20 @@ python -m pytest eval/
 
 ## Evaluation
 
+Each AI component was chosen by measurement: the options were compared on test data, and the app
+uses the one the evaluation picked.
+
+| Component | Options compared | Chosen for the app | Why | Details |
+|---|---|---|---|---|
+| Task extraction | Gemini Flash, Claude Sonnet, Claude Haiku | **Gemini Flash** | Never significantly behind Claude Sonnet on F1, more precise, a tenth of the price; Claude Haiku sets 40-52% of deadlines a day late | [evaluation-report.md](docs/evaluation-report.md) |
+| Speech-to-text | Deepgram Nova-3, hosted Whisper large-v3 and large-v3-turbo, local Whisper | **Deepgram Nova-3** | Lowest word error rate on both AMI meetings (13.0% and 15.3%), and hosted, so it fits a small server | [asr-evaluation.md](docs/asr-evaluation.md) |
+| Subtask checklists | Gemini Flash, Claude Sonnet | **Gemini Flash** | Same quality (4.79 vs 4.82 and 4.87 vs 4.88 out of 5, no significant difference), a tenth of the price, one provider | [subtask-evaluation-report.md](docs/subtask-evaluation-report.md) |
+
+### Task extraction
+
 Extraction is scored on **two test sets** of synthetic SAP programme meetings:
 
-| Set | Transcripts | Words each | Annotated action items | Role |
+| Test set | Meetings | Words per meeting | Tasks in the answer key | Purpose |
 |---|---|---|---|---|
 | Short | 4 | 838-1,209 | 33 | Development: the prompt was refined against it |
 | Long | 4 | 3,102-4,089 | 123 | Held out: written after the prompt was fixed, never used to tune it |
@@ -317,12 +328,7 @@ This scores both sets, writes `eval/results.json`, and refreshes:
   set, the permutation tests, deadline errors, the confidence score, and the limitations.
 
 An index of every document, with the question each answers and the data it uses, is in
-**[docs/README.md](docs/README.md)**. Two further reports have their own scripts:
-**[docs/subtask-evaluation-report.md](docs/subtask-evaluation-report.md)** (`eval.subtask_eval`)
-and **[docs/asr-evaluation.md](docs/asr-evaluation.md)** (`eval.asr_eval`, speech-to-text on AMI
-meeting audio, which the text transcripts cannot be used for; its "From recording to tasks"
-section, from `eval.ami_actions_eval`, checks the tasks extracted from those recordings against
-the actions AMI's own annotators recorded).
+**[docs/README.md](docs/README.md)**.
 
 The extraction evaluation answers two questions.
 
@@ -345,8 +351,7 @@ with an exact permutation test. Gemini Flash is never significantly behind Claud
 (ahead on the short set, no significant difference on the long set), is more precise on both
 sets, and costs a tenth of Sonnet's input price, so extraction runs on Gemini. Its small F1 lead
 across all eight transcripts (p = 0.037) is borderline, and the decision does not rely on it.
-Claude Haiku is rejected because it sets 40-52% of deadlines exactly one day late. Subtask generation is indistinguishable between the two models
-on both sets (p = 0.652 and p = 1.0), so it runs on Gemini for cost and a single provider.
+Claude Haiku is rejected because it sets 40-52% of deadlines exactly one day late.
 
 Claude Sonnet is a larger model and Gemini Flash a more recent one, so the models are not
 matched and this is a decision for this project, not a ranking of vendors.
@@ -372,6 +377,23 @@ cached figures. Requests that never completed (rate limit, capacity) are recorde
 and excluded from scoring, so an exhausted quota is never counted as the model failing to find
 items. Each run records which model produced it. Keep the prediction caches: without them the
 reports can only be rebuilt by re-parsing.
+
+### Speech-to-text
+
+Scored on two real meetings from the AMI Meeting Corpus (ES2008a and ES2010a, in
+`data/test-audio/`) as word error rate against AMI's manual transcripts. The page's "From
+recording to tasks" section also checks the tasks extracted from each recording against the
+actions AMI's own annotators listed.
+
+```bash
+python -m eval.asr_transcribe deepgram-nova-3 --meeting ES2008a   # transcribe once; calls the API
+python -m eval.asr_eval                                           # score the saved transcripts; no API calls
+python -m eval.ami_actions_eval                                   # tasks vs AMI's lists; calls Gemini and a Claude judge
+```
+
+Both refresh [docs/asr-evaluation.md](docs/asr-evaluation.md).
+
+### Subtask checklists
 
 The AI **subtask** generator is open-ended (no single correct breakdown, so no ground truth):
 it's assessed with an LLM-as-judge rubric (relevance, actionability, coverage, non-redundancy)

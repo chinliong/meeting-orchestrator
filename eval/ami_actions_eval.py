@@ -104,27 +104,27 @@ def section(results: dict, runs: int) -> str:
     return f"""## From recording to tasks
 
 Word error rate only counts words. What matters for the app is whether the right tasks come out.
-So for each meeting the tasks were extracted twice: once from the human-typed transcript (the
+So for each meeting the tasks were extracted twice: once from AMI's manual transcript (the
 perfect case) and once from the recording, transcribed the way the app does it. Both were checked
 against the actions AMI's note-takers listed for that meeting. Each version was run {runs} times;
 the table shows the share of listed actions found, averaged over the runs.
 
-| Meeting | Actions listed by AMI | Found from the human-typed transcript | Found from the recording (the app) |
+| Meeting | Actions listed by AMI | Found from the manual transcript | Found from the recording (the app) |
 |---|---|---|---|
 {chr(10).join(rows)}
 
-**Result.** The recording gives the same actions as the human-typed transcript. Every figure
+**Result.** The recording gives the same actions as the manual transcript. Every figure
 below 100% is one run in which two of AMI's actions, typing up the minutes and e-mailing the
 slides, came out as a single task: the work is on the board, but it counts as one match instead
 of two.
 
 Two further comparisons agree. Transcribed without the speaker labels the app now adds, the
 recording found {' and '.join(found_ok)} of the listed actions. Compared as whole boards, the
-recording's board contained {' and '.join(kept)} of the tasks found from the human-typed
+recording's board contained {' and '.join(kept)} of the tasks found from the manual
 transcript.
 
 **What changes is the spelling of names.** Deepgram writes names as it hears them, so an owner
-can be spelled differently from the human-typed transcript (Iain as "Ian", Bucciantini as
+can be spelled differently from the manual transcript (Iain as "Ian", Bucciantini as
 "Bucontinini"). The tasks are still assigned to the same people.
 
 ### The AMI actions
