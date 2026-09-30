@@ -1221,3 +1221,47 @@ def test_the_startup_check_runs_after_its_delay(db_session, monkeypatch):
             if stuck.status == MeetingStatus.FAILED:
                 break
     assert stuck.status == MeetingStatus.FAILED
+
+
+def test_a_recording_whose_board_is_deleted_mid_job_stops_quietly(client, project, db_session, monkeypatch, tmp_path):
+    from sqlalchemy import text
+    from app.api import transcripts as transcripts_api
+    from app.models.models import Meeting, MeetingStatus
+
+    audio = tmp_path / "meeting.wav"
+    audio.write_bytes(b"audio")
+    parsed = []
+    monkeypatch.setattr(transcripts_api.TranscriptParser, "parse", lambda *a, **k: parsed.append(1))
+
+    def make_meeting():
+        meeting = Meeting(project_id=project["id"], title="Rec", transcript_text="", status=MeetingStatus.PROCESSING)
+        db_session.add(meeting)
+        db_session.commit()
+        return meeting.id
+
+    # Deleted while transcribing: the job stops before the (paid) extraction.
+    mid = make_meeting()
+
+    def transcribe_while_deleted(path):
+        db_session.execute(text("DELETE FROM meetings WHERE id = :id"), {"id": mid})
+        db_session.commit()
+        return "Speaker 1: I will send the report."
+
+    monkeypatch.setattr(transcripts_api.transcription, "transcribe_file", transcribe_while_deleted)
+    transcripts_api._transcribe_and_extract(mid, str(audio))  # must not raise
+    assert parsed == [] and not audio.exists()
+
+    # Deleted during the extraction: the save finds no meeting and the job ends without an error.
+    mid = make_meeting()
+    audio.write_bytes(b"audio")
+    monkeypatch.setattr(transcripts_api.transcription, "transcribe_file", lambda path: "Speaker 1: I will send it.")
+
+    def parse_while_deleted(self, *a, **k):
+        db_session.execute(text("DELETE FROM meetings WHERE id = :id"), {"id": mid})
+        db_session.commit()
+        from app.schemas.schemas import ExtractionResult
+        return ExtractionResult(decisions=[], action_items=[])
+
+    monkeypatch.setattr(transcripts_api.TranscriptParser, "parse", parse_while_deleted)
+    transcripts_api._transcribe_and_extract(mid, str(audio))  # must not raise
+    assert db_session.get(Meeting, mid) is None and not audio.exists()

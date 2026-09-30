@@ -17,7 +17,9 @@ from fastapi import (
     UploadFile,
 )
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.exc import ObjectDeletedError, StaleDataError
 
 from app.auth import get_optional_user, require_project_edit, require_project_view
 from app.db import SessionLocal, get_db
@@ -184,8 +186,7 @@ def _transcribe_and_extract(meeting_id: int, path: str) -> None:
         if meeting is None:  # deleted before the job ran
             return
         try:
-            meeting.transcript_text = transcription.transcribe_file(path)
-            db.commit()
+            text = transcription.transcribe_file(path)
         except (transcription.WhisperUnavailableError, transcription.TranscriptionError) as exc:
             meeting.status = MeetingStatus.FAILED
             meeting.error_message = str(exc)
@@ -196,7 +197,18 @@ def _transcribe_and_extract(meeting_id: int, path: str) -> None:
             meeting.error_message = f"Transcription failed: {exc}"
             db.commit()
             return
+        # Deleting the board deletes its meetings, even one still processing; if that happened
+        # while transcribing, stop before paying for an extraction nobody will see.
+        if db.query(Meeting.id).filter(Meeting.id == meeting_id).first() is None:
+            return
+        meeting.transcript_text = text
+        db.commit()
         _extract_and_store_tasks(meeting, db)
+    except (StaleDataError, ObjectDeletedError, IntegrityError):
+        # Deleted during the extraction instead: the save finds no meeting, so there is nothing to keep.
+        db.rollback()
+        log.info("meeting %s was deleted while it was being processed", meeting_id)
+        return
     finally:
         db.close()
         try:
