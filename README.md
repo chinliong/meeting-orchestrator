@@ -316,13 +316,13 @@ This scores both sets, writes `eval/results.json`, and refreshes:
 - **[docs/evaluation-appendix.md](docs/evaluation-appendix.md)**: method, every condition on every
   set, the permutation tests, deadline errors, the confidence score, and the limitations.
 
-Three further reports have their own scripts:
-**[docs/subtask-evaluation-report.md](docs/subtask-evaluation-report.md)** (`eval.subtask_eval`),
-**[docs/asr-evaluation.md](docs/asr-evaluation.md)** (`eval.asr_eval`, speech-to-text on AMI
-meeting audio, which the text transcripts cannot be used for) and
-**[docs/ami-actions-check.md](docs/ami-actions-check.md)** (`eval.ami_actions_eval`, extraction on
-two real AMI meetings against the actions AMI's own annotators recorded, from the manual and the
-Deepgram transcript).
+An index of every document, with the question each answers and the data it uses, is in
+**[docs/README.md](docs/README.md)**. Two further reports have their own scripts:
+**[docs/subtask-evaluation-report.md](docs/subtask-evaluation-report.md)** (`eval.subtask_eval`)
+and **[docs/asr-evaluation.md](docs/asr-evaluation.md)** (`eval.asr_eval`, speech-to-text on AMI
+meeting audio, which the text transcripts cannot be used for; its "From recording to tasks"
+section, from `eval.ami_actions_eval`, checks the tasks extracted from those recordings against
+the actions AMI's own annotators recorded).
 
 The extraction evaluation answers two questions.
 
