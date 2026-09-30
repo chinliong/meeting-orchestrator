@@ -121,6 +121,8 @@ export interface MeetingListItem {
   error_message: string | null;
   /** Null until a summary has been written. */
   summary: MeetingSummary | null;
+  /** True when the server tried to write the summary after extraction and could not. */
+  summary_failed: boolean;
   /** When it was added, in UTC without a zone suffix (as the API sends it). */
   created_at: string | null;
   task_count: number;
@@ -132,6 +134,10 @@ export interface Meeting {
   title: string;
   status: MeetingStatus;
   error_message: string | null;
+  /** Null until the server has written the meeting's summary, which it does after extraction. */
+  summary: MeetingSummary | null;
+  /** True when that attempt failed; the summary can still be written on request. */
+  summary_failed: boolean;
   created_at: string;
   tasks: Task[];
 }

@@ -1,4 +1,7 @@
+import asyncio
+import logging
 import os
+from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
 
@@ -16,7 +19,34 @@ from app.models import models  # noqa: F401  (ensures models are registered befo
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="AI-Powered Meeting and Workflow Orchestrator")
+# How long after startup to look for meetings a restart interrupted. On a deploy Render keeps the
+# old instance serving for about 60 seconds after the new one starts, then allows it 30 seconds to
+# stop, so a job there can still finish within that time; waiting longer avoids failing it.
+RECOVERY_DELAY_SECONDS = float(os.getenv("RECOVERY_DELAY_SECONDS", "180"))
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """Shortly after startup, mark meetings a restart left "processing" as failed."""
+    log = logging.getLogger(__name__)
+    up_to_id = transcripts.latest_meeting_id()
+
+    async def recover_later():
+        await asyncio.sleep(RECOVERY_DELAY_SECONDS)
+        try:
+            count = await asyncio.to_thread(transcripts.recover_interrupted_meetings, up_to_id)
+        except Exception:
+            log.exception("could not check for interrupted meetings")
+            return
+        if count:
+            log.warning("marked %d interrupted meeting(s) as failed", count)
+
+    task = asyncio.create_task(recover_later())
+    yield
+    task.cancel()
+
+
+app = FastAPI(title="AI-Powered Meeting and Workflow Orchestrator", lifespan=lifespan)
 
 # Per-visitor limits on the endpoints that call paid model APIs or invite guessing (app/ratelimit.py).
 app.state.limiter = limiter

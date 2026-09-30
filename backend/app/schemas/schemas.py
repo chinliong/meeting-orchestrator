@@ -216,6 +216,8 @@ class MeetingOut(BaseModel):
     status: MeetingStatus
     error_message: Optional[str]
     summary: Optional[MeetingSummary] = None
+    # True when the server tried to write the summary after extraction and could not.
+    summary_failed: bool = False
     created_at: datetime
     tasks: list[TaskOut] = []
 
@@ -232,6 +234,7 @@ class MeetingListItem(BaseModel):
     status: MeetingStatus
     error_message: Optional[str] = None
     summary: Optional[MeetingSummary] = None
+    summary_failed: bool = False
     created_at: Optional[datetime] = None
     task_count: int
 

@@ -44,6 +44,19 @@ def db_session():
         Base.metadata.drop_all(bind=engine)
 
 
+@pytest.fixture(autouse=True)
+def background_jobs_use_the_test_db(db_session, monkeypatch):
+    """Background jobs (summaries, recordings) and startup recovery open their own session; hand
+    them the test session, kept open, so they never touch a real database. The summary model
+    call is faked too, so no test reaches the API; tests that check summaries replace it again."""
+    from app.api import transcripts as transcripts_api
+
+    monkeypatch.setattr(transcripts_api, "SessionLocal", lambda: db_session)
+    monkeypatch.setattr(db_session, "close", lambda: None)
+    monkeypatch.setattr("app.llm.summary.gemini.call_tool",
+                        lambda *a, **k: {"overview": "The team met and agreed the next steps."})
+
+
 @pytest.fixture()
 def client(db_session):
     def override_get_db():

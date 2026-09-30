@@ -1095,3 +1095,101 @@ def test_deleting_tasks_boards_and_accounts_clears_shared_reminders(client, acco
     client.put(f"/api/v1/projects/{board2['id']}/reminders/me", headers={**other, "X-Workspace-Token": board2["view_token"]})
     assert client.delete(f"/api/v1/projects/{board2['id']}", headers=owner2).status_code == 204
     assert db_session.query(ReminderSubscription).count() == 0
+
+
+# --- summaries written by the server, and meetings interrupted by a restart ---------------------
+
+def test_the_server_writes_the_summary_after_parsing(client, project, stub_parser):
+    meeting = client.post("/api/v1/transcripts", json={"project_id": project["id"], "title": "Sync", "transcript_text": "x"}).json()
+    # The response comes back before the summary is written...
+    assert meeting["summary"] is None
+    # ...and the server writes it straight after, without the browser asking.
+    after = client.get(f"/api/v1/transcripts/{meeting['id']}").json()
+    assert after["summary"] == {"overview": "The team met and agreed the next steps."}
+
+
+def test_a_failed_background_summary_leaves_the_meeting_complete(client, project, stub_parser, monkeypatch):
+    def boom(*a, **k):
+        raise RuntimeError("HTTP 503: overloaded")
+
+    monkeypatch.setattr("app.llm.summary.gemini.call_tool", boom)
+    meeting = client.post("/api/v1/transcripts", json={"project_id": project["id"], "title": "M", "transcript_text": "x"}).json()
+    after = client.get(f"/api/v1/transcripts/{meeting['id']}").json()
+    assert after["summary"] is None and after["status"] == "complete" and len(after["tasks"]) == 2
+    # The failure is recorded, so the app can say so at once; asking again can still succeed.
+    assert after["summary_failed"] is True
+    listed = client.get(f"/api/v1/transcripts?project_id={project['id']}").json()
+    assert listed[0]["summary_failed"] is True and listed[0]["summary"] is None
+    monkeypatch.setattr("app.llm.summary.gemini.call_tool", lambda *a, **k: {"overview": "Second try worked."})
+    assert client.post(f"/api/v1/transcripts/{meeting['id']}/summary").status_code == 200
+    again = client.get(f"/api/v1/transcripts/{meeting['id']}").json()
+    assert again["summary"] == {"overview": "Second try worked."} and again["summary_failed"] is False
+
+
+def test_a_recording_job_writes_the_summary_after_its_tasks(client, project, db_session, stub_parser, monkeypatch):
+    from app.api import transcripts as transcripts_api
+    from app.models.models import Meeting, MeetingStatus
+
+    meeting = Meeting(project_id=project["id"], title="Recording", transcript_text="", status=MeetingStatus.PROCESSING)
+    db_session.add(meeting)
+    db_session.commit()
+    fd, path = tempfile.mkstemp(suffix=".wav")
+    os.close(fd)
+    monkeypatch.setattr(transcripts_api.transcription, "transcribe_file", lambda _path: "spoken words")
+    transcripts_api._transcribe_and_extract(meeting.id, path)
+    db_session.refresh(meeting)
+    assert meeting.status == MeetingStatus.COMPLETE
+    assert "agreed the next steps" in meeting.summary
+
+
+def test_startup_marks_meetings_interrupted_by_a_restart_as_failed(client, project, db_session):
+    from app.api import transcripts as transcripts_api
+    from app.models.models import Meeting, MeetingStatus
+
+    stuck = Meeting(project_id=project["id"], title="Stuck", transcript_text="", status=MeetingStatus.PROCESSING)
+    queued = Meeting(project_id=project["id"], title="Queued", transcript_text="", status=MeetingStatus.PENDING)
+    done = Meeting(project_id=project["id"], title="Done", transcript_text="x", status=MeetingStatus.COMPLETE)
+    db_session.add_all([stuck, queued, done])
+    db_session.commit()
+    up_to_id = transcripts_api.latest_meeting_id()  # taken when the server starts
+    # A recording this server started processing afterwards is still running and is left alone.
+    running = Meeting(project_id=project["id"], title="Running", transcript_text="", status=MeetingStatus.PROCESSING)
+    db_session.add(running)
+    db_session.commit()
+
+    assert transcripts_api.recover_interrupted_meetings(up_to_id) == 2
+    for m in (stuck, queued, done, running):
+        db_session.refresh(m)
+    assert stuck.status == queued.status == MeetingStatus.FAILED
+    assert "server restarted" in stuck.error_message
+    assert done.status == MeetingStatus.COMPLETE
+    assert running.status == MeetingStatus.PROCESSING
+    # No longer processing, so it can now be deleted from the board.
+    assert client.delete(f"/api/v1/transcripts/{stuck.id}").status_code == 204
+
+
+def test_the_startup_check_runs_after_its_delay(db_session, monkeypatch):
+    import time
+
+    from fastapi.testclient import TestClient
+
+    from app import main
+    from app.models.models import Meeting, MeetingStatus, Project
+
+    board = Project(name="Board", edit_token="e", view_token="v")
+    db_session.add(board)
+    db_session.flush()
+    stuck = Meeting(project_id=board.id, title="Stuck", transcript_text="", status=MeetingStatus.PROCESSING)
+    db_session.add(stuck)
+    db_session.commit()
+
+    monkeypatch.setattr(main, "RECOVERY_DELAY_SECONDS", 0.2)
+    with TestClient(main.app):
+        db_session.refresh(stuck)
+        assert stuck.status == MeetingStatus.PROCESSING  # not straight away
+        for _ in range(50):
+            time.sleep(0.1)
+            db_session.refresh(stuck)
+            if stuck.status == MeetingStatus.FAILED:
+                break
+    assert stuck.status == MeetingStatus.FAILED

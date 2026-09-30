@@ -39,9 +39,11 @@ recordings for end-to-end processing.
   Choosing meetings also narrows the owner filter to the people with tasks in them. The owner
   filter is a dropdown too, and several owners can be ticked at once.
 - **AI meeting summary**: each meeting gets a short overview (two to four sentences on what it
-  was about and what it agreed), so the tasks on the board keep their context. It is written by a
-  **separate request after extraction**, never part of it, so the evaluated extraction is
-  unchanged and a failed summary never affects a meeting's tasks. It appears above the board for
+  was about and what it agreed), so the tasks on the board keep their context. The server writes
+  it in the background by a **separate request after extraction**, never part of it, so the
+  evaluated extraction is unchanged, a failed summary never affects a meeting's tasks, and the
+  summary is still written if the page is closed. A summary that fails is recorded, and the card
+  offers to try again. It appears above the board for
   the meeting just added, the meeting chosen in the Meeting filter (several chosen meetings share
   one list, one summary open at a time), or a board's only meeting;
   meetings added earlier can be summarised on request from their saved transcript. It describes
@@ -124,6 +126,19 @@ for the full API.
 - An edit link grants every write on the board, including deleting it. The stakeholder endpoints
   are not tied to a board and check no credentials.
 
+## Processing and restarts
+
+A pasted transcript is parsed within the request. A recording is processed as a background job on
+the server: the meeting is saved as "processing" straight away and the app checks it every few
+seconds until it is done, so the tab can be switched or closed meanwhile. Each meeting's summary is
+also written in the background once its tasks are saved. Background jobs run inside the web process,
+so a restart or redeploy while one is running stops it. Three minutes after the server starts again
+it marks any older meeting still "processing" as failed (waiting because during a deploy Render
+keeps the old instance running for about a minute and a half, and a job there may still finish),
+with the message "The server restarted while this meeting was being processed. Please add it
+again.", instead of leaving it processing for good. A job queue with a separate worker would let
+jobs survive restarts; for a single free-tier instance this recovery step is enough.
+
 ## Rate limits
 
 Boards can be used without an account, so the actions that call a paid model API, and the ones
@@ -137,7 +152,8 @@ that invite guessing, are limited per visitor (`backend/app/ratelimit.py`, using
 | Sign in | 10 per minute |
 | Request a password reset | 5 per hour |
 
-Everything else (viewing boards, editing tasks) is not limited. Over a limit the API answers
+Everything else (viewing boards, editing tasks) is not limited, and the summary the server writes
+for each new meeting is covered by the parse or upload limit rather than the AI one. Over a limit the API answers
 `429` with a message the app shows as it is, e.g. "You've reached the limit for parsing
 transcripts for now. Please try again later." Each limit can be changed with an environment
 variable (`RATE_LIMIT_PARSE`, `RATE_LIMIT_AUDIO`, `RATE_LIMIT_AI`, `RATE_LIMIT_LOGIN`,
@@ -315,6 +331,10 @@ python -m pytest tests/            # API + parser unit tests (LLM mocked)
 python -m pytest eval/
 ```
 
+GitHub Actions (`.github/workflows/ci.yml`) runs both test suites on Python 3.11, plus a type check
+and production build of the frontend, on every push to `master` and every pull request. No API keys
+are needed: the model calls are mocked.
+
 ## Evaluation
 
 Each AI component was chosen by measurement: the options were compared on test data, and the app
@@ -443,6 +463,7 @@ data/         synthetic-transcripts/ and synthetic-transcripts-long/ (inputs), a
 eval/         evaluation framework, cached predictions (predictions.json, predictions_long.json), tests
 docs/         architecture, API spec, evaluation report
 render.yaml   Render deployment blueprint
+.github/      CI workflow: backend and evaluation tests, frontend type check and build
 ```
 
 ## Scope notes

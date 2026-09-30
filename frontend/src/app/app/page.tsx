@@ -416,8 +416,44 @@ export default function DashboardPage() {
   );
   const singleChosenId = chosenMeetings.length === 1 ? chosenMeetings[0].id : null;
 
-  // Writes a meeting's summary with a separate request after its tasks are saved, so a slow or
-  // failed summary never holds up or affects the tasks. `boardToken` pins the meeting's board.
+  // After a meeting is added, the server writes its summary on its own (so it is written even if
+  // the page is closed). Wait for it here, up to a minute, rather than asking for a second one.
+  const waitForSummary = useCallback(async (meetingId: number, boardToken?: string) => {
+    setSummarising((cur) => ({ ...cur, [meetingId]: true }));
+    setSummaryErrors(({ [meetingId]: _cleared, ...rest }) => rest);
+    const deadline = Date.now() + 60 * 1000;
+    try {
+      while (Date.now() < deadline) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        try {
+          const current = await api.getMeeting(meetingId, boardToken);
+          const written = current.summary;
+          if (written) {
+            setFreshSummaries((cur) => ({ ...cur, [meetingId]: written }));
+            return;
+          }
+          if (current.summary_failed) break; // the server tried and could not: say so now
+        } catch (err) {
+          if (err instanceof ApiError) return; // e.g. the meeting was deleted meanwhile
+        }
+      }
+      setSummaryErrors((cur) => ({ ...cur, [meetingId]: "Couldn't write a summary right now. Please try again." }));
+    } finally {
+      setSummarising(({ [meetingId]: _done, ...rest }) => rest);
+    }
+  }, []);
+
+  // A summary the server could not write (it records the failure) shows the same message and
+  // Try again as a failed request, also after a reload, unless one has been written since.
+  // Only editors see it: a view-only reader cannot try again, and just sees there is no summary.
+  const summaryErrorFor = (m: MeetingListItem) =>
+    summaryErrors[m.id] ??
+    (cardsEditable && m.summary_failed && !freshSummaries[m.id] && !summarising[m.id]
+      ? "Couldn't write a summary right now. Please try again."
+      : null);
+
+  // Writes (or rewrites) a meeting's summary on request, from the summary card's button.
+  // `boardToken` pins the meeting's board.
   const requestSummary = useCallback(async (meetingId: number, boardToken?: string) => {
     setSummarising((cur) => ({ ...cur, [meetingId]: true }));
     setSummaryErrors(({ [meetingId]: _cleared, ...rest }) => rest);
@@ -695,7 +731,7 @@ export default function DashboardPage() {
     reloadTasksRef.current();
     const board = projects.find((p) => p.id === projectId);
     setSummaryShownFor(meeting.id);
-    requestSummary(meeting.id, board ? workspaceTokenFor(board) : undefined);
+    waitForSummary(meeting.id, board ? workspaceTokenFor(board) : undefined);
   };
 
   const handleAudioSubmit = async (title: string, file: File, meetingDate: string) => {
@@ -734,7 +770,7 @@ export default function DashboardPage() {
     setSelectedMeetingIds([]); // as for pasted text: show the new meeting's tasks and summary
     reloadTasksRef.current();
     setSummaryShownFor(meeting.id);
-    requestSummary(meeting.id, boardToken);
+    waitForSummary(meeting.id, boardToken);
   };
 
   const performDeleteMeeting = async () => {
@@ -1182,7 +1218,7 @@ export default function DashboardPage() {
                     meeting={summaryMeeting}
                     summary={freshSummaries[summaryMeeting.id] ?? summaryMeeting.summary}
                     working={!!summarising[summaryMeeting.id]}
-                    error={summaryErrors[summaryMeeting.id] ?? null}
+                    error={summaryErrorFor(summaryMeeting)}
                     canEdit={cardsEditable}
                     onSummarise={() => requestSummary(summaryMeeting.id, meetingsBoardToken)}
                     onDismiss={summaryHideable ? () => setSummaryShownFor(null) : undefined}
@@ -1194,7 +1230,7 @@ export default function DashboardPage() {
                     meetings={chosenMeetings.filter((m) => m.status !== "failed")}
                     summaryFor={(m) => freshSummaries[m.id] ?? m.summary}
                     workingFor={(m) => !!summarising[m.id]}
-                    errorFor={(m) => summaryErrors[m.id] ?? null}
+                    errorFor={summaryErrorFor}
                     canEdit={cardsEditable}
                     onSummarise={(m) => requestSummary(m.id, meetingsBoardToken)}
                   />

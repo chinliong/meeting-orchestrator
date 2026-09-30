@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import enum
+import json
 import secrets
 from datetime import date
 
@@ -114,6 +115,14 @@ class Stakeholder(Base):
     email = Column(String, nullable=True)
 
 
+# Stored in Meeting.summary when the server could not write a summary after extraction.
+SUMMARY_FAILED = json.dumps({"failed": True})
+
+
+def is_summary_failure(stored) -> bool:
+    return stored == SUMMARY_FAILED
+
+
 class Meeting(Base):
     __tablename__ = "meetings"
 
@@ -128,8 +137,13 @@ class Meeting(Base):
     status = Column(Enum(MeetingStatus), default=MeetingStatus.PENDING, nullable=False)
     error_message = Column(Text, nullable=True)
     # An AI summary of the meeting (overview, decisions, open items) as JSON, written by a
-    # separate request after extraction (app/llm/summary.py). NULL until one has been made.
+    # separate request after extraction (app/llm/summary.py). NULL until one has been made;
+    # SUMMARY_FAILED when the server's attempt failed, so the app can say so at once.
     summary = Column(Text, nullable=True)
+
+    @property
+    def summary_failed(self) -> bool:
+        return is_summary_failure(self.summary)
     created_at = Column(DateTime, server_default=func.now())
 
     project = relationship("Project", back_populates="meetings")

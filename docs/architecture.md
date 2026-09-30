@@ -13,8 +13,9 @@
 5. The backend sends the transcript to Gemini with a forced function-call schema; the response
    is validated into decisions, action items, owners, deadlines, and confidence via Pydantic.
 6. The structured data is persisted to the relational database (a `Meeting` plus its `Task` rows).
-   The frontend then asks for a short AI summary of the meeting (`POST /transcripts/{id}/summary`),
-   a separate request that is stored on the meeting and never touches its tasks.
+   The server then writes a short AI summary of the meeting in the background, a separate model
+   request that is stored on the meeting and never touches its tasks; the frontend checks the
+   meeting until it appears.
 7. The frontend fetches the task list and renders it two ways: a **Kanban board** (drag-and-drop
    status changes) and a **month calendar** (tasks plotted by deadline, drag-to-reschedule), both
    with search and owner filtering. Edits are written back with `PATCH /tasks/{id}`; deletes return
@@ -102,7 +103,8 @@ flowchart LR
   - `POST /transcripts`, `POST /transcripts/audio`, `GET /transcripts/{id}`,
     `PATCH /transcripts/{id}` (rename a meeting; reflected on its tasks), `GET /transcripts?project_id=`
     (a board's meetings with task counts and summaries), `DELETE /transcripts/{id}` (a meeting with
-    its tasks) and `POST /transcripts/{id}/summary` (write the meeting's AI summary).
+    its tasks) and `POST /transcripts/{id}/summary` (write or rewrite the meeting's AI summary, for
+    meetings added before summaries existed and for a summary that failed).
     `POST /transcripts` can refuse an identical transcript already on the board (`check_duplicate`).
   - `GET|POST /tasks`, `PATCH /tasks/{id}`, `DELETE /tasks/{id}` (returns a snapshot for undo),
     `POST /tasks/restore` (recreate a deleted task with its original id). `GET /tasks` filters by
@@ -140,7 +142,7 @@ flowchart LR
     different problem from extraction and was measured on its own rubric.
   - **Meeting summary** (`app/llm/summary.py`): a two-to-four-sentence overview of what a meeting
     was about and what it agreed, so the board's tasks keep their context. It is a separate request
-    made after extraction, never part of it, so the evaluated extraction prompt and schema are
+    made by the server in the background after extraction, never part of it, so the evaluated extraction prompt and schema are
     unchanged and a failed summary cannot affect a meeting's tasks. It describes the meeting as it
     happened rather than the current state of the work, which moves on on the board. It is not
     covered by the evaluation and is labelled as AI-written in the app.
@@ -336,8 +338,15 @@ unusable.
 - A board reached through a share link that stops working (the link was regenerated: `403`; the
   board was deleted: `404`) is taken off that browser's list with a plain message, instead of the
   raw error reappearing on every visit. Signed-in users' shared boards are remembered per account.
-- A meeting summary that fails (`502`) leaves the meeting and its tasks as they were; the frontend
-  shows "Try again" on the summary card, and the tasks are already on the board.
+- A meeting summary that fails leaves the meeting and its tasks as they were. The failure is
+  recorded on the meeting (`summary_failed` in the API), so the frontend shows "Try again" on the
+  summary card rather than waiting; the tasks are already on the board.
+- Background jobs (recording processing and summaries) run inside the web process, so a restart or
+  redeploy stops any that are running. Three minutes after startup the server marks meetings from
+  before it started that are still `processing` or `pending` as `failed`, with a message asking the
+  user to add the meeting again, so none stays "Processing…" for good. A job queue with a separate
+  worker would let jobs survive a restart; with one free-tier instance, this recovery step is the
+  simpler choice.
 - The audio endpoint degrades gracefully: if no transcription backend is configured it returns `503`
   with an actionable message instead of failing at import time.
 - Audio/video uploads are streamed to a temporary file in 1 MB chunks and never held in memory

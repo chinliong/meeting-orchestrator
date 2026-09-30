@@ -190,6 +190,7 @@ Response `201 Created`, a meeting object with its extracted tasks:
   "status": "complete",
   "error_message": null,
   "summary": null,
+  "summary_failed": false,
   "created_at": "2026-06-17T09:30:00",
   "tasks": [
     {
@@ -206,6 +207,12 @@ Response `201 Created`, a meeting object with its extracted tasks:
 On LLM/API failure the meeting is returned with `status: "failed"` and an `error_message`
 (still `201`), and no tasks.
 
+`summary` is `null` in the response: once the tasks are saved, the server writes the meeting's AI
+summary in the background (a separate model request) and stores it on the meeting, where
+`GET /transcripts/{meeting_id}` returns it. If that request fails, `summary` stays `null` and
+`summary_failed` becomes `true`; the summary can then be written again with
+`POST /transcripts/{meeting_id}/summary`.
+
 ### `POST /transcripts/audio`
 Submit an audio/video file (`multipart/form-data`). Requires edit access to `project_id`.
 
@@ -213,8 +220,14 @@ Form fields: `project_id` (int), `title` (string, optional), `meeting_date` (`YY
 optional; omitted means today), `file` (the upload).
 
 Returns at once with the meeting in `processing` status and no tasks. Transcription and
-extraction then run in the background, and the client polls `GET /transcripts/{meeting_id}`
-until the status is `complete` or `failed`.
+extraction then run in the background, followed by the summary as for a pasted transcript, and the
+client polls `GET /transcripts/{meeting_id}` until the status is `complete` or `failed`.
+
+Background jobs run inside the web process, so a server restart stops any that are running. Three
+minutes after startup the server marks meetings from before it started that are still `pending` or
+`processing` as `failed`, with the
+`error_message` "The server restarted while this meeting was being processed. Please add it
+again."
 
 The upload is streamed to a temporary file on disk rather than held in memory, and is limited
 to 500 MB.
@@ -224,8 +237,8 @@ file · `403` no edit access · `404` unknown project · `413` over the 500 MB l
 transcription service is configured.
 
 ### `GET /transcripts/{meeting_id}`
-Returns the meeting's status, its summary (or `null`) and its extracted tasks. Requires view
-access. `404` if not found.
+Returns the meeting's status, its summary (or `null`), `summary_failed` and its extracted tasks.
+Requires view access. `404` if not found.
 
 ### `PATCH /transcripts/{meeting_id}`
 Rename a meeting. Body `{ "title": "string" }`. The new title is reflected on every task from that
@@ -233,14 +246,16 @@ meeting. Requires edit access. `404` if not found.
 
 ### `GET /transcripts?project_id=`
 The board's meetings, newest first: `id`, `project_id`, `title`, `meeting_date`, `status`,
-`error_message`, `summary` (`{ "overview" }` or `null`), `created_at` (UTC) and `task_count`. No
+`error_message`, `summary` (`{ "overview" }` or `null`), `summary_failed`, `created_at` (UTC) and
+`task_count`. No
 transcript text or tasks. Requires view access.
 
 ### `POST /transcripts/{meeting_id}/summary`
 Writes (or rewrites) the meeting's AI summary from its saved transcript and stores it on the
 meeting. This is a separate LLM request from extraction: the meeting's tasks are neither read nor
-changed, so it also works for meetings added before summaries existed. The frontend calls it right
-after a meeting is parsed, and on request for older meetings. Requires edit access.
+changed, so it also works for meetings added before summaries existed. The server writes each new
+meeting's summary itself; the frontend calls this endpoint on request, for older meetings and to try
+again after a summary failed. Requires edit access.
 
 Response `200`:
 ```json

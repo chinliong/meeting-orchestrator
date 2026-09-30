@@ -24,7 +24,15 @@ from app.db import SessionLocal, get_db
 from app.llm import summary as meeting_summary
 from app.llm import transcription
 from app.llm.parser import TranscriptParser
-from app.models.models import Meeting, MeetingStatus, Project, Task, User
+from app.models.models import (
+    SUMMARY_FAILED,
+    Meeting,
+    MeetingStatus,
+    Project,
+    Task,
+    User,
+    is_summary_failure,
+)
 from app.ratelimit import AUDIO, PARSE, ai_limit, limiter
 from app.schemas.schemas import (
     MeetingListItem,
@@ -195,6 +203,70 @@ def _transcribe_and_extract(meeting_id: int, path: str) -> None:
             os.unlink(path)
         except FileNotFoundError:
             pass
+    write_summary(meeting_id)
+
+
+def write_summary(meeting_id: int) -> None:
+    """Background job: write the meeting's AI summary once its tasks are saved.
+
+    Run by the server rather than asked for by the browser, so the summary is written even if the
+    user closes the page. It opens its own session (the request's is closed by then). A failure is
+    recorded on the meeting rather than raised: the meeting and its tasks are already complete, and
+    the summary can be written again from the board.
+    """
+    db = SessionLocal()
+    try:
+        meeting = db.get(Meeting, meeting_id)
+        if meeting is None or meeting.status != MeetingStatus.COMPLETE or not meeting.transcript_text.strip():
+            return
+        try:
+            result = meeting_summary.summarise(meeting.transcript_text, meeting.title, _anchor(meeting))
+        except Exception as exc:
+            log.warning("summary failed for meeting %s: %s", meeting_id, exc)
+            stored = SUMMARY_FAILED  # so the app can show the failure, with Try again, at once
+        else:
+            stored = result.model_dump_json()
+        # Saved with a query, so a meeting deleted meanwhile is simply not found.
+        db.query(Meeting).filter(Meeting.id == meeting_id).update(
+            {Meeting.summary: stored}, synchronize_session=False)
+        db.commit()
+    finally:
+        db.close()
+
+
+def latest_meeting_id() -> int:
+    """The highest meeting id so far (0 if none): taken at startup to tell older meetings apart."""
+    db = SessionLocal()
+    try:
+        return db.query(func.max(Meeting.id)).scalar() or 0
+    finally:
+        db.close()
+
+
+def recover_interrupted_meetings(up_to_id: int) -> int:
+    """Mark meetings left processing by a restart as failed, so they can be retried or deleted.
+
+    Processing runs inside the web process, so a restart mid-job (a deploy, a crash, the host
+    moving the service) would otherwise leave the meeting "processing" for good. Only meetings up
+    to `up_to_id` (the latest when this process started) are touched, so jobs this process began
+    are never affected. The caller waits before running this: during a deploy Render keeps the
+    old instance running for a short while after the new one starts, and a job there may still
+    finish. Returns how many were marked.
+    """
+    db = SessionLocal()
+    try:
+        count = db.query(Meeting).filter(
+            Meeting.id <= up_to_id,
+            Meeting.status.in_([MeetingStatus.PROCESSING, MeetingStatus.PENDING]),
+        ).update({Meeting.status: MeetingStatus.FAILED,
+                  Meeting.error_message: "The server restarted while this meeting was being "
+                                         "processed. Please add it again."},
+                 synchronize_session=False)
+        db.commit()
+        return count
+    finally:
+        db.close()
+
 
 
 @router.post("", response_model=MeetingOut, status_code=201)
@@ -202,6 +274,7 @@ def _transcribe_and_extract(meeting_id: int, path: str) -> None:
                                     "Please try again later.")
 def submit_transcript(
     request: Request,
+    background_tasks: BackgroundTasks,
     payload: TranscriptSubmit,
     user: Optional[User] = Depends(get_optional_user),
     x_workspace_token: Optional[str] = Header(None),
@@ -230,8 +303,11 @@ def submit_transcript(
                 },
             )
     on = payload.meeting_date or date.today()
-    return _process_transcript(project, _meeting_title(payload.title, on),
-                               payload.transcript_text, db, meeting_date=on)
+    meeting = _process_transcript(project, _meeting_title(payload.title, on),
+                                  payload.transcript_text, db, meeting_date=on)
+    # The summary is written after the response is sent, so the tasks arrive as fast as before.
+    background_tasks.add_task(write_summary, meeting.id)
+    return meeting
 
 
 @router.post("/audio", response_model=MeetingOut, status_code=201)
@@ -314,7 +390,8 @@ def list_meetings(
     )
     return [
         MeetingListItem(id=r[0], project_id=r[1], title=r[2], meeting_date=r[3], status=r[4],
-                        error_message=r[5], summary=r[6], created_at=r[7], task_count=r[8])
+                        error_message=r[5], summary=r[6], summary_failed=is_summary_failure(r[6]),
+                        created_at=r[7], task_count=r[8])
         for r in rows
     ]
 
