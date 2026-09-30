@@ -10,8 +10,9 @@ from fastapi import (
     Depends,
     File,
     Form,
-    Header,
     HTTPException,
+    Header,
+    Request,
     Response,
     UploadFile,
 )
@@ -24,6 +25,7 @@ from app.llm import summary as meeting_summary
 from app.llm import transcription
 from app.llm.parser import TranscriptParser
 from app.models.models import Meeting, MeetingStatus, Project, Task, User
+from app.ratelimit import AUDIO, PARSE, ai_limit, limiter
 from app.schemas.schemas import (
     MeetingListItem,
     MeetingOut,
@@ -196,7 +198,10 @@ def _transcribe_and_extract(meeting_id: int, path: str) -> None:
 
 
 @router.post("", response_model=MeetingOut, status_code=201)
+@limiter.limit(PARSE, error_message="You've reached the limit for parsing transcripts for now. "
+                                    "Please try again later.")
 def submit_transcript(
+    request: Request,
     payload: TranscriptSubmit,
     user: Optional[User] = Depends(get_optional_user),
     x_workspace_token: Optional[str] = Header(None),
@@ -230,7 +235,10 @@ def submit_transcript(
 
 
 @router.post("/audio", response_model=MeetingOut, status_code=201)
+@limiter.limit(AUDIO, error_message="You've reached the limit for uploading recordings for now. "
+                                    "Please try again later.")
 async def submit_audio(
+    request: Request,
     background_tasks: BackgroundTasks,
     project_id: int = Form(...),
     title: str = Form(""),
@@ -335,7 +343,9 @@ def delete_meeting(
 
 
 @router.post("/{meeting_id}/summary", response_model=MeetingSummary)
+@ai_limit
 def summarise_meeting(
+    request: Request,
     meeting_id: int,
     user: Optional[User] = Depends(get_optional_user),
     x_workspace_token: Optional[str] = Header(None),

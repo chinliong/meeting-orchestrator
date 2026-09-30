@@ -3,14 +3,20 @@
 The LLM is never called during tests — `app.api.transcripts.TranscriptParser` is monkey-
 patched per-test so the suite is fast, deterministic, and free of API keys/network.
 """
+import os
+
+# Rate limits are switched off for the suite (it signs in and parses far more often than the limits
+# allow); tests/test_ratelimit.py switches them on where it checks them. Set before the app imports.
+os.environ["RATE_LIMITS_ENABLED"] = "false"
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.db import Base, get_db
-from app.main import app
+from app.db import Base, get_db  # noqa: E402
+from app.main import app  # noqa: E402
 
 
 @pytest.fixture()

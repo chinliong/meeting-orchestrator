@@ -324,6 +324,11 @@ unusable.
 
 ## Reliability notes
 
+- Rate limits (`app/ratelimit.py`, `slowapi`): the endpoints that call a paid model API (parse,
+  audio upload, summary, subtask generation) and the sign-in and password-reset endpoints are
+  limited per visitor, with counts held in memory for the single instance. Over a limit they return
+  `429` with a message the frontend shows as it is. On Render the visitor's address comes from
+  Cloudflare's `CF-Connecting-IP` header; `X-Forwarded-For` is not trusted, since Render appends to it.
 - LLM/API failures during parsing are caught and recorded on the meeting (`status = failed`,
   `error_message`) rather than crashing the request, so the client always gets a response. The
   request still returns `201`, so the frontend checks `status` and shows the error, keeping the

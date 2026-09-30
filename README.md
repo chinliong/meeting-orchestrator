@@ -124,6 +124,30 @@ for the full API.
 - An edit link grants every write on the board, including deleting it. The stakeholder endpoints
   are not tied to a board and check no credentials.
 
+## Rate limits
+
+Boards can be used without an account, so the actions that call a paid model API, and the ones
+that invite guessing, are limited per visitor (`backend/app/ratelimit.py`, using `slowapi`):
+
+| Action | Default limit |
+|---|---|
+| Parse a transcript | 20 per hour |
+| Upload a recording | 10 per hour |
+| AI summaries and subtask suggestions (shared) | 30 per hour |
+| Sign in | 10 per minute |
+| Request a password reset | 5 per hour |
+
+Everything else (viewing boards, editing tasks) is not limited. Over a limit the API answers
+`429` with a message the app shows as it is, e.g. "You've reached the limit for parsing
+transcripts for now. Please try again later." Each limit can be changed with an environment
+variable (`RATE_LIMIT_PARSE`, `RATE_LIMIT_AUDIO`, `RATE_LIMIT_AI`, `RATE_LIMIT_LOGIN`,
+`RATE_LIMIT_RESET`, e.g. `"20/hour"`), and `RATE_LIMITS_ENABLED=false` turns limiting off.
+
+Counts are kept in memory, which suits the single deployed instance; several instances would need
+a shared store such as Redis. On Render the visitor's address is read from Cloudflare's
+`CF-Connecting-IP` header, not `X-Forwarded-For`, which Render appends to and a visitor could
+fake. `GET /api/v1/health` reports whether limits are on and where the address comes from.
+
 ## Quick start (local)
 
 ### Prerequisites

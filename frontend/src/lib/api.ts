@@ -52,6 +52,17 @@ async function throwIfFailed(res: Response, method: string, path: string): Promi
   if (res.ok) return;
   const body = await res.text();
   if (res.status === 401 && authToken && !PASSWORD_ROUTES.includes(path)) onSessionExpired?.();
+  // A rate limit (429) comes with a message written for people, e.g. "You've reached the limit for
+  // parsing transcripts for now"; use it as the error text so every screen shows it as it is.
+  if (res.status === 429) {
+    let detail = "Too many requests for now. Please try again later.";
+    try {
+      detail = JSON.parse(body).detail || detail;
+    } catch {
+      /* not JSON: keep the default */
+    }
+    throw new ApiError(detail, 429, body);
+  }
   throw new ApiError(`${method} ${path} failed (${res.status}): ${body}`, res.status, body);
 }
 

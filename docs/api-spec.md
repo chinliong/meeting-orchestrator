@@ -18,6 +18,11 @@ For a given board, access resolves to `edit`, `view`, or none. Reads require `vi
 require `edit`. Missing access returns `403`; a missing board returns `404`; routes that require a
 signed-in user return `401`.
 
+Rate limits apply per visitor to `POST /transcripts` (20/hour), `POST /transcripts/audio`
+(10/hour), `POST /transcripts/{meeting_id}/summary` and `POST /tasks/{task_id}/subtasks/generate`
+(30/hour between them), `POST /auth/login` (10/minute) and `POST /auth/forgot-password` (5/hour).
+Over a limit they return `429` with a `detail` message meant to be shown as it is.
+
 ## Health
 
 ### `GET /health`

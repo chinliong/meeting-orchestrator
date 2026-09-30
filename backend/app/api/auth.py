@@ -2,7 +2,7 @@ import logging
 import secrets
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 
 from app.auth import create_access_token, get_current_user, hash_password, verify_password
@@ -10,6 +10,7 @@ from app.db import get_db
 from app.email import send_email
 from app.models.models import PasswordReset, Project, ReminderSubscription, User
 from app.notifications import NotificationSendError, send_test_notification
+from app.ratelimit import LOGIN, RESET, limiter
 from app.schemas.schemas import (
     AuthResponse,
     ChangePasswordRequest,
@@ -62,7 +63,8 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=AuthResponse)
-def login(payload: LoginRequest, db: Session = Depends(get_db)):
+@limiter.limit(LOGIN, error_message="Too many sign-in attempts. Please wait a minute and try again.")
+def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)):
     email = payload.email.strip().lower()
     user = db.query(User).filter(User.email == email).first()
     if user is None or not verify_password(payload.password, user.password_hash):
@@ -173,7 +175,9 @@ def _send_reset_email(to: str, code: str) -> None:
 
 
 @router.post("/forgot-password", status_code=204)
+@limiter.limit(RESET, error_message="Too many password-reset requests. Please try again later.")
 def forgot_password(
+    request: Request,
     payload: ForgotPasswordRequest,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),

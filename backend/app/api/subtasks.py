@@ -1,12 +1,13 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.auth import get_optional_user, require_project_edit, require_project_view
 from app.db import get_db
 from app.llm.subtasks import SubtaskGenerator
 from app.models.models import Subtask, Task, User
+from app.ratelimit import ai_limit
 from app.schemas.schemas import SubtaskCreate, SubtaskGenerate, SubtaskOut, SubtaskUpdate
 
 router = APIRouter(tags=["subtasks"])
@@ -71,7 +72,9 @@ def create_subtask(
 
 
 @router.post("/tasks/{task_id}/subtasks/generate", response_model=list[SubtaskOut], status_code=201)
+@ai_limit
 def generate_subtasks(
+    request: Request,
     task_id: int,
     payload: SubtaskGenerate,
     user: Optional[User] = Depends(get_optional_user),

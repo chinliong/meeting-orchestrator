@@ -6,15 +6,21 @@ load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi.errors import RateLimitExceeded
 
 from app.api import attachments, auth, internal, projects, stakeholders, subtasks, tasks, transcripts
 from app.db import Base, engine
 from app.llm import transcription
+from app.ratelimit import TRUSTED_IP_HEADERS, limiter, rate_limit_exceeded
 from app.models import models  # noqa: F401  (ensures models are registered before create_all)
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="AI-Powered Meeting and Workflow Orchestrator")
+
+# Per-visitor limits on the endpoints that call paid model APIs or invite guessing (app/ratelimit.py).
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded)
 
 # Comma-separated list of allowed frontend origins. Defaults to "*" (allow any origin),
 # which is fine for this public, cookie-less demo API. Set CORS_ORIGINS to lock it down.
@@ -74,4 +80,8 @@ def health():
         "status": "ok",
         "extraction": extraction,
         "transcription": {"available": transcription.is_available()},
+        # Whether limits are on, and where the visitor's address is read from: behind Render's
+        # proxy it must be Cloudflare's header, or every visitor would share one count.
+        "rate_limits": {"enabled": limiter.enabled,
+                        "address_from": "cloudflare header" if TRUSTED_IP_HEADERS else "connection"},
     }

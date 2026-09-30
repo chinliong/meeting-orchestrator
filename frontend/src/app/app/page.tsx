@@ -424,8 +424,11 @@ export default function DashboardPage() {
     try {
       const summary = await api.summariseMeeting(meetingId, boardToken);
       setFreshSummaries((cur) => ({ ...cur, [meetingId]: summary }));
-    } catch {
-      setSummaryErrors((cur) => ({ ...cur, [meetingId]: "Couldn't write a summary right now. Please try again." }));
+    } catch (err) {
+      const message = err instanceof ApiError && err.status === 429
+        ? err.message
+        : "Couldn't write a summary right now. Please try again.";
+      setSummaryErrors((cur) => ({ ...cur, [meetingId]: message }));
     } finally {
       setSummarising(({ [meetingId]: _done, ...rest }) => rest);
     }
