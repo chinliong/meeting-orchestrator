@@ -260,12 +260,12 @@ rate), and the actions AMI's annotators wrote in each meeting's summary (the ans
 measured on both test meetings. It runs as a hosted service, so no model loads on the server -
 which is what makes the audio path fit a 512 MB instance.''')}
 
-## Results
+## Results: word error rate on each meeting
 
 Scored against the AMI manual transcripts. The two meetings differ in how much speech overlaps,
 which is the main thing that makes meeting audio hard.
 
-| Model | Runs on | ES2008a (9.4% overlap) | ES2010a (19.3% overlap) | Time (17 min audio) |
+| Model | Runs on | Word error rate, ES2008a (9.4% overlapping speech) | Word error rate, ES2010a (19.3% overlapping speech) | Time for the 17-minute recording |
 |---|---|---|---|---|
 {body}
 
@@ -287,7 +287,7 @@ base drops {a['scores']['local-base']['del']} words and large-v3
 {a['scores']['local-large-v3']['del']}, while a model with better voice-activity handling drops a
 third fewer than hosted Whisper.''')}
 
-## What a mis-heard name did, and did not, reach
+## Example: a mis-heard name
 
 {_wrap('''Deepgram transcribes the participant **Fenella** as "Vanilla" during the roll-call.
 Whether that error reaches the task board turns out to depend on the extraction model, which
@@ -310,7 +310,7 @@ in the text, but on the implemented configuration it reaches the board only as a
 assigned to, not as an owner.''')}
 
 {_recording_to_tasks()}
-## Hosted or local
+## Why a hosted service, not a local model
 
 {_wrap('''The local backend is a development convenience, not an alternative. It needs roughly
 1.5 GB of RAM that a free-tier instance does not have, and the host's CPU is far slower than a
@@ -336,30 +336,30 @@ The local and hosted times below are therefore two deployments, not two models.'
 - **WER is not the product metric.** The output is action items, not words; "From recording to
   tasks" above checks the tasks on these two meetings.
 
-## Appendix A - full figures
+## Appendix A: every word error rate figure
 
 ES2008a ({a['scores']['deepgram-nova-3']['ref_words']} reference words, {MEETINGS['ES2008a']['minutes']} min)
 
-| Configuration | WER | 95% CI | Sub | Del | Ins |
+| Configuration | Word error rate | 95% confidence interval | Misheard words | Missed words | Added words |
 |---|---|---|---|---|---|
 {detail(a)}
 
 ES2010a ({b['scores']['deepgram-nova-3']['ref_words']} reference words, {MEETINGS['ES2010a']['minutes']} min)
 
-| Configuration | WER | 95% CI | Sub | Del | Ins |
+| Configuration | Word error rate | 95% confidence interval | Misheard words | Missed words | Added words |
 |---|---|---|---|---|---|
 {detail(b)}
 
 Intervals come from resampling the reference in 50-word blocks, 2,000 draws, seeded. Paired
 comparisons resample both systems on the same blocks:
 
-| Comparison (ES2008a) | Difference, 95% CI | Separable? |
+| Comparison (ES2008a) | Difference in word error rate (95% interval) | Significantly different? |
 |---|---|---|
 {sig(a, keypairs)}
 
-## Appendix B - Whisper model size (ES2008a, local)
+## Appendix B: does a bigger Whisper model help?
 
-| Configuration | WER | Time | Note |
+| Configuration | Word error rate | Time | Note |
 |---|---|---|---|
 {ladder}
 

@@ -14,12 +14,12 @@ Uploads are transcribed by **Deepgram Nova-3**, the most accurate of the configu
 on both test meetings. It runs as a hosted service, so no model loads on the server - which is
 what makes the audio path fit a 512 MB instance.
 
-## Results
+## Results: word error rate on each meeting
 
 Scored against the AMI manual transcripts. The two meetings differ in how much speech overlaps,
 which is the main thing that makes meeting audio hard.
 
-| Model | Runs on | ES2008a (9.4% overlap) | ES2010a (19.3% overlap) | Time (17 min audio) |
+| Model | Runs on | Word error rate, ES2008a (9.4% overlapping speech) | Word error rate, ES2010a (19.3% overlapping speech) | Time for the 17-minute recording |
 |---|---|---|---|---|
 | Deepgram Nova-3 | hosted | 13.0% | 15.3% | 3s |
 | Whisper large-v3-turbo | hosted | 16.6% | 17.2% | 2s |
@@ -41,7 +41,7 @@ transcript cannot represent them. Model size does not steadily reduce deletions:
 base drops 332 words and large-v3 377, while a model with better voice-activity handling drops a
 third fewer than hosted Whisper.
 
-## What a mis-heard name did, and did not, reach
+## Example: a mis-heard name
 
 Deepgram transcribes the participant **Fenella** as "Vanilla" during the roll-call. Whether that
 error reaches the task board turns out to depend on the extraction model, which makes ES2010a a
@@ -64,24 +64,29 @@ not as an owner.
 
 ## From recording to tasks
 
-Word error rate counts words; the product's output is tasks. So the production extraction was also
-run on both meetings, from the manual transcript and from the Deepgram transcript, and checked
-against the actions AMI's own annotators wrote in each meeting's summary
-(`python -m eval.ami_actions_eval`, 3 runs per version).
+Word error rate only counts words. What matters for the app is whether the right tasks come out.
+So for each meeting the tasks were extracted twice: once from the human-typed transcript (the
+perfect case) and once from the recording, transcribed the way the app does it. Both were checked
+against the actions AMI's note-takers listed for that meeting. Each version was run 3 times;
+the table shows the share of listed actions found, averaged over the runs.
 
-| Meeting | Actions in AMI summary | Found, manual transcript | Found, Deepgram transcript | Found, Deepgram with speaker labels (app) | Tasks kept, Deepgram vs manual |
-|---|---|---|---|---|---|
-| ES2008a | 5 | 93% | 100% | 93% | 90% |
-| ES2010a | 3 | 100% | 100% | 100% | 100% |
+| Meeting | Actions listed by AMI | Found from the human-typed transcript | Found from the recording (the app) |
+|---|---|---|---|
+| ES2008a | 5 | 93% | 93% |
+| ES2010a | 3 | 100% | 100% |
 
-**Result.** The actions AMI's annotators recorded are found from the manual transcript and from
-the Deepgram transcript alike, with or without the speaker labels the app now requests, so at headset quality the transcription errors measured in the
-speech-to-text evaluation do not cost the board its actions. Each gap below 100% is one run that
-folded two of the annotated actions, typing up the minutes and e-mailing the slides, into a
-single task, so the content is on the board but counts as one match.
+**Result.** The recording gives the same actions as the human-typed transcript. Every figure
+below 100% is one run in which two of AMI's actions, typing up the minutes and e-mailing the
+slides, came out as a single task: the work is on the board, but it counts as one match instead
+of two.
+
+Two further comparisons agree. Transcribed without the speaker labels the app now adds, the
+recording found 100% (ES2008a) and 100% (ES2010a) of the listed actions. Compared as whole boards, the
+recording's board contained 90% (ES2008a) and 100% (ES2010a) of the tasks found from the human-typed
+transcript.
 
 **What changes is the spelling of names.** Deepgram writes names as it hears them, so an owner
-can be spelled differently from the manual transcript (Iain as "Ian", Bucciantini as
+can be spelled differently from the human-typed transcript (Iain as "Ian", Bucciantini as
 "Bucontinini"). The tasks are still assigned to the same people.
 
 ### The AMI actions
@@ -89,7 +94,7 @@ can be spelled differently from the manual transcript (Iain as "Ian", Bucciantin
 - ES2008a: "The project manager will investigate whether the team is to create a remote that is to be sued solely with televisions."; "The industrial designer will work on the working design."; "The user interface designer will work on technical functions."; "The project manager will type up the minutes of the current meeting and e-mail those to the team members."; "The project manager will e-mail her slides to the team members"
 - ES2010a: "The Industrial Designer will work on the internal working design."; "The User Interface Designer will work on the technical function design."; "The Marketing Expert will research user requirements."
 
-### Method and limitations of this check
+### How this check was done
 
 - Answer key: the ACTIONS section of each meeting's abstractive summary, AMI manual annotations
   v1.6.2 (CC BY 4.0), cached in `data/test-audio/ami_actions.json`.
@@ -103,7 +108,7 @@ can be spelled differently from the manual transcript (Iain as "Ian", Bucciantin
   AMI actions name roles rather than people, so owners are not scored against them.
 
 
-## Hosted or local
+## Why a hosted service, not a local model
 
 The local backend is a development convenience, not an alternative. It needs roughly 1.5 GB of
 RAM that a free-tier instance does not have, and the host's CPU is far slower than a laptop's:
@@ -129,11 +134,11 @@ hosted times below are therefore two deployments, not two models.
 - **WER is not the product metric.** The output is action items, not words; "From recording to
   tasks" above checks the tasks on these two meetings.
 
-## Appendix A - full figures
+## Appendix A: every word error rate figure
 
 ES2008a (2574 reference words, 17.4 min)
 
-| Configuration | WER | 95% CI | Sub | Del | Ins |
+| Configuration | Word error rate | 95% confidence interval | Misheard words | Missed words | Added words |
 |---|---|---|---|---|---|
 | Deepgram Nova-3 (hosted) | 13.0% | [10.3%, 16.0%] | 119 | 181 | 34 |
 | Whisper large-v3 (hosted) | 16.4% | [13.7%, 19.2%] | 121 | 266 | 35 |
@@ -147,7 +152,7 @@ ES2008a (2574 reference words, 17.4 min)
 
 ES2010a (1550 reference words, 10.7 min)
 
-| Configuration | WER | 95% CI | Sub | Del | Ins |
+| Configuration | Word error rate | 95% confidence interval | Misheard words | Missed words | Added words |
 |---|---|---|---|---|---|
 | Deepgram Nova-3 (hosted) | 15.3% | [10.4%, 20.9%] | 59 | 128 | 51 |
 | Whisper large-v3-turbo (hosted) | 17.2% | [12.1%, 23.1%] | 74 | 137 | 55 |
@@ -157,15 +162,15 @@ ES2010a (1550 reference words, 10.7 min)
 Intervals come from resampling the reference in 50-word blocks, 2,000 draws, seeded. Paired
 comparisons resample both systems on the same blocks:
 
-| Comparison (ES2008a) | Difference, 95% CI | Separable? |
+| Comparison (ES2008a) | Difference in word error rate (95% interval) | Significantly different? |
 |---|---|---|
 | deepgram-nova-3 vs groq-turbo | -5.5% to -1.6% | **yes** |
 | groq-large-v3 vs groq-turbo | -1.8% to +1.2% | no |
 | groq-turbo vs local-turbo | -3.2% to +1.6% | no |
 
-## Appendix B - Whisper model size (ES2008a, local)
+## Appendix B: does a bigger Whisper model help?
 
-| Configuration | WER | Time | Note |
+| Configuration | Word error rate | Time | Note |
 |---|---|---|---|
 | Whisper turbo | 17.5% | 212s |  |
 | Whisper medium | 19.5% | 198s |  |

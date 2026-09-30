@@ -91,40 +91,47 @@ def extract(text: str) -> list[dict]:
 
 def section(results: dict, runs: int) -> str:
     """The "From recording to tasks" section of docs/asr-evaluation.md, which eval.asr_eval writes."""
-    rows = []
+    rows, kept, found_ok = [], [], []
     for m in MEETINGS:
         r = results[m]
         ref, head, spk = r["reference"], r["headset"], r["speakers"]
-        rows.append(f"| {m} | {len(r['ami_actions'])} | {ref['found']:.0%} | {head['found']:.0%} "
-                    f"| {spk['found']:.0%} | {head['kept']:.0%} |")
+        n = len(r["ami_actions"])
+        rows.append(f"| {m} | {n} | {ref['found']:.0%} | {spk['found']:.0%} |")
+        kept.append(f"{head['kept']:.0%} ({m})")
+        found_ok.append(f"{head['found']:.0%} ({m})")
     examples = "\n".join(f"- {m}: " + "; ".join(f"\"{a}\"" for a in results[m]["ami_actions"])
                          for m in MEETINGS)
     return f"""## From recording to tasks
 
-Word error rate counts words; the product's output is tasks. So the production extraction was also
-run on both meetings, from the manual transcript and from the Deepgram transcript, and checked
-against the actions AMI's own annotators wrote in each meeting's summary
-(`python -m eval.ami_actions_eval`, {runs} runs per version).
+Word error rate only counts words. What matters for the app is whether the right tasks come out.
+So for each meeting the tasks were extracted twice: once from the human-typed transcript (the
+perfect case) and once from the recording, transcribed the way the app does it. Both were checked
+against the actions AMI's note-takers listed for that meeting. Each version was run {runs} times;
+the table shows the share of listed actions found, averaged over the runs.
 
-| Meeting | Actions in AMI summary | Found, manual transcript | Found, Deepgram transcript | Found, Deepgram with speaker labels (app) | Tasks kept, Deepgram vs manual |
-|---|---|---|---|---|---|
+| Meeting | Actions listed by AMI | Found from the human-typed transcript | Found from the recording (the app) |
+|---|---|---|---|
 {chr(10).join(rows)}
 
-**Result.** The actions AMI's annotators recorded are found from the manual transcript and from
-the Deepgram transcript alike, with or without the speaker labels the app now requests, so at headset quality the transcription errors measured in the
-speech-to-text evaluation do not cost the board its actions. Each gap below 100% is one run that
-folded two of the annotated actions, typing up the minutes and e-mailing the slides, into a
-single task, so the content is on the board but counts as one match.
+**Result.** The recording gives the same actions as the human-typed transcript. Every figure
+below 100% is one run in which two of AMI's actions, typing up the minutes and e-mailing the
+slides, came out as a single task: the work is on the board, but it counts as one match instead
+of two.
+
+Two further comparisons agree. Transcribed without the speaker labels the app now adds, the
+recording found {' and '.join(found_ok)} of the listed actions. Compared as whole boards, the
+recording's board contained {' and '.join(kept)} of the tasks found from the human-typed
+transcript.
 
 **What changes is the spelling of names.** Deepgram writes names as it hears them, so an owner
-can be spelled differently from the manual transcript (Iain as "Ian", Bucciantini as
+can be spelled differently from the human-typed transcript (Iain as "Ian", Bucciantini as
 "Bucontinini"). The tasks are still assigned to the same people.
 
 ### The AMI actions
 
 {examples}
 
-### Method and limitations of this check
+### How this check was done
 
 - Answer key: the ACTIONS section of each meeting's abstractive summary, AMI manual annotations
   v1.6.2 (CC BY 4.0), cached in `data/test-audio/ami_actions.json`.

@@ -285,7 +285,7 @@ def _set_section(name: str, res: dict) -> list[str]:
     lines = [f"## {title}", "",
              f"Sample: {SAMPLE_RULE[name]}. {ship['runs']} runs per configuration.", "",
              "### Mean scores (1-5), averaged over all runs", "",
-             "| Dimension | " + " | ".join(a["label"] for a in arms) + " |",
+             "| Rubric criterion | " + " | ".join(a["label"] for a in arms) + " |",
              "| --- |" + " --- |" * len(arms)]
     for dim in DIMENSIONS:
         lines.append(f"| {dim.replace('_', ' ')} | "
@@ -294,7 +294,7 @@ def _set_section(name: str, res: dict) -> list[str]:
     lines.append("| subtasks per task | "
                  + " | ".join(str(a["avg_subtasks_per_task"]) for a in arms) + " |")
     lines += ["", "### Overall score per run", "",
-              "| Configuration | Runs | Mean | SD | Range |", "| --- | --- | --- | --- | --- |"]
+              "| Generator | Score in each run | Mean | Standard deviation | Range |", "| --- | --- | --- | --- | --- |"]
     for a in arms:
         lines.append(f"| {a['label']} | {', '.join(str(x) for x in a['overall_per_run'])} "
                      f"| {a['overall_mean']} | {a['overall_sd']} "
@@ -302,13 +302,12 @@ def _set_section(name: str, res: dict) -> list[str]:
     # Averaged over runs rather than taken from one of them: a single run is a noisy sample,
     # and picking the first would quietly report whichever run happened to score best.
     lines += ["", "### Per-task detail", "",
-              "Rel, Act, Cov and NR are relevance, actionability, coverage and non-redundancy, "
-              "each scored 1-5. Subtasks is the number of steps generated, a count rather than a "
-              "score.", ""]
+              "Relevance, actionability, coverage and non-redundancy are each scored 1-5. "
+              "Subtasks is the number of steps generated, a count rather than a score.", ""]
     for a in arms:
         runs = a["per_task_runs"]
         lines += [f"{a['label']}, averaged over {len(runs)} runs:", "",
-                  "| Task | Subtasks | Rel | Act | Cov | NR |",
+                  "| Task | Subtasks | Relevance | Actionability | Coverage | Non-redundancy |",
                   "| --- | --- | --- | --- | --- | --- |"]
         for first in runs[0]:
             task_name = first["task"]

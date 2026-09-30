@@ -340,7 +340,7 @@ List stakeholders (alphabetical).
 ### `POST /stakeholders`
 Body `{ "name": "string", "email": "string (optional)" }` → `201` stakeholder object.
 
-## Internal
+## Internal: daily reminder trigger
 
 ### `GET /internal/notify-due-tasks`
 Runs one deadline-reminder pass (see [architecture.md](architecture.md#deadline-reminders)).
