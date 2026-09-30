@@ -43,7 +43,11 @@ rather than what its environment variables were set to. Never returns a key.
 Body `{ "email": "string", "password": "string", "claim_tokens": ["edit_token", ...] }`.
 `claim_tokens` is optional, the edit tokens of guest boards to adopt into the new account.
 Returns `201` `{ "token": "<jwt>", "user": { "id", "email", "created_at", "notify_email", "notify_days_before" } }`.
-`409` if the email already exists.
+`409` if the email already exists; `400` if the password is shorter than 8 characters.
+
+New passwords (signup, change and reset) must be at least 8 characters, with the message
+`Password must be at least 8 characters.` Sign-in does not check the length, so accounts created
+before the rule still sign in.
 
 ### `POST /auth/login`
 Body `{ "email": "string", "password": "string", "claim_tokens": ["edit_token", ...] }` → `200`
@@ -56,7 +60,7 @@ Returns the current user (requires bearer). `401` if unauthenticated.
 ### `POST /auth/password`
 Change the signed-in user's password. Requires bearer. Body
 `{ "current_password": "string", "new_password": "string" }`. `204` on success; `401` if the
-current password is wrong; `400` if the new password is empty.
+current password is wrong; `400` if the new password is empty or shorter than 8 characters.
 
 ### `PATCH /auth/notifications`
 Update the signed-in user's deadline-reminder preferences. Requires bearer. Body
@@ -88,7 +92,8 @@ emailed in the background; any earlier outstanding codes for that user are inval
 ### `POST /auth/reset-password`
 Complete a reset. Body `{ "email": "string", "code": "string", "new_password": "string" }`.
 `204` on success. `400` (`Invalid or expired code`) if the code is wrong, expired, already used,
-or the new password is empty. The code is invalidated after success or after too many wrong
+or the new password is empty; `400` if the new password is shorter than 8 characters, checked
+before the code so a short password does not use up an attempt. The code is invalidated after success or after too many wrong
 attempts.
 
 ## Projects

@@ -85,7 +85,7 @@ def project(client):
 @pytest.fixture()
 def account(client):
     """A registered user; returns the signup body plus a ready-to-use auth header."""
-    resp = client.post("/api/v1/auth/signup", json={"email": "owner@example.com", "password": "pw12345"})
+    resp = client.post("/api/v1/auth/signup", json={"email": "owner@example.com", "password": "pw123456"})
     assert resp.status_code == 201
     body = resp.json()
     body["headers"] = {"Authorization": f"Bearer {body['token']}"}

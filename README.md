@@ -49,8 +49,9 @@ recordings for end-to-end processing.
   meetings added earlier can be summarised on request from their saved transcript. It describes
   the meeting as it happened (the board shows where the work stands now) and is labelled as
   AI-written, since it is not covered by the evaluation.
-- **Accounts & guest mode**: sign up to keep your boards under an account, or continue as a
-  guest (guest boards are kept on the device and are carried into the account on sign-up or log-in).
+- **Accounts & guest mode**: sign up to keep your boards under an account (passwords are at least 8
+  characters), or continue as a guest (guest boards are kept on the device and are carried into the
+  account on sign-up or log-in).
 - **Account self-service**: change your password, reset a forgotten one with a 6-digit code
   emailed to you, or delete your account (owned boards are released as guest boards rather than
   destroyed, so existing share links keep working).

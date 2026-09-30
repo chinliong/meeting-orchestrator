@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import type { Project, SharedReminder, User } from "@/lib/types";
 import PasswordInput from "@/components/PasswordInput";
+import { MIN_PASSWORD_LENGTH, passwordTooShort } from "@/lib/format";
 
 interface Props {
   open: boolean;
@@ -135,6 +136,11 @@ export default function AccountModal({
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentPassword || !newPassword) return;
+    const tooShort = passwordTooShort(newPassword);
+    if (tooShort) {
+      setError(tooShort);
+      return;
+    }
     if (newPassword !== confirmPassword) {
       setError("New passwords do not match");
       return;
@@ -455,7 +461,7 @@ export default function AccountModal({
                 autoComplete="new-password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="New password"
+                placeholder={`New password (at least ${MIN_PASSWORD_LENGTH} characters)`}
               />
               <PasswordInput
                 autoComplete="new-password"

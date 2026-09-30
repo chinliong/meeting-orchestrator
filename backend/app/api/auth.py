@@ -29,6 +29,15 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 RESET_CODE_TTL = timedelta(minutes=15)
 RESET_MAX_ATTEMPTS = 5
+MIN_PASSWORD_LENGTH = 8
+
+
+def _check_new_password(password: str) -> None:
+    """Reject a new password that is too short. Applies whenever a password is set (sign-up,
+    change, reset), never to sign-in, so accounts created before the rule still sign in."""
+    if len(password) < MIN_PASSWORD_LENGTH:
+        raise HTTPException(status_code=400,
+                            detail=f"Password must be at least {MIN_PASSWORD_LENGTH} characters.")
 
 
 def _claim_guest_projects(db: Session, user: User, edit_tokens: list[str]) -> None:
@@ -50,6 +59,7 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)):
     email = payload.email.strip().lower()
     if not email or not payload.password:
         raise HTTPException(status_code=400, detail="Email and password are required")
+    _check_new_password(payload.password)
     if db.query(User).filter(User.email == email).first() is not None:
         raise HTTPException(status_code=409, detail="An account with this email already exists")
 
@@ -92,6 +102,7 @@ def change_password(
         raise HTTPException(status_code=401, detail="Current password is incorrect")
     if not payload.new_password:
         raise HTTPException(status_code=400, detail="New password is required")
+    _check_new_password(payload.new_password)
     user.password_hash = hash_password(payload.new_password)
     db.commit()
     return Response(status_code=204)
@@ -215,6 +226,7 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
     email = payload.email.strip().lower()
     if not payload.new_password:
         raise HTTPException(status_code=400, detail="New password is required")
+    _check_new_password(payload.new_password)
 
     invalid = HTTPException(status_code=400, detail="Invalid or expired code")
     user = db.query(User).filter(User.email == email).first()

@@ -207,7 +207,7 @@ def test_send_due_date_notifications_never_raises_on_provider_failure(db_session
 def test_only_the_owner_can_switch_a_boards_reminders(client, account):
     """Reminders go to the board owner alone, so an edit-link holder can't turn them on or off."""
     board = client.post("/api/v1/projects", json={"name": "Owned"}, headers=account["headers"]).json()
-    editor = client.post("/api/v1/auth/signup", json={"email": "editor@example.com", "password": "pw"}).json()
+    editor = client.post("/api/v1/auth/signup", json={"email": "editor@example.com", "password": "pw123456"}).json()
     as_editor = {"Authorization": f"Bearer {editor['token']}", "X-Workspace-Token": board["edit_token"]}
 
     blocked = client.patch(f"/api/v1/projects/{board['id']}", json={"notify_enabled": True}, headers=as_editor)

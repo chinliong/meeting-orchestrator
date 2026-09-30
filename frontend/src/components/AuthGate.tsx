@@ -5,6 +5,7 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import type { AuthResponse } from "@/lib/types";
 import PasswordInput from "@/components/PasswordInput";
+import { MIN_PASSWORD_LENGTH, passwordTooShort } from "@/lib/format";
 
 interface Props {
   /** Edit tokens of guest boards to carry into the account on sign-up or log-in. */
@@ -62,6 +63,11 @@ export default function AuthGate({ claimTokens, onAuthed, onGuest, allowGuest = 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password) return;
+    const tooShort = mode === "signup" ? passwordTooShort(password) : null;
+    if (tooShort) {
+      setError(tooShort);
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -114,6 +120,11 @@ export default function AuthGate({ claimTokens, onAuthed, onGuest, allowGuest = 
   const handleConfirmReset = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code.trim() || !newPassword) return;
+    const tooShort = passwordTooShort(newPassword);
+    if (tooShort) {
+      setError(tooShort);
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -185,7 +196,7 @@ export default function AuthGate({ claimTokens, onAuthed, onGuest, allowGuest = 
               autoComplete="new-password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="New password"
+              placeholder={`New password (at least ${MIN_PASSWORD_LENGTH} characters)`}
             />
             {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
             <button
@@ -237,7 +248,7 @@ export default function AuthGate({ claimTokens, onAuthed, onGuest, allowGuest = 
           autoComplete={mode === "signup" ? "new-password" : "current-password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
+          placeholder={mode === "signup" ? `Password (at least ${MIN_PASSWORD_LENGTH} characters)` : "Password"}
         />
 
         {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}

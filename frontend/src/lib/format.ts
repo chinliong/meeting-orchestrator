@@ -118,6 +118,15 @@ export function confidenceColor(confidence: number): string {
  * flag rarely if ever fires. The score is not a calibrated probability on either model.
  * See docs/evaluation-appendix.md, "Is the confidence score meaningful?".
  */
+// The backend's rule for new passwords (app/api/auth.py), checked here too so the message shows at once.
+export const MIN_PASSWORD_LENGTH = 8;
+
+export function passwordTooShort(password: string): string | null {
+  return password.length < MIN_PASSWORD_LENGTH
+    ? `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`
+    : null;
+}
+
 export const LOW_CONFIDENCE = 0.85;
 
 export function isLowConfidence(confidence: number): boolean {

@@ -48,13 +48,13 @@ def test_health(client):
 # --- accounts ---
 
 def test_signup_login_and_me(client):
-    signup = client.post("/api/v1/auth/signup", json={"email": "a@b.com", "password": "secret1"})
+    signup = client.post("/api/v1/auth/signup", json={"email": "a@b.com", "password": "secret123"})
     assert signup.status_code == 201
     token = signup.json()["token"]
 
     # Wrong password rejected; correct one works.
     assert client.post("/api/v1/auth/login", json={"email": "a@b.com", "password": "nope"}).status_code == 401
-    login = client.post("/api/v1/auth/login", json={"email": "A@B.com", "password": "secret1"})
+    login = client.post("/api/v1/auth/login", json={"email": "A@B.com", "password": "secret123"})
     assert login.status_code == 200
 
     me = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
@@ -62,8 +62,8 @@ def test_signup_login_and_me(client):
 
 
 def test_duplicate_email_rejected(client):
-    client.post("/api/v1/auth/signup", json={"email": "dup@b.com", "password": "x"})
-    again = client.post("/api/v1/auth/signup", json={"email": "dup@b.com", "password": "y"})
+    client.post("/api/v1/auth/signup", json={"email": "dup@b.com", "password": "first-pass"})
+    again = client.post("/api/v1/auth/signup", json={"email": "dup@b.com", "password": "second-pass"})
     assert again.status_code == 409
 
 
@@ -83,14 +83,42 @@ def test_change_password(client, account):
     # Correct current password updates the hash.
     ok = client.post(
         "/api/v1/auth/password",
-        json={"current_password": "pw12345", "new_password": "newpw123"},
+        json={"current_password": "pw123456", "new_password": "newpw123"},
         headers=account["headers"],
     )
     assert ok.status_code == 204
 
     # Old password no longer works; new one does.
-    assert client.post("/api/v1/auth/login", json={"email": "owner@example.com", "password": "pw12345"}).status_code == 401
+    assert client.post("/api/v1/auth/login", json={"email": "owner@example.com", "password": "pw123456"}).status_code == 401
     assert client.post("/api/v1/auth/login", json={"email": "owner@example.com", "password": "newpw123"}).status_code == 200
+
+
+def test_new_passwords_must_be_at_least_8_characters(client, account):
+    too_short = "Password must be at least 8 characters."
+    signup = client.post("/api/v1/auth/signup", json={"email": "short@b.com", "password": "1234567"})
+    assert signup.status_code == 400 and signup.json()["detail"] == too_short
+    assert client.post("/api/v1/auth/signup", json={"email": "ok@b.com", "password": "12345678"}).status_code == 201
+
+    change = client.post("/api/v1/auth/password", headers=account["headers"],
+                         json={"current_password": "pw123456", "new_password": "short"})
+    assert change.status_code == 400 and change.json()["detail"] == too_short
+    # The password was left as it was.
+    assert client.post("/api/v1/auth/login",
+                       json={"email": "owner@example.com", "password": "pw123456"}).status_code == 200
+
+
+def test_an_account_with_an_older_short_password_still_signs_in(client, db_session):
+    from app.auth import hash_password
+    from app.models.models import User
+
+    db_session.add(User(email="old@b.com", password_hash=hash_password("12345")))
+    db_session.commit()
+    login = client.post("/api/v1/auth/login", json={"email": "old@b.com", "password": "12345"})
+    assert login.status_code == 200
+    # ...and can move to a longer password.
+    change = client.post("/api/v1/auth/password", headers={"Authorization": f"Bearer {login.json()['token']}"},
+                         json={"current_password": "12345", "new_password": "12345678"})
+    assert change.status_code == 204
 
 
 def test_change_password_requires_auth(client):
@@ -106,7 +134,7 @@ def test_delete_account_after_password_reset_request(client, account, monkeypatc
 
     resp = client.request("DELETE", "/api/v1/auth/me", headers=account["headers"])
     assert resp.status_code == 204
-    login = client.post("/api/v1/auth/login", json={"email": "owner@example.com", "password": "pw12345"})
+    login = client.post("/api/v1/auth/login", json={"email": "owner@example.com", "password": "pw123456"})
     assert login.status_code == 401
 
 
@@ -149,7 +177,7 @@ def test_forgot_and_reset_password(client, account, monkeypatch):
     )
     assert ok.status_code == 204
     assert client.post("/api/v1/auth/login", json={"email": "owner@example.com", "password": "fresh123"}).status_code == 200
-    assert client.post("/api/v1/auth/login", json={"email": "owner@example.com", "password": "pw12345"}).status_code == 401
+    assert client.post("/api/v1/auth/login", json={"email": "owner@example.com", "password": "pw123456"}).status_code == 401
 
     # The code is single-use.
     reuse = client.post(
@@ -189,7 +217,7 @@ def test_reset_code_expires(client, db_session, account, monkeypatch):
     )
     assert expired.status_code == 400
     # The original password still works, so nothing was changed.
-    assert client.post("/api/v1/auth/login", json={"email": "owner@example.com", "password": "pw12345"}).status_code == 200
+    assert client.post("/api/v1/auth/login", json={"email": "owner@example.com", "password": "pw123456"}).status_code == 200
 
 
 def test_reset_code_burns_after_too_many_wrong_attempts(client, account, monkeypatch):
@@ -212,7 +240,7 @@ def test_reset_code_burns_after_too_many_wrong_attempts(client, account, monkeyp
         json={"email": "owner@example.com", "code": code, "new_password": "fresh123"},
     )
     assert burned.status_code == 400
-    assert client.post("/api/v1/auth/login", json={"email": "owner@example.com", "password": "pw12345"}).status_code == 200
+    assert client.post("/api/v1/auth/login", json={"email": "owner@example.com", "password": "pw123456"}).status_code == 200
 
 
 def test_forgot_password_unknown_email_is_silent(client, monkeypatch):
@@ -228,7 +256,7 @@ def test_forgot_password_unknown_email_is_silent(client, monkeypatch):
 def test_list_projects_is_scoped_to_owner(client, account):
     client.post("/api/v1/projects", json={"name": "Mine"}, headers=account["headers"])
     # A different user sees none of the first user's projects.
-    other = client.post("/api/v1/auth/signup", json={"email": "other@b.com", "password": "pw"}).json()
+    other = client.post("/api/v1/auth/signup", json={"email": "other@b.com", "password": "pw123456"}).json()
     mine = client.get("/api/v1/projects", headers=account["headers"]).json()
     theirs = client.get("/api/v1/projects", headers={"Authorization": f"Bearer {other['token']}"}).json()
     assert [p["name"] for p in mine] == ["Mine"]
@@ -322,7 +350,7 @@ def test_rotate_token_is_owner_only(client, account, project):
     assert client.post(f"/api/v1/projects/{project['id']}/rotate-token?which=edit").status_code == 403
     # ...nor can a different signed-in user who doesn't own the board.
     owned = client.post("/api/v1/projects", json={"name": "Mine"}, headers=account["headers"]).json()
-    other = client.post("/api/v1/auth/signup", json={"email": "other@b.com", "password": "pw"}).json()
+    other = client.post("/api/v1/auth/signup", json={"email": "other@b.com", "password": "pw123456"}).json()
     blocked = client.post(
         f"/api/v1/projects/{owned['id']}/rotate-token?which=view",
         headers={"Authorization": f"Bearer {other['token']}"},
@@ -346,7 +374,7 @@ def test_guest_board_claimed_on_signup(client):
     guest = client.post("/api/v1/projects", json={"name": "Guest board"}).json()
     auth = client.post(
         "/api/v1/auth/signup",
-        json={"email": "claim@b.com", "password": "pw", "claim_tokens": [guest["edit_token"]]},
+        json={"email": "claim@b.com", "password": "pw123456", "claim_tokens": [guest["edit_token"]]},
     ).json()
     owned = client.get("/api/v1/projects", headers={"Authorization": f"Bearer {auth['token']}"}).json()
     assert [p["id"] for p in owned] == [guest["id"]]
@@ -356,7 +384,7 @@ def test_guest_board_claimed_on_login(client, account):
     guest = client.post("/api/v1/projects", json={"name": "Guest board"}).json()
     auth = client.post(
         "/api/v1/auth/login",
-        json={"email": "owner@example.com", "password": "pw12345", "claim_tokens": [guest["edit_token"]]},
+        json={"email": "owner@example.com", "password": "pw123456", "claim_tokens": [guest["edit_token"]]},
     )
     assert auth.status_code == 200
     owned = client.get("/api/v1/projects", headers={"Authorization": f"Bearer {auth.json()['token']}"}).json()
@@ -365,10 +393,10 @@ def test_guest_board_claimed_on_login(client, account):
 
 def test_login_does_not_claim_an_owned_board(client, account):
     owned = client.post("/api/v1/projects", json={"name": "Mine"}, headers=account["headers"]).json()
-    other = client.post("/api/v1/auth/signup", json={"email": "other@b.com", "password": "pw"}).json()
+    other = client.post("/api/v1/auth/signup", json={"email": "other@b.com", "password": "pw123456"}).json()
     client.post(
         "/api/v1/auth/login",
-        json={"email": "other@b.com", "password": "pw", "claim_tokens": [owned["edit_token"]]},
+        json={"email": "other@b.com", "password": "pw123456", "claim_tokens": [owned["edit_token"]]},
     )
     theirs = client.get("/api/v1/projects", headers={"Authorization": f"Bearer {other['token']}"}).json()
     assert theirs == []
@@ -1002,7 +1030,7 @@ def test_notify_due_tasks_accepts_query_or_header_secret(client, monkeypatch):
 
 
 def _second_account(client, email="friend@example.com"):
-    body = client.post("/api/v1/auth/signup", json={"email": email, "password": "pw12345"}).json()
+    body = client.post("/api/v1/auth/signup", json={"email": email, "password": "pw123456"}).json()
     return {"Authorization": f"Bearer {body['token']}"}
 
 
