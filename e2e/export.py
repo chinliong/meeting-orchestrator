@@ -4,7 +4,7 @@ phone layout."""
 import time
 
 from common import APP_URL as URL
-from common import OUT, check, finish
+from common import OUT, check, finish, wait_until
 from playwright.sync_api import sync_playwright
 
 HEADER = "Task,Owner,Deadline,Status,Meeting,Meeting date,Subtasks done,Overdue"
