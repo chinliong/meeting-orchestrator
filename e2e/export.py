@@ -38,7 +38,9 @@ with sync_playwright() as p:
     errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
     sign_in(pg)
-    cards = pg.locator('[aria-label="Delete task"]').count()
+    card_count = lambda: pg.locator('[aria-label="Delete task"]').count()  # noqa: E731
+    wait_until(lambda: card_count() > 0)
+    cards = card_count()
 
     raw = download(pg)
     lines = rows(raw)
