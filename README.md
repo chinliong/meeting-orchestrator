@@ -332,9 +332,21 @@ python -m pytest tests/            # API + parser unit tests (LLM mocked)
 python -m pytest eval/
 ```
 
-GitHub Actions (`.github/workflows/ci.yml`) runs both test suites on Python 3.11, plus a type check
-and production build of the frontend, on every push to `master` and every pull request. No API keys
-are needed: the model calls are mocked.
+Browser suites (`e2e/`) drive the real frontend in Chromium against a fake backend: the real app
+with the model, transcription and email calls simulated and the API keys blanked, so nothing is
+charged. They cover boards and undo, meeting summaries, passwords, export, account settings with 100
+boards, and the rate limits (about 80 checks). Start the frontend (`npm run dev` in `frontend/`),
+stop any dev backend on port 8000, then from the repo root:
+
+```bash
+pip install -r e2e/requirements.txt && python -m playwright install chromium
+python e2e/run.py              # every suite; or name some, e.g. python e2e/run.py board export
+```
+
+GitHub Actions (`.github/workflows/ci.yml`) runs all of these on Python 3.11 on every push to
+`master` and every pull request: a lint for unused imports and undefined names, both pytest suites,
+a type check and production build of the frontend, and the browser suites against that build. No
+API keys are needed.
 
 ## Evaluation
 
@@ -462,6 +474,7 @@ backend/      FastAPI app (api/, llm/, models/, schemas/, auth.py, email.py, not
 frontend/     Next.js app (src/app, src/components, src/hooks, src/lib); Dockerfile for local compose, Render hosts it as a static export (out/)
 data/         synthetic-transcripts/ and synthetic-transcripts-long/ (inputs), annotated-test-set/ and annotated-test-set-long/ (ground truth)
 eval/         evaluation framework, cached predictions (predictions.json, predictions_long.json), tests
+e2e/          browser suites (Playwright) and the fake backend they run against
 docs/         architecture, API spec, evaluation report
 render.yaml   Render deployment blueprint
 .github/      CI workflow: backend and evaluation tests, frontend type check and build

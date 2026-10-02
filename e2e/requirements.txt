@@ -1,0 +1,4 @@
+# The browser suites: the backend's packages (the fake backend is the real app with its paid calls
+# replaced) plus Playwright. Then: python -m playwright install chromium
+-r ../backend/requirements.txt
+playwright==1.60.0
