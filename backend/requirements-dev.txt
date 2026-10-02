@@ -1,3 +1,4 @@
 # Test / development dependencies.
 #   pip install -r requirements-dev.txt
 pytest==8.3.3
+ruff==0.16.10  # linter run in CI: unused imports, undefined names (see .github/workflows/ci.yml)

@@ -23,6 +23,8 @@ jobs:
             backend/requirements-dev.txt
       - name: Install dependencies
         run: pip install -r backend/requirements.txt -r backend/requirements-dev.txt
+      - name: Lint (unused imports, undefined names)
+        run: ruff check backend/app backend/tests eval --select F
       - name: Backend tests
         working-directory: backend
         run: python -m pytest -q

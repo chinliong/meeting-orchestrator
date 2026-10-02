@@ -19,6 +19,9 @@ import ShareModal from "@/components/ShareModal";
 import StatsBar from "@/components/StatsBar";
 import TopBar from "@/components/TopBar";
 import TranscriptUpload from "@/components/TranscriptUpload";
+import { EmptyProjects, LoadingScreen } from "@/components/BoardPlaceholders";
+import { useMeetingSummaries } from "@/hooks/useMeetingSummaries";
+import { useUndoHistory } from "@/hooks/useUndoHistory";
 import { ApiError, api, setAuthToken, setSessionExpiredHandler, setWorkspaceToken } from "@/lib/api";
 import { formatAddedAt } from "@/lib/format";
 import {
@@ -42,7 +45,6 @@ import type {
   AuthResponse,
   Meeting,
   MeetingListItem,
-  MeetingSummary,
   Project,
   Task,
   TaskMeta,
@@ -91,8 +93,6 @@ export default function DashboardPage() {
   const [projectModal, setProjectModal] = useState<"create" | "edit" | null>(null);
   // The card edits a *live* task looked up by id, so changes (incl. undo) flow back into it.
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
-  // Bumped on every undo so the open card re-seeds its fields from the reverted task.
-  const [undoNonce, setUndoNonce] = useState(0);
   // Bumped when an undo reverses a subtask change, so the open subtask list re-fetches.
   const [subtaskReloadNonce, setSubtaskReloadNonce] = useState(0);
   const [creatingTask, setCreatingTask] = useState(false);
@@ -108,13 +108,8 @@ export default function DashboardPage() {
   // The board's meetings (for the Meeting filter), and the one the board is filtered to.
   const [meetings, setMeetings] = useState<MeetingListItem[]>([]);
   const [selectedMeetingIds, setSelectedMeetingIds] = useState<number[]>([]);
-  // Meeting summaries: the meeting whose summary is shown after it was just added (until hidden),
-  // summaries written in this session (newer than the loaded list), and those being written or
-  // that failed, each by meeting id.
+  // The meeting whose summary is shown after it was just added (until hidden).
   const [summaryShownFor, setSummaryShownFor] = useState<number | null>(null);
-  const [freshSummaries, setFreshSummaries] = useState<Record<number, MeetingSummary>>({});
-  const [summarising, setSummarising] = useState<Record<number, true>>({});
-  const [summaryErrors, setSummaryErrors] = useState<Record<number, string>>({});
   // The Delete meeting confirmation, and the "add this transcript again?" question.
   const [meetingDeletion, setMeetingDeletion] = useState<{ meeting: MeetingListItem; busy: boolean; error: string | null } | null>(null);
   const [duplicatePrompt, setDuplicatePrompt] = useState<{
@@ -416,59 +411,7 @@ export default function DashboardPage() {
   );
   const singleChosenId = chosenMeetings.length === 1 ? chosenMeetings[0].id : null;
 
-  // After a meeting is added, the server writes its summary on its own (so it is written even if
-  // the page is closed). Wait for it here, up to a minute, rather than asking for a second one.
-  const waitForSummary = useCallback(async (meetingId: number, boardToken?: string) => {
-    setSummarising((cur) => ({ ...cur, [meetingId]: true }));
-    setSummaryErrors(({ [meetingId]: _cleared, ...rest }) => rest);
-    const deadline = Date.now() + 60 * 1000;
-    try {
-      while (Date.now() < deadline) {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        try {
-          const current = await api.getMeeting(meetingId, boardToken);
-          const written = current.summary;
-          if (written) {
-            setFreshSummaries((cur) => ({ ...cur, [meetingId]: written }));
-            return;
-          }
-          if (current.summary_failed) break; // the server tried and could not: say so now
-        } catch (err) {
-          if (err instanceof ApiError) return; // e.g. the meeting was deleted meanwhile
-        }
-      }
-      setSummaryErrors((cur) => ({ ...cur, [meetingId]: "Couldn't write a summary right now. Please try again." }));
-    } finally {
-      setSummarising(({ [meetingId]: _done, ...rest }) => rest);
-    }
-  }, []);
-
-  // A summary the server could not write (it records the failure) shows the same message and
-  // Try again as a failed request, also after a reload, unless one has been written since.
-  // Only editors see it: a view-only reader cannot try again, and just sees there is no summary.
-  const summaryErrorFor = (m: MeetingListItem) =>
-    summaryErrors[m.id] ??
-    (cardsEditable && m.summary_failed && !freshSummaries[m.id] && !summarising[m.id]
-      ? "Couldn't write a summary right now. Please try again."
-      : null);
-
-  // Writes (or rewrites) a meeting's summary on request, from the summary card's button.
-  // `boardToken` pins the meeting's board.
-  const requestSummary = useCallback(async (meetingId: number, boardToken?: string) => {
-    setSummarising((cur) => ({ ...cur, [meetingId]: true }));
-    setSummaryErrors(({ [meetingId]: _cleared, ...rest }) => rest);
-    try {
-      const summary = await api.summariseMeeting(meetingId, boardToken);
-      setFreshSummaries((cur) => ({ ...cur, [meetingId]: summary }));
-    } catch (err) {
-      const message = err instanceof ApiError && err.status === 429
-        ? err.message
-        : "Couldn't write a summary right now. Please try again.";
-      setSummaryErrors((cur) => ({ ...cur, [meetingId]: message }));
-    } finally {
-      setSummarising(({ [meetingId]: _done, ...rest }) => rest);
-    }
-  }, []);
+  const summaries = useMeetingSummaries(cardsEditable);
   // With two or more meetings chosen, their summaries share one list (see MeetingSummaryList).
   // Otherwise the card shows the one chosen meeting, or else the one just added, or else a board's
   // only meeting (whose tasks are the whole board).
@@ -485,7 +428,7 @@ export default function DashboardPage() {
     summaryMeeting !== null &&
     (cardsEditable ||
       summaryMeeting.id === singleChosenId ||
-      !!(freshSummaries[summaryMeeting.id] ?? summaryMeeting.summary));
+      !!summaries.summaryFor(summaryMeeting));
 
   // The tasks of the meetings chosen in the Meeting filter (all tasks when none is chosen). The
   // owner filter lists only their owners, so it never offers a name with no tasks on screen.
@@ -561,57 +504,19 @@ export default function DashboardPage() {
   const activeView: BoardView = view;
 
   // --- undo: a shared stack whose entries each perform the inverse of an action ---
-  const undoStackRef = useRef<UndoAction[]>([]);
-  const [undoDepth, setUndoDepth] = useState(0);
-  // Bumped whenever the history is cleared. A handler notes it before its request, so an action
-  // that finishes after the user has switched boards is not added to the new board's history.
-  const undoGenRef = useRef(0);
-
-  // Undo runs with the current board's credentials and updates the tasks on screen, so its
-  // history is cleared on switching board or view, and on signing in or out.
-  useEffect(() => {
-    undoGenRef.current += 1;
-    undoStackRef.current = [];
-    setUndoDepth(0);
-  }, [viewKey, session?.mode, user?.id]);
-
-  const pushUndo = useCallback((action: UndoAction, gen?: number) => {
-    if (gen !== undefined && gen !== undoGenRef.current) return;
-    undoStackRef.current.push(action);
-    if (undoStackRef.current.length > 50) undoStackRef.current.shift();
-    setUndoDepth(undoStackRef.current.length);
-  }, []);
-
-  const handleUndo = useCallback(async () => {
-    const action = undoStackRef.current.pop();
-    setUndoDepth(undoStackRef.current.length);
-    if (!action) return;
-    try {
-      await action.run();
-      // Let an open card re-seed its fields from the now-reverted task.
-      setUndoNonce((n) => n + 1);
-    } catch (err) {
-      setLoadError((err as Error).message);
-    }
-  }, []);
-
-  // Cmd/Ctrl+Z anywhere (except while typing in a field).
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (!(e.metaKey || e.ctrlKey) || e.shiftKey || e.key.toLowerCase() !== "z") return;
-      const el = e.target as HTMLElement | null;
-      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
-      e.preventDefault();
-      handleUndo();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [handleUndo]);
+  const {
+    depth: undoDepth,
+    nonce: undoNonce,
+    push: pushUndo,
+    undo: handleUndo,
+    clear: clearUndoHistory,
+    generation: undoGeneration,
+  } = useUndoHistory(`${viewKey}|${session?.mode}|${user?.id}`, setLoadError);
 
   // --- task handlers ---
   const handleStatusChange = async (taskId: number, status: TaskStatus) => {
     const prev = tasks.find((t) => t.id === taskId)?.status;
-    const gen = undoGenRef.current;
+    const gen = undoGeneration();
     setTasks((cur) => cur.map((t) => (t.id === taskId ? { ...t, status } : t)));
     try {
       await api.updateTask(taskId, { status });
@@ -637,7 +542,7 @@ export default function DashboardPage() {
     patch: { description?: string; owner?: string | null; deadline?: string | null; status?: TaskStatus }
   ) => {
     const before = tasks.find((t) => t.id === taskId);
-    const gen = undoGenRef.current;
+    const gen = undoGeneration();
     const updated = await api.updateTask(taskId, patch);
     setTasks((cur) => cur.map((t) => (t.id === taskId ? updated : t)));
     if (before) {
@@ -682,7 +587,7 @@ export default function DashboardPage() {
   };
 
   const handleDelete = async (taskId: number) => {
-    const gen = undoGenRef.current;
+    const gen = undoGeneration();
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
     try {
       const snapshot = await api.deleteTask(taskId);
@@ -731,7 +636,7 @@ export default function DashboardPage() {
     reloadTasksRef.current();
     const board = projects.find((p) => p.id === projectId);
     setSummaryShownFor(meeting.id);
-    waitForSummary(meeting.id, board ? workspaceTokenFor(board) : undefined);
+    summaries.waitForSummary(meeting.id, board ? workspaceTokenFor(board) : undefined);
   };
 
   const handleAudioSubmit = async (title: string, file: File, meetingDate: string) => {
@@ -770,7 +675,7 @@ export default function DashboardPage() {
     setSelectedMeetingIds([]); // as for pasted text: show the new meeting's tasks and summary
     reloadTasksRef.current();
     setSummaryShownFor(meeting.id);
-    waitForSummary(meeting.id, boardToken);
+    summaries.waitForSummary(meeting.id, boardToken);
   };
 
   const performDeleteMeeting = async () => {
@@ -789,9 +694,7 @@ export default function DashboardPage() {
     setSelectedMeetingIds((ids) => ids.filter((id) => id !== meeting.id));
     if (summaryShownFor === meeting.id) setSummaryShownFor(null);
     // Undo entries may refer to the tasks just removed, so the history starts afresh.
-    undoGenRef.current += 1;
-    undoStackRef.current = [];
-    setUndoDepth(0);
+    clearUndoHistory();
     setMeetingsKey((k) => k + 1);
     reloadTasksRef.current();
   };
@@ -1216,11 +1119,11 @@ export default function DashboardPage() {
                   <MeetingSummaryCard
                     key={summaryMeeting.id}
                     meeting={summaryMeeting}
-                    summary={freshSummaries[summaryMeeting.id] ?? summaryMeeting.summary}
-                    working={!!summarising[summaryMeeting.id]}
-                    error={summaryErrorFor(summaryMeeting)}
+                    summary={summaries.summaryFor(summaryMeeting)}
+                    working={summaries.isWorking(summaryMeeting)}
+                    error={summaries.errorFor(summaryMeeting)}
                     canEdit={cardsEditable}
-                    onSummarise={() => requestSummary(summaryMeeting.id, meetingsBoardToken)}
+                    onSummarise={() => summaries.requestSummary(summaryMeeting.id, meetingsBoardToken)}
                     onDismiss={summaryHideable ? () => setSummaryShownFor(null) : undefined}
                   />
                 )}
@@ -1228,11 +1131,11 @@ export default function DashboardPage() {
                 {chosenMeetings.length > 1 && (
                   <MeetingSummaryList
                     meetings={chosenMeetings.filter((m) => m.status !== "failed")}
-                    summaryFor={(m) => freshSummaries[m.id] ?? m.summary}
-                    workingFor={(m) => !!summarising[m.id]}
-                    errorFor={summaryErrorFor}
+                    summaryFor={summaries.summaryFor}
+                    workingFor={summaries.isWorking}
+                    errorFor={summaries.errorFor}
                     canEdit={cardsEditable}
-                    onSummarise={(m) => requestSummary(m.id, meetingsBoardToken)}
+                    onSummarise={(m) => summaries.requestSummary(m.id, meetingsBoardToken)}
                   />
                 )}
 
@@ -1430,64 +1333,4 @@ function duplicateOf(err: unknown): { title: string; created_at: string | null }
   } catch {
     return null;
   }
-}
-
-function LoadingScreen({ slow }: { slow: boolean }) {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-5 px-6 text-center">
-      <div className="relative flex items-center justify-center">
-        <span className="absolute h-16 w-16 animate-ping rounded-full bg-slate-300/40" />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/logo.png"
-          alt="Meeting Orchestrator"
-          className="relative h-14 w-14 rounded-full object-cover shadow-card"
-        />
-      </div>
-
-      <div className="flex items-center gap-2 text-slate-600">
-        <svg className="h-4 w-4 animate-spin text-slate-400" viewBox="0 0 24 24" fill="none">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-          />
-        </svg>
-        <span className="text-sm font-medium">Loading your boards…</span>
-      </div>
-
-      {slow && (
-        <p className="max-w-sm text-xs leading-relaxed text-slate-400">
-          Waking up the server — the free hosting tier sleeps after inactivity, so the first load
-          can take up to a minute.
-        </p>
-      )}
-    </div>
-  );
-}
-
-function EmptyProjects({ onCreate }: { onCreate: () => void }) {
-  return (
-    <div className="mx-auto mt-16 max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-card">
-      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-900">
-        <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor">
-          <path d="M3 6a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V6z" />
-        </svg>
-      </div>
-      <h2 className="text-lg font-semibold text-slate-900">No projects yet</h2>
-      <p className="mt-1 text-sm text-slate-500">
-        Create a project to start turning meeting transcripts into tracked action items.
-      </p>
-      <button
-        onClick={onCreate}
-        className="mt-5 inline-flex items-center gap-1.5 rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-ink-700"
-      >
-        <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
-          <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" />
-        </svg>
-        Create your first project
-      </button>
-    </div>
-  );
 }

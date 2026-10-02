@@ -459,7 +459,7 @@ generator, then the judge).
 
 ```
 backend/      FastAPI app (api/, llm/, models/, schemas/, auth.py, email.py, notifications.py), tests, Dockerfile
-frontend/     Next.js app (src/app, src/components, src/lib); Dockerfile for local compose, Render hosts it as a static export (out/)
+frontend/     Next.js app (src/app, src/components, src/hooks, src/lib); Dockerfile for local compose, Render hosts it as a static export (out/)
 data/         synthetic-transcripts/ and synthetic-transcripts-long/ (inputs), annotated-test-set/ and annotated-test-set-long/ (ground truth)
 eval/         evaluation framework, cached predictions (predictions.json, predictions_long.json), tests
 docs/         architecture, API spec, evaluation report

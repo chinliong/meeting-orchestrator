@@ -19,7 +19,6 @@ EnglishTextNormalizer folds case anyway, so lowercasing here only keeps the arte
 from __future__ import annotations
 
 import argparse
-import re
 import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path

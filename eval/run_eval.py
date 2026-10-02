@@ -1174,11 +1174,11 @@ vendors.''')}
 
 ## Limitations
 
-{_wrap(f'''- **The meetings are synthetic.** They are written text, not recorded speech. The long
+{_wrap('''- **The meetings are synthetic.** They are written text, not recorded speech. The long
 transcripts and their answer keys were drafted with an AI assistant (Claude). Text written by one
 model family could be easier for models of the same family. Here that would help Claude Sonnet,
 so any such effect works against the model that was chosen.''', indent="  ")}
-{_wrap(f'''- **Eight meetings is still a small sample.** The results show the choice holds on
+{_wrap('''- **Eight meetings is still a small sample.** The results show the choice holds on
 longer, harder meetings than the ones the prompt was built on; they do not show it holds for
 every kind of meeting.''', indent="  ")}
 {_wrap(f'''- **The low-confidence review flag was tuned on Claude Sonnet.** Every Sonnet item
