@@ -1,14 +1,22 @@
-fastapi==0.115.0
+# Security fixes (Starlette and python-multipart upload parsing, PyJWT) need Python 3.10+. The
+# server and CI run Python 3.11 and get the fixed versions; an older local Python gets the newest
+# versions it supports.
+fastapi==0.142.2; python_version >= "3.10"
+fastapi==0.128.8; python_version < "3.10"
+starlette==1.7.0; python_version >= "3.10"
+starlette==0.49.3; python_version < "3.10"
 uvicorn[standard]==0.30.6
 sqlalchemy==2.0.35
 pydantic==2.9.2
 anthropic==0.109.2
 openai>=1.40,<2.0  # OpenAI-compatible client for hosted Whisper transcription (OpenAI or Groq)
 httpx>=0.27,<1.0   # Deepgram transcription calls (also an openai dependency; pinned explicitly)
-python-dotenv==1.0.1
-python-multipart==0.0.9
+python-dotenv==1.2.2; python_version >= "3.10"
+python-dotenv==1.2.1; python_version < "3.10"
+python-multipart==0.0.32; python_version >= "3.10"
+python-multipart==0.0.20; python_version < "3.10"
 psycopg2-binary==2.9.9  # PostgreSQL driver (used in deployment; SQLite needs no driver)
-PyJWT==2.9.0  # signed access tokens for account auth
+PyJWT==2.15.1  # signed access tokens for account auth
 passlib[bcrypt]==1.7.4  # password hashing
 bcrypt==4.0.1  # passlib 1.7.4 reads this version cleanly (4.1+ dropped __about__)
 tzdata==2024.1  # IANA tz database for zoneinfo (REMINDER_TIMEZONE); python:slim has no system tzdata

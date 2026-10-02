@@ -8,6 +8,8 @@ import os
 # Rate limits are switched off for the suite (it signs in and parses far more often than the limits
 # allow); tests/test_ratelimit.py switches them on where it checks them. Set before the app imports.
 os.environ["RATE_LIMITS_ENABLED"] = "false"
+# A full-length signing key, as production has (PyJWT warns about shorter ones).
+os.environ.setdefault("AUTH_SECRET", "test-signing-key-that-is-at-least-32-bytes-long")
 
 import pytest
 from fastapi.testclient import TestClient

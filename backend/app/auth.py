@@ -24,7 +24,8 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.models.models import Project, User
 
-AUTH_SECRET = os.getenv("AUTH_SECRET", "dev-insecure-secret-change-me")
+# PyJWT warns about HMAC keys under 32 bytes, so even the development default is longer.
+AUTH_SECRET = os.getenv("AUTH_SECRET", "dev-insecure-secret-change-me-in-production")
 ALGORITHM = "HS256"
 TOKEN_TTL = timedelta(days=30)
 
