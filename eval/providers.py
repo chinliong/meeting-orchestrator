@@ -157,14 +157,7 @@ GEMINI_API_ROOT = "https://generativelanguage.googleapis.com/v1beta/models"
 
 # Pinned rather than the floating "gemini-flash-latest" alias: an evaluation whose model can
 # change underneath it is not reproducible.
-#
-# Why 3.6 and not 3.7: gemini-3.7-flash (version 3.7-flash-08-2026) is the newest Flash the API
-# offers as of August 2026, but on this schema it was measured returning HTTP 503 "model is
-# currently experiencing high demand" - or hanging until the socket timed out - on roughly three
-# attempts in four. A benchmark cannot rest on a model that answers a quarter of the time. 3.6
-# Flash (3.6-flash-07-2026) is the newest Flash that responds reliably, and when 3.7 did answer
-# it returned the same item count. Override with GEMINI_MODEL to re-run on 3.7 later.
-DEFAULT_MODEL = "gemini-3.6-flash"
+DEFAULT_MODEL = "gemini-3.5-flash"
 
 _TYPE_MAP = {
     "string": "STRING",

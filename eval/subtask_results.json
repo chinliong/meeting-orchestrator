@@ -6,7 +6,7 @@
     "gemini": {
       "label": "Gemini Flash",
       "provider": "gemini",
-      "model": "gemini-3.6-flash",
+      "model": "gemini-3.5-flash",
       "runs": 5,
       "overall_per_run": [
         4.88,

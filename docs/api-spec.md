@@ -32,7 +32,7 @@ rather than what its environment variables were set to. Never returns a key.
 ```json
 {
   "status": "ok",
-  "extraction": { "provider": "gemini", "model": "gemini-3.6-flash" },
+  "extraction": { "provider": "gemini", "model": "gemini-3.5-flash" },
   "transcription": { "available": true }
 }
 ```

@@ -43,7 +43,7 @@ _Summary and decision: [evaluation-report.md](evaluation-report.md). Speech-to-t
 A semantic LLM-judge matcher is available (`--rescore-judge`) but has not been run, so every
 figure uses word overlap.
 
-Models: Claude Haiku `claude-haiku-4-5`, Claude Sonnet `claude-sonnet-4-6`, Gemini Flash `gemini-3.6-flash`.
+Models: Claude Haiku `claude-haiku-4-5`, Claude Sonnet `claude-sonnet-4-6`, Gemini Flash `gemini-3.5-flash`.
 
 ## Study 1: does the prompt and schema guidance help?
 
@@ -232,8 +232,6 @@ is small, but the flag should not be described as a check that catches this mode
   built on; it does not show it holds for every kind of meeting.
 - **Models differ in tier and release date.** Claude Sonnet is a larger model and Gemini Flash a
   more recent one, so this is a decision for this project rather than a ranking of vendors.
-- `gemini-3.7-flash` returned HTTP 503 "high demand" or hung on roughly three attempts in four
-  and could not be used; `gemini-3.6-flash` is the newest Flash that answered reliably.
 - **A correction worth recording.** An earlier `BARE_TOOL` stripped every key named
   `description`, including the *field* of that name, so the without-guidance configuration
   required a field it did not define. The stripper now removes only annotation text, and

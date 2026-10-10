@@ -3352,8 +3352,8 @@
         ]
       },
       "models": {
-        "gemini_naive": "gemini-3.6-flash",
-        "gemini_prod": "gemini-3.6-flash"
+        "gemini_naive": "gemini-3.5-flash",
+        "gemini_prod": "gemini-3.5-flash"
       }
     },
     {
@@ -3980,8 +3980,8 @@
         ]
       },
       "models": {
-        "gemini_naive": "gemini-3.6-flash",
-        "gemini_prod": "gemini-3.6-flash"
+        "gemini_naive": "gemini-3.5-flash",
+        "gemini_prod": "gemini-3.5-flash"
       }
     },
     {
@@ -5484,8 +5484,8 @@
         ]
       },
       "models": {
-        "gemini_naive": "gemini-3.6-flash",
-        "gemini_prod": "gemini-3.6-flash"
+        "gemini_naive": "gemini-3.5-flash",
+        "gemini_prod": "gemini-3.5-flash"
       }
     },
     {
@@ -6120,8 +6120,8 @@
         ]
       },
       "models": {
-        "gemini_naive": "gemini-3.6-flash",
-        "gemini_prod": "gemini-3.6-flash"
+        "gemini_naive": "gemini-3.5-flash",
+        "gemini_prod": "gemini-3.5-flash"
       }
     },
     {
@@ -8792,8 +8792,8 @@
         ]
       },
       "models": {
-        "gemini_naive": "gemini-3.6-flash",
-        "gemini_prod": "gemini-3.6-flash"
+        "gemini_naive": "gemini-3.5-flash",
+        "gemini_prod": "gemini-3.5-flash"
       }
     },
     {
@@ -9412,8 +9412,8 @@
         ]
       },
       "models": {
-        "gemini_naive": "gemini-3.6-flash",
-        "gemini_prod": "gemini-3.6-flash"
+        "gemini_naive": "gemini-3.5-flash",
+        "gemini_prod": "gemini-3.5-flash"
       }
     },
     {
@@ -9967,8 +9967,8 @@
         ]
       },
       "models": {
-        "gemini_naive": "gemini-3.6-flash",
-        "gemini_prod": "gemini-3.6-flash"
+        "gemini_naive": "gemini-3.5-flash",
+        "gemini_prod": "gemini-3.5-flash"
       }
     },
     {
@@ -10490,8 +10490,8 @@
         ]
       },
       "models": {
-        "gemini_naive": "gemini-3.6-flash",
-        "gemini_prod": "gemini-3.6-flash"
+        "gemini_naive": "gemini-3.5-flash",
+        "gemini_prod": "gemini-3.5-flash"
       }
     },
     {

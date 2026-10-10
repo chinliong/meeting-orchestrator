@@ -5,7 +5,7 @@ _Extraction accuracy: [evaluation-report.md](evaluation-report.md). Speech-to-te
 
 The AI subtask feature breaks a single action item into an ordered checklist. Unlike transcript parsing, this is **open-ended generation with no single correct answer**, so precision and recall cannot be measured. Instead a second model, the judge, scores each checklist from 1 to 5 on four points: relevance, actionability, coverage and non-redundancy.
 
-- Implemented generator: `gemini-3.6-flash` (Gemini Flash)
+- Implemented generator: `gemini-3.5-flash` (Gemini Flash)
 - Judge: `claude-sonnet-4-6`, held fixed across both generators and both sets
 - Test sets: short (12 tasks), long (12 tasks)
 

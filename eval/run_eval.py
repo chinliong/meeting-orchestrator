@@ -1498,8 +1498,6 @@ be described as a check that catches this model's errors.''')}
   built on; it does not show it holds for every kind of meeting.
 - **Models differ in tier and release date.** Claude Sonnet is a larger model and Gemini Flash a
   more recent one, so this is a decision for this project rather than a ranking of vendors.
-- `gemini-3.7-flash` returned HTTP 503 "high demand" or hung on roughly three attempts in four
-  and could not be used; `gemini-3.6-flash` is the newest Flash that answered reliably.
 - **A correction worth recording.** An earlier `BARE_TOOL` stripped every key named
   `description`, including the *field* of that name, so the without-guidance configuration
   required a field it did not define. The stripper now removes only annotation text, and
