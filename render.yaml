@@ -18,7 +18,7 @@ services:
       - key: GEMINI_API_KEY
         sync: false # set manually in the dashboard (secret)
       - key: GEMINI_MODEL
-        value: gemini-3.6-flash
+        value: gemini-3.8-flash
       # Extraction provider, chosen by the evaluation.
       - key: LLM_PROVIDER
         value: gemini

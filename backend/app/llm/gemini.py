@@ -19,7 +19,7 @@ import urllib.request
 from datetime import date
 
 API_ROOT = "https://generativelanguage.googleapis.com/v1beta/models"
-DEFAULT_MODEL = "gemini-3.6-flash"
+DEFAULT_MODEL = "gemini-3.8-flash"
 REQUEST_TIMEOUT_S = 90
 
 # Flash is a thinking model and thinking tokens come out of this budget, so it sits well above
