@@ -188,7 +188,12 @@ export default function DashboardPage() {
           }
           setSelectedProjectId(shared.id);
         } catch (err) {
-          setLoadError((err as Error).message);
+          // A regenerated or mistyped link: say so plainly instead of showing the raw API error.
+          setLoadError(
+            err instanceof ApiError && err.status === 404
+              ? "This share link is no longer valid. Ask the board\u2019s owner for a new one."
+              : (err as Error).message
+          );
         }
         url.searchParams.delete("w");
         window.history.replaceState({}, "", url.pathname);
@@ -575,7 +580,8 @@ export default function DashboardPage() {
   }) => {
     if (!selectedProjectId) return;
     const created = await api.createTask({ projectId: selectedProjectId, ...values });
-    setTasks((prev) => [created, ...prev]);
+    // A task list loaded meanwhile may already include it.
+    setTasks((prev) => (prev.some((t) => t.id === created.id) ? prev : [created, ...prev]));
   };
 
   const handleRenameMeeting = async (meetingId: number, title: string) => {
