@@ -10,7 +10,7 @@ from app.db import get_db
 from app.email import send_email
 from app.models.models import PasswordReset, Project, ReminderSubscription, User
 from app.notifications import NotificationSendError, send_test_notification
-from app.ratelimit import LOGIN, RESET, limiter
+from app.ratelimit import LOGIN, RESET, RESET_CODE, limiter
 from app.schemas.schemas import (
     AuthResponse,
     ChangePasswordRequest,
@@ -222,7 +222,8 @@ def forgot_password(
 
 
 @router.post("/reset-password", status_code=204)
-def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db)):
+@limiter.limit(RESET_CODE, error_message="Too many reset-code attempts. Please wait a minute and try again.")
+def reset_password(request: Request, payload: ResetPasswordRequest, db: Session = Depends(get_db)):
     email = payload.email.strip().lower()
     if not payload.new_password:
         raise HTTPException(status_code=400, detail="New password is required")
@@ -243,11 +244,26 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
     if reset is None or reset.expires_at < datetime.now(timezone.utc).replace(tzinfo=None):
         raise invalid
 
+    # Take one of the code's attempts before checking the guess, in a single UPDATE, so guesses
+    # sent at the same moment cannot all get past the limit before any of them is counted.
+    claimed = (
+        db.query(PasswordReset)
+        .filter(
+            PasswordReset.id == reset.id,
+            PasswordReset.used.is_(False),
+            PasswordReset.attempts < RESET_MAX_ATTEMPTS,
+        )
+        .update({PasswordReset.attempts: PasswordReset.attempts + 1}, synchronize_session=False)
+    )
+    db.commit()
+    if not claimed:
+        raise invalid
+    db.refresh(reset)
+
     if not verify_password(payload.code, reset.code_hash):
-        reset.attempts += 1
         if reset.attempts >= RESET_MAX_ATTEMPTS:
             reset.used = True  # too many guesses — burn the code
-        db.commit()
+            db.commit()
         raise invalid
 
     user.password_hash = hash_password(payload.new_password)

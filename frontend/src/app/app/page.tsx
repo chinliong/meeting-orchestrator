@@ -832,7 +832,9 @@ export default function DashboardPage() {
     setShowAuth(false);
     for (const shared of sharedWithGuest) rememberSharedBoard(auth.user.id, shared.id, workspaceTokenFor(shared));
     try {
-      let projs = await api.listProjects();
+      // As on a page load: the account's own boards, then the ones others shared with it
+      // (including the guest's shared boards, remembered just above).
+      let projs = await withSharedBoards(auth.user.id, await api.listProjects());
       for (const shared of sharedWithGuest) if (!projs.some((p) => p.id === shared.id)) projs = [...projs, shared];
       setProjects(projs);
       setSelectedProjectId(projs.some((p) => p.id === onScreen) ? onScreen : projs[0]?.id ?? null);
@@ -1280,6 +1282,7 @@ export default function DashboardPage() {
         onSave={handleEditTask}
         onCreate={handleCreateTask}
         onMetaChange={handleTaskMetaChange}
+        onSaveErrorAfterClose={setLoadError}
       />
 
       <ConfirmDialog

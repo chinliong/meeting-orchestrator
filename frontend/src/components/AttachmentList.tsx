@@ -25,7 +25,11 @@ export default function AttachmentList({ taskId, canEdit, onMetaChange }: Props)
   const onMetaRef = useRef(onMetaChange);
   onMetaRef.current = onMetaChange;
 
-  const sync = (list: Attachment[]) => {
+  // The list as last set, so a change made while an upload is running is not undone by it.
+  const listRef = useRef<Attachment[]>([]);
+  const sync = (update: (current: Attachment[]) => Attachment[]) => {
+    const list = update(listRef.current);
+    listRef.current = list;
     setAttachments(list);
     onMetaRef.current({ attachment_count: list.length });
   };
@@ -37,8 +41,7 @@ export default function AttachmentList({ taskId, canEdit, onMetaChange }: Props)
       .listAttachments(taskId)
       .then((list) => {
         if (cancelled) return;
-        setAttachments(list);
-        onMetaRef.current({ attachment_count: list.length });
+        sync(() => list);
       })
       .catch((err) => !cancelled && setError(err.message))
       .finally(() => !cancelled && setLoading(false));
@@ -58,11 +61,9 @@ export default function AttachmentList({ taskId, canEdit, onMetaChange }: Props)
     setUploading(true);
     setError(null);
     try {
-      let list = attachments;
       for (const file of Array.from(files)) {
         const created = await api.uploadAttachment(taskId, file);
-        list = [...list, created];
-        sync(list);
+        sync((cur) => [...cur, created]);
       }
     } catch (err) {
       setError((err as Error).message);
@@ -82,12 +83,17 @@ export default function AttachmentList({ taskId, canEdit, onMetaChange }: Props)
   };
 
   const remove = async (id: number) => {
-    const prev = attachments;
-    sync(attachments.filter((a) => a.id !== id));
+    const removed = listRef.current.find((a) => a.id === id);
+    sync((cur) => cur.filter((a) => a.id !== id));
     try {
       await api.deleteAttachment(id);
     } catch (err) {
-      sync(prev);
+      // Put it back in its place, keeping whatever else changed meanwhile.
+      if (removed) {
+        sync((cur) =>
+          cur.some((a) => a.id === id) ? cur : [...cur, removed].sort((a, b) => a.created_at.localeCompare(b.created_at))
+        );
+      }
       setError((err as Error).message);
     }
   };

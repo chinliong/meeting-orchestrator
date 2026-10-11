@@ -1315,3 +1315,57 @@ def test_a_recording_whose_board_is_deleted_mid_job_stops_quietly(client, projec
     monkeypatch.setattr(transcripts_api.TranscriptParser, "parse", parse_while_deleted)
     transcripts_api._transcribe_and_extract(mid, str(audio))  # must not raise
     assert db_session.get(Meeting, mid) is None and not audio.exists()
+
+
+# --- required fields, duplicates, secrets in logs --------------------------------------
+
+
+def test_null_on_a_required_field_is_a_422_not_a_500(client, project):
+    task_id = _make_task(client, project, "Keep me")
+    for patch in ({"description": None}, {"status": None}):
+        assert client.patch(f"/api/v1/tasks/{task_id}", json=patch).status_code == 422
+    # owner and deadline may still be cleared with null.
+    assert client.patch(f"/api/v1/tasks/{task_id}", json={"owner": None, "deadline": None}).status_code == 200
+    for patch in ({"name": None}, {"description": None}):
+        assert client.patch(f"/api/v1/projects/{project['id']}", json=patch).status_code == 422
+    sub = client.post(f"/api/v1/tasks/{task_id}/subtasks", json={"title": "a"}).json()
+    assert client.patch(f"/api/v1/subtasks/{sub['id']}", json={"done": None}).status_code == 422
+
+
+def test_duplicate_stakeholder_name_is_a_409(client):
+    assert client.post("/api/v1/stakeholders", json={"name": "Priya"}).status_code == 201
+    dup = client.post("/api/v1/stakeholders", json={"name": "Priya"})
+    assert dup.status_code == 409
+
+
+def test_reset_code_attempts_are_claimed_before_the_guess_is_checked(client, account, monkeypatch, db_session):
+    """Once a code has used its attempts, even the right code is refused without being checked."""
+    from app.api.auth import RESET_MAX_ATTEMPTS
+    from app.models.models import PasswordReset
+
+    code = _request_reset_code(client, monkeypatch)
+    reset = db_session.query(PasswordReset).filter(PasswordReset.used.is_(False)).one()
+    reset.attempts = RESET_MAX_ATTEMPTS  # as if other guesses had just been counted
+    db_session.commit()
+    checked = []
+    monkeypatch.setattr("app.api.auth.verify_password", lambda *a: checked.append(a) or True)
+
+    resp = client.post(
+        "/api/v1/auth/reset-password",
+        json={"email": "owner@example.com", "code": code, "new_password": "fresh123"},
+    )
+    assert resp.status_code == 400
+    assert checked == []
+
+
+def test_cron_secret_is_hidden_in_access_logs():
+    import logging
+
+    from app.main import _RedactSecrets
+
+    record = logging.LogRecord("uvicorn.access", logging.INFO, "", 0, '%s - "%s %s HTTP/%s" %d',
+                               ("1.2.3.4", "GET", "/api/v1/internal/notify-due-tasks?secret=abc123&x=1", "1.1", 200),
+                               None)
+    _RedactSecrets().filter(record)
+    assert "abc123" not in record.getMessage()
+    assert "secret=[redacted]&x=1" in record.getMessage()

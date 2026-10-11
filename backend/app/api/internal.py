@@ -8,6 +8,7 @@ a day with a simple GET request.
 There's no user session for an external pinger to present, so this is protected by a shared
 secret (CRON_SECRET) instead of the usual auth/workspace tokens.
 """
+import hmac
 import os
 from typing import Optional
 
@@ -24,7 +25,11 @@ def _verify_cron_secret(secret_header: Optional[str], secret_query: Optional[str
     expected = os.getenv("CRON_SECRET")
     if not expected:
         raise HTTPException(status_code=503, detail="CRON_SECRET is not configured on the server")
-    if (secret_header or secret_query) != expected:
+    # Compared in constant time, so response timing reveals nothing about the secret.
+    if not any(
+        given and hmac.compare_digest(given.encode(), expected.encode())
+        for given in (secret_header, secret_query)
+    ):
         raise HTTPException(status_code=403, detail="Invalid or missing secret")
 
 

@@ -24,6 +24,7 @@ Environment variables (each limit is a count per period, e.g. "20/hour"):
     RATE_LIMIT_AI         summaries and subtask generations together. Default 30/hour.
     RATE_LIMIT_LOGIN      sign-in attempts.          Default 10/minute.
     RATE_LIMIT_RESET      password-reset requests.   Default 5/hour.
+    RATE_LIMIT_RESET_CODE reset-code attempts.       Default 10/minute.
 """
 from __future__ import annotations
 
@@ -57,6 +58,7 @@ AUDIO = _limit("AUDIO", "10/hour")
 AI = _limit("AI", "30/hour")
 LOGIN = _limit("LOGIN", "10/minute")
 RESET = _limit("RESET", "5/hour")
+RESET_CODE = _limit("RESET_CODE", "10/minute")
 
 limiter = Limiter(
     key_func=client_address,

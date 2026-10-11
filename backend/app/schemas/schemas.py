@@ -7,6 +7,13 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from app.models.models import MeetingStatus, TaskStatus
 
 
+def _not_null(value):
+    """For an update field that may be left out but not set to null (its column is required)."""
+    if value is None:
+        raise ValueError("cannot be null")
+    return value
+
+
 class ProjectCreate(BaseModel):
     name: str
     description: str = ""
@@ -16,6 +23,8 @@ class ProjectUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     notify_enabled: Optional[bool] = None
+
+    _required = field_validator("name", "description", "notify_enabled")(_not_null)
 
 
 class ProjectOut(BaseModel):
@@ -162,6 +171,9 @@ class TaskUpdate(BaseModel):
     deadline: Optional[date] = None
     status: Optional[TaskStatus] = None
 
+    # owner and deadline may be cleared with null; a task always has a description and status.
+    _required = field_validator("description", "status")(_not_null)
+
 
 class SubtaskSnapshot(BaseModel):
     """A deleted task's subtask, as kept in its undo snapshot."""
@@ -276,6 +288,8 @@ class SubtaskCreate(BaseModel):
 class SubtaskUpdate(BaseModel):
     title: Optional[str] = None
     done: Optional[bool] = None
+
+    _required = field_validator("done")(_not_null)
 
 
 class SubtaskGenerate(BaseModel):

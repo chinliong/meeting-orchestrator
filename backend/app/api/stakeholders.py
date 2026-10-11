@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.db import get_db
@@ -15,6 +15,9 @@ def list_stakeholders(db: Session = Depends(get_db)):
 
 @router.post("", response_model=StakeholderOut, status_code=201)
 def create_stakeholder(payload: StakeholderCreate, db: Session = Depends(get_db)):
+    # Names are unique; say so rather than fail the insert with a 500.
+    if db.query(Stakeholder.id).filter(Stakeholder.name == payload.name).first() is not None:
+        raise HTTPException(status_code=409, detail="A stakeholder with this name already exists")
     stakeholder = Stakeholder(name=payload.name, email=payload.email)
     db.add(stakeholder)
     db.commit()

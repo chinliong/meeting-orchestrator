@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import re
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
@@ -18,6 +19,26 @@ from app.ratelimit import TRUSTED_IP_HEADERS, limiter, rate_limit_exceeded
 from app.models import models  # noqa: F401  (ensures models are registered before create_all)
 
 Base.metadata.create_all(bind=engine)
+
+
+class _RedactSecrets(logging.Filter):
+    """Hide `?secret=` values in uvicorn's access log lines.
+
+    The daily reminder trigger passes CRON_SECRET in the query string (free schedulers often
+    cannot set headers), and the access log records each request's full path.
+    """
+
+    _pattern = re.compile(r"(secret=)[^&\s]*", re.IGNORECASE)
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        if isinstance(record.args, tuple):
+            record.args = tuple(
+                self._pattern.sub(r"\1[redacted]", a) if isinstance(a, str) else a for a in record.args
+            )
+        return True
+
+
+logging.getLogger("uvicorn.access").addFilter(_RedactSecrets())
 
 # How long after startup to look for meetings a restart interrupted. On a deploy Render keeps the
 # old instance serving for about 60 seconds after the new one starts, then allows it 30 seconds to

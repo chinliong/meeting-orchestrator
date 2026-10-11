@@ -46,7 +46,13 @@ export default function SubtaskList({
   const onMetaRef = useRef(onMetaChange);
   onMetaRef.current = onMetaChange;
 
-  const sync = (list: Subtask[]) => {
+  // The list as last set. Changes are applied to this rather than to the `subtasks` a handler
+  // closed over: Generate can take seconds, and a subtask added or ticked meanwhile must not be
+  // dropped from the list when it returns.
+  const listRef = useRef<Subtask[]>([]);
+  const sync = (update: (current: Subtask[]) => Subtask[]) => {
+    const list = update(listRef.current);
+    listRef.current = list;
     setSubtasks(list);
     onMetaRef.current({
       subtask_total: list.length,
@@ -62,11 +68,7 @@ export default function SubtaskList({
       .listSubtasks(taskId)
       .then((list) => {
         if (cancelled) return;
-        setSubtasks(list);
-        onMetaRef.current({
-          subtask_total: list.length,
-          subtask_done: list.filter((s) => s.done).length,
-        });
+        sync(() => list);
       })
       .catch((err) => !cancelled && setError(err.message))
       .finally(() => !cancelled && setLoading(false));
@@ -102,7 +104,7 @@ export default function SubtaskList({
     setError(null);
     try {
       const created = await api.createSubtask(taskId, title);
-      sync([...subtasks, created]);
+      sync((cur) => [...cur, created]);
       setNewTitle("");
       pushReverse("add subtask", () => api.deleteSubtask(created.id));
     } catch (err) {
@@ -114,14 +116,15 @@ export default function SubtaskList({
 
   const toggleDone = async (subtask: Subtask) => {
     // Optimistic — flip immediately, reconcile from the server response.
-    const next = subtasks.map((s) => (s.id === subtask.id ? { ...s, done: !s.done } : s));
-    sync(next);
+    const setDone = (done: boolean) => (cur: Subtask[]) =>
+      cur.map((s) => (s.id === subtask.id ? { ...s, done } : s));
+    sync(setDone(!subtask.done));
     try {
       const updated = await api.updateSubtask(subtask.id, { done: !subtask.done });
-      sync(subtasks.map((s) => (s.id === updated.id ? updated : s)));
+      sync((cur) => cur.map((s) => (s.id === updated.id ? updated : s)));
       pushReverse("subtask", () => api.updateSubtask(subtask.id, { done: subtask.done }));
     } catch (err) {
-      sync(subtasks); // revert
+      sync(setDone(subtask.done)); // revert this subtask only
       setError((err as Error).message);
     }
   };
@@ -133,7 +136,7 @@ export default function SubtaskList({
     const previousTitle = subtask.title;
     try {
       const updated = await api.updateSubtask(subtask.id, { title });
-      sync(subtasks.map((s) => (s.id === updated.id ? updated : s)));
+      sync((cur) => cur.map((s) => (s.id === updated.id ? updated : s)));
       pushReverse("rename subtask", () => api.updateSubtask(subtask.id, { title: previousTitle }));
     } catch (err) {
       setError((err as Error).message);
@@ -141,15 +144,21 @@ export default function SubtaskList({
   };
 
   const removeSubtask = async (id: number) => {
-    const prev = subtasks;
-    const removed = subtasks.find((s) => s.id === id);
-    sync(subtasks.filter((s) => s.id !== id));
+    const removed = listRef.current.find((s) => s.id === id);
+    sync((cur) => cur.filter((s) => s.id !== id));
     try {
       await api.deleteSubtask(id);
       // Undo re-creates it (with a fresh id, appended) — close enough for a checklist item.
       if (removed) pushReverse("delete subtask", () => api.createSubtask(taskId, removed.title));
     } catch (err) {
-      sync(prev);
+      // Put it back in its place, keeping whatever else changed meanwhile.
+      if (removed) {
+        sync((cur) =>
+          cur.some((s) => s.id === id)
+            ? cur
+            : [...cur, removed].sort((a, b) => a.position - b.position || a.id - b.id)
+        );
+      }
       setError((err as Error).message);
     }
   };
@@ -164,7 +173,7 @@ export default function SubtaskList({
         taskId,
         withInstructions ? instructions.trim() : undefined
       );
-      sync([...subtasks, ...created]);
+      sync((cur) => [...cur, ...created]);
       setInstructMode(false);
       setInstructions("");
       pushReverse("generate subtasks", () =>

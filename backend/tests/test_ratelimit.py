@@ -67,3 +67,12 @@ def test_password_reset_requests_are_limited(client, limits_on):
     blocked = client.post("/api/v1/auth/forgot-password", json={"email": "a@example.com"})
     assert blocked.status_code == 429
     assert "password-reset requests" in blocked.json()["detail"]
+
+
+def test_reset_code_attempts_are_limited(client, limits_on):
+    body = {"email": "a@example.com", "code": "000000", "new_password": "fresh12345"}
+    for _ in range(10):
+        assert client.post("/api/v1/auth/reset-password", json=body).status_code == 400
+    blocked = client.post("/api/v1/auth/reset-password", json=body)
+    assert blocked.status_code == 429
+    assert "reset-code attempts" in blocked.json()["detail"]

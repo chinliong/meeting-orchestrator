@@ -35,6 +35,8 @@ interface Props {
   onCreate: (values: TaskValues) => Promise<void>;
   /** Bubble up subtask/attachment count changes so the task card badges stay in sync. */
   onMetaChange?: (taskId: number, meta: Partial<TaskMeta>) => void;
+  /** A change saved as the card closed failed; the card is gone, so the page shows the message. */
+  onSaveErrorAfterClose?: (message: string) => void;
 }
 
 const STATUSES: { value: TaskStatus; label: string }[] = [
@@ -57,6 +59,7 @@ export default function EditTaskModal({
   onSave,
   onCreate,
   onMetaChange,
+  onSaveErrorAfterClose,
 }: Props) {
   const open = task !== null || createMode;
   // Viewing an existing task on a board you can't edit: show everything, change nothing.
@@ -75,12 +78,15 @@ export default function EditTaskModal({
   const savedRef = useRef<TaskValues>({ description: "", owner: null, deadline: null, status: "todo" });
   // Latest close handler, so the Escape listener can flush pending edits without re-subscribing.
   const closeRef = useRef<() => void>(onClose);
+  // Set once the card is closing, so a save that fails afterwards is reported to the page.
+  const closingRef = useRef(false);
 
   // Seed the fields when the card opens, switches task, or an undo lands (syncNonce). Crucially
   // this does NOT depend on the whole `task` object, so a field auto-save (which replaces the
   // task object) won't re-seed mid-edit and clobber what's being typed elsewhere.
   useEffect(() => {
     if (open) {
+      closingRef.current = false;
       setDescription(task?.description ?? "");
       setOwner(task?.owner ?? "");
       setStatus(task?.status ?? "todo");
@@ -126,12 +132,19 @@ export default function EditTaskModal({
   // --- edit mode: save a single field the moment it changes, only if it actually changed ---
   const commitField = async <K extends keyof TaskValues>(field: K, value: TaskValues[K]) => {
     if (!task || readOnly || savedRef.current[field] === value) return;
+    const previous = savedRef.current[field];
     savedRef.current = { ...savedRef.current, [field]: value };
     try {
       setAutoSaveError(null);
       await onSave(task.id, { [field]: value });
     } catch (err) {
-      setAutoSaveError(err instanceof Error ? err.message : "Failed to save changes");
+      // Not saved after all: forget it was, so the next blur or closing the card tries again
+      // (unless a newer value has been saved for the field since).
+      if (savedRef.current[field] === value) savedRef.current = { ...savedRef.current, [field]: previous };
+      const message = err instanceof Error ? err.message : "Failed to save changes";
+      // A save started by closing the card fails after the card has gone, so tell the page.
+      if (closingRef.current) onSaveErrorAfterClose?.(`A change to \u201c${task.description}\u201d wasn\u2019t saved. ${message}`);
+      else setAutoSaveError(message);
     }
   };
 
@@ -164,6 +177,7 @@ export default function EditTaskModal({
   };
 
   const handleClose = () => {
+    closingRef.current = true;
     flushPending();
     onClose();
   };

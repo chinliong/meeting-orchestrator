@@ -97,10 +97,11 @@ def call_tool(system_prompt: str, tool: dict, user_text: str, model: str | None 
             "mode": "ANY", "allowedFunctionNames": [tool["name"]]}},
         "generationConfig": {"maxOutputTokens": MAX_OUTPUT_TOKENS},
     }
+    # The key goes in a header, not the URL, so it never appears in a logged or reported URL.
     req = urllib.request.Request(
-        f"{API_ROOT}/{model}:generateContent?key={api_key}",
+        f"{API_ROOT}/{model}:generateContent",
         data=json.dumps(body).encode(),
-        headers={"Content-Type": "application/json"}, method="POST")
+        headers={"Content-Type": "application/json", "x-goog-api-key": api_key}, method="POST")
     try:
         with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT_S) as resp:
             data = json.loads(resp.read())
