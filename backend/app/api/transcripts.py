@@ -54,6 +54,9 @@ log = logging.getLogger("uvicorn.error")
 MAX_AUDIO_BYTES = 500 * 1024 * 1024  # 500 MB
 _UPLOAD_CHUNK = 1024 * 1024
 
+# Shown on a meeting whose task extraction failed (a model outage, an unreadable reply).
+EXTRACTION_FAILED = "The AI couldn't read this transcript just now. Please try again in a moment."
+
 
 def _meeting_title(title: str, on: date) -> str:
     """Fall back to a dated label when the user leaves the title blank."""
@@ -90,9 +93,11 @@ def _extract_and_store_tasks(meeting: Meeting, db: Session) -> None:
         # TranscriptParser.parse logs the provider, model and elapsed time itself.
         extraction = TranscriptParser().parse(meeting.transcript_text,
                                               meeting_date=_anchor(meeting))
-    except Exception as exc:  # LLM/API failure: record it on the meeting, don't crash
+    except Exception:  # LLM/API failure: record it on the meeting, don't crash
+        # The raw error (an HTTP status, a validation dump) is for the logs; people get a sentence.
+        log.exception("extraction failed for meeting %s", meeting.id)
         meeting.status = MeetingStatus.FAILED
-        meeting.error_message = str(exc)
+        meeting.error_message = EXTRACTION_FAILED
         db.commit()
         return
 
@@ -192,9 +197,10 @@ def _transcribe_and_extract(meeting_id: int, path: str) -> None:
             meeting.error_message = str(exc)
             db.commit()
             return
-        except Exception as exc:  # never leave the meeting stuck in PROCESSING
+        except Exception:  # never leave the meeting stuck in PROCESSING
+            log.exception("transcription failed for meeting %s", meeting_id)
             meeting.status = MeetingStatus.FAILED
-            meeting.error_message = f"Transcription failed: {exc}"
+            meeting.error_message = "The recording could not be transcribed. Please try again."
             db.commit()
             return
         # Deleting the board deletes its meetings, even one still processing; if that happened

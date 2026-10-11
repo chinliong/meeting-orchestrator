@@ -48,23 +48,38 @@ export function setSessionExpiredHandler(handler: (() => void) | null) {
 // A wrong password on these routes is also a 401, so it must not end the session.
 const PASSWORD_ROUTES = ["/auth/login", "/auth/signup", "/auth/password"];
 
-async function throwIfFailed(res: Response, method: string, path: string): Promise<void> {
+async function throwIfFailed(res: Response, path: string): Promise<void> {
   if (res.ok) return;
   const body = await res.text();
   if (res.status === 401 && authToken && !PASSWORD_ROUTES.includes(path)) onSessionExpired?.();
-  // A rate limit (429) comes with a message written for people, e.g. "You've reached the limit for
-  // parsing transcripts for now"; use it as the error text so every screen shows it as it is.
-  if (res.status === 429) {
-    let detail = "Too many requests for now. Please try again later.";
-    try {
-      detail = JSON.parse(body).detail || detail;
-    } catch {
-      /* not JSON: keep the default */
-    }
-    throw new ApiError(detail, 429, body);
-  }
-  throw new ApiError(`${method} ${path} failed (${res.status}): ${body}`, res.status, body);
+  // The message is what screens show, so it is the server's sentence for people (FastAPI's
+  // "detail"), never the method, path or raw body. Callers that need more read status and body.
+  throw new ApiError(readableError(res.status, body), res.status, body);
 }
+
+/** A sentence for people from an error response: the server's own detail when it has one. */
+function readableError(status: number, body: string): string {
+  let detail: unknown;
+  try {
+    detail = JSON.parse(body).detail;
+  } catch {
+    /* not JSON (e.g. a proxy's error page): fall through to a message for the status */
+  }
+  if (typeof detail === "string" && detail.trim()) return detail;
+  if (detail && typeof detail === "object" && !Array.isArray(detail)) {
+    const message = (detail as { message?: unknown }).message;
+    if (typeof message === "string" && message.trim()) return message;
+  }
+  if (Array.isArray(detail)) return "Some of those details weren't accepted. Please check them and try again.";
+  if (status === 429) return "Too many requests for now. Please try again later.";
+  if (status === 404) return "That item no longer exists. Refresh the page to see the latest.";
+  if (status === 403) return "You don't have permission to do that.";
+  if (status >= 500) return "The server ran into a problem. Please try again in a moment.";
+  return "Something went wrong. Please try again.";
+}
+
+/** Thrown when the server could not be reached at all (offline, or still waking after retries). */
+export class NetworkError extends Error {}
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -78,7 +93,10 @@ async function fetchWithRetry(url: string, init: RequestInit, maxAttempts = 5): 
     try {
       return await fetch(url, init);
     } catch (err) {
-      if (attempt >= maxAttempts) throw err;
+      // The browser's own text ("Failed to fetch", "Load failed") means nothing to people.
+      if (attempt >= maxAttempts) {
+        throw new NetworkError("Couldn't reach the server. Check your connection and try again.");
+      }
       await sleep(2000);
     }
   }
@@ -103,7 +121,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   if (workspaceToken && !headers["X-Workspace-Token"]) headers["X-Workspace-Token"] = workspaceToken;
 
   const res = await fetchWithRetry(`${API_BASE}${path}`, { ...options, headers });
-  await throwIfFailed(res, options?.method ?? "GET", path);
+  await throwIfFailed(res, path);
   if (res.status === 204) return undefined as T;
   return res.json();
 }
@@ -237,7 +255,7 @@ export const api = {
       body: form,
       headers: authHeaders(),
     });
-    await throwIfFailed(res, "POST", `/tasks/${taskId}/attachments`);
+    await throwIfFailed(res, `/tasks/${taskId}/attachments`);
     return res.json();
   },
 
@@ -250,7 +268,7 @@ export const api = {
       method: "GET",
       headers: authHeaders(),
     });
-    await throwIfFailed(res, "GET", `/attachments/${id}`);
+    await throwIfFailed(res, `/attachments/${id}`);
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -341,7 +359,7 @@ export const api = {
     if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
     if (workspaceToken) headers["X-Workspace-Token"] = workspaceToken;
     const res = await fetchWithRetry(`${API_BASE}/transcripts/audio`, { method: "POST", body: form, headers });
-    await throwIfFailed(res, "POST", "/transcripts/audio");
+    await throwIfFailed(res, "/transcripts/audio");
     return res.json();
   },
 };

@@ -93,9 +93,14 @@ export interface Attachment {
   created_at: string;
 }
 
-/** Snapshot returned when a task is deleted, enough to restore it (powers undo). */
+/**
+ * Snapshot returned when a task is deleted, enough to restore it with its subtasks (powers undo).
+ * The server signs it, so it is sent back exactly as received. Attachments are not kept.
+ */
 export interface DeletedTask {
   task: Task;
+  subtasks: { title: string; done: boolean; position: number }[];
+  signature: string;
 }
 
 /** A reversible action on the undo stack. `run` performs the inverse of what just happened. */

@@ -117,6 +117,8 @@ export default function DashboardPage() {
     createdAt: string | null;
     resolve: (addAgain: boolean) => void;
   } | null>(null);
+  // The Delete task confirmation, for a task with attachments: null while closed.
+  const [taskDeletion, setTaskDeletion] = useState<Task | null>(null);
   // The Delete project confirmation: null while closed.
   const [projectDeletion, setProjectDeletion] = useState<{ busy: boolean; error: string | null } | null>(null);
 
@@ -188,12 +190,13 @@ export default function DashboardPage() {
           }
           setSelectedProjectId(shared.id);
         } catch (err) {
-          // A regenerated or mistyped link: say so plainly instead of showing the raw API error.
+          // A regenerated or mistyped link: say so plainly, and open the user's own boards.
           setLoadError(
             err instanceof ApiError && err.status === 404
               ? "This share link is no longer valid. Ask the board\u2019s owner for a new one."
               : (err as Error).message
           );
+          if (projs.length > 0) setSelectedProjectId(projs[0].id);
         }
         url.searchParams.delete("w");
         window.history.replaceState({}, "", url.pathname);
@@ -244,6 +247,7 @@ export default function DashboardPage() {
         : `${shownNames.slice(0, 2).join(", ")} and ${shownNames.length - 2} more projects`;
 
   const handleSelectProject = (id: number) => {
+    setLoadError(null); // an earlier board's error does not follow the user to this one
     setSearchAllProjects(false);
     setSelectedProjectId(id);
   };
@@ -256,10 +260,12 @@ export default function DashboardPage() {
           active: searchAllProjects,
           selected: boardScope,
           onShowAll: () => {
+            setLoadError(null);
             setBoardScope(null);
             setSearchAllProjects(true);
           },
           onShowSome: (ids) => {
+            setLoadError(null);
             setBoardScope(ids);
             setSearchAllProjects(true);
           },
@@ -292,14 +298,31 @@ export default function DashboardPage() {
     );
   };
 
+  // What is on screen: one board, all boards, or a chosen set. The owner filter and undo history
+  // below reset whenever it changes.
+  const viewKey = searchAllProjects ? (boardScope ? boardScope.join(",") : "all") : `board:${selectedProjectId}`;
+  // The view whose tasks are in `tasks`. A different view's cards must not stay on screen (under
+  // this board's name and permissions) while its own list loads, which can take seconds.
+  const loadedViewRef = useRef<string | null>(null);
+  const [tasksLoading, setTasksLoading] = useState(false);
+
   // Set the active board's capability token, then (re)load its tasks.
   const reloadTasks = useCallback(() => {
     const seq = ++loadSeqRef.current;
+    if (loadedViewRef.current !== viewKey) {
+      loadedViewRef.current = viewKey;
+      setTasks([]);
+      setTasksLoading(true);
+    }
     const apply = (list: Task[]) => {
-      if (seq === loadSeqRef.current) setTasks(list);
+      if (seq !== loadSeqRef.current) return;
+      setTasks(list);
+      setTasksLoading(false);
     };
     const fail = (err: Error) => {
-      if (seq === loadSeqRef.current) setLoadError(err.message);
+      if (seq !== loadSeqRef.current) return;
+      setLoadError(err.message);
+      setTasksLoading(false);
     };
     if (searchAllProjects && session?.mode === "user") {
       setWorkspaceToken(null);
@@ -318,6 +341,7 @@ export default function DashboardPage() {
         .catch((err) => {
           const viaLink = proj && !(session?.mode === "user" && proj.owner_user_id === session.user.id);
           if (seq === loadSeqRef.current && viaLink && err instanceof ApiError && (err.status === 403 || err.status === 404)) {
+            setTasksLoading(false);
             dropLostBoard(proj, err.status);
           } else {
             fail(err);
@@ -325,12 +349,9 @@ export default function DashboardPage() {
         });
     } else {
       setTasks([]);
+      setTasksLoading(false);
     }
-  }, [selectedProjectId, searchAllProjects, boardScope, projects, session]);
-
-  // What is on screen: one board, all boards, or a chosen set. The owner filter and undo history
-  // below reset whenever it changes.
-  const viewKey = searchAllProjects ? (boardScope ? boardScope.join(",") : "all") : `board:${selectedProjectId}`;
+  }, [selectedProjectId, searchAllProjects, boardScope, projects, session, viewKey]);
 
   // The latest reloadTasks. A transcript or recording can take minutes to process, and the user
   // may switch boards meanwhile; reloading through this ref refreshes the board now on screen,
@@ -361,10 +382,18 @@ export default function DashboardPage() {
   // token is passed explicitly so the list loads for this board even mid-switch.
   const meetingsBoardId = !searchAllProjects && selectedProject ? selectedProject.id : null;
   const meetingsBoardToken = selectedProject ? workspaceTokenFor(selectedProject) : undefined;
+  const meetingsLoadedForRef = useRef<number | null>(null);
   useEffect(() => {
     if (!ready || meetingsBoardId === null) {
+      meetingsLoadedForRef.current = null;
       setMeetings([]);
       return;
+    }
+    // Another board's meetings (its filter entries and summary) must not show while this
+    // board's list loads; a reload of the same board keeps its list on screen meanwhile.
+    if (meetingsLoadedForRef.current !== meetingsBoardId) {
+      meetingsLoadedForRef.current = meetingsBoardId;
+      setMeetings([]);
     }
     let cancelled = false;
     api
@@ -592,7 +621,16 @@ export default function DashboardPage() {
     );
   };
 
-  const handleDelete = async (taskId: number) => {
+  // Undo brings a deleted task back with its subtasks but not its attachments (the server does not
+  // keep the files), so a task with attachments is deleted only after the user confirms.
+  const handleDelete = (taskId: number) => {
+    const task = tasks.find((t) => t.id === taskId);
+    if (task && task.attachment_count > 0) setTaskDeletion(task);
+    else performDeleteTask(taskId);
+  };
+
+  const performDeleteTask = async (taskId: number) => {
+    setTaskDeletion(null);
     const gen = undoGeneration();
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
     try {
@@ -710,6 +748,7 @@ export default function DashboardPage() {
     const project = await api.createProject(name, description);
     if (user) setProjects((prev) => [project, ...prev]);
     else setProjects(upsertGuestWorkspace(project));
+    setLoadError(null);
     setSelectedProjectId(project.id);
     setTasks([]);
   };
@@ -784,6 +823,7 @@ export default function DashboardPage() {
         ? loadGuestWorkspaces().filter((p) => p.owner_user_id !== null && p.owner_user_id !== auth.user.id)
         : [];
     const onScreen = selectedProjectId;
+    setLoadError(null);
     saveAuth(auth);
     setAuthToken(auth.token);
     clearGuestChosen();
@@ -803,6 +843,7 @@ export default function DashboardPage() {
 
   const handleContinueAsGuest = () => {
     setGuestChosen();
+    setLoadError(null);
     setSession({ mode: "guest" });
     const projs = loadGuestWorkspaces();
     setProjects(projs);
@@ -817,6 +858,7 @@ export default function DashboardPage() {
     setProjects([]);
     setTasks([]);
     setSelectedProjectId(null);
+    setLoadError(null);
   };
 
   const handleChangePassword = async (currentPassword: string, newPassword: string) => {
@@ -909,9 +951,22 @@ export default function DashboardPage() {
 
       <main className="mx-auto max-w-screen-2xl px-4 py-6 sm:px-6">
         {loadError && (
-          <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {loadError}
-          </p>
+          <div
+            role="alert"
+            className="mb-4 flex items-start justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          >
+            <p>{loadError}</p>
+            <button
+              type="button"
+              onClick={() => setLoadError(null)}
+              aria-label="Dismiss message"
+              className="-my-0.5 shrink-0 rounded p-0.5 text-red-400 transition hover:bg-red-100 hover:text-red-700"
+            >
+              <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor" aria-hidden="true">
+                <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+              </svg>
+            </button>
+          </div>
         )}
 
         {projects.length === 0 ? (
@@ -1145,6 +1200,12 @@ export default function DashboardPage() {
                   />
                 )}
 
+                {tasksLoading && (
+                  <p role="status" className="text-sm text-slate-500">
+                    Loading tasks…
+                  </p>
+                )}
+
                 {activeView === "calendar" ? (
                   <CalendarView
                     tasks={visibleTasks}
@@ -1153,7 +1214,7 @@ export default function DashboardPage() {
                     onDeleteTask={handleDelete}
                     onReschedule={(taskId, deadline) => handleEditTask(taskId, { deadline })}
                   />
-                ) : search.trim() && visibleTasks.length === 0 ? (
+                ) : search.trim() && visibleTasks.length === 0 && !tasksLoading ? (
                   <div className="rounded-xl border border-dashed border-slate-200 bg-white/60 px-4 py-12 text-center text-sm text-slate-500">
                     No tasks match <span className="font-medium text-slate-700">“{search.trim()}”</span>.
                   </div>
@@ -1240,6 +1301,24 @@ export default function DashboardPage() {
         error={meetingDeletion?.error}
         onConfirm={performDeleteMeeting}
         onCancel={() => setMeetingDeletion(null)}
+      />
+
+      <ConfirmDialog
+        open={taskDeletion !== null}
+        title={`Delete “${taskDeletion?.description ?? ""}”?`}
+        message={
+          taskDeletion && (
+            <>
+              Its {taskDeletion.attachment_count} attachment{taskDeletion.attachment_count === 1 ? "" : "s"} will be
+              deleted too. Undo can bring back the task and its subtasks, but not the attachment
+              {taskDeletion.attachment_count === 1 ? "" : "s"}.
+            </>
+          )
+        }
+        confirmLabel="Delete task"
+        tone="danger"
+        onConfirm={() => taskDeletion && performDeleteTask(taskDeletion.id)}
+        onCancel={() => setTaskDeletion(null)}
       />
 
       <ConfirmDialog

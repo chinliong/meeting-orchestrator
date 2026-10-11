@@ -771,7 +771,9 @@ def test_llm_failure_marks_meeting_failed(client, project, monkeypatch):
     assert resp.status_code == 201
     body = resp.json()
     assert body["status"] == "failed"
-    assert "API down" in body["error_message"]
+    # A plain sentence for the person; the provider's own error stays in the logs.
+    assert "API down" not in body["error_message"]
+    assert "try again" in body["error_message"].lower()
     assert body["tasks"] == []
 
 
@@ -929,6 +931,54 @@ def test_restore_requires_edit_access(client, project):
     view_headers = {"X-Workspace-Token": project["view_token"]}
     blocked = client.post("/api/v1/tasks/restore", json=snapshot, headers=view_headers)
     assert blocked.status_code == 403
+
+
+def test_restore_brings_back_subtasks(client, project):
+    a = _make_task(client, project, "Plan cutover")
+    first = client.post(f"/api/v1/tasks/{a}/subtasks", json={"title": "Book the room"}).json()
+    client.post(f"/api/v1/tasks/{a}/subtasks", json={"title": "Send the agenda"})
+    client.patch(f"/api/v1/subtasks/{first['id']}", json={"done": True})
+
+    snapshot = client.delete(f"/api/v1/tasks/{a}").json()
+    assert [s["title"] for s in snapshot["subtasks"]] == ["Book the room", "Send the agenda"]
+
+    restored = client.post("/api/v1/tasks/restore", json=snapshot).json()
+    assert (restored["subtask_total"], restored["subtask_done"]) == (2, 1)
+    subs = client.get(f"/api/v1/tasks/{a}/subtasks").json()
+    assert [(s["title"], s["done"]) for s in subs] == [("Book the room", True), ("Send the agenda", False)]
+
+
+def test_restore_refuses_an_edited_snapshot(client, project):
+    a = _make_task(client, project, "A")
+    snapshot = client.delete(f"/api/v1/tasks/{a}").json()
+
+    # A client cannot choose the id (which could collide with ids handed out later)...
+    forged = {**snapshot, "task": {**snapshot["task"], "id": a + 1000}}
+    assert client.post("/api/v1/tasks/restore", json=forged).status_code == 400
+    # ...nor change what is restored, nor drop the signature.
+    forged = {**snapshot, "task": {**snapshot["task"], "description": "something else"}}
+    assert client.post("/api/v1/tasks/restore", json=forged).status_code == 400
+    unsigned = {k: v for k, v in snapshot.items() if k != "signature"}
+    assert client.post("/api/v1/tasks/restore", json=unsigned).status_code == 422
+    assert client.get(f"/api/v1/tasks?project_id={project['id']}").json() == []
+
+    # The genuine snapshot still works, once.
+    assert client.post("/api/v1/tasks/restore", json=snapshot).status_code == 201
+    assert client.post("/api/v1/tasks/restore", json=snapshot).status_code == 409
+
+
+def test_restore_keeps_the_board_meeting_link(client, project, stub_parser):
+    meeting = client.post(
+        "/api/v1/transcripts",
+        json={"project_id": project["id"], "title": "Standup", "transcript_text": "notes"},
+    ).json()
+    task_id = meeting["tasks"][0]["id"]
+    snapshot = client.delete(f"/api/v1/tasks/{task_id}").json()
+
+    # The board's own meeting link is kept on restore.
+    restored = client.post("/api/v1/tasks/restore", json=snapshot).json()
+    assert restored["meeting_id"] == meeting["id"]
+    assert restored["meeting_title"] == "Standup"
 
 
 # --- deadline email notifications -----------------------------------------------------

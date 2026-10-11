@@ -4,10 +4,24 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
-from app.auth import get_optional_user, require_project_edit, require_project_view
+from app.auth import (
+    get_optional_user,
+    require_project_edit,
+    require_project_view,
+    sign_payload,
+    verify_payload,
+)
 from app.db import get_db
-from app.models.models import Meeting, Project, Task, TaskStatus, User
-from app.schemas.schemas import DeletedTask, TaskCreate, TaskOut, TaskRestore, TaskUpdate
+from app.models.models import Meeting, Project, Subtask, Task, TaskStatus, User
+from app.schemas.schemas import (
+    DeletedTask,
+    SubtaskSnapshot,
+    TaskCreate,
+    TaskOut,
+    TaskRestore,
+    TaskRestoreData,
+    TaskUpdate,
+)
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -99,11 +113,26 @@ def delete_task(
     db: Session = Depends(get_db),
 ):
     task = _editable_task(db, task_id, user, x_workspace_token)
-    # Snapshot the task first so the client can offer an undo (POST /tasks/restore).
-    snapshot = DeletedTask(task=TaskOut.model_validate(task))
+    # Snapshot the task and its subtasks first so the client can offer an undo
+    # (POST /tasks/restore). The signature lets restore trust the snapshot's contents.
+    task_data = TaskRestoreData.model_validate(TaskOut.model_validate(task).model_dump())
+    subtasks = [SubtaskSnapshot(title=s.title, done=s.done, position=s.position) for s in task.subtasks]
+    snapshot = DeletedTask(
+        task=TaskOut.model_validate(task),
+        subtasks=subtasks,
+        signature=sign_payload(_RESTORE_PURPOSE, _restorable(task_data, subtasks)),
+    )
     db.delete(task)
     db.commit()
     return snapshot
+
+
+# What a delete snapshot's signature covers: everything restore writes.
+_RESTORE_PURPOSE = "task-restore"
+
+
+def _restorable(task: TaskRestoreData, subtasks: list[SubtaskSnapshot]) -> dict:
+    return {"task": task.model_dump(mode="json"), "subtasks": [s.model_dump(mode="json") for s in subtasks]}
 
 
 @router.post("/restore", response_model=TaskOut, status_code=201)
@@ -113,14 +142,22 @@ def restore_task(
     x_workspace_token: Optional[str] = Header(None),
     db: Session = Depends(get_db),
 ):
-    """Recreate a deleted task (with its original id) from a DeletedTask snapshot. Powers undo."""
+    """Recreate a deleted task (with its original id and subtasks) from a DeletedTask snapshot.
+
+    Powers undo. Only a snapshot this server signed is accepted, so a client cannot pick an
+    arbitrary id (which on Postgres would collide with ids the sequence hands out later) or
+    attach the task to another board's meeting.
+    """
     snap = payload.task
+    if not verify_payload(_RESTORE_PURPOSE, _restorable(snap, payload.subtasks), payload.signature):
+        raise HTTPException(status_code=400, detail="This undo is no longer available.")
     require_project_edit(db, snap.project_id, user, x_workspace_token)
     if db.get(Task, snap.id) is not None:
-        raise HTTPException(status_code=409, detail="Task already exists")
+        raise HTTPException(status_code=409, detail="This task has already been restored.")
 
     # Drop a dangling meeting link (e.g. the whole meeting was deleted meanwhile).
-    meeting_id = snap.meeting_id if snap.meeting_id and db.get(Meeting, snap.meeting_id) else None
+    meeting = db.get(Meeting, snap.meeting_id) if snap.meeting_id else None
+    meeting_id = meeting.id if meeting is not None and meeting.project_id == snap.project_id else None
     task = Task(
         id=snap.id,
         project_id=snap.project_id,
@@ -132,6 +169,7 @@ def restore_task(
         confidence=snap.confidence,
         source_decision=snap.source_decision,
     )
+    task.subtasks = [Subtask(title=s.title, done=s.done, position=s.position) for s in payload.subtasks]
     db.add(task)
     db.commit()
     db.refresh(task)

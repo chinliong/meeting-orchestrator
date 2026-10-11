@@ -163,10 +163,26 @@ class TaskUpdate(BaseModel):
     status: Optional[TaskStatus] = None
 
 
+class SubtaskSnapshot(BaseModel):
+    """A deleted task's subtask, as kept in its undo snapshot."""
+
+    title: str
+    done: bool = False
+    position: int = 0
+
+
 class DeletedTask(BaseModel):
-    """Snapshot returned by DELETE /tasks/{id} so the client can offer an undo."""
+    """Snapshot returned by DELETE /tasks/{id} so the client can offer an undo.
+
+    It carries the task's subtasks so undo brings them back too, and a server signature so
+    POST /tasks/restore only accepts a snapshot this server produced (the client cannot choose
+    the task's id, board or meeting). Attachments are not kept; the app warns before deleting
+    a task that has any.
+    """
 
     task: TaskOut
+    subtasks: list[SubtaskSnapshot] = []
+    signature: str
 
 
 class TaskRestoreData(BaseModel):
@@ -184,6 +200,8 @@ class TaskRestoreData(BaseModel):
 
 class TaskRestore(BaseModel):
     task: TaskRestoreData
+    subtasks: list[SubtaskSnapshot] = []
+    signature: str
 
 
 class MeetingUpdate(BaseModel):

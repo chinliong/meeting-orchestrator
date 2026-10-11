@@ -108,7 +108,9 @@ def test_generate_failure_returns_502(client, task, monkeypatch):
     monkeypatch.setattr("app.api.subtasks.SubtaskGenerator", BoomGenerator)
     resp = client.post(f"/api/v1/tasks/{task['id']}/subtasks/generate", json={})
     assert resp.status_code == 502
-    assert "API down" in resp.json()["detail"]
+    # A plain sentence for the person; the provider's own error stays in the logs.
+    assert "API down" not in resp.json()["detail"]
+    assert "try again" in resp.json()["detail"].lower()
 
 
 def test_subtasks_respect_view_only_token(client, task, project, stub_generator):

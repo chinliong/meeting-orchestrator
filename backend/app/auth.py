@@ -12,6 +12,9 @@ The app is multi-tenant via two mechanisms that an endpoint can accept together:
 """
 from __future__ import annotations
 
+import hashlib
+import hmac
+import json
 import os
 from datetime import datetime, timedelta, timezone
 from typing import Literal, Optional
@@ -46,6 +49,17 @@ def verify_password(password: str, password_hash: str) -> bool:
 def create_access_token(user_id: int) -> str:
     payload = {"sub": str(user_id), "exp": datetime.now(timezone.utc) + TOKEN_TTL}
     return jwt.encode(payload, AUTH_SECRET, algorithm=ALGORITHM)
+
+
+def sign_payload(purpose: str, data: dict) -> str:
+    """An HMAC over `data` (canonical JSON), so the server can later tell it produced it."""
+    canonical = json.dumps(data, sort_keys=True, separators=(",", ":"))
+    message = f"{purpose}:{canonical}".encode()
+    return hmac.new(AUTH_SECRET.encode(), message, hashlib.sha256).hexdigest()
+
+
+def verify_payload(purpose: str, data: dict, signature: str) -> bool:
+    return hmac.compare_digest(sign_payload(purpose, data), signature or "")
 
 
 def _decode_user_id(token: str) -> Optional[int]:

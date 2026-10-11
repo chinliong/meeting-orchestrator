@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
@@ -11,6 +12,8 @@ from app.ratelimit import ai_limit
 from app.schemas.schemas import SubtaskCreate, SubtaskGenerate, SubtaskOut, SubtaskUpdate
 
 router = APIRouter(tags=["subtasks"])
+
+log = logging.getLogger("uvicorn.error")
 
 
 def _task_for_view(db: Session, task_id: int, user, ws_token) -> Task:
@@ -89,8 +92,9 @@ def generate_subtasks(
     task = _task_for_edit(db, task_id, user, x_workspace_token)
     try:
         titles = SubtaskGenerator().generate(task, payload.instructions)
-    except Exception as exc:  # LLM/API failure — surface a clean error, don't 500
-        raise HTTPException(status_code=502, detail=f"Could not generate subtasks: {exc}")
+    except Exception:  # LLM/API failure — surface a clean error, don't 500
+        log.exception("subtask generation failed for task %s", task.id)
+        raise HTTPException(status_code=502, detail="Couldn't suggest subtasks right now. Please try again.")
 
     if not titles:
         raise HTTPException(status_code=502, detail="The model returned no subtasks. Try again.")
