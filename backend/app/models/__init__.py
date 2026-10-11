@@ -1,3 +1,3 @@
-from app.models.models import Meeting, Project, Stakeholder, Task, User
+from app.models.models import Meeting, Project, Task, User
 
-__all__ = ["Project", "Stakeholder", "Meeting", "Task", "User"]
+__all__ = ["Project", "Meeting", "Task", "User"]

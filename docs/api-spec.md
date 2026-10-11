@@ -354,17 +354,6 @@ found. The client fetches this with the auth/workspace headers, so it isn't a pl
 ### `DELETE /attachments/{attachment_id}`
 Removes the attachment. Requires edit access. `204`. `404` if not found.
 
-## Stakeholders
-
-A list of named people, not linked to tasks or to any board. These endpoints check no
-credentials.
-
-### `GET /stakeholders`
-List stakeholders (alphabetical).
-
-### `POST /stakeholders`
-Body `{ "name": "string", "email": "string (optional)" }` → `201` stakeholder object.
-
 ## Internal: daily reminder trigger
 
 ### `GET /internal/notify-due-tasks`

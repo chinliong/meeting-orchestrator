@@ -1317,7 +1317,7 @@ def test_a_recording_whose_board_is_deleted_mid_job_stops_quietly(client, projec
     assert db_session.get(Meeting, mid) is None and not audio.exists()
 
 
-# --- required fields, duplicates, secrets in logs --------------------------------------
+# --- required fields, reset codes, secrets in logs -------------------------------------
 
 
 def test_null_on_a_required_field_is_a_422_not_a_500(client, project):
@@ -1330,12 +1330,6 @@ def test_null_on_a_required_field_is_a_422_not_a_500(client, project):
         assert client.patch(f"/api/v1/projects/{project['id']}", json=patch).status_code == 422
     sub = client.post(f"/api/v1/tasks/{task_id}/subtasks", json={"title": "a"}).json()
     assert client.patch(f"/api/v1/subtasks/{sub['id']}", json={"done": None}).status_code == 422
-
-
-def test_duplicate_stakeholder_name_is_a_409(client):
-    assert client.post("/api/v1/stakeholders", json={"name": "Priya"}).status_code == 201
-    dup = client.post("/api/v1/stakeholders", json={"name": "Priya"})
-    assert dup.status_code == 409
 
 
 def test_reset_code_attempts_are_claimed_before_the_guess_is_checked(client, account, monkeypatch, db_session):

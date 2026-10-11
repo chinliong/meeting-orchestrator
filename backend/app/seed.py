@@ -1,4 +1,4 @@
-"""Seed the database with sample projects, stakeholders, and pre-extracted tasks.
+"""Seed the database with a demo account, sample projects and pre-extracted tasks.
 
 This is deterministic and offline — it does NOT call the LLM, so the dashboard has
 realistic data across all three Kanban columns on first run without spending API calls.
@@ -17,7 +17,6 @@ from app.models.models import (
     Meeting,
     MeetingStatus,
     Project,
-    Stakeholder,
     Task,
     TaskStatus,
     User,
@@ -26,13 +25,6 @@ from app.models.models import (
 # A demo account that owns the sample boards, so they're visible after a fresh seed.
 DEMO_EMAIL = "demo@example.com"
 DEMO_PASSWORD = "demo1234"
-
-SAMPLE_STAKEHOLDERS = [
-    ("Aisha Rahman", "aisha.rahman@example.com"),
-    ("Daniel Tan", "daniel.tan@example.com"),
-    ("Priya Nair", "priya.nair@example.com"),
-    ("Marcus Wong", "marcus.wong@example.com"),
-]
 
 SAMPLE_PROJECTS = [
     (
@@ -75,10 +67,6 @@ def seed():
             elif project.owner_user_id is None:
                 project.owner_user_id = demo.id
             projects[name] = project
-
-        for name, email in SAMPLE_STAKEHOLDERS:
-            if not db.query(Stakeholder).filter_by(name=name).first():
-                db.add(Stakeholder(name=name, email=email))
 
         # Seed a completed sample meeting + tasks on the first project, only if it has none yet.
         first = projects["SAP S/4HANA Go-Live Programme"]

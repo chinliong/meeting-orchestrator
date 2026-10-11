@@ -107,14 +107,6 @@ class Project(Base):
     )
 
 
-class Stakeholder(Base):
-    __tablename__ = "stakeholders"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False, unique=True)
-    email = Column(String, nullable=True)
-
-
 # Stored in Meeting.summary when the server could not write a summary after extraction.
 SUMMARY_FAILED = json.dumps({"failed": True})
 

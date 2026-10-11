@@ -113,17 +113,6 @@ class SharedReminderOut(BaseModel):
     project_name: str
 
 
-class StakeholderCreate(BaseModel):
-    name: str
-    email: Optional[str] = None
-
-
-class StakeholderOut(StakeholderCreate):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-
-
 class TranscriptSubmit(BaseModel):
     project_id: int
     title: str = ""

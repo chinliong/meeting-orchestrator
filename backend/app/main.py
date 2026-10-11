@@ -12,7 +12,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 
-from app.api import attachments, auth, internal, projects, stakeholders, subtasks, tasks, transcripts
+from app.api import attachments, auth, internal, projects, subtasks, tasks, transcripts
 from app.db import Base, engine
 from app.llm import transcription
 from app.ratelimit import TRUSTED_IP_HEADERS, limiter, rate_limit_exceeded
@@ -93,7 +93,6 @@ app.add_middleware(
 
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(projects.router, prefix="/api/v1")
-app.include_router(stakeholders.router, prefix="/api/v1")
 app.include_router(transcripts.router, prefix="/api/v1")
 app.include_router(tasks.router, prefix="/api/v1")
 app.include_router(subtasks.router, prefix="/api/v1")

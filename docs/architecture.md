@@ -38,7 +38,7 @@ flowchart LR
 
     subgraph API[FastAPI backend]
         direction TB
-        R[API routers<br/>auth, projects, transcripts, tasks,<br/>subtasks, attachments, stakeholders]
+        R[API routers<br/>auth, projects, transcripts, tasks,<br/>subtasks, attachments]
         AC[Access control<br/>owner JWT or workspace token]
         L[LLM module<br/>parser, subtask generator,<br/>meeting summary]
         W[Transcription module]
@@ -115,7 +115,6 @@ flowchart LR
   - `GET|POST /tasks/{id}/attachments`, `GET|DELETE /attachments/{id}`. Bytes are streamed back
     behind the same credential headers as every other call, so an attachment is not reachable
     through a bare unauthenticated link.
-  - `GET|POST /stakeholders`.
   - `PATCH /auth/notifications` (set deadline-reminder preferences), `POST /auth/notifications/test`
     (send a one-off preview digest).
   - `GET /health`: liveness, plus the extraction model the deployment will actually use and
@@ -158,7 +157,7 @@ flowchart LR
     supported by configuration. With none configured the audio endpoint returns a clear
     unavailable status rather than failing at import.
 - **Database:** PostgreSQL (prod) / SQLite (dev), via SQLAlchemy. Tables: `users`, `projects`,
-  `meetings`, `stakeholders`, `tasks`, `subtasks`, `attachments`, `password_resets`,
+  `meetings`, `tasks`, `subtasks`, `attachments`, `password_resets`,
   `reminder_subscriptions`, `subscriber_reminders`. Attachment
   bytes are stored in the `attachments` row (the deploy target has an ephemeral filesystem and no
   object storage), size-capped in the API. The engine is created with `pool_pre_ping` (and a 5-min
@@ -183,8 +182,7 @@ flowchart LR
   write access. On sign-up or log-in, a guest's `edit_token`s can be supplied to claim those boards.
 - The owner can regenerate either token (`POST /projects/{id}/rotate-token`), which cancels every
   copy of the old link while the other keeps working. Tokens do not otherwise expire.
-- Edit access covers every write on the board, including deleting it. The `stakeholders`
-  endpoints are not tied to a board and check no credentials.
+- Edit access covers every write on the board, including deleting it.
 - Sharing is asynchronous (no live sync); concurrent edits are last-write-wins.
 
 ## Deadline reminders
@@ -297,11 +295,6 @@ erDiagram
         int size
         blob data
     }
-    STAKEHOLDER {
-        int id PK
-        string name
-        string email
-    }
     REMINDER_SUBSCRIPTION {
         int id PK
         int project_id FK
@@ -318,9 +311,9 @@ erDiagram
 
 A task exposes its source meeting's title and date (`meeting_title`, `meeting_date`) for display,
 so meetings in a series that share a title stay distinguishable on the board; manually-added tasks
-have no `meeting_id` and carry full confidence. `stakeholders` deliberately has no foreign key to
-`tasks`: a task's `owner` is the plain name the model extracted from the transcript, and the owner
-filter matches that string directly. The people who own action items in a meeting are usually not
+have no `meeting_id` and carry full confidence. A task's `owner` is the plain name the model
+extracted from the transcript, not a link to a user or contact record, and the owner filter
+matches that string directly. The people who own action items in a meeting are usually not
 users of the tool, and requiring each of them to hold an account would make the extraction
 unusable.
 
@@ -364,6 +357,5 @@ unusable.
   server; past that it tells the user the tasks will still arrive rather than invite a re-upload.
 - The schema is created on startup via `create_all`, which adds missing tables but never alters
   existing ones. New tables (e.g. `subtasks`, `attachments`) appear automatically; a new column on
-  an existing table needs an additive migration (`app/migrate_add_meeting_date.py`,
-  `app/migrate_add_notifications.py`, `app/migrate_reminder_optin.py`,
-  `app/migrate_add_meeting_summary.py`). `python -m app.reset_db` rebuilds and re-seeds from scratch.
+  an existing table needs a one-off additive `ALTER TABLE` against the deployed database before
+  the code that reads it ships. `python -m app.reset_db` rebuilds and re-seeds from scratch.

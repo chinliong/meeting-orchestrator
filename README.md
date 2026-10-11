@@ -89,7 +89,7 @@ Next.js / React frontend  ──HTTP──>  FastAPI backend  ──>  Gemini AP
                                               │
                                               v
                                      SQLite (dev) / PostgreSQL (prod)
-       users · projects · meetings · tasks · subtasks · attachments · stakeholders · password_resets
+       users · projects · meetings · tasks · subtasks · attachments · password_resets
        reminder_subscriptions · subscriber_reminders
 ```
 
@@ -124,8 +124,7 @@ for the full API.
   (`POST /projects/{id}/rotate-token`), which cancels every copy of the old one while the other
   keeps working, and ends the reminders of anyone who subscribed through the old link. The share
   dialog warns that anyone with a link can open the board.
-- An edit link grants every write on the board, including deleting it. The stakeholder endpoints
-  are not tied to a board and check no credentials.
+- An edit link grants every write on the board, including deleting it.
 
 ## Processing and restarts
 
@@ -292,25 +291,10 @@ DATABASE_URL="<your Postgres connection string>" python -m app.seed
 ### Schema changes on an existing database
 
 The startup `create_all` **adds missing tables** but never alters existing ones, so it picks up
-brand-new tables (e.g. `subtasks`, `attachments`) automatically on the next deploy, but a new
-**column** on an existing table needs a one-off, additive migration. Run these from your machine
-against the deployed `DATABASE_URL` (idempotent, non-destructive):
-
-```bash
-cd backend
-DATABASE_URL="<your Postgres connection string>" python -m app.migrate_add_meeting_date    # adds meetings.meeting_date
-DATABASE_URL="<your Postgres connection string>" python -m app.migrate_add_notifications   # deadline-reminder columns
-DATABASE_URL="<your Postgres connection string>" python -m app.migrate_reminder_optin      # adds projects.notify_enabled (opt-in reminders)
-DATABASE_URL="<your Postgres connection string>" python -m app.migrate_add_meeting_summary # adds meetings.summary (AI meeting summaries)
-```
-
-> Run `migrate_add_meeting_summary` **before** deploying the meeting-summary change: without
-> `meetings.summary` the meetings API will error. Existing meetings keep no summary until one is
-> requested, and their tasks are untouched.
-
-> Deploying the opt-in-reminders change to a database that predates it **requires**
-> `migrate_reminder_optin`: without `projects.notify_enabled` the projects API will error. It
-> seeds the new flag from the old one so boards that were being reminded keep being reminded.
+brand-new tables (e.g. `subtasks`, `attachments`) automatically on the next deploy, and a fresh
+database gets every current column. A new **column** on a table that already exists needs a
+one-off `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` run against the deployed `DATABASE_URL`
+before deploying the code that reads it. The deployed database already has every current column.
 
 To rebuild from scratch instead (drops, recreates, re-seeds; **destructive**), run
 `python -m app.reset_db` against that `DATABASE_URL`.
