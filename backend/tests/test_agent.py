@@ -66,8 +66,7 @@ def fake_model(monkeypatch, plan):
         calls.append(copy.deepcopy(contents))
         assert model == "existing-flash-model"
         assert 0 < timeout <= 90
-        if allowed == ["read_board"]:
-            return call("read_board", signature="signature-must-survive")
+        assert "read_board" not in allowed  # the board is sent with the request
         return call("finish_review", plan)
     monkeypatch.setattr(agent, "model_turn", turn)
     return calls
@@ -93,7 +92,13 @@ def test_no_key_does_not_fall_back_to_another_provider(client, project, enabled,
 
 
 def test_review_is_read_only_and_preserves_signatures(client, project, task, enabled, monkeypatch, db_session):
-    calls = fake_model(monkeypatch, plan_for(task.id))
+    calls = []
+    turns = iter([call("read_meeting", {"meeting_id": 999}, signature="signature-must-survive"),
+                  call("finish_review", plan_for(task.id))])
+    def turn(contents, allowed, model, timeout):
+        calls.append(copy.deepcopy(contents))
+        return next(turns)
+    monkeypatch.setattr(agent, "model_turn", turn)
     response = create(client, project)
     assert response.status_code == 201, response.text
     review = response.json()
@@ -230,11 +235,11 @@ def test_correction_can_recover_invalid_evidence(client, project, task, enabled,
     good = plan_for(task.id)
     bad = copy.deepcopy(good)
     bad["proposals"][0]["evidence"] = "An invented quote that must be corrected."
-    responses = iter([call("read_board"), call("finish_review", bad), call("finish_review", good)])
+    responses = iter([call("finish_review", bad), call("finish_review", good)])
     monkeypatch.setattr(agent, "model_turn", lambda *a: next(responses))
     response = create(client, project)
     assert response.status_code == 201
-    assert response.json()["steps"] == 3
+    assert response.json()["steps"] == 2
 
 
 def test_earlier_meeting_cannot_roll_back_newer_work(client, project, task, enabled, monkeypatch, db_session):
@@ -280,12 +285,13 @@ def test_read_tools_are_scoped_and_unknown_tools_cannot_execute(monkeypatch):
     monkeypatch.setattr(agent, "model_turn", turn)
     result = agent.run_review(ReviewInput(**INPUT), {"tasks": []}, {})
     assert result["proposals"] == []
+    assert "not available at this step" in json.dumps(captured[1])  # the board is sent, not fetched
     assert "not available in this project" in json.dumps(captured[2])
     assert "not available at this step" in json.dumps(captured[3])
 
 
 def test_read_source_meeting_and_empty_review(monkeypatch):
-    turns = iter([call("read_board"), call("read_meeting", {"meeting_id": 7}),
+    turns = iter([call("read_meeting", {"meeting_id": 7}),
                   call("finish_review", {"summary": "Already reflected on the board.", "proposals": [], "questions": []})])
     monkeypatch.setattr(agent, "model_turn", lambda *a: next(turns))
     result = agent.run_review(ReviewInput(**INPUT), {"tasks": []}, {7: {"title": "Earlier planning", "transcript": "Context"}})
@@ -302,7 +308,7 @@ def test_recent_update_only_meetings_are_available_to_agent(client, project, tas
     meeting_id = meeting.id
     calls = fake_model(monkeypatch, plan_for(task.id))
     assert create(client, project).status_code == 201
-    board = calls[1][2]["parts"][0]["functionResponse"]["response"]
+    board = json.loads(calls[0][0]["parts"][0]["text"])["board"]  # sent with the request
     assert any(m["id"] == meeting_id for m in board["meetings"])
     assert "Earlier decisions remain useful" not in json.dumps(board)  # Full text is retrieved on demand.
 
@@ -489,7 +495,7 @@ def mutate_during_generation(monkeypatch, mutation):
     mutated = False
     def turn(contents, allowed, model, timeout):
         nonlocal mutated
-        if allowed != ["read_board"] and not mutated:
+        if not mutated:  # the board snapshot is taken before the first model turn
             mutation()
             mutated = True
         return original(contents, allowed, model, timeout)
@@ -734,7 +740,7 @@ def test_malformed_tool_response_retries_within_budget(client, project, task, en
     monkeypatch.setattr(agent, "model_turn", turn)
     response = create(client, project)
     assert response.status_code == 201, response.text
-    assert response.json()["steps"] == 3
+    assert response.json()["steps"] == 2  # one rejected tool response, then the review
     assert original
 
 
@@ -1081,3 +1087,30 @@ def test_matched_candidates_are_named_in_a_note(client, project, task, enabled, 
     assert response.json()["new_task_count"] == 0
     assert any("“Write the release notes” is already on the board as “Finish the landing page design”" in q
                for q in response.json()["questions"])
+
+
+def test_empty_board_import_reserves_only_the_parser_and_summary(client, project, enabled, monkeypatch, agent_limits_on):
+    monkeypatch.setenv("RATE_LIMIT_AI", "3/hour")
+    monkeypatch.setenv("RATE_LIMIT_PARSE", "100/hour")
+    fake_model(monkeypatch, plan_for(1))
+    # Empty board: the assistant is not called, so 2 of the 3 calls are reserved.
+    assert parse_with_assistant(client, project).status_code == 201
+    # The board now has a task, so a review reserves the parser call and the assistant's six.
+    assert client.post(f"/api/v1/projects/{project['id']}/agent/reviews",
+                       json={**INPUT, "transcript": INPUT["transcript"] + " Second meeting."}).status_code == 429
+
+
+def test_meeting_review_keeps_an_existing_deadline_and_owner():
+    board = [{"id": 1, "description": "Finish the landing page design", "owner": "Alex",
+              "deadline": "2026-11-04", "status": "in_progress", "meeting_date": None}]
+    plan = plan_for(1)
+    plan["proposals"] = plan["proposals"][:1]
+    plan["proposals"][0]["after"].update(deadline=None, status="done")
+    kept = agent.validate_plan(copy.deepcopy(plan), TRANSCRIPT, board, "2026-11-02", keep_set_fields=True)
+    assert kept["proposals"][0]["after"] == {**plan["proposals"][0]["after"], "deadline": "2026-11-04"}
+    # Clearing alone leaves nothing to suggest, so the proposal is dropped rather than rejected.
+    only_clear = copy.deepcopy(plan)
+    only_clear["proposals"][0]["after"].update(status="in_progress", owner=None)
+    assert agent.validate_plan(only_clear, TRANSCRIPT, board, "2026-11-02", keep_set_fields=True)["proposals"] == []
+    # Chat, where a user can ask for a deadline to be removed, may still clear it.
+    assert agent.validate_plan(copy.deepcopy(plan), TRANSCRIPT, board, "2026-11-02")["proposals"][0]["after"]["deadline"] is None

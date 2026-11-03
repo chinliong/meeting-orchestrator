@@ -20,7 +20,7 @@ Questions the agent asks instead of adding a task count as missed items, as in t
 | Deadline within 3 days | 0.922 | 0.900 | | |
 | Tasks per run | 27.8 | 35.6 | | |
 
-Agent reviews: 32; not completed within limits: 2; provider errors excluded: 0; questions per review: 0; model calls per review: 2.67. Model: gemini-3.5-flash.
+Agent reviews: 32; not completed within limits: 2; provider errors excluded: 0; questions per review: 0; model calls per review: 2.67 (measured when the agent fetched the board with its own call; it is now sent with the request). Model: gemini-3.5-flash.
 
 ## Long set (123 annotated tasks per run)
 
@@ -35,7 +35,7 @@ Agent reviews: 32; not completed within limits: 2; provider errors excluded: 0; 
 | Deadline within 3 days | 0.983 | 0.985 | | |
 | Tasks per run | 61.6 | 101.4 | | |
 
-Agent reviews: 32; not completed within limits: 3; provider errors excluded: 0; questions per review: 0.06; model calls per review: 2.62. Model: gemini-3.5-flash.
+Agent reviews: 32; not completed within limits: 3; provider errors excluded: 0; questions per review: 0.06; model calls per review: 2.62 (measured when the agent fetched the board with its own call; it is now sent with the request). Model: gemini-3.5-flash.
 
 ## What this decided
 

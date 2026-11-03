@@ -44,8 +44,7 @@ def simulate(monkeypatch, answer, additional=None):
         assert kwargs["system_prompt"] == assistant.SYSTEM
         assert kwargs["tools"] == assistant.TOOLS
         calls.append(copy.deepcopy(contents))
-        if allowed == ["read_board"]:
-            return tool("read_board")
+        assert "read_board" not in allowed  # the board is sent with the message
         if remaining:
             return remaining.pop(0)
         return tool("finish_chat", answer)
@@ -79,7 +78,7 @@ def test_answer_has_verified_task_source_and_does_not_write(client, project, aud
     assert db_session.query(Task).count() == 1
     assert calls[1][1]["parts"][0]["thoughtSignature"] == "keep-me"
     assert calls[1][2]["parts"][0]["functionResponse"]["id"] == "call-1"
-    assert calls[2][-1]["parts"][0]["functionResponse"]["response"]["total"] == 1
+    assert calls[1][-1]["parts"][0]["functionResponse"]["response"]["total"] == 1
 
 
 def test_chat_proposal_applies_and_undoes_without_creating_meeting(client, project, audit, monkeypatch, db_session):
@@ -252,7 +251,7 @@ def test_task_filter_finds_a_full_name_owner_by_first_name():
 
 
 def test_arbitrary_tools_cannot_execute(monkeypatch):
-    turns = iter([tool("read_board"), tool("send_email", {"to": "external@example.com"}), tool("finish_chat", reply())])
+    turns = iter([tool("send_email", {"to": "external@example.com"}), tool("finish_chat", reply())])
     captures = []
     def turn(contents, *args, **kwargs):
         captures.append(copy.deepcopy(contents))
@@ -292,14 +291,14 @@ def test_consumed_chat_request_cannot_authorize_a_later_edit(client, project, au
 
 
 def test_chat_retries_malformed_tool_response(monkeypatch):
-    turns = iter([agent.RecoverableModelError("Return a valid tool call."), tool("read_board"), tool("finish_chat", reply())])
+    turns = iter([agent.RecoverableModelError("Return a valid tool call."), tool("finish_chat", reply())])
     def turn(*args, **kwargs):
         value = next(turns)
         if isinstance(value, Exception): raise value
         return value
     monkeypatch.setattr(agent, "model_turn", turn)
     result = assistant.run_chat(ChatInput(message="Hello", current_date="2026-11-02"), {"tasks": []}, {}, True)
-    assert result["steps"] == 3
+    assert result["steps"] == 2
 
 
 def test_refresh_chat_renews_request_without_applying_it(client, project, audit, monkeypatch, db_session):

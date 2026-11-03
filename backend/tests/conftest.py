@@ -54,6 +54,8 @@ def background_jobs_use_the_test_db(db_session, monkeypatch):
     from app.api import transcripts as transcripts_api
 
     monkeypatch.setattr(transcripts_api, "SessionLocal", lambda: db_session)
+    # The assistant's AI reservation checks whether the board has tasks before the request runs.
+    monkeypatch.setattr("app.ratelimit.SessionLocal", lambda: db_session)
     monkeypatch.setattr(db_session, "close", lambda: None)
     monkeypatch.setattr("app.llm.summary.gemini.call_tool",
                         lambda *a, **k: {"overview": "The team met and agreed the next steps."})

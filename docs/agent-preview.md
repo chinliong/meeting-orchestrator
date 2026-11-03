@@ -127,8 +127,9 @@ is ignored in a meeting review; the remaining candidates are added with their ex
 source decision. Each candidate matched to an existing task is named in a note after the import, so a
 wrong match can be noticed and the task added by hand.
 
-The meeting-review agent has three tools: `read_board`, `read_meeting`, and `finish_review`. It must read the board
-first, then may retrieve earlier meetings before producing suggestions. Its meeting index covers
+The board is sent with the meeting, so no model call is spent fetching it. The meeting-review agent
+then has two tools: `read_meeting`, to retrieve an earlier meeting when it needs context, and
+`finish_review`. Chat works the same way, with `query_tasks` in place of a board read. Its meeting index covers
 task source meetings and the 30 most recently added completed meetings, including follow-ups that
 only updated tasks. It has no write,
 delete, email, shell or arbitrary network tool. Its multi-turn REST adapter retains Gemini's full
@@ -136,7 +137,9 @@ model content, including thought signatures and function-call IDs, between turns
 
 The output schema is strict. Server validation checks field types, valid dates, in-project task
 IDs, distinct update targets, exact evidence excerpts, no-op edits, identical duplicate descriptions,
-and attempts to change tasks sourced from a later meeting. After the exact-excerpt check, a quote
+and attempts to change tasks sourced from a later meeting. A meeting review may change an existing
+owner or deadline but not clear one; a cleared field is restored, and a suggestion whose only change
+was clearing is dropped (chat may clear a field when asked to). After the exact-excerpt check, a quote
 that starts partway through a turn gets its speaker's label added ("Priya: …", or "Speaker 2: …"
 for a transcribed recording), taken from the nearest label above it; a header line such as
 "Date:" adds none, so a quote is never attributed to an earlier speaker. New/reassigned owners
@@ -198,7 +201,9 @@ All endpoints are under `/api/v1/projects/{project_id}/agent` and require curren
 Chat is limited by `RATE_LIMIT_AGENT_CHAT` (default 30/hour). Text-parse entry points and assistant recordings
 share `RATE_LIMIT_PARSE` (default 20/hour). Chat and refresh reserve six calls from the shared
 `RATE_LIMIT_AI` allowance (default 30/hour), a meeting review seven (the parser's extraction plus six), and
-`/parse` and `/recordings` eight, adding their background summary. This conservative reservation counts the bounded maximum, even if fewer calls are used. The app's health response advertises
+`/parse` and `/recordings` eight, adding their background summary. On a board with no tasks the
+assistant is not called, so a review reserves one call and `/parse` and `/recordings` two. The
+reservation counts the bounded maximum, even if fewer calls are used. The app's health response advertises
 `features.meeting_agent`; disabled review routes return 404.
 
 ## Validation and limits

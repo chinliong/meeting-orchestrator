@@ -169,7 +169,8 @@ that invite guessing, are limited per visitor (`backend/app/ratelimit.py`, using
 | Request a password reset | 5 per hour |
 
 Assistant chat reserves six calls from the shared AI allowance, a meeting review seven (the parser's
-extraction plus the assistant's maximum tool loop) and assistant transcript parsing eight, adding its summary. All text-parse
+extraction plus the assistant's maximum tool loop) and assistant transcript parsing eight, adding its
+summary; on a board with no tasks, where the assistant is not called, they reserve one and two. All text-parse
 entry points share the parse allowance.
 
 Everything else (viewing boards, editing tasks) is not limited, and the summary the original parser writes

@@ -36,6 +36,9 @@ from fastapi.responses import JSONResponse
 from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
 
+from app.db import SessionLocal
+from app.models.models import Task
+
 
 # Headers holding the visitor's address, trusted only where a proxy that sets them is in front.
 TRUSTED_IP_HEADERS = ("cf-connecting-ip", "true-client-ip") if os.getenv("RENDER") else ()
@@ -85,11 +88,35 @@ agent_chat_limit = limiter.limit(lambda: _limit("AGENT_CHAT", "30/hour"),
                                  error_message="You've reached the assistant message limit. Please try again later.")
 agent_ai_limit = limiter.shared_limit(lambda: _limit("AI", "30/hour"), scope="ai-generation", cost=6,
                                      error_message="You've reached the AI usage limit. Please try again later.")
+
+
+def _board_cost(with_tasks: int, empty: int):
+    """An import's reservation: the assistant is only called when the board already has tasks.
+
+    On an empty board the parser's tasks are the whole result, so only the parser (and, for a
+    parse, the summary) runs. If the board cannot be checked, the full amount is reserved.
+    """
+    def cost(request: Request) -> int:
+        try:
+            project_id = int(request.path_params["project_id"])
+            db = SessionLocal()
+            try:
+                has_tasks = db.query(Task.id).filter(Task.project_id == project_id).first() is not None
+            finally:
+                db.close()
+        except Exception:
+            return with_tasks
+        return with_tasks if has_tasks else empty
+    return cost
+
+
 # A meeting review adds the parser's extraction call to the assistant's six.
-agent_review_ai_limit = limiter.shared_limit(lambda: _limit("AI", "30/hour"), scope="ai-generation", cost=7,
+agent_review_ai_limit = limiter.shared_limit(lambda: _limit("AI", "30/hour"), scope="ai-generation",
+                                            cost=_board_cost(7, 1),
                                             error_message="You've reached the AI usage limit. Please try again later.")
 # Parsing adds the meeting summary on top of that.
-agent_parse_ai_limit = limiter.shared_limit(lambda: _limit("AI", "30/hour"), scope="ai-generation", cost=8,
+agent_parse_ai_limit = limiter.shared_limit(lambda: _limit("AI", "30/hour"), scope="ai-generation",
+                                           cost=_board_cost(8, 2),
                                            error_message="You've reached the AI usage limit. Please try again later.")
 
 

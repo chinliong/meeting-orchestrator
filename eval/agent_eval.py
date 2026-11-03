@@ -180,7 +180,8 @@ def render(results: dict) -> str:
         ag = r["agent"]
         lines += ["", f"Agent reviews: {ag['reviews']}; not completed within limits: {ag['failed_reviews']}; "
                       f"provider errors excluded: {ag['api_failures']}; questions per review: "
-                      f"{ag['questions_per_review']}; model calls per review: {ag['mean_steps']}. "
+                      f"{ag['questions_per_review']}; model calls per review: {ag['mean_steps']} (measured when "
+                      "the agent fetched the board with its own call; it is now sent with the request). "
                       f"Model: {ag['model']}.", ""]
     lines += [
         "## What this decided",
