@@ -272,16 +272,22 @@ def extract_candidates(payload):
     return [item.model_dump(mode="json") for item in extraction.action_items]
 
 
-def with_candidates(plan, candidates):
+def with_candidates(plan, candidates, tasks=()):
     """Add the parser's candidates as new-task proposals, except those already on the board.
 
     They keep their extraction score and source decision, so the board treats them like any
-    parsed task: a score below the review threshold still marks the card "Check this".
+    parsed task: a score below the review threshold still marks the card "Check this". Each
+    candidate matched to an existing task is named in a note, so a wrong match can be noticed.
     """
-    existing = {e["item"] for e in plan.get("existing_items", [])}
+    existing = {e["item"]: e["task_id"] for e in plan.get("existing_items", [])}
+    by_id = {t["id"]: t for t in tasks}
     next_id = max((p["id"] for p in plan["proposals"]), default=-1) + 1
     for i, c in enumerate(candidates):
         if i in existing:
+            match = by_id.get(existing[i])
+            if match:
+                plan["questions"].append(f'“{c["description"]}” is already on the board as “{match["description"]}”. '
+                                         "No extra copy was added.")
             continue
         plan["proposals"].append({
             "id": next_id, "kind": "create", "task_id": None, "before": None,
@@ -314,7 +320,7 @@ def run_meeting_review(db, project, payload):
     except GeminiError as exc:
         log.warning("agent review failed: %s", exc)
         raise HTTPException(502, "Gemini couldn't complete a valid review within its limits. No tasks changed. Try again.") from exc
-    return tasks, with_candidates(plan, candidates)
+    return tasks, with_candidates(plan, candidates, tasks)
 
 
 def store_meeting_review(db, project_id, payload, tasks, plan):

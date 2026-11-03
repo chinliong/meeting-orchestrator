@@ -124,7 +124,8 @@ are the result and the agent is not called. Otherwise the agent receives them as
 `candidate_tasks`: it lists those that repeat or continue an existing task under `existing_items`, so
 they are not added again, and proposes updates to existing tasks. Any new task it proposes itself
 is ignored in a meeting review; the remaining candidates are added with their extraction score and
-source decision.
+source decision. Each candidate matched to an existing task is named in a note after the import, so a
+wrong match can be noticed and the task added by hand.
 
 The meeting-review agent has three tools: `read_board`, `read_meeting`, and `finish_review`. It must read the board
 first, then may retrieve earlier meetings before producing suggestions. Its meeting index covers

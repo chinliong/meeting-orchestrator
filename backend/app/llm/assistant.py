@@ -93,7 +93,9 @@ def query_tasks(args, tasks, today):
         raise ValueError("Invalid due filter.")
     matching = []
     for task in tasks:
-        if owner and owner != (task["owner"] or "").strip().casefold():
+        task_owner = (task["owner"] or "").strip().casefold()
+        # A first name finds the owner, as people are named in meetings and in questions.
+        if owner and owner not in {task_owner, task_owner.split(" ")[0]}:
             continue
         if status == "open" and task["status"] == "done":
             continue

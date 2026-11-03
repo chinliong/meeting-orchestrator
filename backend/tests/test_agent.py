@@ -1069,3 +1069,15 @@ def test_parser_failure_saves_nothing(client, project, task, enabled, monkeypatc
     assert response.status_code == 502
     assert db_session.query(Meeting).count() == 0
     assert db_session.query(Task).count() == 1
+
+
+def test_matched_candidates_are_named_in_a_note(client, project, task, enabled, monkeypatch, db_session):
+    plan = plan_for(task.id)
+    plan["proposals"] = []
+    plan["existing_items"] = [{"item": 0, "task_id": task.id}]
+    fake_model(monkeypatch, plan)
+    response = parse_with_assistant(client, project)
+    assert response.status_code == 201, response.text
+    assert response.json()["new_task_count"] == 0
+    assert any("“Write the release notes” is already on the board as “Finish the landing page design”" in q
+               for q in response.json()["questions"])

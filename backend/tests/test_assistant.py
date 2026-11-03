@@ -239,6 +239,18 @@ def test_task_filter_dates_completed_work_and_exact_owner():
         query(status="blocked")
 
 
+def test_task_filter_finds_a_full_name_owner_by_first_name():
+    tasks = [{"id": 1, "owner": "Priya Nair", "status": "todo", "deadline": None},
+             {"id": 2, "owner": "Priyanka Rao", "status": "todo", "deadline": None},
+             {"id": 3, "owner": "Daniel Tan", "status": "todo", "deadline": None}]
+    def owners(name):
+        return [t["id"] for t in assistant.query_tasks({"owner": name, "status": "any", "due": "any"},
+                                                       tasks, date(2026, 11, 2))["tasks"]]
+    assert owners("Priya") == [1]
+    assert owners("priya nair") == [1]
+    assert owners("Nair") == []  # a surname alone is not a first name
+
+
 def test_arbitrary_tools_cannot_execute(monkeypatch):
     turns = iter([tool("read_board"), tool("send_email", {"to": "external@example.com"}), tool("finish_chat", reply())])
     captures = []
