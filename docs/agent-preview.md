@@ -35,16 +35,17 @@ The API listens at `127.0.0.1:8100`. Both listeners are restricted to this compu
 
 1. Use the existing **New meeting** card: enter the title/date, then paste a transcript or upload a recording.
 2. The meeting and new tasks save automatically. No confirmation opens when there are no updates to existing tasks.
-3. If existing tasks would change, **Suggested changes** shows those updates, ticked. Tasks the assistant
-   matched to ones already on the board are listed, unticked, under "Possible duplicates"; select any
-   that are really new. **Apply** applies what is ticked and dismisses the rest; with nothing
-   ticked the button reads **Dismiss all**. **Not now** leaves the suggestions waiting under Changes; the
-   meeting and new tasks stay saved either way.
+3. If existing tasks would change, **Suggested changes** shows those updates, selected. Tasks the
+   assistant matched to ones already on the board are listed, not selected, under "Possible
+   duplicates"; select any that are really new. **Apply** applies what is selected and dismisses the
+   rest; with nothing selected the button reads **Dismiss all**. **Not now** leaves the suggestions
+   waiting under Changes; the meeting and new tasks stay saved either way.
 4. Open the blue assistant button for questions about saved meetings or current tasks. Try
    “What is Priya working on?” and then “Move that task's deadline to this Friday.”
 5. The board toolbar’s **Changes** menu shows an approval count and contains **Suggested changes** and **Recent changes**.
    Meeting batches open a review dialog. One or two chat changes are approved in the chat itself.
-   **Recent changes** lists applied and undone changes only. Undoing approved updates preserves the imported
+   **Recent changes** lists applied, dismissed and undone changes. Undone suggestions can be opened again
+   with **Review again**, with the earlier choices selected. Undoing approved updates preserves the imported
    meeting and its new tasks. The original import has its own receipt and can only be removed from
    **Recent changes**, after confirmation. Approved task changes enter the main Undo history,
    retaining earlier normal edits. Undo still checks affected tasks before reverting.
@@ -127,8 +128,8 @@ are the result and the agent is not called. Otherwise the agent receives them as
 `candidate_tasks`: it lists those that repeat or continue an existing task under `existing_items`, so
 they are not added again, and proposes updates to existing tasks. Any new task it proposes itself
 is ignored in a meeting review; the remaining candidates are added with their extraction score and
-source decision. Each candidate matched to an existing task is kept, unticked, as a possible duplicate
-in the pending review, so a wrong match can be added with one tick; adding one links it to the meeting
+source decision. Each candidate matched to an existing task is kept, not selected, as a possible duplicate
+in the pending review, so a wrong match can be added by selecting it; adding one links it to the meeting
 and keeps its score and source. Possible duplicates do not count towards the Changes badge, and the
 review opens by itself only when it has suggested changes.
 
