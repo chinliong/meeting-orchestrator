@@ -64,6 +64,10 @@ export default function PendingTaskUpdates({ project, refreshKey, boardTasks, on
       aria-controls={expanded ? "suggested-changes-list" : undefined} disabled={!!loadingId}
       className={`inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-lg border bg-white px-3 text-[13px] font-medium transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:cursor-wait sm:text-sm ${expanded ? "border-slate-300 text-slate-800" : "border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-800"}`}
       onClick={() => setExpanded(v => !v)}>
+      {/* The sparkle used for the app's other AI features ("New meeting", subtask "Generate"). */}
+      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0" fill="currentColor" aria-hidden="true">
+        <path d="M12 2l1.9 5.1L19 9l-5.1 1.9L12 16l-1.9-5.1L5 9l5.1-1.9L12 2z" />
+      </svg>
       Changes
       {/* While a review opens, a spinner takes the badge's place, so the button keeps its width. */}
       {loadingId

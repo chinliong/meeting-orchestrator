@@ -1174,10 +1174,15 @@ export default function DashboardPage() {
                     <button
                       onClick={() => setView("board")}
                       aria-pressed={activeView === "board"}
-                      className={`rounded-md px-2.5 transition sm:px-3 ${
+                      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 transition sm:px-3 ${
                         activeView === "board" ? "bg-ink text-white shadow-sm" : "text-slate-500 hover:text-slate-700"
                       }`}
                     >
+                      {/* Three equal columns in an outline, the usual board-view icon, matching Calendar's weight. */}
+                      <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+                        <rect x="2.5" y="3.5" width="15" height="13" rx="2" />
+                        <path strokeLinecap="round" d="M7.5 3.5v13M12.5 3.5v13" />
+                      </svg>
                       Board
                     </button>
                     <button
