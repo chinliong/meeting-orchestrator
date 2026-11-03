@@ -162,6 +162,10 @@ export const api = {
     request<AgentReview>(`/projects/${projectId}/agent/reviews/${id}/refresh`, {
       method: "POST", headers: { "X-Workspace-Token": token },
     }, 1),
+  reopenAgentReview: (projectId: number, id: string, token: string) =>
+    request<AgentReview>(`/projects/${projectId}/agent/reviews/${id}/reopen`, {
+      method: "POST", headers: { "X-Workspace-Token": token },
+    }, 1),
   dismissAgentReview: (projectId: number, id: string, token: string) =>
     request<AgentReview>(`/projects/${projectId}/agent/reviews/${id}/dismiss`, {
       method: "POST", headers: { "X-Workspace-Token": token },

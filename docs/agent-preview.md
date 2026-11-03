@@ -203,6 +203,7 @@ All endpoints are under `/api/v1/projects/{project_id}/agent` and require curren
 | `POST /reviews/{id}/refresh` | Recheck a draft against current tasks without importing another meeting or creating tasks |
 | `POST /reviews/{id}/dismiss` | Turn down every suggestion in a draft; nothing on the board changes, and it is listed as dismissed |
 | `POST /reviews/{id}/undo` | Reverse that batch if its board and meeting have not changed |
+| `POST /reviews/{id}/reopen` | Offer an undone batch again as a new pending review, with the earlier choices selected; the undone entry stays in the history, and asking again returns the same review |
 
 Chat is limited by `RATE_LIMIT_AGENT_CHAT` (default 30/hour). Text-parse entry points and assistant recordings
 share `RATE_LIMIT_PARSE` (default 20/hour). Chat and refresh reserve six calls from the shared

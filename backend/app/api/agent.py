@@ -642,6 +642,36 @@ def dismiss_review(project_id: int, review_id: str, user: Optional[User] = Depen
     return output(review)
 
 
+@router.post("/reviews/{review_id}/reopen")
+def reopen_review(project_id: int, review_id: str, user: Optional[User] = Depends(get_optional_user),
+                  x_workspace_token: Optional[str] = Header(None), db: Session = Depends(get_db)):
+    """Offer undone suggestions again as a new pending review, with the earlier choices selected.
+
+    The undone entry stays in the history. Each one can be reopened once; asking again returns
+    the review it already became, so repeated clicks do not fill the history with copies.
+    """
+    review = load_review(db, project_id, review_id, user, x_workspace_token)
+    plan = json.loads(review.plan_json)
+    if review.status != "undone" or plan.get("mode", "meeting") == "meeting":
+        raise HTTPException(409, "Only undone suggested changes can be reviewed again.")
+    receipt = json.loads(review.receipt_json)
+    if receipt.get("reopened_as"):
+        return output(load_review(db, project_id, receipt["reopened_as"], user, x_workspace_token), db)
+    fresh = AgentReview(id=str(uuid.uuid4()), project_id=project_id, status="draft",
+                        expires_at=datetime.utcnow() + timedelta(hours=1), input_json=review.input_json,
+                        plan_json=json.dumps({**plan, "preselected": receipt["proposal_ids"]}),
+                        baseline_hash=fingerprint(board_snapshot(db, project_id)))
+    db.add(fresh)
+    # Claim the undone entry in the same transaction, so a repeated request cannot make two copies.
+    claimed = db.query(AgentReview).filter_by(id=review_id, status="undone", receipt_json=review.receipt_json).update(
+        {"receipt_json": json.dumps({**receipt, "reopened_as": fresh.id})}, synchronize_session=False)
+    if not claimed:
+        conflict(db, "These changes were reviewed again elsewhere. Reopen them to see the result.")
+    db.commit()
+    db.refresh(fresh)
+    return output(fresh, db)
+
+
 @router.post("/reviews/{review_id}/undo")
 def undo_review(project_id: int, review_id: str, user: Optional[User] = Depends(get_optional_user),
                 x_workspace_token: Optional[str] = Header(None), db: Session = Depends(get_db)):

@@ -16,8 +16,10 @@ const countLabel = (mode: AgentReview["mode"], n: number) =>
   mode === "meeting" ? plural(n, "new task") : plural(n, "change");
 // Suggested changes start ticked; possible duplicates start unticked, since the assistant
 // believes they are already on the board.
+// A review reopened after an undo starts with the earlier choices instead.
 const defaultSelection = (review?: AgentReview | null) =>
-  review?.proposals.filter(p => !p.possible_duplicate && !review.unavailable_proposal_ids?.includes(p.id)).map(p => p.id);
+  review?.proposals.filter(p => (review.preselected ? review.preselected.includes(p.id) : !p.possible_duplicate)
+    && !review.unavailable_proposal_ids?.includes(p.id)).map(p => p.id);
 const when = (iso: string) => new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
 // A meeting import is saved without approval, so it reads Added / Removed rather than Applied / Undone.
@@ -54,7 +56,7 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
   const [fromList, setFromList] = useState(false);
   const [history, setHistory] = useState<AgentReviewListItem[] | null>(null);
   const [selected, setSelected] = useState<number[]>([]);
-  const [busy, setBusy] = useState<"apply" | "undo" | "load" | "refresh" | "dismiss" | null>(null);
+  const [busy, setBusy] = useState<"apply" | "undo" | "load" | "refresh" | "dismiss" | "reopen" | null>(null);
   const [confirmRemoval, setConfirmRemoval] = useState(false);
   const cancelRemoval = useRef<HTMLButtonElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +122,7 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
     }
   }
 
-  async function perform(action: "apply" | "undo" | "load" | "refresh" | "dismiss", id?: string) {
+  async function perform(action: "apply" | "undo" | "load" | "refresh" | "dismiss" | "reopen", id?: string) {
     if (inFlight.current) return;
     inFlight.current = true;
     setBusy(action); setError(null);
@@ -129,13 +131,14 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
         : action === "refresh" ? await api.refreshAgentReview(project.id, review!.id, token)
         : action === "apply" ? await api.applyAgentReview(project.id, review!.id, selected, token)
         : action === "dismiss" ? await api.dismissAgentReview(project.id, review!.id, token)
+        : action === "reopen" ? await api.reopenAgentReview(project.id, review!.id, token)
         : await api.undoAgentReview(project.id, review!.id, token);
       if (!mounted.current) return;
       setConfirmRemoval(false);
       if (action === "load") setFromList(true);
       setReview(result); setSelected(result.receipt?.proposal_ids ?? defaultSelection(result) ?? []);
       // Dismissing changes nothing on the board; it only refreshes the pending list.
-      if (action !== "load") onChanged(result, action === "dismiss" ? "refresh" : action);
+      if (action !== "load") onChanged(result, action === "dismiss" || action === "reopen" ? "refresh" : action);
       onReviewChanged(result);
       await loadHistory();
     } catch (err) {
@@ -181,7 +184,7 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
     : review.status === "dismissed" ? "These suggested changes were dismissed. Nothing on the board changed."
     : review.status === "applied"
       ? (mode === "meeting" ? `Added this meeting and ${plural(appliedCount, "new task")}.` : `Applied ${plural(appliedCount, "change")}.`)
-      : (mode === "meeting" ? "This meeting and the tasks it added were removed." : "These changes were reversed.");
+      : (mode === "meeting" ? "This meeting and the tasks it added were removed." : "These changes were reversed. Review them again to choose differently.");
 
   return <>
     {open && createPortal(
@@ -305,6 +308,7 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
               {review.status === "applied" && (mode === "meeting"
                 ? <button className="rounded-lg px-3 py-2 text-xs text-slate-400 hover:bg-rose-50 hover:text-rose-700 focus-visible:ring-2 focus-visible:ring-rose-300" disabled={!!busy} onClick={() => setConfirmRemoval(true)}>Remove meeting…</button>
                 : <button className={SECONDARY} disabled={!!busy} onClick={() => void perform("undo")}>{busy === "undo" ? "Undoing…" : "Undo these changes"}</button>)}
+              {review.status === "undone" && mode !== "meeting" && <button className={PRIMARY} disabled={!!busy} onClick={() => void perform("reopen")}>{busy === "reopen" ? "Opening…" : "Review again"}</button>}
             </div>}
           </footer>}
         </div>

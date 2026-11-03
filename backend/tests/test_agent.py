@@ -1167,3 +1167,46 @@ def test_meeting_review_keeps_an_existing_deadline_and_owner():
     assert agent.validate_plan(only_clear, TRANSCRIPT, board, "2026-11-02", keep_set_fields=True)["proposals"] == []
     # Chat, where a user can ask for a deadline to be removed, may still clear it.
     assert agent.validate_plan(copy.deepcopy(plan), TRANSCRIPT, board, "2026-11-02")["proposals"][0]["after"]["deadline"] is None
+
+
+def apply_then_undo(client, project, task, monkeypatch, db_session):
+    """A meeting's suggested change (Done) and a possible duplicate, with only the change applied, then undone."""
+    review = import_with_match(client, project, task, monkeypatch, updates=True)["review"]
+    change = next(p["id"] for p in review["proposals"] if p["kind"] == "update")
+    assert client.post(route(project, review, "/apply"), json={"proposal_ids": [change]}).status_code == 200
+    assert client.post(route(project, review, "/undo")).status_code == 200
+    return review, change
+
+
+def test_undone_changes_can_be_reviewed_again_once(client, project, task, enabled, monkeypatch, db_session):
+    review, change = apply_then_undo(client, project, task, monkeypatch, db_session)
+    reopened = client.post(route(project, review, "/reopen"))
+    assert reopened.status_code == 200, reopened.text
+    fresh = reopened.json()
+    assert fresh["status"] == "draft" and fresh["id"] != review["id"]
+    assert fresh["preselected"] == [change]  # the earlier choice comes back selected
+    assert len(fresh["proposals"]) == 2 and fresh["unavailable_proposal_ids"] == []
+    # The undone entry stays in the history; asking again returns the same copy.
+    assert client.get(route(project, review)).json()["status"] == "undone"
+    assert client.post(route(project, review, "/reopen")).json()["id"] == fresh["id"]
+    pending = client.get(f"/api/v1/projects/{project['id']}/agent/reviews?view=pending").json()
+    assert [p["id"] for p in pending] == [fresh["id"]]
+    # It applies like any other review.
+    assert client.post(route(project, fresh, "/apply"), json={"proposal_ids": [change]}).status_code == 200
+    db_session.refresh(task)
+    assert task.status == TaskStatus.DONE
+
+
+def test_reviewing_again_marks_tasks_edited_since_as_unavailable(client, project, task, enabled, monkeypatch, db_session):
+    review, change = apply_then_undo(client, project, task, monkeypatch, db_session)
+    task.owner = "Someone else"
+    db_session.commit()
+    fresh = client.post(route(project, review, "/reopen")).json()
+    assert change in fresh["unavailable_proposal_ids"]
+
+
+def test_only_undone_suggested_changes_can_be_reviewed_again(client, project, task, enabled, monkeypatch, db_session):
+    data = import_with_match(client, project, task, monkeypatch, updates=True)
+    assert client.post(route(project, data["review"], "/reopen")).status_code == 409  # still pending
+    imported = data["saved_review"]  # the meeting import itself
+    assert client.post(route(project, imported, "/reopen")).status_code == 409

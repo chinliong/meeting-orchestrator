@@ -203,7 +203,9 @@ export interface AgentReview {
   steps: number;
   elapsed_seconds: number;
   trace: { label: string; tool: string }[];
-  receipt: { proposal_ids: number[]; meeting_id: number | null; applied_at: string } | null;
+  receipt: { proposal_ids: number[]; meeting_id: number | null; applied_at: string; reopened_as?: string } | null;
+  /** On a review reopened after an undo: the changes chosen the first time. */
+  preselected?: number[];
 }
 
 export interface AgentReviewListItem {

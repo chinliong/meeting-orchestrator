@@ -375,6 +375,7 @@ and validation are described in [agent-preview.md](agent-preview.md).
 | `POST /reviews/{id}/refresh` | Recheck a draft against the current board |
 | `POST /reviews/{id}/dismiss` | Turn down every suggestion in a draft without changing the board |
 | `POST /reviews/{id}/undo` | Reverse an applied review if its tasks have not changed since |
+| `POST /reviews/{id}/reopen` | Offer undone suggested changes again as a new pending review, earlier choices selected; once per undo |
 
 ## Internal: daily reminder trigger
 
