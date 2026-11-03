@@ -54,7 +54,7 @@ services:
       - key: DATABASE_URL
         sync: false
       # Set to the deployed frontend origin after its first deploy,
-      # e.g. https://orchestrator-frontend.onrender.com
+      # e.g. https://meeting-orchestrators.onrender.com (use the URL Render shows for the service).
       - key: CORS_ORIGINS
         sync: false
       # Speech-to-text (Objective 4): Deepgram Nova-3, the most accurate service measured
@@ -101,7 +101,7 @@ services:
     envVars:
       # Baked into the client bundle at BUILD time, so it needs the full backend URL
       # including scheme and the /api/v1 path. Set this after the backend's first deploy,
-      # e.g. https://orchestrator-backend.onrender.com/api/v1, then trigger a frontend rebuild.
+      # e.g. https://orchestrator-backend-wa1a.onrender.com/api/v1, then trigger a frontend rebuild.
       - key: NEXT_PUBLIC_API_BASE
         sync: false
       # Shows the meeting assistant (the backend's ENABLE_MEETING_AGENT must also be true).

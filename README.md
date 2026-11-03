@@ -272,14 +272,16 @@ expiry window.
 
 1. Push the repo to GitHub.
 2. In Render: **New → Blueprint**, point at the repo. It reads [render.yaml](render.yaml).
-3. Fill in the `sync: false` env vars (Render names services predictably as
-   `https://<name>.onrender.com`):
+3. Fill in the `sync: false` env vars. Each service's URL is shown on its Render page; it is
+   `https://<name>.onrender.com` only if that name was free, otherwise Render adds a suffix (this
+   deployment's are `orchestrator-backend-wa1a` and `meeting-orchestrators`):
    - backend `GEMINI_API_KEY` = your key
    - backend `DATABASE_URL` = your Postgres connection string
      (`postgresql://…/<db>?sslmode=require`; `db.py` normalises `postgres://` URLs)
-   - backend `CORS_ORIGINS` = the frontend's exact origin, e.g. `https://orchestrator-frontend.onrender.com`
+   - backend `CORS_ORIGINS` = the frontend's exact origin, e.g. `https://meeting-orchestrators.onrender.com`
      (scheme + host only, no trailing slash, no path; defaults to `*` if left unset)
-   - frontend `NEXT_PUBLIC_API_BASE` = `https://orchestrator-backend.onrender.com/api/v1`
+   - frontend `NEXT_PUBLIC_API_BASE` = the backend's URL plus `/api/v1`, e.g.
+     `https://orchestrator-backend-wa1a.onrender.com/api/v1`
    - backend `BREVO_API_KEY` + `SMTP_FROM` (optional) = enable password-reset and deadline-reminder
      emails; see "Email delivery" above. **Render's free tier blocks outbound SMTP**, so the
      Brevo HTTPS API is required there; the `SMTP_*` host/port/user/password vars won't work.
