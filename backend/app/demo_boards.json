@@ -1,0 +1,459 @@
+{
+ "note": "Real output of the app's parser, summaries, subtask generator and meeting assistant on the test transcripts, captured on 3 Nov 2026 so the demo account can show them without model calls. IDs are positions within each board.",
+ "boards": [
+  {
+   "name": "SAP Go-Live Workshops (demo)",
+   "description": "Two SAP programme workshops, parsed from their transcripts by the app.",
+   "meetings": [
+    {
+     "title": "SAP FI/CO Finance Workshop #4",
+     "meeting_date": "2026-06-15",
+     "transcript": "================================================================\nSESSION 2\nMeeting: SAP FI/CO Finance Workshop #4\nDate: 2026-06-15\nDuration: ~30 min\nAttendees: Aisha Rahman (Finance Lead), Daniel Tan (SAP FICO Consultant), Priya Nair (Controller)\n================================================================\n\nAisha: Okay, I think we're all here — Priya, you're on mute, no rush, we'll get to you. Let's pick up from last week. Tight agenda: cost center hierarchy, the bank statement integration, and a few open items I want closed before the dress rehearsal. Daniel, start us off — cost center hierarchy migration.\n\nDaniel: Sure. So you'll remember the hierarchy splits into two regions, EMEA and APAC. EMEA — that's behind us. I closed it out Tuesday, validated the whole thing against the org chart, signed it off, it's clean. APAC is the one still in motion. I'm working through it right now, I'd say I'm about two-thirds of the way through the APAC cost centers.\n\nAisha: Two-thirds. And the finish line is —\n\nDaniel: I can have APAC mapping wrapped by Friday. With one big caveat — I need the new cost center codes from Priya by Wednesday, otherwise Friday slips. The last third is literally blocked on those codes.\n\nPriya: Yeah, sorry, I'm here now. Codes — I can do that. I'll get the cost center codes over to you by Wednesday, Daniel. Full disclosure, I haven't actually compiled them yet, they're scattered across a couple of spreadsheets. I'll pull them together tomorrow and send them, so that's a fresh one on my plate.\n\nAisha: Wednesday for the codes, Friday for APAC. And just to capture a decision while it's fresh — steering confirmed this, it's not a proposal anymore — we're moving the parallel ledger cutover to line up with the APAC mapping completion, instead of running it as its own separate event. That's settled, done deal.\n\nDaniel: Understood. That actually simplifies my life. Okay, next item, and this one's a headache. The bank statement upload test. We ran it twice in QA and it failed both times — both times. The format parser is choking on the multi-currency statements.\n\nPriya: Both runs failed completely, or partially?\n\nDaniel: Hard fail, both. But — the good news is I already chased down why. That diagnosis is finished, I know exactly what it is: it's a delimiter issue in the MT940 file, the multi-currency lines use a separator the parser doesn't expect. So root cause, that investigation's done and dusted.\n\nAisha: Okay so if you know the cause, what's the holdup on fixing it?\n\nDaniel: The holdup is I can't fix it in a vacuum. To do it properly I need someone from the banking team actually in the room, because we have to confirm the real statement format with the bank itself. We genuinely cannot sign off the integration test before go-live without the banking team confirming that format.\n\nAisha: Right. So diagnosis behind us, the fix is blocked on the banking team. I'll take that — I'll loop the banking team in and get them onto next week's call. I haven't reached out to them yet, so chalk that up as new on me.\n\nDaniel: And separately — the actual parser config fix. I want to be clear it's not at zero. I've started tinkering, I've got a candidate fix half-built in the dev system already. But I can't finish it or test it until the banking team confirms the format, so it's mid-flight but stalled on that dependency. Don't write it down as not-started, I've put real hours in.\n\nAisha: Noted — parser fix, in motion but stuck pending the bank. Under your name. Priya — the open items report?\n\nPriya: Right. So I went through it this morning — and I mean properly, I did the full review of the open items report and flagged all the duplicates. That review's finished. There were eleven duplicate postings, I've got them listed out with document numbers.\n\nAisha: Eleven, wow.\n\nPriya: Eleven. What I have not done yet is the second pass to actually clear them out of the system. That's still ahead of me. I'll do the clearing before the dress rehearsal — that's next Thursday, right? Yeah, before Thursday. So review's done, the clearing is the new to-do.\n\nAisha: Got it. Did you ever hear back from Wei Lin's office about the month-end timetable, by the way? That's been hanging.\n\nPriya: Not a peep. I'll chase it but it's not urgent this week.\n\nAisha: Okay, park it. Daniel, anything that ties back to budget? Wei Lin's going to ask me.\n\nDaniel: Yes, briefly. The bank integration rework is honestly the main reason I'm putting in a change request for additional consulting days. I've drafted that request — the draft is finished, it's written up with the justification. I just need to actually send it over to Wei Lin's office for approval. I'll send it Thursday. So the drafting's done, the sending's the pending bit.\n\nAisha: Good, I'll flag that dependency when I follow up with the banking team — that the delay's driving cost. Okay, let me try to summarize, tell me if I butcher it. Finished: EMEA mapping, the bank test root cause diagnosis, Priya's open items review, and Daniel's change request draft. In motion: APAC mapping at two-thirds, and the parser config fix that's stalled on the bank. And the to-dos: Priya's cost center codes by Wednesday, Priya clearing the eleven duplicates before Thursday, me looping in the banking team for next week, and Daniel sending the change request Thursday. That it?\n\nPriya: That all matches what I've got.\n\nDaniel: One thing — you said EMEA \"mapping,\" just make sure it's not confused with the parallel ledger move. EMEA cost center mapping is the done one.\n\nAisha: Yes — EMEA cost center mapping, done. Parallel ledger's the decision, not a task. Good. Let's reconvene Friday to confirm APAC's actually landed. Thanks both.",
+     "summary": "{\"overview\":\"Aisha Rahman, Daniel Tan, and Priya Nair convened for a finance workshop to discuss cost center hierarchy migration, bank statement upload testing, and open items. The team agreed to align the parallel ledger cutover with the completion of the APAC cost center mapping. They also reviewed bank statement parser failures, duplicate open item postings, and a change request for additional consulting days.\"}"
+    },
+    {
+     "title": "SAP Data Migration Cutover Planning",
+     "meeting_date": "2026-06-18",
+     "transcript": "================================================================\nSESSION 1\nMeeting: SAP Data Migration Cutover Planning\nDate: 2026-06-18\nDuration: ~30 min\nAttendees: Aisha Rahman (PM), Daniel Tan (SAP Consultant), Priya Nair (Data Lead), Marcus Wong (Basis)\n================================================================\n\nAisha: Morning everyone. Can you — Marcus, you're a bit frozen, can you turn your camera... there we go. Okay. So we've only got the half hour because I've got the steering pre-brief right after, so let's please keep it tight. Agenda's basically the cutover sequence and clearing the open data items before the dress rehearsal. Did everyone get the deck I sent? Daniel?\n\nDaniel: Got it, yeah. Didn't read past slide three but I got it.\n\nAisha: Ha, that's fair, nobody does. Okay. Priya, can you kick us off — material master, where are we?\n\nPriya: Sure, so. The first validation run, that finished over the weekend, ran Saturday night into Sunday. Out of — it's roughly forty-two thousand records, and we came back with about a three percent error rate. Which sounds bad but it's almost entirely one thing, it's missing units of measure on the legacy side. Like ninety percent of the errors are that.\n\nMarcus: Is that the same UoM thing we saw in the dev load back in, what, April?\n\nPriya: Same family of problem, yeah, but worse in production because the older records just don't have it populated at all. Anyway — the point is I went in and cleaned the source extract. That's behind me now, I finished scrubbing it yesterday afternoon, late, like six-ish. So the source is good.\n\nAisha: Okay good, so the cleanup —\n\nPriya: The cleanup's behind us. What's left is I need to rerun the validation against the cleaned file, and that — honestly that's chugging away right now as we speak, the job's running in the background. It'll land Monday, probably Monday morning.\n\nAisha: Right, so for my notes, cleanup wrapped, the rerun's churning. Don't want to write down \"done\" if it's not done.\n\nPriya: No, the rerun's mid-flight. The cleanup's the done part.\n\nAisha: Perfect. Daniel — customer master. Where's that sitting?\n\nDaniel: Yeah so, customer master mapping. I'll be honest, I haven't put the final pass in yet. And the reason — it wasn't me dragging my feet, I was genuinely blocked, I was waiting on the dedup results from the data quality folks. Those only came in this morning, like right before this call actually, Hassan dropped them in the channel around eight.\n\nAisha: Oh good, so you're unblocked now.\n\nDaniel: I'm unblocked now, exactly. So I'll get on the final mapping today and I'm confident I can have it finalized by Friday. So it hasn't started, but Friday, put my name on it.\n\nAisha: Friday, you, customer master. Got it. Oh — before I forget, did anyone sort out the parking passes for the rehearsal day? People kept messaging me about it.\n\nMarcus: I think Facilities is handling that, not us.\n\nAisha: Okay, not our problem, moving on. Marcus — the downtime window. This is the one I'm nervous about.\n\nMarcus: Yeah, this is the one that moved on us. So originally we scoped a twelve-hour downtime window for the big-bang load, that was the number everyone's been anchored on. But we did the timed trial load — that's done, we ran the full timed trial Saturday, end to end, real volumes. And the numbers came back ugly, honestly. It's closer to sixteen hours of actual processing, and that's before you add any contingency.\n\nDaniel: Sixteen, oof.\n\nMarcus: Sixteen real, so I want to pad it. I'd revise the official estimate up to eighteen hours to be safe. The trial itself is in the bag, that part's finished. What's not done is — somebody's got to get business to sign off on the longer window, because eighteen hours is a very different conversation than twelve.\n\nAisha: Yeah, that lands on me. I'll own the sign-off. I'll go request business approval for the eighteen-hour window — and I want that by, let's say next Wednesday, before we reconvene. I haven't even opened that conversation yet though, so that's a brand new one for me.\n\nDaniel: While we're on cutover — let me just get this on the record so there's no ambiguity later. We are confirmed big-bang, not phased. That came down from steering, it's decided, it's not a \"let's discuss it\" thing — it's locked.\n\nAisha: Yep, that's settled, I don't want to reopen it. Big-bang, confirmed. Priya — you'd mentioned a reconciliation report thing last week?\n\nPriya: Yeah, the data reconciliation report template, for the post-load validation. So... this one's awkward. I started it, I got maybe halfway, and then the material master cleanup ate my whole week and I had to drop it.\n\nAisha: Halfway being —\n\nPriya: Call it fifty percent. The structure's there, the logic's half-built. It's not abandoned, it's just parked. I'll pick it back up the second the validation rerun clears, so probably Monday afternoon.\n\nAisha: Okay, so that stays with you, mid-flight, fifty percent — I don't want to reassign it just because it stalled.\n\nPriya: No, leave it with me, I know where I left it.\n\nAisha: Marcus, anything technical I'm missing before I run to the next thing?\n\nMarcus: Two things, quick. One — the fallback rollback script. That's done, I wrote it and I tested it on QA this week, ran the full rollback against the QA system and it behaved itself, so I'm calling that one finished and validated. Two — and this is the gap — somebody needs to actually write the rollback steps up into the cutover runbook. In plain English, for the on-call team, because right now the only documentation is the script itself and a script is not a runbook.\n\nAisha: And who owns that right now?\n\nMarcus: Nobody. It's floating.\n\nDaniel: I'll take it. I'll write up the rollback section into the runbook. I can have that by Thursday.\n\nAisha: Great, so that goes from nobody to Daniel, Thursday. Oh — Marcus, unrelated, did the QA box get more disk? You were complaining about it last week.\n\nMarcus: Provisioned more last night, it's fine now, don't worry about it.\n\nAisha: Good. Priya — last one, the legacy freeze date. Business will not stop asking me about it.\n\nPriya: It's locked. I confirmed it with the application owners on Monday — July twentieth, no movement. And I sent the note round, so it's not just confirmed, it's communicated. People have it.\n\nAisha: Oh thank god. Okay. Let me read back fast because I've got to jump. In flight: Priya's validation rerun, and the recon template at fifty. Not started but owned: Daniel's customer master Friday, my downtime sign-off Wednesday, Daniel's runbook rollback section Thursday. And finished this week — source cleanup, the timed trial, the rollback script, freeze date confirmed. Did I miss anything?\n\nMarcus: Nope. That's the lot.\n\nDaniel: One correction — earlier you said the trial was the twelve-hour thing, but it's the timed trial that gave us the eighteen. Just so the note's not confusing.\n\nAisha: Right, yes, eighteen comes from the trial. Good catch. Okay — dress rehearsal's next Thursday, we reconvene Wednesday to check where the sign-off's at. Thanks all, I'm running.",
+     "summary": "{\"overview\":\"Aisha Rahman led a cutover planning meeting to review data migration progress and finalize arrangements ahead of the upcoming dress rehearsal. The team discussed validation progress for material master and customer master data, as well as timing results from the load trial. Based on the trial results, the group agreed to revise the downtime estimate to eighteen hours and confirmed both a big-bang cutover strategy and the July 20th legacy freeze date.\"}"
+    }
+   ],
+   "tasks": [
+    {
+     "meeting": 0,
+     "description": "Validate and sign off EMEA cost center hierarchy mapping against the organizational chart.",
+     "owner": "Daniel Tan",
+     "deadline": null,
+     "status": "done",
+     "confidence": 1.0,
+     "source_decision": "Cost center hierarchy migration for EMEA and APAC regions.",
+     "subtasks": []
+    },
+    {
+     "meeting": 0,
+     "description": "Complete APAC cost center hierarchy mapping.",
+     "owner": "Daniel Tan",
+     "deadline": "2026-06-19",
+     "status": "in_progress",
+     "confidence": 1.0,
+     "source_decision": "Cost center hierarchy migration for EMEA and APAC regions.",
+     "subtasks": []
+    },
+    {
+     "meeting": 0,
+     "description": "Compile and send new cost center codes to Daniel.",
+     "owner": "Priya Nair",
+     "deadline": "2026-06-17",
+     "status": "todo",
+     "confidence": 1.0,
+     "source_decision": "APAC cost center mapping completion requires new cost center codes.",
+     "subtasks": []
+    },
+    {
+     "meeting": 0,
+     "description": "Diagnose root cause of multi-currency bank statement MT940 format parser failures in QA.",
+     "owner": "Daniel Tan",
+     "deadline": null,
+     "status": "done",
+     "confidence": 1.0,
+     "source_decision": "Bank statement upload QA test failures.",
+     "subtasks": []
+    },
+    {
+     "meeting": 0,
+     "description": "Develop and test parser configuration fix for multi-currency bank statement MT940 format.",
+     "owner": "Daniel Tan",
+     "deadline": null,
+     "status": "in_progress",
+     "confidence": 1.0,
+     "source_decision": "MT940 file multi-currency line delimiter parsing issue.",
+     "subtasks": []
+    },
+    {
+     "meeting": 0,
+     "description": "Loop in the banking team and include them in next week's call to confirm MT940 statement format.",
+     "owner": "Aisha Rahman",
+     "deadline": "2026-06-22",
+     "status": "todo",
+     "confidence": 1.0,
+     "source_decision": "Requirement to confirm MT940 bank statement format with the banking team prior to go-live sign-off.",
+     "subtasks": []
+    },
+    {
+     "meeting": 0,
+     "description": "Review open items report and identify duplicate postings.",
+     "owner": "Priya Nair",
+     "deadline": null,
+     "status": "done",
+     "confidence": 1.0,
+     "source_decision": "Open items report review ahead of dress rehearsal.",
+     "subtasks": []
+    },
+    {
+     "meeting": 0,
+     "description": "Clear eleven duplicate postings out of the system before the dress rehearsal.",
+     "owner": "Priya Nair",
+     "deadline": "2026-06-18",
+     "status": "todo",
+     "confidence": 1.0,
+     "source_decision": "Identification of eleven duplicate postings during open items review.",
+     "subtasks": []
+    },
+    {
+     "meeting": 0,
+     "description": "Draft change request for additional consulting days due to bank integration rework.",
+     "owner": "Daniel Tan",
+     "deadline": null,
+     "status": "done",
+     "confidence": 1.0,
+     "source_decision": "Additional consulting budget needed for bank integration rework.",
+     "subtasks": []
+    },
+    {
+     "meeting": 0,
+     "description": "Send drafted change request for additional consulting days to Wei Lin's office for approval.",
+     "owner": "Daniel Tan",
+     "deadline": "2026-06-18",
+     "status": "todo",
+     "confidence": 1.0,
+     "source_decision": "Drafted change request for additional consulting days.",
+     "subtasks": []
+    },
+    {
+     "meeting": 1,
+     "description": "Finalize the customer master mapping.",
+     "owner": "Daniel Tan",
+     "deadline": "2026-06-19",
+     "status": "todo",
+     "confidence": 0.95,
+     "source_decision": "Dedup results were received from the data quality team, unblocking customer master mapping.",
+     "subtasks": []
+    },
+    {
+     "meeting": 1,
+     "description": "Request and secure business sign-off for the extended 18-hour downtime window.",
+     "owner": "Aisha Rahman",
+     "deadline": "2026-06-24",
+     "status": "todo",
+     "confidence": 0.95,
+     "source_decision": "Timed trial load results showed 16 hours of processing, necessitating a revised 18-hour downtime window.",
+     "subtasks": []
+    },
+    {
+     "meeting": 1,
+     "description": "Document the rollback procedure into the cutover runbook in plain English.",
+     "owner": "Daniel Tan",
+     "deadline": "2026-06-25",
+     "status": "todo",
+     "confidence": 0.95,
+     "source_decision": "Marcus created and validated the QA rollback script, but plain-English documentation is required for the runbook.",
+     "subtasks": []
+    },
+    {
+     "meeting": 1,
+     "description": "Rerun material master validation against the cleaned source extract file.",
+     "owner": "Priya Nair",
+     "deadline": "2026-06-22",
+     "status": "in_progress",
+     "confidence": 0.95,
+     "source_decision": "Material master source extract cleanup was completed following high error rates due to missing units of measure.",
+     "subtasks": [
+      {
+       "title": "Obtain the cleaned material master source extract file",
+       "done": true
+      },
+      {
+       "title": "Verify validation rules and scripts for unit of measure fixes",
+       "done": true
+      },
+      {
+       "title": "Run the validation job against the cleaned extract file",
+       "done": false
+      },
+      {
+       "title": "Review validation error logs and discrepancy reports",
+       "done": false
+      },
+      {
+       "title": "Document validation results and share with the cutover team",
+       "done": false
+      }
+     ]
+    },
+    {
+     "meeting": 1,
+     "description": "Complete the post-load data reconciliation report template.",
+     "owner": "Priya Nair",
+     "deadline": null,
+     "status": "in_progress",
+     "confidence": 0.9,
+     "source_decision": "Post-load validation requires a data reconciliation report template, which is currently 50% complete.",
+     "subtasks": []
+    },
+    {
+     "meeting": 1,
+     "description": "Scrub missing unit of measure fields in the material master source extract.",
+     "owner": "Priya Nair",
+     "deadline": null,
+     "status": "done",
+     "confidence": 0.95,
+     "source_decision": "First validation run uncovered a 3% error rate caused by missing legacy units of measure.",
+     "subtasks": []
+    },
+    {
+     "meeting": 1,
+     "description": "Write and test the fallback rollback script on the QA system.",
+     "owner": "Marcus Wong",
+     "deadline": null,
+     "status": "done",
+     "confidence": 0.95,
+     "source_decision": "Technical fallback capabilities needed validation prior to cutover.",
+     "subtasks": []
+    },
+    {
+     "meeting": 1,
+     "description": "Execute the full end-to-end timed trial load with real volumes.",
+     "owner": "Marcus Wong",
+     "deadline": null,
+     "status": "done",
+     "confidence": 0.95,
+     "source_decision": "Cutover planning required accurate duration estimates for the downtime window.",
+     "subtasks": []
+    }
+   ]
+  },
+  {
+   "name": "Mobile App Launch (demo)",
+   "description": "A kickoff and a follow-up meeting; the follow-up's suggested changes are waiting under Changes.",
+   "meetings": [
+    {
+     "title": "Mobile App Launch Kickoff",
+     "meeting_date": "2026-11-02",
+     "transcript": "Meeting: Mobile App Launch Kickoff\nAttendees: Maya Chen (Product Manager), Ravi Kumar (Backend Lead), Lena Park (Designer), Tom Reyes (QA Lead)\n\nMaya: Thanks for joining. We have three weeks to the store submission, so let's go through where everyone is.\n\nRavi: The payment API integration is about half done. The sandbox calls work, but refunds aren't wired up yet. I'll have the whole integration finished by this Friday.\n\nMaya: Good. Lena, onboarding?\n\nLena: I've got the first two onboarding screens signed off. The last three still need the illustrations. I'll deliver the final onboarding screens by Wednesday.\n\nMaya: And testing?\n\nTom: I've started the regression test plan. It covers login and checkout so far, and I'll extend it to payments once Ravi's done.\n\nMaya: On my side, I already sent the beta invite list to marketing this morning, so that's finished.\n\nLena: Oh, and someone should probably look at the app store screenshots at some point. Maybe. Not sure who owns that.\n\nMaya: Let's park that for now and come back to it.",
+     "summary": "{\"overview\":\"Maya Chen convened a kickoff meeting to review team progress three weeks before the mobile app store submission. Ravi Kumar, Lena Park, Tom Reyes, and Maya Chen shared status updates regarding the payment API integration, onboarding screen designs, regression testing, and the beta invite list. The team also briefly raised the subject of app store screenshots and agreed to park the topic for a later discussion.\"}"
+    },
+    {
+     "title": "Mobile App Launch Check-in",
+     "meeting_date": "2026-11-09",
+     "transcript": "Meeting: Mobile App Launch Check-in\nAttendees: Maya Chen (Product Manager), Ravi Kumar (Backend Lead), Lena Park (Designer), Tom Reyes (QA Lead), Jun Tan (QA Engineer)\n\nMaya: Quick check-in. Ravi, payments?\n\nRavi: Refunds went in on Thursday and the sandbox tests all pass, so the payment API integration is done. One more thing from me. I'll add crash reporting to the app before the store submission, by next Friday.\n\nMaya: Great. Lena?\n\nLena: The onboarding screens slipped, sorry. The illustrator was out sick. I'll have them by Thursday the twelfth instead. I can also take the app store screenshots. I'll prepare them by Friday the thirteenth.\n\nTom: I'm moving to the web project next week, so Jun will take over the regression test plan from me.\n\nJun: Yes, I'll own the regression test plan from today.\n\nMaya: Thanks, everyone.",
+     "summary": "{\"overview\":\"Maya Chen hosted a check-in meeting to review progress for the mobile app launch. Ravi Kumar reported that the payment API integration was complete and discussed adding crash reporting prior to submission. Lena Park explained a delay with the onboarding screens and gave revised timelines for design deliverables, while Tom Reyes handed over ownership of the regression test plan to Jun Tan.\"}"
+    }
+   ],
+   "tasks": [
+    {
+     "meeting": 0,
+     "description": "Finish the payment API integration, including wiring up refunds.",
+     "owner": "Ravi Kumar",
+     "deadline": "2026-11-06",
+     "status": "in_progress",
+     "confidence": 0.95,
+     "source_decision": "Ravi reported that payment API integration is about half done with sandbox calls working but refunds not yet wired up.",
+     "subtasks": []
+    },
+    {
+     "meeting": 0,
+     "description": "Deliver the final three onboarding screens with illustrations.",
+     "owner": "Lena Park",
+     "deadline": "2026-11-04",
+     "status": "in_progress",
+     "confidence": 0.95,
+     "source_decision": "Lena reported that the first two onboarding screens are signed off and the remaining three require illustrations.",
+     "subtasks": []
+    },
+    {
+     "meeting": 0,
+     "description": "Extend the regression test plan to cover payments once the payment API integration is complete.",
+     "owner": "Tom Reyes",
+     "deadline": null,
+     "status": "in_progress",
+     "confidence": 0.9,
+     "source_decision": "Tom reported progress on the regression test plan covering login and checkout.",
+     "subtasks": []
+    },
+    {
+     "meeting": 0,
+     "description": "Send the beta invite list to marketing.",
+     "owner": "Maya Chen",
+     "deadline": null,
+     "status": "done",
+     "confidence": 1.0,
+     "source_decision": "Maya updated the team on marketing preparations for the beta release.",
+     "subtasks": []
+    },
+    {
+     "meeting": 1,
+     "description": "Add crash reporting to the app prior to store submission.",
+     "owner": "Ravi Kumar",
+     "deadline": "2026-11-20",
+     "status": "todo",
+     "confidence": 0.95,
+     "source_decision": "Ravi Kumar will add crash reporting to the app before store submission.",
+     "subtasks": []
+    },
+    {
+     "meeting": 1,
+     "description": "Prepare app store screenshots.",
+     "owner": "Lena Park",
+     "deadline": "2026-11-13",
+     "status": "todo",
+     "confidence": 0.95,
+     "source_decision": "Lena Park will take on preparing screenshots for the app store submission.",
+     "subtasks": []
+    }
+   ],
+   "pending_review": {
+    "input": {
+     "title": "Mobile App Launch Check-in",
+     "meeting_date": "2026-11-09",
+     "transcript": "Meeting: Mobile App Launch Check-in\nAttendees: Maya Chen (Product Manager), Ravi Kumar (Backend Lead), Lena Park (Designer), Tom Reyes (QA Lead), Jun Tan (QA Engineer)\n\nMaya: Quick check-in. Ravi, payments?\n\nRavi: Refunds went in on Thursday and the sandbox tests all pass, so the payment API integration is done. One more thing from me. I'll add crash reporting to the app before the store submission, by next Friday.\n\nMaya: Great. Lena?\n\nLena: The onboarding screens slipped, sorry. The illustrator was out sick. I'll have them by Thursday the twelfth instead. I can also take the app store screenshots. I'll prepare them by Friday the thirteenth.\n\nTom: I'm moving to the web project next week, so Jun will take over the regression test plan from me.\n\nJun: Yes, I'll own the regression test plan from today.\n\nMaya: Thanks, everyone.",
+     "instructions": "",
+     "check_duplicate": true
+    },
+    "plan": {
+     "summary": "Propose updating task 1 to done, extending the deadline on task 2, reassigning task 3 to Jun Tan, and matching candidates 1 and 3 to existing tasks.",
+     "proposals": [
+      {
+       "kind": "update",
+       "task_id": {
+        "task_ref": 0
+       },
+       "after": {
+        "description": "Finish the payment API integration, including wiring up refunds.",
+        "owner": "Ravi Kumar",
+        "deadline": "2026-11-06",
+        "status": "done"
+       },
+       "evidence": "Ravi: Refunds went in on Thursday and the sandbox tests all pass, so the payment API integration is done.",
+       "reason": "Propose marking payment API integration as done following successful sandbox tests and refund wiring completion.",
+       "id": 0,
+       "before": {
+        "description": "Finish the payment API integration, including wiring up refunds.",
+        "owner": "Ravi Kumar",
+        "deadline": "2026-11-06",
+        "status": "in_progress"
+       }
+      },
+      {
+       "kind": "update",
+       "task_id": {
+        "task_ref": 1
+       },
+       "after": {
+        "description": "Deliver the final three onboarding screens with illustrations.",
+        "owner": "Lena Park",
+        "deadline": "2026-11-12",
+        "status": "in_progress"
+       },
+       "evidence": "Lena: The onboarding screens slipped, sorry. The illustrator was out sick. I'll have them by Thursday the twelfth instead.",
+       "reason": "Propose updating deadline to 2026-11-12 as onboarding screens were delayed due to illness.",
+       "id": 1,
+       "before": {
+        "description": "Deliver the final three onboarding screens with illustrations.",
+        "owner": "Lena Park",
+        "deadline": "2026-11-04",
+        "status": "in_progress"
+       }
+      },
+      {
+       "kind": "update",
+       "task_id": {
+        "task_ref": 2
+       },
+       "after": {
+        "description": "Extend the regression test plan to cover payments once the payment API integration is complete.",
+        "owner": "Jun Tan",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "evidence": "Tom: I'm moving to the web project next week, so Jun will take over the regression test plan from me.\n\nJun: Yes, I'll own the regression test plan from today.",
+       "reason": "Propose reassigning regression test plan ownership to Jun Tan as Tom Reyes moves to another project.",
+       "id": 2,
+       "before": {
+        "description": "Extend the regression test plan to cover payments once the payment API integration is complete.",
+        "owner": "Tom Reyes",
+        "deadline": null,
+        "status": "in_progress"
+       }
+      },
+      {
+       "id": 4,
+       "kind": "create",
+       "task_id": null,
+       "before": null,
+       "after": {
+        "description": "Complete and deliver the delayed onboarding screens.",
+        "owner": "Lena Park",
+        "deadline": "2026-11-12",
+        "status": "in_progress"
+       },
+       "evidence": "Onboarding screens were delayed due to the illustrator being out sick.",
+       "reason": "Looks like “Deliver the final three onboarding screens with illustrations.”, already on the board.",
+       "confidence": 0.95,
+       "possible_duplicate": true,
+       "duplicate_of": {
+        "id": {
+         "task_ref": 1
+        },
+        "description": "Deliver the final three onboarding screens with illustrations."
+       }
+      },
+      {
+       "id": 6,
+       "kind": "create",
+       "task_id": null,
+       "before": null,
+       "after": {
+        "description": "Take over ownership of the regression test plan.",
+        "owner": "Jun Tan",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "evidence": "Tom Reyes is moving to the web project next week, so Jun Tan is taking over the regression test plan.",
+       "reason": "Looks like “Extend the regression test plan to cover payments once the payment API integration is complete.”, already on the board.",
+       "confidence": 0.9,
+       "possible_duplicate": true,
+       "duplicate_of": {
+        "id": {
+         "task_ref": 2
+        },
+        "description": "Extend the regression test plan to cover payments once the payment API integration is complete."
+       }
+      }
+     ],
+     "questions": [],
+     "existing_items": [
+      {
+       "item": 1,
+       "task_id": {
+        "task_ref": 1
+       }
+      },
+      {
+       "item": 3,
+       "task_id": {
+        "task_ref": 2
+       }
+      }
+     ],
+     "model": "gemini-3.5-flash",
+     "trace": [
+      {
+       "label": "Read 4 existing tasks",
+       "tool": "read_board"
+      },
+      {
+       "label": "Checked evidence and task references",
+       "tool": "validation"
+      }
+     ],
+     "steps": 1,
+     "elapsed_seconds": 3.1,
+     "mode": "meeting_updates",
+     "source_meeting_id": {
+      "meeting_ref": 1
+     }
+    }
+   }
+  }
+ ]
+}

@@ -311,6 +311,16 @@ cd backend
 DATABASE_URL="<your Postgres connection string>" python -m app.seed
 ```
 
+The seed signs in as `demo@example.com` / `demo1234` and is additive: it only creates what is
+missing, so it is safe to run again. Besides the hand-written sample board, it adds two demo boards
+captured from the app's own model output ([backend/app/demo_boards.json](backend/app/demo_boards.json)),
+so a demonstration needs no model calls:
+
+- **SAP Go-Live Workshops (demo):** two parsed workshops with AI summaries, 18 tasks with confidence
+  scores and source decisions, and an AI subtask checklist.
+- **Mobile App Launch (demo):** a kickoff and a follow-up meeting, with the follow-up's suggested
+  changes and possible duplicates waiting under **Changes** (needs `ENABLE_MEETING_AGENT`).
+
 ### Schema changes on an existing database
 
 The startup `create_all` **adds missing tables** but never alters existing ones, so it picks up

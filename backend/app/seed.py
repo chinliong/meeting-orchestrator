@@ -2,10 +2,15 @@
 
 This is deterministic and offline — it does NOT call the LLM, so the dashboard has
 realistic data across all three Kanban columns on first run without spending API calls.
+It also adds two demo boards captured from the app's own model output (app/demo_boards.json),
+one with a pending meeting-assistant review. Boards that already exist are left alone.
 
 Run with: python -m app.seed
 """
-from datetime import date
+import json
+import uuid
+from datetime import date, datetime, timedelta
+from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -14,9 +19,11 @@ load_dotenv()
 from app.auth import hash_password
 from app.db import Base, SessionLocal, engine
 from app.models.models import (
+    AgentReview,
     Meeting,
     MeetingStatus,
     Project,
+    Subtask,
     Task,
     TaskStatus,
     User,
@@ -45,6 +52,61 @@ SAMPLE_TASKS = [
     ("Review the open items report and flag duplicates before the dress rehearsal", "Priya", date(2026, 6, 18), TaskStatus.TODO, 0.85),
     ("Prepare the mitigating controls document for the external audit", "Daniel", date(2026, 6, 25), TaskStatus.TODO, 0.88),
 ]
+
+# Demo boards built from real output of the app's models (see the file's note), so the demo account
+# shows extraction, summaries, a subtask checklist and a pending assistant review without model calls.
+DEMO_BOARDS = Path(__file__).with_name("demo_boards.json")
+
+
+def _resolve(value, tasks, meetings):
+    """Replace the fixture's {"task_ref": i} / {"meeting_ref": i} positions with the new rows' ids."""
+    if isinstance(value, dict):
+        if set(value) == {"task_ref"}:
+            return tasks[value["task_ref"]].id
+        if set(value) == {"meeting_ref"}:
+            return meetings[value["meeting_ref"]].id
+        return {k: _resolve(v, tasks, meetings) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_resolve(v, tasks, meetings) for v in value]
+    return value
+
+
+def seed_demo_boards(db, owner_id: int) -> list[str]:
+    """Add each demo board the owner does not already have; returns the names added."""
+    from app.api.agent import board_snapshot, fingerprint  # the review's baseline, as the app computes it
+
+    added = []
+    for board in json.loads(DEMO_BOARDS.read_text())["boards"]:
+        if db.query(Project).filter_by(name=board["name"], owner_user_id=owner_id).first():
+            continue
+        project = Project(name=board["name"], description=board["description"], owner_user_id=owner_id)
+        db.add(project)
+        db.flush()
+        meetings = [Meeting(project_id=project.id, title=m["title"], transcript_text=m["transcript"],
+                            meeting_date=date.fromisoformat(m["meeting_date"]), status=MeetingStatus.COMPLETE,
+                            summary=m["summary"]) for m in board["meetings"]]
+        db.add_all(meetings)
+        db.flush()
+        tasks = []
+        for t in board["tasks"]:
+            task = Task(project_id=project.id, meeting_id=meetings[t["meeting"]].id, description=t["description"],
+                        owner=t["owner"], deadline=date.fromisoformat(t["deadline"]) if t["deadline"] else None,
+                        status=TaskStatus(t["status"]), confidence=t["confidence"], source_decision=t["source_decision"])
+            db.add(task)
+            db.flush()
+            db.add_all(Subtask(task_id=task.id, title=s["title"], done=s["done"], position=i)
+                       for i, s in enumerate(t["subtasks"]))
+            tasks.append(task)
+        db.flush()
+        if "pending_review" in board:
+            review = board["pending_review"]
+            db.add(AgentReview(id=str(uuid.uuid4()), project_id=project.id, status="draft",
+                               expires_at=datetime.utcnow() + timedelta(hours=1),
+                               input_json=json.dumps(review["input"]),
+                               plan_json=json.dumps(_resolve(review["plan"], tasks, meetings)),
+                               baseline_hash=fingerprint(board_snapshot(db, project.id))))
+        added.append(board["name"])
+    return added
 
 
 def seed():
@@ -92,8 +154,9 @@ def seed():
                     )
                 )
 
+        added = seed_demo_boards(db, demo.id)
         db.commit()
-        print("Seed complete.")
+        print("Seed complete." + (f" Added demo boards: {', '.join(added)}." if added else ""))
         print(f"Demo login: {DEMO_EMAIL} / {DEMO_PASSWORD}")
     finally:
         db.close()
