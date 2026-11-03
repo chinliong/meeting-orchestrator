@@ -15,9 +15,17 @@ TRANSCRIPT = "Alex: The landing page design is now finished and approved. Sam: I
 INPUT = {"title": "Follow-up", "meeting_date": "2026-11-02", "transcript": TRANSCRIPT}
 
 
+REAL_EXTRACT_CANDIDATES = agent_api.extract_candidates
+
+# What the faked parser extracts from TRANSCRIPT: the one new commitment in it.
+CANDIDATES = [{"description": "Write the release notes", "owner": "Sam", "deadline": "2026-11-05",
+               "status": "todo", "confidence": 0.9, "source_decision": "Sam committed to the release notes."}]
+
+
 @pytest.fixture
 def enabled(monkeypatch):
     monkeypatch.setattr(agent_api, "write_summary", lambda meeting_id: None)
+    monkeypatch.setattr(agent_api, "extract_candidates", lambda payload: copy.deepcopy(CANDIDATES))
     monkeypatch.setenv("ENABLE_MEETING_AGENT", "true")
     monkeypatch.setenv("GEMINI_API_KEY", "fake-test-key")
     monkeypatch.setenv("GEMINI_MODEL", "existing-flash-model")
@@ -197,7 +205,7 @@ def test_viewers_and_other_boards_cannot_review_or_apply(client, project, task, 
     assert client.get(route(project, review)).status_code == 403
 
 
-@pytest.mark.parametrize("bad", ["quote", "target", "no_op", "duplicate", "date"])
+@pytest.mark.parametrize("bad", ["quote", "target", "no_op", "date"])
 def test_invalid_model_output_never_reaches_board(client, project, task, enabled, monkeypatch, db_session, bad):
     plan = plan_for(task.id)
     if bad == "quote":
@@ -323,15 +331,18 @@ def parse_with_assistant(client, project):
     return client.post(f"/api/v1/projects/{project['id']}/agent/parse", json=INPUT)
 
 
-@pytest.mark.parametrize("kind", ["create", "none", "mixed", "update"])
+@pytest.mark.parametrize("kind", ["create", "none", "mixed", "update", "matched"])
 def test_parse_saves_new_work_but_requires_confirmation_for_updates(client, project, task, enabled, monkeypatch, db_session, kind):
     plan = plan_for(task.id)
     if kind == "create":
         plan["proposals"] = plan["proposals"][1:]
     elif kind == "update":
         plan["proposals"] = plan["proposals"][:1]
-    elif kind == "none":
+    elif kind in ("none", "matched"):
         plan["proposals"] = []
+    if kind == "matched":
+        # The assistant recognises the parser's candidate as the existing task.
+        plan["existing_items"] = [{"item": 0, "task_id": task.id}]
     fake_model(monkeypatch, plan)
     response = parse_with_assistant(client, project)
     assert response.status_code == 201, response.text
@@ -340,7 +351,8 @@ def test_parse_saves_new_work_but_requires_confirmation_for_updates(client, proj
     assert data["meeting_id"] is not None
     db_session.refresh(task)
     assert task.status == TaskStatus.IN_PROGRESS
-    expected_new = int(kind in ("create", "mixed"))
+    # The parser's candidate is new work unless the assistant matched it to an existing task.
+    expected_new = int(kind != "matched")
     assert data["new_task_count"] == expected_new
     assert db_session.query(Task).count() == 1 + expected_new
     if kind in ("mixed", "update"):
@@ -573,7 +585,8 @@ def test_selecting_unchanged_target_succeeds_even_if_unselected_target_changed(c
     db_session.commit()
     fetched = client.get(route(project, review)).json()
     assert fetched["stale"] is True
-    assert fetched["unavailable_proposal_ids"] == [2]
+    other_id = next(p["id"] for p in fetched["proposals"] if p["task_id"] == other.id)
+    assert fetched["unavailable_proposal_ids"] == [other_id]
     assert client.post(route(project, review, "/apply"), json={"proposal_ids": [0]}).status_code == 200
     assert db_session.get(Task, other.id).owner == "Changed owner"
 
@@ -671,7 +684,7 @@ def test_near_duplicate_creates_become_questions_instead_of_tasks(client, projec
     response = parse_with_assistant(client, project)
     assert response.status_code == 201, response.text
     assert response.json()["new_task_count"] == 0
-    assert any("Possible duplicate" in q for q in response.json()["questions"])
+    assert any("already on the board" in q for q in response.json()["questions"])
     assert db_session.query(Task).count() == 2
 
 
@@ -746,10 +759,10 @@ def test_review_and_both_parse_paths_share_configurable_parse_limit(client, proj
 
 
 def test_agent_calls_reserve_shared_ai_budget_with_summary(client, project, task, enabled, monkeypatch, db_session, agent_limits_on):
-    monkeypatch.setenv("RATE_LIMIT_AI", "8/hour")
+    monkeypatch.setenv("RATE_LIMIT_AI", "9/hour")
     monkeypatch.setenv("RATE_LIMIT_PARSE", "100/hour")
     fake_model(monkeypatch, plan_for(task.id))
-    assert create(client, project).status_code == 201  # reserves six model calls
+    assert create(client, project).status_code == 201  # reserves the parser call and six model calls
     meeting = Meeting(project_id=project["id"], title="Planning", transcript_text="Discussed work.", status=MeetingStatus.COMPLETE)
     db_session.add(meeting)
     db_session.commit()
@@ -912,6 +925,7 @@ def test_recording_without_updates_returns_clarifications(client, project, task,
     plan = plan_for(task.id)
     plan["proposals"] = []
     plan["questions"] = ["Who owns the next step?"]
+    monkeypatch.setattr(agent_api, "extract_candidates", lambda payload: [])
     fake_model(monkeypatch, plan)
     response = upload_recording(client, project)
     assert response.status_code == 201, response.text
@@ -987,7 +1001,7 @@ def test_assistant_recording_rejects_disabled_feature_and_missing_key_before_upl
 
 
 def test_recording_reserves_shared_ai_budget_including_summary(client, project, task, enabled, recording, monkeypatch, db_session, agent_limits_on):
-    monkeypatch.setenv("RATE_LIMIT_AI", "7/hour")
+    monkeypatch.setenv("RATE_LIMIT_AI", "8/hour")
     fake_model(monkeypatch, plan_for(task.id))
     assert upload_recording(client, project).status_code == 201
     assert create(client, project).status_code == 429
@@ -1003,3 +1017,55 @@ def test_recordings_share_parse_allowance_with_text(client, project, task, enabl
     assert upload_recording(client, project).status_code == 429
     assert recording == []
     assert db_session.query(Meeting).count() == 0
+
+
+def test_empty_board_uses_the_parser_alone(client, project, enabled, monkeypatch, db_session):
+    calls = fake_model(monkeypatch, plan_for(1))
+    response = parse_with_assistant(client, project)
+    assert response.status_code == 201, response.text
+    assert calls == []  # nothing to reconcile, so the assistant is not called
+    assert response.json()["new_task_count"] == 1
+    created = db_session.query(Task).one()
+    assert (created.description, created.owner, created.confidence) == ("Write the release notes", "Sam", 0.9)
+    assert created.source_decision == "Sam committed to the release notes."
+
+
+def test_parser_tasks_keep_their_score_and_source_on_a_board_with_tasks(client, project, task, enabled, monkeypatch, db_session):
+    calls = fake_model(monkeypatch, plan_for(task.id))
+    assert parse_with_assistant(client, project).status_code == 201
+    # The assistant was shown the parser's candidates to reconcile.
+    request = json.loads(calls[0][0]["parts"][0]["text"])
+    assert request["candidate_tasks"][0]["description"] == "Write the release notes"
+    created = db_session.query(Task).filter(Task.id != task.id).one()
+    assert created.confidence == 0.9
+    assert created.source_decision == "Sam committed to the release notes."
+
+
+def test_assistant_creates_are_ignored_when_candidates_are_given():
+    plan = {"summary": "Test", "questions": [], "proposals": [plan_for(1)["proposals"][1]]}
+    validated = agent.validate_plan(plan, TRANSCRIPT, [], "2026-11-02", candidates=CANDIDATES)
+    assert validated["proposals"] == []
+
+
+@pytest.mark.parametrize("existing,match", [
+    ([{"item": 1, "task_id": 7}], "candidate_tasks index"),
+    ([{"item": 0, "task_id": 7}, {"item": 0, "task_id": 7}], "candidate_tasks index"),
+    ([{"item": 0, "task_id": 99}], "tasks on this board"),
+])
+def test_existing_items_must_name_real_candidates_and_tasks(existing, match):
+    board = [{"id": 7, "description": "Write release notes", "owner": "Sam", "deadline": None,
+              "status": "todo", "meeting_date": None}]
+    plan = {"summary": "Test", "questions": [], "proposals": [], "existing_items": existing}
+    with pytest.raises(ValueError, match=match):
+        agent.validate_plan(plan, TRANSCRIPT, board, "2026-11-02", candidates=CANDIDATES)
+
+
+def test_parser_failure_saves_nothing(client, project, task, enabled, monkeypatch, db_session):
+    def fail(self, transcript, meeting_date=None):
+        raise RuntimeError("model unavailable")
+    monkeypatch.setattr(agent_api.TranscriptParser, "parse", fail)
+    monkeypatch.setattr(agent_api, "extract_candidates", REAL_EXTRACT_CANDIDATES)  # undo the fixture's fake
+    response = parse_with_assistant(client, project)
+    assert response.status_code == 502
+    assert db_session.query(Meeting).count() == 0
+    assert db_session.query(Task).count() == 1

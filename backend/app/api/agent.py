@@ -12,14 +12,16 @@ from typing import Literal, Optional
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, Header, HTTPException, Request, UploadFile
 from sqlalchemy.orm import Session
 
-from app.api.transcripts import accept_audio, write_summary
+from app.api.transcripts import EXTRACTION_FAILED, accept_audio, write_summary
 from app.auth import get_optional_user, project_access_level, require_project_edit, require_project_view
 from app.db import get_db
 from app.llm import agent as agent_llm
 from app.llm import assistant as assistant_llm
 from app.llm.gemini import GeminiError
+from app.llm.parser import TranscriptParser
 from app.models.models import AgentReview, Attachment, Meeting, MeetingStatus, Project, Subtask, Task, TaskStatus, User
-from app.ratelimit import agent_ai_limit, agent_chat_limit, agent_parse_ai_limit, audio_limit, parse_limit
+from app.ratelimit import (agent_ai_limit, agent_chat_limit, agent_parse_ai_limit, agent_review_ai_limit,
+                           audio_limit, parse_limit)
 from app.schemas.agent import ApplyInput, ChatInput, ReviewInput
 from app.schemas.schemas import MeetingOut
 
@@ -236,7 +238,7 @@ def get_review(project_id: int, review_id: str, user: Optional[User] = Depends(g
 
 @router.post("/reviews", status_code=201)
 @parse_limit
-@agent_ai_limit
+@agent_review_ai_limit
 def create_review(request: Request, project_id: int, payload: ReviewInput,
                   user: Optional[User] = Depends(get_optional_user),
                   x_workspace_token: Optional[str] = Header(None), db: Session = Depends(get_db)):
@@ -260,6 +262,36 @@ def generate_review(project_id, payload, user, x_workspace_token, db, *, commit=
     return output(review)
 
 
+def extract_candidates(payload):
+    """The meeting's tasks from the evaluated parser, which the assistant then reconciles."""
+    try:
+        extraction = TranscriptParser().parse(payload.transcript, meeting_date=payload.meeting_date)
+    except Exception as exc:  # LLM/API failure: nothing is saved, as for a failed review
+        log.warning("parser failed for assistant import: %s", exc)
+        raise HTTPException(502, EXTRACTION_FAILED) from exc
+    return [item.model_dump(mode="json") for item in extraction.action_items]
+
+
+def with_candidates(plan, candidates):
+    """Add the parser's candidates as new-task proposals, except those already on the board.
+
+    They keep their extraction score and source decision, so the board treats them like any
+    parsed task: a score below the review threshold still marks the card "Check this".
+    """
+    existing = {e["item"] for e in plan.get("existing_items", [])}
+    next_id = max((p["id"] for p in plan["proposals"]), default=-1) + 1
+    for i, c in enumerate(candidates):
+        if i in existing:
+            continue
+        plan["proposals"].append({
+            "id": next_id, "kind": "create", "task_id": None, "before": None,
+            "after": {k: c[k] for k in ("description", "owner", "deadline", "status")},
+            "evidence": c.get("source_decision") or "", "reason": "Extracted from the meeting.",
+            "confidence": c["confidence"]})
+        next_id += 1
+    return plan
+
+
 def run_meeting_review(db, project, payload):
     if not os.getenv("GEMINI_API_KEY"):
         raise HTTPException(503, "Configure GEMINI_API_KEY on the local backend to run the agent.")
@@ -267,14 +299,22 @@ def run_meeting_review(db, project, payload):
     board, meetings = project_context(db, project, tasks)
     # Do not keep a read transaction open while waiting for the model.
     db.rollback()
+    candidates = extract_candidates(payload)
+    if not tasks:
+        # Nothing to reconcile: the parser's tasks are the result, exactly as evaluated.
+        plan = {"summary": f"Extracted {len(candidates)} tasks from the meeting.", "proposals": [],
+                "questions": [], "existing_items": [], "model": TranscriptParser()._resolved_model(),
+                "trace": [{"label": f"Extracted {len(candidates)} tasks", "tool": "parser"}],
+                "steps": 0, "elapsed_seconds": 0}
+        return tasks, with_candidates(plan, candidates)
     try:
-        plan = agent_llm.run_review(payload, board, meetings)
+        plan = agent_llm.run_review(payload, board, meetings, candidates=candidates)
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
     except GeminiError as exc:
         log.warning("agent review failed: %s", exc)
         raise HTTPException(502, "Gemini couldn't complete a valid review within its limits. No tasks changed. Try again.") from exc
-    return tasks, plan
+    return tasks, with_candidates(plan, candidates)
 
 
 def store_meeting_review(db, project_id, payload, tasks, plan):
@@ -369,10 +409,10 @@ def apply_stored_review(db, project_id, review, proposal_ids, *, commit=True, re
     changes = []
     for p in proposals:
         if p["kind"] == "create":
-            # The assistant produces no extraction score. Store none, so the board shows no
-            # percentage, instead of a default 1.0 that would read as "100% confident".
-            task = Task(project_id=project_id, meeting_id=meeting.id if meeting else None, confidence=None,
-                        source_decision=p["evidence"])
+            # Parser-extracted tasks keep their score. A task the assistant proposed from chat has
+            # none, and stores none rather than a default 1.0 that would read as "100% confident".
+            task = Task(project_id=project_id, meeting_id=meeting.id if meeting else None,
+                        confidence=p.get("confidence"), source_decision=p["evidence"] or None)
             db.add(task)
         else:
             task = db.get(Task, p["task_id"])

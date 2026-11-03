@@ -1,8 +1,11 @@
 # Local project assistant
 
-This opt-in preview adds a floating assistant styled with the app's existing navy cards, blue accents,
+The assistant, on in the deployed app (`render.yaml`) and opt-in locally, adds a floating assistant styled with the app's existing navy cards, blue accents,
 typography and rounded controls. It answers questions about the selected project, proposes task
 changes from chat, and reconciles a **new** meeting transcript with existing tasks.
+A meeting's tasks always come from the evaluated parser, with their confidence scores; the assistant
+reconciles them with the board rather than extracting tasks itself (see
+[agent-evaluation.md](agent-evaluation.md) for why).
 It uses `GEMINI_MODEL` and `GEMINI_API_KEY` from the app's current configuration. With no model
 override, it uses `app.llm.gemini.DEFAULT_MODEL`. It never falls back to a different provider.
 The existing extraction, summary and subtask pipelines remain independent.
@@ -43,8 +46,8 @@ The API listens at `127.0.0.1:8100`. Both listeners are restricted to this compu
    **Recent changes**, after confirmation. Approved task changes enter the main Undo history,
    retaining earlier normal edits. Undo still checks affected tasks before reverting.
 
-This works for a first meeting as well as a follow-up; multiple meetings are only needed when comparing meetings.
-The local preview uses the same project-aware parser for pasted text and transcribed audio/video.
+This works for a first meeting as well as a follow-up. On an empty board the assistant is not called:
+the parser's tasks are saved as they are. Pasted text and transcribed audio/video take the same path.
 Recordings process in the background; their existing-task updates open for review when processing finishes.
 Pending updates remain in Changes if the browser closes before processing finishes. Ambiguous points appear
 as clarification notes; they do not require a review form.
@@ -116,6 +119,13 @@ create proposals or use the meeting-review controls. Chat uses the browser's loc
 relative-date requests; inspect the proposed absolute date before applying.
 
 
+Every meeting is first parsed by the evaluated extraction parser. If the board has no tasks, its tasks
+are the result and the agent is not called. Otherwise the agent receives them as numbered
+`candidate_tasks`: it lists those that repeat or continue an existing task under `existing_items`, so
+they are not added again, and proposes updates to existing tasks. Any new task it proposes itself
+is ignored in a meeting review; the remaining candidates are added with their extraction score and
+source decision.
+
 The meeting-review agent has three tools: `read_board`, `read_meeting`, and `finish_review`. It must read the board
 first, then may retrieve earlier meetings before producing suggestions. Its meeting index covers
 task source meetings and the 30 most recently added completed meetings, including follow-ups that
@@ -154,11 +164,11 @@ conflict; reopen the review to see its final state. The client does not automati
 reviews or mutations after a network failure.
 
 Existing tasks retain their original source meeting; the review audit records the follow-up's
-evidence. Newly created tasks reference the new meeting and store their quote as the task's
-source, shown at the top of the task's detail view (folded to three lines when long, speaker
-names in bold). The assistant produces no extraction score, so its new tasks store `confidence`
-as null: their cards show no "Check this" flag and their detail view shows no confidence chip.
-The original parser's tasks keep their extraction score.
+evidence. Newly created tasks reference the new meeting and keep the parser's confidence score and
+source decision, shown at the top of the task's detail view (folded to three lines when long, speaker
+names in bold), so a low score still marks the card "Check this". A task the assistant proposes from
+chat has no extraction score: it stores `confidence` as null, its card shows no flag and its detail
+view no confidence chip.
 Applying task changes records an inverse in the board's Undo history and preserves earlier actions. Undo
 checks affected tasks again and refuses to erase newer edits. Tasks that undo would delete
 also receive content-level subtask/attachment checks. Older receipts keep their original stricter
@@ -185,9 +195,9 @@ All endpoints are under `/api/v1/projects/{project_id}/agent` and require curren
 | `POST /reviews/{id}/undo` | Reverse that batch if its board and meeting have not changed |
 
 Chat is limited by `RATE_LIMIT_AGENT_CHAT` (default 30/hour). Text-parse entry points and assistant recordings
-share `RATE_LIMIT_PARSE` (default 20/hour). Chat and review reserve six calls from the shared
-`RATE_LIMIT_AI` allowance (default 30/hour); `/parse` and `/recordings` reserve seven including their background
-summary. This conservative reservation counts the bounded maximum, even if fewer calls are used. The app's health response advertises
+share `RATE_LIMIT_PARSE` (default 20/hour). Chat and refresh reserve six calls from the shared
+`RATE_LIMIT_AI` allowance (default 30/hour), a meeting review seven (the parser's extraction plus six), and
+`/parse` and `/recordings` eight, adding their background summary. This conservative reservation counts the bounded maximum, even if fewer calls are used. The app's health response advertises
 `features.meeting_agent`; disabled review routes return 404.
 
 ## Validation and limits

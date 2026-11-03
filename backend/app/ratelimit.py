@@ -85,7 +85,11 @@ agent_chat_limit = limiter.limit(lambda: _limit("AGENT_CHAT", "30/hour"),
                                  error_message="You've reached the assistant message limit. Please try again later.")
 agent_ai_limit = limiter.shared_limit(lambda: _limit("AI", "30/hour"), scope="ai-generation", cost=6,
                                      error_message="You've reached the AI usage limit. Please try again later.")
-agent_parse_ai_limit = limiter.shared_limit(lambda: _limit("AI", "30/hour"), scope="ai-generation", cost=7,
+# A meeting review adds the parser's extraction call to the assistant's six.
+agent_review_ai_limit = limiter.shared_limit(lambda: _limit("AI", "30/hour"), scope="ai-generation", cost=7,
+                                            error_message="You've reached the AI usage limit. Please try again later.")
+# Parsing adds the meeting summary on top of that.
+agent_parse_ai_limit = limiter.shared_limit(lambda: _limit("AI", "30/hour"), scope="ai-generation", cost=8,
                                            error_message="You've reached the AI usage limit. Please try again later.")
 
 

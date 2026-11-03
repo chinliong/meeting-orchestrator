@@ -252,7 +252,8 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
                       <span className="font-medium">{display(p.after[k])}</span>
                     </dd></div>)}
                 </dl>
-                <details className="mt-3 text-xs text-slate-500"><summary className="cursor-pointer">Why this change?</summary><blockquote className="mt-2 border-l-2 border-brand-100 bg-brand-50/60 px-3 py-2 text-sm leading-relaxed text-slate-700">“{p.evidence}”</blockquote></details>
+                {/* A parser-extracted task carries its source decision, which may be paraphrased or empty. */}
+                {p.evidence && <details className="mt-3 text-xs text-slate-500"><summary className="cursor-pointer">{p.confidence != null ? "Why this task?" : "Why this change?"}</summary><blockquote className="mt-2 border-l-2 border-brand-100 bg-brand-50/60 px-3 py-2 text-sm leading-relaxed text-slate-700">{p.confidence != null ? p.evidence : `“${p.evidence}”`}</blockquote></details>}
               </article>)}
               {isDraft && <p className="text-xs text-slate-500">{expired ? "These suggested changes expired after an hour. Refresh to check them again." : "Your tasks are checked again before any changes are applied."}</p>}
             </div>}

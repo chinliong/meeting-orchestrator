@@ -1,0 +1,104 @@
+{
+ "short": {
+  "runs": {
+   "agent": 8,
+   "gemini_prod": 8
+  },
+  "means": {
+   "agent": {
+    "precision": 0.965,
+    "recall": 0.811,
+    "f1": 0.875,
+    "owner_accuracy": 0.969,
+    "status_accuracy": 0.93,
+    "deadline_exact_accuracy": 0.9,
+    "deadline_within_3d_accuracy": 0.922,
+    "items_per_run": 27.8
+   },
+   "gemini_prod": {
+    "precision": 0.895,
+    "recall": 0.966,
+    "f1": 0.929,
+    "owner_accuracy": 0.969,
+    "status_accuracy": 0.969,
+    "deadline_exact_accuracy": 0.892,
+    "deadline_within_3d_accuracy": 0.9,
+    "items_per_run": 35.6
+   }
+  },
+  "tests": {
+   "precision": [
+    0.07,
+    0.0002
+   ],
+   "recall": [
+    -0.155,
+    0.0037
+   ],
+   "f1": [
+    -0.054,
+    0.089
+   ]
+  },
+  "agent": {
+   "reviews": 32,
+   "failed_reviews": 2,
+   "api_failures": 0,
+   "questions_per_review": 0,
+   "mean_steps": 2.67,
+   "model": "gemini-3.5-flash",
+   "expected_items": 33
+  }
+ },
+ "long": {
+  "runs": {
+   "agent": 8,
+   "gemini_prod": 8
+  },
+  "means": {
+   "agent": {
+    "precision": 0.992,
+    "recall": 0.497,
+    "f1": 0.651,
+    "owner_accuracy": 0.995,
+    "status_accuracy": 0.961,
+    "deadline_exact_accuracy": 0.98,
+    "deadline_within_3d_accuracy": 0.983,
+    "items_per_run": 61.6
+   },
+   "gemini_prod": {
+    "precision": 0.984,
+    "recall": 0.811,
+    "f1": 0.888,
+    "owner_accuracy": 0.989,
+    "status_accuracy": 0.972,
+    "deadline_exact_accuracy": 0.978,
+    "deadline_within_3d_accuracy": 0.985,
+    "items_per_run": 101.4
+   }
+  },
+  "tests": {
+   "precision": [
+    0.007,
+    0.151
+   ],
+   "recall": [
+    -0.314,
+    0.0003
+   ],
+   "f1": [
+    -0.237,
+    0.0003
+   ]
+  },
+  "agent": {
+   "reviews": 32,
+   "failed_reviews": 3,
+   "api_failures": 0,
+   "questions_per_review": 0.06,
+   "mean_steps": 2.62,
+   "model": "gemini-3.5-flash",
+   "expected_items": 123
+  }
+ }
+}

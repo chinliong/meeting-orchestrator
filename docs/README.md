@@ -18,6 +18,7 @@ Start with **evaluation-report.md**; the others go deeper or cover a different p
 | [evaluation-appendix.md](evaluation-appendix.md) | The method and every figure behind that report: per-condition results, deadline errors, the confidence score, limitations | - | Same 8 meetings |
 | [asr-evaluation.md](asr-evaluation.md) | Which speech-to-text service transcribes recordings most accurately, and do the tasks still come out right from a recording? | Deepgram Nova-3 (compared with hosted and local Whisper) | 2 real meetings from the AMI Meeting Corpus: their recordings, AMI's manual transcripts and AMI's own action lists |
 | [subtask-evaluation-report.md](subtask-evaluation-report.md) | Which model writes better subtask checklists? | Gemini Flash (compared with Claude Sonnet) | 24 tasks taken from the 8 test meetings (12 per test set), each breakdown scored against a rubric by an LLM judge |
+| [agent-evaluation.md](agent-evaluation.md) | Should the meeting assistant extract a meeting's tasks, or the parser? | The parser; the assistant reconciles its tasks with the board | The same 8 test meetings, each imported onto an empty board, 8 runs, scored with the parser evaluation's matcher |
 
 Each evaluation page is generated from saved results by the script named at its top, so the
 numbers on the page always match the raw results in `eval/`.

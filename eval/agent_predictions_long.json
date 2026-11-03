@@ -1,0 +1,4321 @@
+{
+ "note": "Meeting-agent predictions on an empty board; see eval/agent_eval.py.",
+ "runs": [
+  {
+   "conditions": {
+    "agent": [
+     {
+      "transcript_file": "cutover-readiness-review-05.txt",
+      "predicted": [
+       {
+        "description": "Target date for go-live.",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-07-13",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Aisha: Go-live moves to the thirteenth. I'll brief the steering committee on the new date at the meeting on the thirtieth, and before that I'll update the cutover runbook with the new go-live date, by Thursday, so the steering pack is consistent."
+       },
+       {
+        "description": "Forward bank MT940 sample file to Daniel.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-06-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: They've agreed the format. They're sending a signed-off sample file, and they promised it by Wednesday. I'll forward it to Daniel the moment it lands, so Daniel, you'll have it Wednesday."
+       },
+       {
+        "description": "Finish MT940 parser fix and retest in QA.",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-26",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: If Kenji's file lands Wednesday evening, I'll finish the parser fix Thursday and retest in QA. Let's say I'll have the MT940 parser fix finished and retested by Friday. That's honest."
+       },
+       {
+        "description": "Prepare opening balance reconciliation for mock cutover.",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-26",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Priya: I'm preparing the opening balance reconciliation for the mock cutover. I've started, I've got the GL side done, but the sub-ledgers are still outstanding. I'll have the full reconciliation ready by the end of the week."
+       },
+       {
+        "description": "Rerun full warehouse readiness test with new scanner firmware.",
+        "owner": "Farah Ismail",
+        "deadline": "2026-06-30",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: So what I need to do now is rerun the full warehouse readiness test with the new firmware, the proper one, all the movement types, not a smoke test. I haven't started that, I only heard the patch was in this morning."
+       },
+       {
+        "description": "Fix WM to TMS interface timeout errors.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-03",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Aisha: Kenji, can you take the WM to TMS interface timeout errors off Daniel's plate?\n\nKenji: Yes, it's closer to my area anyway. Honestly I already opened the logs this morning because the errors were flooding my inbox, so I've started. I'll have it fixed by next Friday."
+       },
+       {
+        "description": "Confirm stock count schedule with warehouse managers.",
+        "owner": "Farah Ismail",
+        "deadline": "2026-06-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: I still need to confirm the stock count schedule with the warehouse managers. They keep moving it because of the quarter-end shipments. I'll get it confirmed with them by Wednesday."
+       },
+       {
+        "description": "Finish cycle count reconciliation for mock cutover.",
+        "owner": "Nadia",
+        "deadline": "2026-06-26",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Farah: Nadia in my team is doing the cycle count reconciliation for the mock cutover. She's already pulled the counts from the last two cycles, and she'll have the reconciliation finished by Friday."
+       },
+       {
+        "description": "Run system copy from production to mock environment over the weekend.",
+        "owner": null,
+        "deadline": "2026-06-28",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: The Basis team will run the system copy from production to the mock environment over the weekend. It needs to be complete by Sunday so Priya can start her reconciliation checks on Monday."
+       },
+       {
+        "description": "Communicate transport freeze to development teams.",
+        "owner": "Marcus Lee",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: Marcus, can you tell the development teams?\n\nMarcus: Yes, I'll communicate the transport freeze to all the development teams. I'll send it out by Thursday, that gives them the weekend to get their last transports in."
+       },
+       {
+        "description": "Approve change request for extra consulting days.",
+        "owner": "Wei Lin",
+        "deadline": "2026-06-23",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Wei Lin: I'll approve the change request tomorrow, I just need to put it through the finance system."
+       },
+       {
+        "description": "Send month-end close timetable to Priya.",
+        "owner": "Wei Lin",
+        "deadline": "2026-06-22",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Wei Lin: I'll send you the month-end close timetable myself tonight."
+       },
+       {
+        "description": "Complete mitigating controls document for auditors.",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-25",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Wei Lin: the auditors asked about the mitigating controls document. Daniel, that's yours, isn't it?\n\nDaniel: It is. It's about half written. The segregation-of-duties conflicts are all listed, and I've written the controls for the finance roles. The logistics roles are still to do. The auditors wanted it by Thursday, and I'll still make Thursday."
+       },
+       {
+        "description": "Update cutover runbook with new go-live date.",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: I'll update the cutover runbook with the new go-live date, by Thursday, so the steering pack is consistent."
+       },
+       {
+        "description": "Update hour-by-hour run sheet for new cutover weekend.",
+        "owner": "Marcus Lee",
+        "deadline": "2026-06-29",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll update the run sheet for the new weekend, dates, names, contact numbers, all of it. I'll have it updated before our meeting next Monday, so everyone can check their slots then."
+       },
+       {
+        "description": "Schedule train-the-trainer sessions for warehouse supervisors.",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Siti: I haven't booked anything yet, because I didn't know the go-live date, but now that it's the thirteenth, I'll get those sessions scheduled by the third of July, so there's a full week of training before go-live."
+       },
+       {
+        "description": "Draft go-live communication email to all users.",
+        "owner": "Siti Hamid",
+        "deadline": "2026-06-26",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Siti: I can have the draft ready by Friday so it's sitting there, and then we just send it after the thirtieth."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "finance-close-planning-06.txt",
+      "predicted": [
+       {
+        "description": "Run end-to-end bank statement test in pre-production",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll run the end-to-end bank statement test in pre-production by Friday."
+       },
+       {
+        "description": "Write work instruction for manual bank reconciliation fallback",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll write the work instruction for the manual bank reconciliation fallback by the end of next week."
+       },
+       {
+        "description": "Set up five new house bank accounts in production system",
+        "owner": "Omar Rashid",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Omar: I'll have all five house bank accounts set up before the cutover weekend. Before Friday the tenth at the latest."
+       },
+       {
+        "description": "Fix payment file transfer file naming convention issue",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-06",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll have the payment file transfer fixed by Monday."
+       },
+       {
+        "description": "Close three dormant bank accounts",
+        "owner": "Omar Rashid",
+        "deadline": "2026-07-31",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Omar: I'll get the three dormant bank accounts closed by the end of the month."
+       },
+       {
+        "description": "Send Omar the list of bank GL accounts",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll send Omar the list of bank GL accounts after this meeting."
+       },
+       {
+        "description": "Schedule daily exchange rate upload job in production",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll schedule the daily exchange rate upload job in production. It has to be in before the lock, so by the tenth as well."
+       },
+       {
+        "description": "Clear parked vendor invoices",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Hannah: I'll have the parked vendor invoices cleared by Thursday next week."
+       },
+       {
+        "description": "Send payment run cut-off notice to vendors",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-02",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll send the payment run cut-off notice to vendors tomorrow."
+       },
+       {
+        "description": "Clean up remaining duplicate vendor records",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-03",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Hannah: I'll have the remaining duplicate vendor records cleaned up by Friday."
+       },
+       {
+        "description": "Train two new AP clerks on invoice parking in the new system",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll train the two new AP clerks on invoice parking the week before go-live, so by the tenth."
+       },
+       {
+        "description": "Draft first month-end close calendar for July",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-15",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll draft the first month-end close calendar by the fifteenth"
+       },
+       {
+        "description": "Confirm Malaysian tax code mapping",
+        "owner": "Grace Lim",
+        "deadline": "2026-07-06",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Grace: I'll have the Malaysian tax code mapping confirmed by Monday."
+       },
+       {
+        "description": "Configure GST reporting variant on the new system",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I can configure the GST reporting variant. I'll have it done by the seventeenth"
+       },
+       {
+        "description": "Draw up finance hypercare support rota",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll draw up the finance hypercare support rota by Friday"
+       },
+       {
+        "description": "Confirm with Marcus that finance users keep read-only access to legacy after go-live",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll confirm with Marcus by Friday."
+       },
+       {
+        "description": "Share internal audit checklist for cutover sign-off",
+        "owner": "Ravi Menon",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Ravi: I'll share the internal audit checklist for the cutover sign-off today"
+       },
+       {
+        "description": "Update finance FAQ on intranet before go-live",
+        "owner": null,
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Wei Lin: Then the service desk team needs to update the finance FAQ on the intranet before go-live. I'd like it by Friday the tenth."
+       },
+       {
+        "description": "Send action list round tonight",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll send the action list round tonight."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "warehouse-go-live-readiness-07.txt",
+      "predicted": [
+       {
+        "description": "Set up scanner user accounts in production for all devices",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: I'm already setting up the scanner user accounts in production for all the devices. I've done Pandan, Tuas is half done. I'll have all of them done by Thursday, including the six new ones"
+       },
+       {
+        "description": "Get site access for scanner vendor engineer for Friday delivery at Tuas",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll get Tom's engineer site access for Friday, I just need his name and IC number by Thursday."
+       },
+       {
+        "description": "Fix returns movement type mapping in the interface",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Kenji: I'm fixing the returns movement type mapping now. I'll have it fixed by Thursday."
+       },
+       {
+        "description": "Retest the returns process after mapping fix is in",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: So I'll retest the returns process on Friday, after Kenji's fix is in."
+       },
+       {
+        "description": "Load active carrier master data into the transport system",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Arjun: I've been loading the eighteen active carriers into the transport system. Twelve are in. I'll have all the carrier master data loaded by Thursday."
+       },
+       {
+        "description": "Confirm go-live week delivery schedule with main carriers",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-08",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll confirm the go-live week delivery schedule with the carriers tomorrow."
+       },
+       {
+        "description": "Send proof-of-delivery template to carriers",
+        "owner": "Arjun Pillai",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll send the proof-of-delivery template to the carriers. It's ready, I just haven't sent it."
+       },
+       {
+        "description": "Run final stock count at Tuas",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-11",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: I'll run the final stock count at Tuas on Saturday morning, the eleventh."
+       },
+       {
+        "description": "Notify purchasing team about material creation freeze in legacy",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: I'll tell the purchasing team about the material creation freeze today, straight after this."
+       },
+       {
+        "description": "Clear open transfer order backlog in legacy",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Mei Ling: We had two hundred on Friday. We're down to about forty. I'll have the open transfer order backlog cleared by Friday."
+       },
+       {
+        "description": "Brief night shift on paper fallback process for cutover weekend",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll brief the night shift on the paper fallback process on Thursday."
+       },
+       {
+        "description": "Nominate two super-users for Tuas night shift",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-08",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll nominate the two super-users by tomorrow."
+       },
+       {
+        "description": "Reschedule Tuas forklift servicing to week after go-live",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll call the servicing company today and move the forklift servicing to the week after go-live."
+       },
+       {
+        "description": "Book dedicated truck for Harbourfront hotel group delivery on Monday",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll book a dedicated truck for the Harbourfront order on Monday. I'll do it today, trucks for Monday get scarce by Wednesday."
+       },
+       {
+        "description": "Finish replenishment settings for Pandan pick faces",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Nadia: I've set up about half of them. I'll have the replenishment settings for the Pandan pick faces finished by Thursday."
+       },
+       {
+        "description": "Run remaining train-the-trainer session for second Tuas group",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Siti: The last one is Thursday for the second Tuas group. So that's in progress, finished Thursday."
+       },
+       {
+        "description": "Print laminated quick reference cards for scanner cradles",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Siti: I've designed them, I'll print the laminated quick reference cards by Friday, so they're on the cradles for Monday."
+       },
+       {
+        "description": "Send go-live email to warehouse staff",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Siti: I'll send it on Thursday, so people get it before the weekend and not on Monday morning."
+       },
+       {
+        "description": "Document interface restart procedure for night shift",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll document the interface restart procedure for the night shift. One page, with screenshots, no jargon. I'll have it by the end of the week."
+       },
+       {
+        "description": "Send go/no-go warehouse checklist to Aisha",
+        "owner": "Farah Ismail",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: I'll send the go/no-go warehouse checklist to Aisha by Thursday."
+       },
+       {
+        "description": "Raise overtime request for weekend warehouse crew",
+        "owner": "Farah Ismail",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: I'll raise the overtime request for the weekend warehouse crew today."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "access-and-audit-review-08.txt",
+      "predicted": [
+       {
+        "description": "Create individual accounts for any AP clerks who don't have one and lock all three shared generic accounts in production",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-17",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'll create individual accounts for any AP clerks who don't have one tomorrow morning, and I'll lock all three shared generic accounts by the end of tomorrow."
+       },
+       {
+        "description": "Send list of AP clerks who have been using the shared account to Jun Wei",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-16",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll send you the list of AP clerks today, straight after this."
+       },
+       {
+        "description": "Set up a weekly extract of the firefighter log for Ravi",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-20",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'll set up a weekly extract of the firefighter log for Ravi. It'll email him every Monday morning. I'll have it running by Monday."
+       },
+       {
+        "description": "Review the firefighter access log for the first time and weekly thereafter",
+        "owner": "Ravi Menon",
+        "deadline": "2026-07-20",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Ravi: Then I'll review the firefighter access log for the first time on Monday, and every Monday after that."
+       },
+       {
+        "description": "Write mitigating controls for the three accepted segregation-of-duties conflicts",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-21",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll write the mitigating controls for the three conflicts within three working days. So by Tuesday."
+       },
+       {
+        "description": "Approve and sign off written mitigating controls for the three segregation-of-duties conflicts when ready",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: And I'll approve them. Send them to me when they're ready and I'll sign them off, it doesn't need a meeting."
+       },
+       {
+        "description": "Review the list of users with posting access to closed periods",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-20",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll review the list of users with posting access to closed periods on Monday."
+       },
+       {
+        "description": "Get an AP clerk to retest GR/IR clearing transaction and inform Daniel if it still fails",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll get one of my clerks to retest the GR/IR clearing tomorrow morning, and I'll tell Daniel if it still fails."
+       },
+       {
+        "description": "Confirm that AP team approval limits match current April policy",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-21",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll confirm that my team's approval limits match the current policy by Tuesday."
+       },
+       {
+        "description": "Send list of sample requests for IT general controls testing to the team",
+        "owner": "Sofia Reyes",
+        "deadline": "2026-07-22",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Sofia: I'll send you our list of sample requests for the IT general controls by next Wednesday."
+       },
+       {
+        "description": "Confirm with audit manager whether external audit relies on migration reconciliations",
+        "owner": "Sofia Reyes",
+        "deadline": "2026-07-22",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Sofia: I'll confirm with my manager whether we rely on the migration reconciliations, also by next Wednesday."
+       },
+       {
+        "description": "Send signed cutover reconciliation pack to Sofia Reyes",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll send you the signed cutover reconciliation pack tomorrow."
+       },
+       {
+        "description": "Finish writing the role design documentation",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-24",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: The role design documentation is about two-thirds written. I'll finish the role design documentation by Friday next week, the twenty-fourth, which is before the auditors arrive."
+       },
+       {
+        "description": "Send system access documentation pack to the auditors",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-07-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: Then I'll send the auditors the system access documentation pack on the twenty-fourth as well, once Marcus's part is in."
+       },
+       {
+        "description": "Complete post-go-live user access review for all finance roles",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-31",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: I've started the user access review for all the finance roles. Every role, every user, signed off by the role owner. I'm about a third through it. I'll have it complete by the end of the month."
+       },
+       {
+        "description": "Share last year's IT audit findings with Marcus",
+        "owner": "Ravi Menon",
+        "deadline": "2026-07-16",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Ravi: I'll share last year's IT audit findings with you today, Marcus."
+       },
+       {
+        "description": "Rotate interface service account passwords in evening outage windows before auditors arrive",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'll rotate the interface service account passwords before the auditors arrive, by the twenty-fourth. I'll need a short outage window for each interface, so I'll do them in the evenings."
+       },
+       {
+        "description": "Review security audit log settings and provide a recommendation",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-22",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'm reviewing the security audit log settings now to see what we can switch on without filling the disk. I'll have a recommendation by next Wednesday."
+       },
+       {
+        "description": "Remove temporary go-live superuser access from consultants",
+        "owner": "Marcus Lee",
+        "deadline": "2026-08-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll remove the temporary go-live superuser access from the consultants at the end of hypercare, the seventh of August."
+       },
+       {
+        "description": "Log today's access issues and outage windows in the hypercare issue log",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-07-16",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: And I'll log today's access issues in the hypercare issue log this afternoon, including Jun Wei's outage windows."
+       },
+       {
+        "description": "Raise single sign-on proposal at the IT leadership meeting",
+        "owner": "Marcus Lee",
+        "deadline": "2026-09-30",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Let's park single sign-on until after hypercare. I'll raise it at the IT leadership meeting in September."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     }
+    ]
+   },
+   "models": {
+    "agent": "gemini-3.5-flash"
+   },
+   "validation_failures": {
+    "agent": 0
+   },
+   "api_failures": {
+    "agent": 0
+   }
+  },
+  {
+   "conditions": {
+    "agent": [
+     {
+      "transcript_file": "cutover-readiness-review-05.txt",
+      "predicted": [],
+      "questions": [
+       "The task board is currently completely empty. Please populate the board or provide the relevant existing tasks so that updates or new work can be properly reconciled."
+      ],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "finance-close-planning-06.txt",
+      "predicted": [
+       {
+        "description": "End-to-end bank statement test in pre-production",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll run the end-to-end bank statement test in pre-production by Friday."
+       },
+       {
+        "description": "Write work instruction for manual bank reconciliation fallback",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll write the work instruction for the manual bank reconciliation fallback by the end of next week."
+       },
+       {
+        "description": "Set up five new house bank accounts in production system",
+        "owner": "Omar Rashid",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Omar: If I have the letters today, the bank needs two days, so I'll have all five house bank accounts set up before the cutover weekend. Before Friday the tenth at the latest."
+       },
+       {
+        "description": "Fix payment file transfer naming convention",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-06",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: Okay, then I'll have the payment file transfer fixed by Monday."
+       },
+       {
+        "description": "Close three dormant bank accounts",
+        "owner": "Omar Rashid",
+        "deadline": "2026-07-31",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Omar: I'll get the three dormant bank accounts closed by the end of the month."
+       },
+       {
+        "description": "Send list of bank GL accounts to Omar",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll send Omar the list of bank GL accounts after this meeting."
+       },
+       {
+        "description": "Schedule daily exchange rate upload job in production",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll schedule the daily exchange rate upload job in production. It has to be in before the lock, so by the tenth as well."
+       },
+       {
+        "description": "Clear parked vendor invoices",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Hannah: I'll have the parked vendor invoices cleared by Thursday next week."
+       },
+       {
+        "description": "Send payment run cut-off notice to vendors",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-02",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll send the payment run cut-off notice to vendors tomorrow."
+       },
+       {
+        "description": "Clean up remaining duplicate vendor records",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-03",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Hannah: I'll have the remaining duplicate vendor records cleaned up by Friday."
+       },
+       {
+        "description": "Train two new AP clerks on invoice parking",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll train the two new AP clerks on invoice parking the week before go-live, so by the tenth."
+       },
+       {
+        "description": "Draft first month-end close calendar",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-15",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll draft the first month-end close calendar by the fifteenth"
+       },
+       {
+        "description": "Agree cash forecast template with Priya",
+        "owner": "Omar Rashid",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Omar: I'll agree the cash forecast template with Priya then."
+       },
+       {
+        "description": "Confirm Malaysian tax code mapping",
+        "owner": "Grace Lim",
+        "deadline": "2026-07-06",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Grace: I'll have the Malaysian tax code mapping confirmed by Monday."
+       },
+       {
+        "description": "Configure GST reporting variant in pre-production/production",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll have it done by the seventeenth, that's the Friday after go-live."
+       },
+       {
+        "description": "Draw up finance hypercare support rota",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll draw up the finance hypercare support rota by Friday"
+       },
+       {
+        "description": "Confirm with Marcus that finance users keep read-only access to legacy after go-live",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll confirm with Marcus by Friday."
+       },
+       {
+        "description": "Share internal audit checklist for cutover sign-off",
+        "owner": "Ravi Menon",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Ravi: I'll share the internal audit checklist for the cutover sign-off today"
+       },
+       {
+        "description": "Update finance FAQ on intranet before go-live",
+        "owner": null,
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Wei Lin: Then the service desk team needs to update the finance FAQ on the intranet before go-live. I'd like it by Friday the tenth."
+       },
+       {
+        "description": "Send action list round tonight",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll send the action list round tonight."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "warehouse-go-live-readiness-07.txt",
+      "predicted": [
+       {
+        "description": "Set up user accounts in production for all warehouse scanner devices.",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: I'm already setting up the scanner user accounts in production for all the devices. I've done Pandan, Tuas is half done. I'll have all of them done by Thursday, including the six new ones, if Tom sends me the serial numbers."
+       },
+       {
+        "description": "Arrange site access permissions for vendor engineer for scanner replacement at Tuas.",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll get Tom's engineer site access for Friday, I just need his name and IC number by Thursday."
+       },
+       {
+        "description": "Fix the movement type mapping error in the WM-to-TMS interface for returns.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Kenji: I'm fixing the returns movement type mapping now. I'll have it fixed by Thursday."
+       },
+       {
+        "description": "Retest the returns process in the warehouse system after the mapping fix.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: So I'll retest the returns process on Friday, after Kenji's fix is in."
+       },
+       {
+        "description": "Load the 18 active carrier master data records into the transport system.",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Arjun: Twelve are in. I'll have all the carrier master data loaded by Thursday."
+       },
+       {
+        "description": "Confirm the delivery schedule for go-live week with the three main carriers.",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-08",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll confirm the go-live week delivery schedule with the carriers tomorrow."
+       },
+       {
+        "description": "Send the new proof-of-delivery template to the carriers.",
+        "owner": "Arjun Pillai",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll send the proof-of-delivery template to the carriers. It's ready, I just haven't sent it."
+       },
+       {
+        "description": "Perform final stock count at Tuas warehouse post-lock.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-11",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: I'll run the final stock count at Tuas on Saturday morning, the eleventh."
+       },
+       {
+        "description": "Notify purchasing team regarding legacy system material creation freeze effective Wednesday.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: I'll tell the purchasing team about the material creation freeze today, straight after this."
+       },
+       {
+        "description": "Clear the backlog of open transfer orders in legacy warehouse system.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Mei Ling: We had two hundred on Friday. We're down to about forty. I'll have the open transfer order backlog cleared by Friday."
+       },
+       {
+        "description": "Brief night shift team on the paper fallback process for cutover weekend.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll brief the night shift on the paper fallback process on Thursday."
+       },
+       {
+        "description": "Nominate two super-users for the Tuas night shift team.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-08",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll nominate the two super-users by tomorrow."
+       },
+       {
+        "description": "Reschedule forklift servicing at Tuas to the week following go-live.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll call the servicing company today and move the forklift servicing to the week after go-live."
+       },
+       {
+        "description": "Book dedicated transport vehicle for Harbourfront hotel group delivery on go-live Monday.",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll book a dedicated truck for the Harbourfront order on Monday. I'll do it today, trucks for Monday get scarce by Wednesday."
+       },
+       {
+        "description": "Complete replenishment minimum and maximum quantity settings for Pandan pick faces.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Nadia: I've set up about half of them. I'll have the replenishment settings for the Pandan pick faces finished by Thursday."
+       },
+       {
+        "description": "Conduct the remaining train-the-trainer training session for the second Tuas group.",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Siti: I've run two of them, Pandan and the first Tuas one. The last one is Thursday for the second Tuas group. So that's in progress, finished Thursday."
+       },
+       {
+        "description": "Print laminated quick reference cards for scanner cradles.",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Siti: I've designed them, I'll print the laminated quick reference cards by Friday, so they're on the cradles for Monday."
+       },
+       {
+        "description": "Send warehouse go-live announcement email to all staff.",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Siti: I'll send it on Thursday, so people get it before the weekend and not on Monday morning."
+       },
+       {
+        "description": "Document the step-by-step interface restart procedure for the night shift team.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll document the interface restart procedure for the night shift. One page, with screenshots, no jargon. I'll have it by the end of the week."
+       },
+       {
+        "description": "Submit completed warehouse go/no-go readiness checklist to Aisha.",
+        "owner": "Farah Ismail",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: I'll send the go/no-go warehouse checklist to Aisha by Thursday."
+       },
+       {
+        "description": "Submit formal overtime approval request for weekend warehouse teams across both sites.",
+        "owner": "Farah Ismail",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: I'll raise the overtime request for the weekend warehouse crew today."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "access-and-audit-review-08.txt",
+      "predicted": [
+       {
+        "description": "Create individual accounts for any AP clerks who don't have one and lock all three shared generic accounts by the end of tomorrow",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-17",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'll create individual accounts for any AP clerks who don't have one tomorrow morning, and I'll lock all three shared generic accounts by the end of tomorrow."
+       },
+       {
+        "description": "Send list of AP clerks who have been using the shared generic account",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-16",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll send you the list of AP clerks today, straight after this."
+       },
+       {
+        "description": "Set up a weekly extract of the firefighter log for internal audit",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-20",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'll set up a weekly extract of the firefighter log for Ravi. It'll email him every Monday morning. I'll have it running by Monday."
+       },
+       {
+        "description": "Review the firefighter access log weekly starting Monday",
+        "owner": "Ravi Menon",
+        "deadline": "2026-07-20",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Ravi: Then I'll review the firefighter access log for the first time on Monday, and every Monday after that."
+       },
+       {
+        "description": "Write mitigating controls for the three accepted segregation-of-duties conflicts",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-21",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll write the mitigating controls for the three conflicts within three working days. So by Tuesday."
+       },
+       {
+        "description": "Approve written mitigating controls for segregation-of-duties conflicts when ready",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: And I'll approve them. Send them to me when they're ready and I'll sign them off, it doesn't need a meeting."
+       },
+       {
+        "description": "Review the list of users with posting access to closed periods",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-20",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll review the list of users with posting access to closed periods on Monday. If there's anyone on it who shouldn't be, I'll tell Jun Wei the same day."
+       },
+       {
+        "description": "Get an AP clerk to retest GR/IR clearing transaction",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll get one of my clerks to retest the GR/IR clearing tomorrow morning, and I'll tell Daniel if it still fails."
+       },
+       {
+        "description": "Confirm team approval limits in system match current policy",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-21",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll confirm that my team's approval limits match the current policy by Tuesday."
+       },
+       {
+        "description": "Send list of sample requests for IT general controls testing",
+        "owner": "Sofia Reyes",
+        "deadline": "2026-07-22",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Sofia: I'll send you our list of sample requests for the IT general controls by next Wednesday."
+       },
+       {
+        "description": "Confirm with manager whether external audit relies on migration reconciliations",
+        "owner": "Sofia Reyes",
+        "deadline": "2026-07-22",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Sofia: I'll confirm with my manager whether we rely on the migration reconciliations, also by next Wednesday."
+       },
+       {
+        "description": "Send signed cutover reconciliation pack to external audit",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll send you the signed cutover reconciliation pack tomorrow."
+       },
+       {
+        "description": "Finish role design documentation",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-24",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: The role design documentation is about two-thirds written. I'll finish the role design documentation by Friday next week, the twenty-fourth, which is before the auditors arrive."
+       },
+       {
+        "description": "Send system access documentation pack to external auditors",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-07-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: Then I'll send the auditors the system access documentation pack on the twenty-fourth as well, once Marcus's part is in."
+       },
+       {
+        "description": "Complete user access review for all finance roles",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-31",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: I've started the user access review for all the finance roles. Every role, every user, signed off by the role owner. I'm about a third through it. I'll have it complete by the end of the month."
+       },
+       {
+        "description": "Share last year's IT audit findings with Marcus Lee",
+        "owner": "Ravi Menon",
+        "deadline": "2026-07-16",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Ravi: I'll share last year's IT audit findings with you today, Marcus."
+       },
+       {
+        "description": "Rotate interface service account passwords",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'll rotate the interface service account passwords before the auditors arrive, by the twenty-fourth."
+       },
+       {
+        "description": "Review security audit log settings and provide recommendation",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-22",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'm reviewing the security audit log settings now to see what we can switch on without filling the disk. I'll have a recommendation by next Wednesday."
+       },
+       {
+        "description": "Remove temporary go-live superuser access from consultants",
+        "owner": "Marcus Lee",
+        "deadline": "2026-08-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll remove the temporary go-live superuser access from the consultants at the end of hypercare, the seventh of August."
+       },
+       {
+        "description": "Log access issues and outage windows in hypercare issue log",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-07-16",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: And I'll log today's access issues in the hypercare issue log this afternoon, including Jun Wei's outage windows."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     }
+    ]
+   },
+   "models": {
+    "agent": "gemini-3.5-flash"
+   },
+   "validation_failures": {
+    "agent": 0
+   },
+   "api_failures": {
+    "agent": 0
+   }
+  },
+  {
+   "conditions": {
+    "agent": [
+     {
+      "transcript_file": "cutover-readiness-review-05.txt",
+      "predicted": [],
+      "questions": [
+       "The board is currently completely empty. Please clarify if tasks should be created from scratch for all items discussed in Cutover Readiness Review #5."
+      ],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "finance-close-planning-06.txt",
+      "predicted": [
+       {
+        "description": "Fix MT940 parser for multi-currency bank statements",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-03",
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Daniel: The MT940 parser fix passed QA on Friday. The sample file from the bank came in on the Wednesday evening like Kenji said, I finished the fix on Thursday and the retest in QA passed on Friday. All six multi-currency test statements load cleanly now."
+       },
+       {
+        "description": "Run end-to-end bank statement test in pre-production",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll run the end-to-end bank statement test in pre-production by Friday."
+       },
+       {
+        "description": "Write work instruction for manual bank reconciliation fallback",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll write the work instruction for the manual bank reconciliation fallback by the end of next week."
+       },
+       {
+        "description": "Set up five new house bank accounts in production",
+        "owner": "Omar Rashid",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Omar: I'll have all five house bank accounts set up before the cutover weekend. Before Friday the tenth at the latest."
+       },
+       {
+        "description": "Fix payment file transfer file naming convention",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-06",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll have the payment file transfer fixed by Monday. It's a small change, it's the testing that takes time."
+       },
+       {
+        "description": "Close three dormant bank accounts",
+        "owner": "Omar Rashid",
+        "deadline": "2026-07-31",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Omar: I'll take the dormant accounts. I'll get the three dormant bank accounts closed by the end of the month."
+       },
+       {
+        "description": "Send list of bank GL accounts to Omar",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll send Omar the list of bank GL accounts after this meeting. I have it ready, it's just sitting on my desktop."
+       },
+       {
+        "description": "Schedule daily exchange rate upload job in production",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll schedule the daily exchange rate upload job in production. It has to be in before the lock, so by the tenth as well."
+       },
+       {
+        "description": "Clear parked vendor invoices in legacy",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Hannah: I'll have the parked vendor invoices cleared by Thursday next week. That gives us a day of buffer before the lock on the tenth."
+       },
+       {
+        "description": "Send payment run cut-off notice to vendors",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-02",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll send the payment run cut-off notice to vendors tomorrow."
+       },
+       {
+        "description": "Clean up remaining duplicate vendor records",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-03",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Hannah: I'll have the remaining duplicate vendor records cleaned up by Friday."
+       },
+       {
+        "description": "Train new AP clerks on invoice parking in the new system",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll train the two new AP clerks on invoice parking the week before go-live, so by the tenth."
+       },
+       {
+        "description": "Reconcile intercompany balances",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Priya: I finished reconciling the intercompany balances yesterday. Every pair agrees now, including the Malaysia to Singapore one that had the old FX difference. That's closed."
+       },
+       {
+        "description": "Validate fixed asset balances from mock load",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Priya: I validated the fixed asset balances from the mock load, the net book values agree to legacy to the cent for all three company codes. That's done."
+       },
+       {
+        "description": "Draft first month-end close calendar",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-15",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll draft the first month-end close calendar by the fifteenth, so it's out a full two weeks before the close starts."
+       },
+       {
+        "description": "Agree cash forecast template with Priya",
+        "owner": "Omar Rashid",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Omar: I'll agree the cash forecast template with Priya then. No date, it just needs to be before the first forecast is due."
+       },
+       {
+        "description": "Complete Singapore tax code mapping in pre-production",
+        "owner": "Grace Lim",
+        "deadline": "2026-06-29",
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Grace: The Singapore tax code mapping is complete, I finished it on Monday and it's already in the pre-production system."
+       },
+       {
+        "description": "Confirm Malaysian tax code mapping",
+        "owner": "Grace Lim",
+        "deadline": "2026-07-06",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Grace: I'll have the Malaysian tax code mapping confirmed by Monday."
+       },
+       {
+        "description": "Configure GST reporting variant on new system",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll have it done by the seventeenth, that's the Friday after go-live."
+       },
+       {
+        "description": "File June withholding tax return under legacy system",
+        "owner": "Grace Lim",
+        "deadline": "2026-06-29",
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Grace: I filed the June withholding tax return under the legacy system on Monday."
+       },
+       {
+        "description": "Draw up finance hypercare support rota",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll draw up the finance hypercare support rota by Friday, so everyone has a week's notice."
+       },
+       {
+        "description": "Confirm read-only legacy access for finance users with Marcus",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll confirm with Marcus by Friday. If the roles aren't built, I'll say so on Friday rather than find out on the fourteenth."
+       },
+       {
+        "description": "Share internal audit checklist for cutover sign-off",
+        "owner": "Ravi Menon",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Ravi: I'll share the internal audit checklist for the cutover sign-off today, so Priya and Daniel can check it against what they're already planning."
+       },
+       {
+        "description": "Update finance FAQ on intranet before go-live",
+        "owner": null,
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Wei Lin: Then the service desk team needs to update the finance FAQ on the intranet before go-live. I'd like it by Friday the tenth. Their manager already knows it's coming, it's their task."
+       },
+       {
+        "description": "Send action list round from meeting notes",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll send the action list round tonight."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "warehouse-go-live-readiness-07.txt",
+      "predicted": [
+       {
+        "description": "Set up scanner user accounts in production for all devices, including the six new ones",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: I'm already setting up the scanner user accounts in production for all the devices. I've done Pandan, Tuas is half done. I'll have all of them done by Thursday, including the six new ones"
+       },
+       {
+        "description": "Get site access for scanner vendor engineer for Friday",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll get Tom's engineer site access for Friday, I just need his name and IC number by Thursday."
+       },
+       {
+        "description": "Fix the returns movement type mapping in the interface",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Kenji: I'm fixing the returns movement type mapping now. I'll have it fixed by Thursday."
+       },
+       {
+        "description": "Retest the returns process after Kenji's mapping fix is in",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: So I'll retest the returns process on Friday, after Kenji's fix is in."
+       },
+       {
+        "description": "Load remaining active carrier master data into the transport system",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Arjun: Twelve are in. I'll have all the carrier master data loaded by Thursday."
+       },
+       {
+        "description": "Confirm the go-live week delivery schedule with the three main carriers",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-08",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll confirm the go-live week delivery schedule with the carriers tomorrow."
+       },
+       {
+        "description": "Send the new proof-of-delivery template to the carriers",
+        "owner": "Arjun Pillai",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll send the proof-of-delivery template to the carriers. It's ready, I just haven't sent it."
+       },
+       {
+        "description": "Run the final stock count at Tuas",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-11",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: I'll run the final stock count at Tuas on Saturday morning, the eleventh."
+       },
+       {
+        "description": "Inform purchasing team about the material creation freeze in legacy",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: I'll tell the purchasing team about the material creation freeze today, straight after this."
+       },
+       {
+        "description": "Clear open transfer order backlog in legacy",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Mei Ling: We had two hundred on Friday. We're down to about forty. I'll have the open transfer order backlog cleared by Friday."
+       },
+       {
+        "description": "Brief night shift on paper fallback process for cutover weekend",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll brief the night shift on the paper fallback process on Thursday."
+       },
+       {
+        "description": "Nominate two super-users for Tuas night shift",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-08",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll nominate the two super-users by tomorrow."
+       },
+       {
+        "description": "Call servicing company and reschedule forklift servicing to week after go-live",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll call the servicing company today and move the forklift servicing to the week after go-live."
+       },
+       {
+        "description": "Book dedicated truck for Harbourfront hotel group delivery on Monday",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll book a dedicated truck for the Harbourfront order on Monday. I'll do it today"
+       },
+       {
+        "description": "Finish replenishment settings for Pandan pick faces",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Nadia: I've set up about half of them. I'll have the replenishment settings for the Pandan pick faces finished by Thursday."
+       },
+       {
+        "description": "Print laminated quick reference cards for scanners",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Siti: I've designed them, I'll print the laminated quick reference cards by Friday"
+       },
+       {
+        "description": "Send go-live email to warehouse staff",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Siti: I'll send it on Thursday, so people get it before the weekend and not on Monday morning."
+       },
+       {
+        "description": "Document interface restart procedure for night shift",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll document the interface restart procedure for the night shift. One page, with screenshots, no jargon. I'll have it by the end of the week."
+       },
+       {
+        "description": "Send warehouse go/no-go checklist to Aisha",
+        "owner": "Farah Ismail",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: I'll send the go/no-go warehouse checklist to Aisha by Thursday."
+       },
+       {
+        "description": "Raise overtime request for weekend warehouse crew",
+        "owner": "Farah Ismail",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: I'll raise the overtime request for the weekend warehouse crew today."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "access-and-audit-review-08.txt",
+      "predicted": [
+       {
+        "description": "Lock remaining shared/generic accounts in production (AP and Pandan warehouse accounts) after creating individual accounts for AP clerks",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-17",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'll create individual accounts for any AP clerks who don't have one tomorrow morning, and I'll lock all three shared generic accounts by the end of tomorrow."
+       },
+       {
+        "description": "Send list of AP clerks who have been using the shared account to Jun Wei",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-16",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll send you the list of AP clerks today, straight after this."
+       },
+       {
+        "description": "Set up weekly extract of the firefighter log emailed to Ravi every Monday morning",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-20",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'll set up a weekly extract of the firefighter log for Ravi. It'll email him every Monday morning. I'll have it running by Monday."
+       },
+       {
+        "description": "Review firefighter access log every Monday",
+        "owner": "Ravi Menon",
+        "deadline": "2026-07-20",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Ravi: Then I'll review the firefighter access log for the first time on Monday, and every Monday after that."
+       },
+       {
+        "description": "Write mitigating controls for the three accepted segregation-of-duties conflicts",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-21",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll write the mitigating controls for the three conflicts within three working days. So by Tuesday."
+       },
+       {
+        "description": "Approve written mitigating controls for the segregation-of-duties conflicts once prepared",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: And I'll approve them. Send them to me when they're ready and I'll sign them off, it doesn't need a meeting."
+       },
+       {
+        "description": "Review list of users with posting access to closed periods",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-20",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll review the list of users with posting access to closed periods on Monday."
+       },
+       {
+        "description": "Have AP clerk retest GR/IR clearing transaction and inform Daniel if it fails",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll get one of my clerks to retest the GR/IR clearing tomorrow morning, and I'll tell Daniel if it still fails."
+       },
+       {
+        "description": "Confirm AP team approval limits match the current April policy",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-21",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll confirm that my team's approval limits match the current policy by Tuesday."
+       },
+       {
+        "description": "Send list of sample requests for IT general controls testing",
+        "owner": "Sofia Reyes",
+        "deadline": "2026-07-22",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Sofia: I'll send you our list of sample requests for the IT general controls by next Wednesday."
+       },
+       {
+        "description": "Confirm with audit manager whether external audit relies on migration reconciliations",
+        "owner": "Sofia Reyes",
+        "deadline": "2026-07-22",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Sofia: I'll confirm with my manager whether we rely on the migration reconciliations, also by next Wednesday."
+       },
+       {
+        "description": "Send signed cutover reconciliation pack to external audit",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll send you the signed cutover reconciliation pack tomorrow."
+       },
+       {
+        "description": "Finish role design documentation",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-24",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: The role design documentation is about two-thirds written. I'll finish the role design documentation by Friday next week, the twenty-fourth, which is before the auditors arrive."
+       },
+       {
+        "description": "Send system access documentation pack to external auditors",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-07-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: Then I'll send the auditors the system access documentation pack on the twenty-fourth as well, once Marcus's part is in."
+       },
+       {
+        "description": "Complete user access review for all finance roles",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-31",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: I've started the user access review for all the finance roles. Every role, every user, signed off by the role owner. I'm about a third through it. I'll have it complete by the end of the month."
+       },
+       {
+        "description": "Share last year's IT audit findings with Marcus",
+        "owner": "Ravi Menon",
+        "deadline": "2026-07-16",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Ravi: I'll share last year's IT audit findings with you today, Marcus."
+       },
+       {
+        "description": "Rotate interface service account passwords during evening outage windows",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'll rotate the interface service account passwords before the auditors arrive, by the twenty-fourth. I'll need a short outage window for each interface, so I'll do them in the evenings."
+       },
+       {
+        "description": "Review security audit log settings and provide recommendation",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-22",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'm reviewing the security audit log settings now to see what we can switch on without filling the disk. I'll have a recommendation by next Wednesday."
+       },
+       {
+        "description": "Remove temporary go-live superuser access from consultants at end of hypercare",
+        "owner": "Marcus Lee",
+        "deadline": "2026-08-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll remove the temporary go-live superuser access from the consultants at the end of hypercare, the seventh of August."
+       },
+       {
+        "description": "Log today's access issues in hypercare issue log, including interface outage windows",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-07-16",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: And I'll log today's access issues in the hypercare issue log this afternoon, including Jun Wei's outage windows."
+       }
+      ],
+      "questions": [],
+      "steps": 4,
+      "model": "gemini-3.5-flash"
+     }
+    ]
+   },
+   "models": {
+    "agent": "gemini-3.5-flash"
+   },
+   "validation_failures": {
+    "agent": 0
+   },
+   "api_failures": {
+    "agent": 0
+   }
+  },
+  {
+   "conditions": {
+    "agent": [
+     {
+      "transcript_file": "cutover-readiness-review-05.txt",
+      "predicted": [],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "finance-close-planning-06.txt",
+      "predicted": [
+       {
+        "description": "End-to-end bank statement test in pre-production",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll run the end-to-end bank statement test in pre-production by Friday."
+       },
+       {
+        "description": "Write work instruction for manual bank reconciliation fallback",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll write the work instruction for the manual bank reconciliation fallback by the end of next week."
+       },
+       {
+        "description": "Set up 5 new house bank accounts in production",
+        "owner": "Omar Rashid",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Omar: I'll have all five house bank accounts set up before the cutover weekend. Before Friday the tenth at the latest."
+       },
+       {
+        "description": "Fix payment file transfer naming convention and test",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-06",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: Okay, then I'll have the payment file transfer fixed by Monday. It's a small change, it's the testing that takes time."
+       },
+       {
+        "description": "Close 3 dormant bank accounts",
+        "owner": "Omar Rashid",
+        "deadline": "2026-07-31",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Omar: I'll get the three dormant bank accounts closed by the end of the month."
+       },
+       {
+        "description": "Send list of bank GL accounts to Omar",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll send Omar the list of bank GL accounts after this meeting."
+       },
+       {
+        "description": "Schedule daily exchange rate upload job in production",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll schedule the daily exchange rate upload job in production. It has to be in before the lock, so by the tenth as well."
+       },
+       {
+        "description": "Clear remaining parked vendor invoices in legacy",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Hannah: I'll have the parked vendor invoices cleared by Thursday next week."
+       },
+       {
+        "description": "Send payment run cut-off notice to vendors",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-02",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll send the payment run cut-off notice to vendors tomorrow."
+       },
+       {
+        "description": "Clean up remaining duplicate Penang vendor records",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-03",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Hannah: I'll have the remaining duplicate vendor records cleaned up by Friday."
+       },
+       {
+        "description": "Train 2 new AP clerks on invoice parking in the new system",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll train the two new AP clerks on invoice parking the week before go-live, so by the tenth."
+       },
+       {
+        "description": "Draft first month-end close calendar for July",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-15",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll draft the first month-end close calendar by the fifteenth"
+       },
+       {
+        "description": "Agree cash forecast template with Priya",
+        "owner": "Omar Rashid",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Omar: I'll agree the cash forecast template with Priya then."
+       },
+       {
+        "description": "Confirm Malaysian tax code mapping",
+        "owner": "Grace Lim",
+        "deadline": "2026-07-06",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Grace: I'll have the Malaysian tax code mapping confirmed by Monday."
+       },
+       {
+        "description": "Configure GST reporting variant in new system",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I can configure the GST reporting variant. I'll have it done by the seventeenth, that's the Friday after go-live."
+       },
+       {
+        "description": "Draw up finance hypercare support rota",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll draw up the finance hypercare support rota by Friday"
+       },
+       {
+        "description": "Confirm with Marcus that finance users retain read-only legacy access after go-live",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll confirm with Marcus by Friday."
+       },
+       {
+        "description": "Share internal audit checklist for cutover sign-off",
+        "owner": "Ravi Menon",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Ravi: I'll share the internal audit checklist for the cutover sign-off today"
+       },
+       {
+        "description": "Update finance FAQ on intranet before go-live",
+        "owner": null,
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Wei Lin: Then the service desk team needs to update the finance FAQ on the intranet before go-live. I'd like it by Friday the tenth."
+       },
+       {
+        "description": "Send meeting action list round tonight",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll send the action list round tonight."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "warehouse-go-live-readiness-07.txt",
+      "predicted": [
+       {
+        "description": "Setup scanner user accounts in production",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: I'm already setting up the scanner user accounts in production for all the devices. I've done Pandan, Tuas is half done. I'll have all of them done by Thursday, including the six new ones, if Tom sends me the serial numbers."
+       },
+       {
+        "description": "Get Tom's scanner engineer site access for Friday",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll get Tom's engineer site access for Friday, I just need his name and IC number by Thursday."
+       },
+       {
+        "description": "Fix returns movement type mapping",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Kenji: I'm fixing the returns movement type mapping now. I'll have it fixed by Thursday."
+       },
+       {
+        "description": "Retest returns process after mapping fix",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: So I'll retest the returns process on Friday, after Kenji's fix is in."
+       },
+       {
+        "description": "Load active carrier master data",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Arjun: I've been loading the eighteen active carriers into the transport system. Twelve are in. I'll have all the carrier master data loaded by Thursday."
+       },
+       {
+        "description": "Confirm go-live week delivery schedule with main carriers",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-08",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll confirm the go-live week delivery schedule with the carriers tomorrow."
+       },
+       {
+        "description": "Send proof-of-delivery template to carriers",
+        "owner": "Arjun Pillai",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll send the proof-of-delivery template to the carriers. It's ready, I just haven't sent it."
+       },
+       {
+        "description": "Run final stock count at Tuas",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-11",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: I'll run the final stock count at Tuas on Saturday morning, the eleventh."
+       },
+       {
+        "description": "Notify purchasing team of material creation freeze in legacy",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: I'll tell the purchasing team about the material creation freeze today, straight after this."
+       },
+       {
+        "description": "Clear open transfer order backlog",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Mei Ling: We had two hundred on Friday. We're down to about forty. I'll have the open transfer order backlog cleared by Friday."
+       },
+       {
+        "description": "Brief night shift on paper fallback process",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll brief the night shift on the paper fallback process on Thursday."
+       },
+       {
+        "description": "Key paper records into new system before day shift",
+        "owner": null,
+        "deadline": "2026-07-13",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: The night shift team keys the paper records into the new system on Monday morning, before the day shift starts."
+       },
+       {
+        "description": "Nominate two super-users for Tuas night shift",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-08",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll nominate the two super-users by tomorrow."
+       },
+       {
+        "description": "Reschedule forklift servicing to week after go-live",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll call the servicing company today and move the forklift servicing to the week after go-live."
+       },
+       {
+        "description": "Book dedicated truck for Harbourfront hotel group delivery",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll book a dedicated truck for the Harbourfront order on Monday. I'll do it today, trucks for Monday get scarce by Wednesday."
+       },
+       {
+        "description": "Complete replenishment settings for Pandan pick faces",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Nadia: I've set up about half of them. I'll have the replenishment settings for the Pandan pick faces finished by Thursday."
+       },
+       {
+        "description": "Run train-the-trainer session for second Tuas group",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Siti: I've run two of them, Pandan and the first Tuas one. The last one is Thursday for the second Tuas group. So that's in progress, finished Thursday."
+       },
+       {
+        "description": "Print laminated quick reference cards for scanner cradles",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Siti: I've designed them, I'll print the laminated quick reference cards by Friday, so they're on the cradles for Monday."
+       },
+       {
+        "description": "Send warehouse go-live email to staff",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Siti: I drafted it two weeks ago and it's been approved. I'll send it on Thursday, so people get it before the weekend and not on Monday morning."
+       },
+       {
+        "description": "Document interface restart procedure for night shift",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll document the interface restart procedure for the night shift. One page, with screenshots, no jargon. I'll have it by the end of the week."
+       },
+       {
+        "description": "Send go/no-go warehouse checklist to Aisha",
+        "owner": "Farah Ismail",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: I'll send the go/no-go warehouse checklist to Aisha by Thursday."
+       },
+       {
+        "description": "Raise overtime request for weekend warehouse crew",
+        "owner": "Farah Ismail",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: I'll raise the overtime request for the weekend warehouse crew today."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "access-and-audit-review-08.txt",
+      "predicted": [],
+      "questions": [],
+      "error": "limit",
+      "error_message": "Review step or time limit reached"
+     }
+    ]
+   },
+   "models": {
+    "agent": "gemini-3.5-flash"
+   },
+   "validation_failures": {
+    "agent": 1
+   },
+   "api_failures": {
+    "agent": 0
+   }
+  },
+  {
+   "conditions": {
+    "agent": [
+     {
+      "transcript_file": "cutover-readiness-review-05.txt",
+      "predicted": [],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "finance-close-planning-06.txt",
+      "predicted": [
+       {
+        "description": "Run end-to-end bank statement test in pre-production",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll run the end-to-end bank statement test in pre-production by Friday."
+       },
+       {
+        "description": "Write work instruction for manual bank reconciliation fallback",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll write the work instruction for the manual bank reconciliation fallback by the end of next week."
+       },
+       {
+        "description": "Set up five new house bank accounts before cutover weekend",
+        "owner": "Omar Rashid",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Omar: I'll have all five house bank accounts set up before the cutover weekend. Before Friday the tenth at the latest."
+       },
+       {
+        "description": "Fix payment file transfer naming convention and test",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-06",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll have the payment file transfer fixed by Monday."
+       },
+       {
+        "description": "Close three dormant bank accounts",
+        "owner": "Omar Rashid",
+        "deadline": "2026-07-31",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Omar: I'll get the three dormant bank accounts closed by the end of the month."
+       },
+       {
+        "description": "Send list of bank GL accounts to Omar",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll send Omar the list of bank GL accounts after this meeting."
+       },
+       {
+        "description": "Schedule daily exchange rate upload job in production",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll schedule the daily exchange rate upload job in production. It has to be in before the lock, so by the tenth as well."
+       },
+       {
+        "description": "Clear parked vendor invoices",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Hannah: I'll have the parked vendor invoices cleared by Thursday next week."
+       },
+       {
+        "description": "Send payment run cut-off notice to vendors",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-02",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll send the payment run cut-off notice to vendors tomorrow."
+       },
+       {
+        "description": "Clean up remaining duplicate vendor records",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-03",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Hannah: I'll have the remaining duplicate vendor records cleaned up by Friday."
+       },
+       {
+        "description": "Train two new AP clerks on invoice parking",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll train the two new AP clerks on invoice parking the week before go-live, so by the tenth."
+       },
+       {
+        "description": "Draft first month-end close calendar",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-15",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll draft the first month-end close calendar by the fifteenth"
+       },
+       {
+        "description": "Confirm Malaysian tax code mapping",
+        "owner": "Grace Lim",
+        "deadline": "2026-07-06",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Grace: I'll have the Malaysian tax code mapping confirmed by Monday."
+       },
+       {
+        "description": "Configure GST reporting variant on new system",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll have it done by the seventeenth, that's the Friday after go-live."
+       },
+       {
+        "description": "Draw up finance hypercare support rota",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll draw up the finance hypercare support rota by Friday"
+       },
+       {
+        "description": "Confirm with Marcus that finance users keep read-only access to legacy after go-live",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll confirm with Marcus by Friday."
+       },
+       {
+        "description": "Share internal audit checklist for cutover sign-off",
+        "owner": "Ravi Menon",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Ravi: I'll share the internal audit checklist for the cutover sign-off today"
+       },
+       {
+        "description": "Update finance FAQ on intranet before go-live",
+        "owner": null,
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Wei Lin: the service desk team needs to update the finance FAQ on the intranet before go-live. I'd like it by Friday the tenth."
+       },
+       {
+        "description": "Send action list round tonight",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll send the action list round tonight."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "warehouse-go-live-readiness-07.txt",
+      "predicted": [
+       {
+        "description": "Set up scanner user accounts in production for all devices, including the six replacement units for Tuas.",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: I'm already setting up the scanner user accounts in production for all the devices. I've done Pandan, Tuas is half done. I'll have all of them done by Thursday, including the six new ones, if Tom sends me the serial numbers."
+       },
+       {
+        "description": "Arrange site access for the scanner vendor engineer to visit Tuas on Friday.",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll get Tom's engineer site access for Friday, I just need his name and IC number by Thursday."
+       },
+       {
+        "description": "Fix the returns movement type mapping in the interface to resolve customer returns posting errors.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Kenji: I'm fixing the returns movement type mapping now. I'll have it fixed by Thursday."
+       },
+       {
+        "description": "Retest the returns process after the movement type mapping fix is applied.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: So I'll retest the returns process on Friday, after Kenji's fix is in."
+       },
+       {
+        "description": "Fix WM to TMS interface timeout errors.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-02",
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Kenji: The WM to TMS interface timeout errors are done. I fixed them on the second, a day ahead of the date I gave."
+       },
+       {
+        "description": "Load the eighteen active carrier master data records into the transport system.",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Arjun: I've been loading the eighteen active carriers into the transport system. Twelve are in. I'll have all the carrier master data loaded by Thursday."
+       },
+       {
+        "description": "Confirm the go-live week delivery schedule with the three main carriers.",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-08",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll confirm the go-live week delivery schedule with the carriers tomorrow."
+       },
+       {
+        "description": "Send the new proof-of-delivery template to the carriers.",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll send the proof-of-delivery template to the carriers. It's ready, I just haven't sent it."
+       },
+       {
+        "description": "Finish cycle count reconciliation for the mock.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-03",
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Nadia: The cycle count reconciliation for the mock is finished. I finished it on the Friday like I said."
+       },
+       {
+        "description": "Reconcile bin locations between legacy and the new system.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-03",
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Nadia: I reconciled the bin locations between legacy and the new system last Friday as well."
+       },
+       {
+        "description": "Run the final stock count at Tuas following the Friday evening lock.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-11",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: I'll run the final stock count at Tuas on Saturday morning, the eleventh."
+       },
+       {
+        "description": "Inform the purchasing team about the material creation freeze in legacy taking effect Wednesday.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: I'll tell the purchasing team about the material creation freeze today, straight after this."
+       },
+       {
+        "description": "Clear the backlog of open transfer orders in legacy before lock.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Mei Ling: We had two hundred on Friday. We're down to about forty. I'll have the open transfer order backlog cleared by Friday."
+       },
+       {
+        "description": "Brief the night shift on the paper fallback process for the cutover weekend.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll brief the night shift on the paper fallback process on Thursday."
+       },
+       {
+        "description": "Nominate two super-users for the Tuas night shift.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-08",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll nominate the two super-users by tomorrow."
+       },
+       {
+        "description": "Contact the servicing company to move Tuas forklift servicing to the week after go-live.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll call the servicing company today and move the forklift servicing to the week after go-live."
+       },
+       {
+        "description": "Book a dedicated truck for the Harbourfront hotel group delivery on Monday.",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll book a dedicated truck for the Harbourfront order on Monday. I'll do it today, trucks for Monday get scarce by Wednesday."
+       },
+       {
+        "description": "Finish replenishment settings for the Pandan pick faces.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Nadia: I've set up about half of them. I'll have the replenishment settings for the Pandan pick faces finished by Thursday."
+       },
+       {
+        "description": "Run the third train-the-trainer session for the second Tuas group.",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Siti: I've run two of them, Pandan and the first Tuas one. The last one is Thursday for the second Tuas group."
+       },
+       {
+        "description": "Print laminated quick reference cards for the scanner cradles.",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Siti: I've designed them, I'll print the laminated quick reference cards by Friday, so they're on the cradles for Monday."
+       },
+       {
+        "description": "Send the warehouse go-live email to staff.",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Siti: I'll send it on Thursday, so people get it before the weekend and not on Monday morning."
+       },
+       {
+        "description": "Test all production label printers across both sites.",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-06",
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: I tested all the label printers in production on Monday, both sites. Everything prints, including the dangerous goods labels, which were the ones that failed in the first mock. So that's done."
+       },
+       {
+        "description": "Document the interface restart procedure for the night shift team.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll document the interface restart procedure for the night shift. One page, with screenshots, no jargon. I'll have it by the end of the week."
+       },
+       {
+        "description": "Send the warehouse go/no-go checklist to Aisha.",
+        "owner": "Farah Ismail",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: I'll send the go/no-go warehouse checklist to Aisha by Thursday."
+       },
+       {
+        "description": "Raise the overtime request for the weekend warehouse crew at both sites.",
+        "owner": "Farah Ismail",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: I'll raise the overtime request for the weekend warehouse crew today."
+       }
+      ],
+      "questions": [],
+      "steps": 6,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "access-and-audit-review-08.txt",
+      "predicted": [],
+      "questions": [],
+      "error": "limit",
+      "error_message": "Review step or time limit reached"
+     }
+    ]
+   },
+   "models": {
+    "agent": "gemini-3.5-flash"
+   },
+   "validation_failures": {
+    "agent": 1
+   },
+   "api_failures": {
+    "agent": 0
+   }
+  },
+  {
+   "conditions": {
+    "agent": [
+     {
+      "transcript_file": "cutover-readiness-review-05.txt",
+      "predicted": [
+       {
+        "description": "Brief the steering committee on the new go-live date (2026-07-13) at the meeting on June 30th",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: Go-live moves to the thirteenth. I'll brief the steering committee on the new date at the meeting on the thirtieth"
+       },
+       {
+        "description": "Update the cutover runbook with the new go-live date by Thursday",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: before that I'll update the cutover runbook with the new go-live date, by Thursday, so the steering pack is consistent."
+       },
+       {
+        "description": "Forward the bank sample file to Daniel as soon as it arrives",
+        "owner": "Kenji Sato",
+        "deadline": "2026-06-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: They've agreed the format. They're sending a signed-off sample file, and they promised it by Wednesday. I'll forward it to Daniel the moment it lands"
+       },
+       {
+        "description": "Finish the MT940 parser fix and retest it in QA",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-26",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: If Kenji's file lands Wednesday evening, I'll finish the parser fix Thursday and retest in QA. Let's say I'll have the MT940 parser fix finished and retested by Friday."
+       },
+       {
+        "description": "Prepare the full opening balance reconciliation for the mock cutover",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-26",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Priya: I'm preparing the opening balance reconciliation for the mock cutover. I've started, I've got the GL side done, but the sub-ledgers are still outstanding. I'll have the full reconciliation ready by the end of the week."
+       },
+       {
+        "description": "Rerun the full warehouse readiness test with the new firmware across all movement types",
+        "owner": "Farah Ismail",
+        "deadline": "2026-06-30",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: Realistically I'll get it done before the steering committee on the thirtieth."
+       },
+       {
+        "description": "Fix the WM to TMS interface timeout errors",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-03",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Kenji: Honestly I already opened the logs this morning because the errors were flooding my inbox, so I've started. I'll have it fixed by next Friday."
+       },
+       {
+        "description": "Confirm the stock count schedule with the warehouse managers",
+        "owner": "Farah Ismail",
+        "deadline": "2026-06-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: I still need to confirm the stock count schedule with the warehouse managers. They keep moving it because of the quarter-end shipments. I'll get it confirmed with them by Wednesday."
+       },
+       {
+        "description": "Finish the cycle count reconciliation for the mock cutover",
+        "owner": "Nadia",
+        "deadline": "2026-06-26",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Farah: Nadia in my team is doing the cycle count reconciliation for the mock cutover. She's already pulled the counts from the last two cycles, and she'll have the reconciliation finished by Friday."
+       },
+       {
+        "description": "Run system copy from production to the mock environment over the weekend",
+        "owner": null,
+        "deadline": "2026-06-28",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: The Basis team will run the system copy from production to the mock environment over the weekend. It needs to be complete by Sunday so Priya can start her reconciliation checks on Monday."
+       },
+       {
+        "description": "Communicate the production transport freeze to all development teams",
+        "owner": "Marcus Lee",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Yes, I'll communicate the transport freeze to all the development teams. I'll send it out by Thursday, that gives them the weekend to get their last transports in."
+       },
+       {
+        "description": "Approve the change request for extra consulting days in the finance system",
+        "owner": "Wei Lin",
+        "deadline": "2026-06-23",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Wei Lin: I'll approve the change request tomorrow, I just need to put it through the finance system."
+       },
+       {
+        "description": "Send the month-end close timetable to Priya",
+        "owner": "Wei Lin",
+        "deadline": "2026-06-22",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Wei Lin: I'll send you the month-end close timetable myself tonight."
+       },
+       {
+        "description": "Complete the mitigating controls document for the auditors",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-25",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: The auditors wanted it by Thursday, and I'll still make Thursday."
+       },
+       {
+        "description": "Drop the conflict report with mapped role names into the project folder",
+        "owner": "Marcus Lee",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: It's the same file I circulated last week, just with the extra column. I'll drop it in the project folder."
+       },
+       {
+        "description": "Sign off the post-load financial balances on cutover Sunday",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-12",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll sign off the post-load financial balances on the cutover Sunday, the twelfth. Daniel supports me on it, but the signature is mine."
+       },
+       {
+        "description": "Sign off the warehouse side on cutover Sunday",
+        "owner": "Farah Ismail",
+        "deadline": "2026-07-12",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: Yes, I'll sign off the warehouse side on the Sunday as well. But honestly it depends on the stock count, which is why the schedule matters so much."
+       },
+       {
+        "description": "Update the hour-by-hour run sheet with new dates, names, and contact numbers before next Monday's meeting",
+        "owner": "Marcus Lee",
+        "deadline": "2026-06-29",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll update the run sheet for the new weekend, dates, names, contact numbers, all of it. I'll have it updated before our meeting next Monday, so everyone can check their slots then."
+       },
+       {
+        "description": "Schedule train-the-trainer sessions for warehouse supervisors",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Siti: I'll get those sessions scheduled by the third of July, so there's a full week of training before go-live."
+       },
+       {
+        "description": "Draft the go-live communication email to all users",
+        "owner": "Siti Hamid",
+        "deadline": "2026-06-26",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Siti: I can have the draft ready by Friday so it's sitting there, and then we just send it after the thirtieth."
+       }
+      ],
+      "questions": [],
+      "steps": 5,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "finance-close-planning-06.txt",
+      "predicted": [
+       {
+        "description": "Run end-to-end bank statement test in pre-production",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll run the end-to-end bank statement test in pre-production by Friday."
+       },
+       {
+        "description": "Write work instruction for manual bank reconciliation fallback",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll write the work instruction for the manual bank reconciliation fallback by the end of next week."
+       },
+       {
+        "description": "Set up five new house bank accounts in production system",
+        "owner": "Omar Rashid",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Omar: If I have the letters today, the bank needs two days, so I'll have all five house bank accounts set up before the cutover weekend. Before Friday the tenth at the latest."
+       },
+       {
+        "description": "Fix payment file transfer naming convention issue and test",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-06",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: Okay, then I'll have the payment file transfer fixed by Monday. It's a small change, it's the testing that takes time."
+       },
+       {
+        "description": "Close three dormant bank accounts",
+        "owner": "Omar Rashid",
+        "deadline": "2026-07-31",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Omar: I'll take the dormant accounts. I'll get the three dormant bank accounts closed by the end of the month."
+       },
+       {
+        "description": "Send list of bank GL accounts to Omar",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll send Omar the list of bank GL accounts after this meeting. I have it ready, it's just sitting on my desktop."
+       },
+       {
+        "description": "Schedule daily exchange rate upload job in production",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll schedule the daily exchange rate upload job in production. It has to be in before the lock, so by the tenth as well."
+       },
+       {
+        "description": "Clear parked vendor invoices in legacy",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Hannah: I'll have the parked vendor invoices cleared by Thursday next week."
+       },
+       {
+        "description": "Send payment run cut-off notice to vendors",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-02",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: The template is ready. I'll send the payment run cut-off notice to vendors tomorrow."
+       },
+       {
+        "description": "Clean up remaining duplicate Penang vendor records",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-03",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Hannah: I'll have the remaining duplicate vendor records cleaned up by Friday."
+       },
+       {
+        "description": "Train two new AP clerks on invoice parking in the new system",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll train the two new AP clerks on invoice parking the week before go-live, so by the tenth."
+       },
+       {
+        "description": "Draft first month-end close calendar for July",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-15",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll draft the first month-end close calendar by the fifteenth, so it's out a full two weeks before the close starts."
+       },
+       {
+        "description": "Agree cash forecast template between Treasury and Controller",
+        "owner": "Omar Rashid",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Omar: I'll agree the cash forecast template with Priya then. No date, it just needs to be before the first forecast is due."
+       },
+       {
+        "description": "Confirm Malaysian tax code mapping",
+        "owner": "Grace Lim",
+        "deadline": "2026-07-06",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Grace: I'll have the Malaysian tax code mapping confirmed by Monday."
+       },
+       {
+        "description": "Configure GST reporting variant in pre-production system",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I can configure the GST reporting variant. I'll have it done by the seventeenth, that's the Friday after go-live."
+       },
+       {
+        "description": "Draw up finance hypercare support rota",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll draw up the finance hypercare support rota by Friday, so everyone has a week's notice."
+       },
+       {
+        "description": "Confirm with Marcus that finance users retain read-only access to legacy post go-live",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll confirm with Marcus by Friday. If the roles aren't built, I'll say so on Friday rather than find out on the fourteenth."
+       },
+       {
+        "description": "Share internal audit checklist for cutover sign-off",
+        "owner": "Ravi Menon",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Ravi: I'll share the internal audit checklist for the cutover sign-off today, so Priya and Daniel can check it against what they're already planning."
+       },
+       {
+        "description": "Update finance FAQ page on intranet with new go-live date and screens",
+        "owner": null,
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Wei Lin: Then the service desk team needs to update the finance FAQ on the intranet before go-live. I'd like it by Friday the tenth."
+       },
+       {
+        "description": "Send meeting action list to team",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll send the action list round tonight."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "warehouse-go-live-readiness-07.txt",
+      "predicted": [
+       {
+        "description": "Set up scanner user accounts in production for all devices, including the six replacement units for Tuas.",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: I'm already setting up the scanner user accounts in production for all the devices. I've done Pandan, Tuas is half done. I'll have all of them done by Thursday, including the six new ones, if Tom sends me the serial numbers."
+       },
+       {
+        "description": "Arrange site access for the scanner vendor engineer to swap charging cradles at Tuas on Friday.",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Tuas has the security gate. I'll get Tom's engineer site access for Friday, I just need his name and IC number by Thursday."
+       },
+       {
+        "description": "Fix the customer returns movement type mapping in the interface between the warehouse system and transport side.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Kenji: I'm fixing the returns movement type mapping now. I'll have it fixed by Thursday."
+       },
+       {
+        "description": "Retest the returns process after the returns movement type mapping fix is in.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: So I'll retest the returns process on Friday, after Kenji's fix is in."
+       },
+       {
+        "description": "Fix WM to TMS interface timeout errors.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-02",
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Kenji: Fixed. The WM to TMS interface timeout errors are done. I fixed them on the second, a day ahead of the date I gave."
+       },
+       {
+        "description": "Load the 18 active carriers into the transport system master data.",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Arjun: I've been loading the eighteen active carriers into the transport system. Twelve are in. I'll have all the carrier master data loaded by Thursday."
+       },
+       {
+        "description": "Confirm the go-live week delivery schedule with the three main carriers.",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-08",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll confirm the go-live week delivery schedule with the carriers tomorrow."
+       },
+       {
+        "description": "Send the new proof-of-delivery template to the carriers.",
+        "owner": "Arjun Pillai",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll send the proof-of-delivery template to the carriers. It's ready, I just haven't sent it."
+       },
+       {
+        "description": "Finish cycle count reconciliation for the mock.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-03",
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Nadia: The cycle count reconciliation for the mock is finished. I finished it on the Friday like I said."
+       },
+       {
+        "description": "Reconcile bin locations between legacy and the new system.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-03",
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Nadia: I reconciled the bin locations between legacy and the new system last Friday as well."
+       },
+       {
+        "description": "Run the final stock count at Tuas after lock.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-11",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: I'll run the final stock count at Tuas on Saturday morning, the eleventh."
+       },
+       {
+        "description": "Inform the purchasing team about the material creation freeze in legacy taking effect Wednesday.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: I'll tell the purchasing team about the material creation freeze today, straight after this."
+       },
+       {
+        "description": "Clear the open transfer order backlog at Tuas before the cutover lock.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Mei Ling: We had two hundred on Friday. We're down to about forty. I'll have the open transfer order backlog cleared by Friday."
+       },
+       {
+        "description": "Brief the Tuas night shift on the paper fallback process for cutover weekend.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll brief the night shift on the paper fallback process on Thursday."
+       },
+       {
+        "description": "Key paper records from cutover weekend into the new system before day shift starts.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-13",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: The night shift team keys the paper records into the new system on Monday morning, before the day shift starts."
+       },
+       {
+        "description": "Nominate two super-users for the Tuas night shift.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-08",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll nominate the two super-users by tomorrow."
+       },
+       {
+        "description": "Call servicing company to reschedule Tuas forklift servicing to the week after go-live.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll call the servicing company today and move the forklift servicing to the week after go-live."
+       },
+       {
+        "description": "Book a dedicated truck for the Harbourfront hotel group delivery on Monday.",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll book a dedicated truck for the Harbourfront order on Monday. I'll do it today"
+       },
+       {
+        "description": "Finish setting up replenishment settings for Pandan pick faces.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Nadia: I've set up about half of them. I'll have the replenishment settings for the Pandan pick faces finished by Thursday."
+       },
+       {
+        "description": "Run the final train-the-trainer session for the second Tuas group.",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Siti: I've run two of them, Pandan and the first Tuas one. The last one is Thursday for the second Tuas group. So that's in progress, finished Thursday."
+       },
+       {
+        "description": "Print laminated quick reference cards for scanner cradles.",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Siti: I've designed them, I'll print the laminated quick reference cards by Friday, so they're on the cradles for Monday."
+       },
+       {
+        "description": "Send the approved go-live email to warehouse staff.",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Siti: I'll send it on Thursday, so people get it before the weekend and not on Monday morning."
+       },
+       {
+        "description": "Test all label printers in production across both sites.",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-06",
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: I tested all the label printers in production on Monday, both sites. Everything prints, including the dangerous goods labels, which were the ones that failed in the first mock. So that's done."
+       },
+       {
+        "description": "Document the interface restart procedure for the night shift with screenshots.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll document the interface restart procedure for the night shift. One page, with screenshots, no jargon. I'll have it by the end of the week."
+       },
+       {
+        "description": "Send the go/no-go warehouse checklist to Aisha.",
+        "owner": "Farah Ismail",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: I'll send the go/no-go warehouse checklist to Aisha by Thursday."
+       },
+       {
+        "description": "Raise overtime request for the weekend warehouse crew at both sites.",
+        "owner": "Farah Ismail",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: I'll raise the overtime request for the weekend warehouse crew today."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "access-and-audit-review-08.txt",
+      "predicted": [
+       {
+        "description": "Lock shared and generic accounts in production",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-17",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'll lock all three shared generic accounts by the end of tomorrow."
+       },
+       {
+        "description": "Send list of AP clerks using the shared account",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-16",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll send you the list of AP clerks today, straight after this."
+       },
+       {
+        "description": "Set up weekly extract of the firefighter log",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-20",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'll set up a weekly extract of the firefighter log for Ravi. It'll email him every Monday morning. I'll have it running by Monday."
+       },
+       {
+        "description": "Review firefighter access log weekly",
+        "owner": "Ravi Menon",
+        "deadline": "2026-07-20",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Ravi: I'll review the firefighter access log for the first time on Monday, and every Monday after that."
+       },
+       {
+        "description": "Write mitigating controls for the three segregation-of-duties conflicts",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-21",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll write the mitigating controls for the three conflicts within three working days. So by Tuesday."
+       },
+       {
+        "description": "Approve written mitigating controls for segregation-of-duties conflicts",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: And I'll approve them. Send them to me when they're ready and I'll sign them off"
+       },
+       {
+        "description": "Review list of users with posting access to closed periods",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-20",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll review the list of users with posting access to closed periods on Monday."
+       },
+       {
+        "description": "Retest GR/IR clearing transaction in production",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll get one of my clerks to retest the GR/IR clearing tomorrow morning"
+       },
+       {
+        "description": "Confirm AP approval limits match current policy",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-21",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll confirm that my team's approval limits match the current policy by Tuesday."
+       },
+       {
+        "description": "Send list of sample requests for IT general controls testing",
+        "owner": "Sofia Reyes",
+        "deadline": "2026-07-22",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Sofia: I'll send you our list of sample requests for the IT general controls by next Wednesday."
+       },
+       {
+        "description": "Confirm audit reliance on migration reconciliations",
+        "owner": "Sofia Reyes",
+        "deadline": "2026-07-22",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Sofia: I'll confirm with my manager whether we rely on the migration reconciliations, also by next Wednesday."
+       },
+       {
+        "description": "Send signed cutover reconciliation pack to external audit",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll send you the signed cutover reconciliation pack tomorrow."
+       },
+       {
+        "description": "Finish role design documentation",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll finish the role design documentation by Friday next week, the twenty-fourth"
+       },
+       {
+        "description": "Send system access documentation pack to auditors",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-07-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: Then I'll send the auditors the system access documentation pack on the twenty-fourth as well"
+       },
+       {
+        "description": "Complete user access review for finance roles",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-31",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: I've started the user access review for all the finance roles. Every role, every user, signed off by the role owner. I'm about a third through it. I'll have it complete by the end of the month."
+       },
+       {
+        "description": "Share last year's IT audit findings with Marcus",
+        "owner": "Ravi Menon",
+        "deadline": "2026-07-16",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Ravi: I'll share last year's IT audit findings with you today, Marcus."
+       },
+       {
+        "description": "Rotate interface service account passwords",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'll rotate the interface service account passwords before the auditors arrive, by the twenty-fourth."
+       },
+       {
+        "description": "Review security audit log settings and provide recommendation",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-22",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'm reviewing the security audit log settings now to see what we can switch on without filling the disk. I'll have a recommendation by next Wednesday."
+       },
+       {
+        "description": "Remove temporary go-live superuser access from consultants",
+        "owner": "Marcus Lee",
+        "deadline": "2026-08-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll remove the temporary go-live superuser access from the consultants at the end of hypercare, the seventh of August."
+       },
+       {
+        "description": "Log today's access issues and outage windows in hypercare issue log",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-07-16",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: And I'll log today's access issues in the hypercare issue log this afternoon, including Jun Wei's outage windows."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     }
+    ]
+   },
+   "models": {
+    "agent": "gemini-3.5-flash"
+   },
+   "validation_failures": {
+    "agent": 0
+   },
+   "api_failures": {
+    "agent": 0
+   }
+  },
+  {
+   "conditions": {
+    "agent": [
+     {
+      "transcript_file": "cutover-readiness-review-05.txt",
+      "predicted": [
+       {
+        "description": "Send bank sample file to Daniel.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: They're sending a signed-off sample file, and they promised it by Wednesday. I'll forward it to Daniel the moment it lands, so Daniel, you'll have it Wednesday."
+       },
+       {
+        "description": "Finish MT940 parser fix and retest in QA.",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-26",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: Let's say I'll have the MT940 parser fix finished and retested by Friday. That's honest."
+       },
+       {
+        "description": "Prepare opening balance reconciliation for mock cutover.",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-26",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Priya: I'm preparing the opening balance reconciliation for the mock cutover. I've started, I've got the GL side done, but the sub-ledgers are still outstanding. I'll have the full reconciliation ready by the end of the week."
+       },
+       {
+        "description": "Rerun full warehouse readiness test with new firmware.",
+        "owner": "Farah Ismail",
+        "deadline": "2026-06-30",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: So what I need to do now is rerun the full warehouse readiness test with the new firmware, the proper one, all the movement types, not a smoke test. I haven't started that, I only heard the patch was in this morning."
+       },
+       {
+        "description": "Fix WM to TMS interface timeout errors.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-03",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Kenji: Honestly I already opened the logs this morning because the errors were flooding my inbox, so I've started. I'll have it fixed by next Friday."
+       },
+       {
+        "description": "Confirm stock count schedule with warehouse managers.",
+        "owner": "Farah Ismail",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: I still need to confirm the stock count schedule with the warehouse managers. They keep moving it because of the quarter-end shipments. I'll get it confirmed with them by Wednesday."
+       },
+       {
+        "description": "Finish cycle count reconciliation for mock cutover.",
+        "owner": "Nadia",
+        "deadline": "2026-06-26",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Farah: Nadia in my team is doing the cycle count reconciliation for the mock cutover. She's already pulled the counts from the last two cycles, and she'll have the reconciliation finished by Friday."
+       },
+       {
+        "description": "Run system copy from production to mock environment.",
+        "owner": null,
+        "deadline": "2026-06-28",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: The Basis team will run the system copy from production to the mock environment over the weekend. It needs to be complete by Sunday so Priya can start her reconciliation checks on Monday."
+       },
+       {
+        "description": "Communicate transport freeze to development teams.",
+        "owner": "Marcus Lee",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Yes, I'll communicate the transport freeze to all the development teams. I'll send it out by Thursday, that gives them the weekend to get their last transports in."
+       },
+       {
+        "description": "Approve change request for extra consulting days.",
+        "owner": "Wei Lin",
+        "deadline": "2026-06-23",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Wei Lin: I'll approve the change request tomorrow, I just need to put it through the finance system."
+       },
+       {
+        "description": "Send month-end close timetable to Priya.",
+        "owner": "Wei Lin",
+        "deadline": "2026-06-22",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Wei Lin: I'll send you the month-end close timetable myself tonight."
+       },
+       {
+        "description": "Complete mitigating controls document for auditors.",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-25",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: The auditors wanted it by Thursday, and I'll still make Thursday."
+       },
+       {
+        "description": "Update cutover runbook with new go-live date.",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: and before that I'll update the cutover runbook with the new go-live date, by Thursday, so the steering pack is consistent."
+       },
+       {
+        "description": "Update hour-by-hour run sheet for cutover weekend.",
+        "owner": "Marcus Lee",
+        "deadline": "2026-06-29",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll update the run sheet for the new weekend, dates, names, contact numbers, all of it. I'll have it updated before our meeting next Monday, so everyone can check their slots then."
+       },
+       {
+        "description": "Schedule train-the-trainer sessions for warehouse supervisors.",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Siti: I need to schedule the train-the-trainer sessions for the warehouse supervisors. I haven't booked anything yet, because I didn't know the go-live date, but now that it's the thirteenth, I'll get those sessions scheduled by the third of July, so there's a full week of training before go-live."
+       },
+       {
+        "description": "Draft go-live communication email to all users.",
+        "owner": "Siti Hamid",
+        "deadline": "2026-06-26",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Siti: I'll draft the go-live communication email to all users. I'd rather wait until the date is formally confirmed by steering, but I can have the draft ready by Friday so it's sitting there, and then we just send it after the thirtieth."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "finance-close-planning-06.txt",
+      "predicted": [
+       {
+        "description": "Run the end-to-end bank statement test in pre-production.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll run the end-to-end bank statement test in pre-production by Friday."
+       },
+       {
+        "description": "Write the work instruction for the manual bank reconciliation fallback.",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll write the work instruction for the manual bank reconciliation fallback by the end of next week."
+       },
+       {
+        "description": "Set up all five house bank accounts in the production system.",
+        "owner": "Omar Rashid",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Omar: If I have the letters today, the bank needs two days, so I'll have all five house bank accounts set up before the cutover weekend. Before Friday the tenth at the latest."
+       },
+       {
+        "description": "Fix and test the payment file transfer naming convention.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-06",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Kenji: Okay, then I'll have the payment file transfer fixed by Monday. It's a small change, it's the testing that takes time."
+       },
+       {
+        "description": "Close the three dormant bank accounts.",
+        "owner": "Omar Rashid",
+        "deadline": "2026-07-31",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Omar: I'll get the three dormant bank accounts closed by the end of the month. It's not urgent for go-live, the balances are zero."
+       },
+       {
+        "description": "Send Omar the list of GL accounts linked to the bank accounts.",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll send Omar the list of bank GL accounts after this meeting. I have it ready, it's just sitting on my desktop."
+       },
+       {
+        "description": "Schedule the daily exchange rate upload job in production for 7 AM.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll schedule the daily exchange rate upload job in production. It has to be in before the lock, so by the tenth as well. I'll set it to run at seven like legacy."
+       },
+       {
+        "description": "Clear all remaining parked vendor invoices before the legacy lock.",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Hannah: I'll have the parked vendor invoices cleared by Thursday next week. That gives us a day of buffer before the lock on the tenth."
+       },
+       {
+        "description": "Send the payment run cut-off notice to vendors.",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-02",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll send the payment run cut-off notice to vendors tomorrow."
+       },
+       {
+        "description": "Clean up the remaining duplicate Penang vendor records.",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-03",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Hannah: I'll have the remaining duplicate vendor records cleaned up by Friday."
+       },
+       {
+        "description": "Train the two new AP clerks on invoice parking in the new system.",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll train the two new AP clerks on invoice parking the week before go-live, so by the tenth."
+       },
+       {
+        "description": "Draft the first month-end close calendar for the new system.",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-15",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll draft the first month-end close calendar by the fifteenth, so it's out a full two weeks before the close starts."
+       },
+       {
+        "description": "Agree the new cash forecast template with Priya.",
+        "owner": "Omar Rashid",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Omar: I'll agree the cash forecast template with Priya then. No date, it just needs to be before the first forecast is due."
+       },
+       {
+        "description": "Confirm the Malaysian sales and service tax code mapping.",
+        "owner": "Grace Lim",
+        "deadline": "2026-07-06",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Grace: I'll have the Malaysian tax code mapping confirmed by Monday."
+       },
+       {
+        "description": "Configure the GST reporting variant on the new system.",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I can configure the GST reporting variant. I'll have it done by the seventeenth, that's the Friday after go-live."
+       },
+       {
+        "description": "Draw up the finance hypercare support rota.",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll draw up the finance hypercare support rota by Friday, so everyone has a week's notice."
+       },
+       {
+        "description": "Confirm with Marcus that finance users retain read-only access to legacy after go-live.",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll confirm with Marcus by Friday. If the roles aren't built, I'll say so on Friday rather than find out on the fourteenth."
+       },
+       {
+        "description": "Share the internal audit checklist for cutover sign-off.",
+        "owner": "Ravi Menon",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Ravi: I'll share the internal audit checklist for the cutover sign-off today, so Priya and Daniel can check it against what they're already planning."
+       },
+       {
+        "description": "Update the finance FAQ on the intranet before go-live.",
+        "owner": null,
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Wei Lin: Then the service desk team needs to update the finance FAQ on the intranet before go-live. I'd like it by Friday the tenth."
+       },
+       {
+        "description": "Send the action list round tonight.",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll send the action list round tonight."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "warehouse-go-live-readiness-07.txt",
+      "predicted": [
+       {
+        "description": "Set up scanner user accounts in production for all devices, including the six replacement units for Tuas once serial numbers are received.",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: That's fine, I'm already setting up the scanner user accounts in production for all the devices. I've done Pandan, Tuas is half done. I'll have all of them done by Thursday, including the six new ones, if Tom sends me the serial numbers."
+       },
+       {
+        "description": "Get site access for Tom's scanner engineer for Friday to swap charging cradles at Tuas.",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Then he needs site access. Tuas has the security gate. I'll get Tom's engineer site access for Friday, I just need his name and IC number by Thursday."
+       },
+       {
+        "description": "Fix the returns movement type mapping in the interface between WM and TMS.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Kenji: That's a mapping error in the interface, I found it on Friday. The movement type is right in the warehouse system, but the interface translates it to the wrong one on the way to the transport side. I'm fixing the returns movement type mapping now. I'll have it fixed by Thursday."
+       },
+       {
+        "description": "Retest the customer returns process on Friday after the mapping fix is in.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: And then I retest returns. I'll need a day. So I'll retest the returns process on Friday, after Kenji's fix is in."
+       },
+       {
+        "description": "Load all 18 active carrier master data records into the transport system.",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Arjun: So, carrier master data. We have forty-two carriers in legacy, but only eighteen that we actually use. I've been loading the eighteen active carriers into the transport system. Twelve are in. I'll have all the carrier master data loaded by Thursday."
+       },
+       {
+        "description": "Confirm the go-live week delivery schedule with the three main carriers.",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-08",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: The delivery schedule for go-live week. I need to confirm it with the three main carriers, because they all want to deliver on Monday morning, and that's the worst possible time. I'll confirm the go-live week delivery schedule with the carriers tomorrow."
+       },
+       {
+        "description": "Send the new proof-of-delivery template with updated document numbers to the carriers.",
+        "owner": "Arjun Pillai",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: The carriers need the new proof-of-delivery template, the one with the new document numbers. I'll send the proof-of-delivery template to the carriers. It's ready, I just haven't sent it. No rush, the old one works for the first week."
+       },
+       {
+        "description": "Run the final stock count at Tuas on Saturday morning following the lock on Friday evening.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-11",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: The final stock count. After the lock on Friday evening, we count Tuas. I'll run the final stock count at Tuas on Saturday morning, the eleventh. Pandan was counted on the mock weekend and nothing's moved much since."
+       },
+       {
+        "description": "Inform the purchasing team today about the material creation freeze in legacy taking effect Wednesday.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: I'll tell the purchasing team about the material creation freeze today, straight after this."
+       },
+       {
+        "description": "Clear the open transfer order backlog in legacy before the Friday evening lock.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Mei Ling: Okay, a few things. The transfer orders. We have open transfer orders in legacy that need to be confirmed or cancelled before the lock, because they don't migrate. We had two hundred on Friday. We're down to about forty. I'll have the open transfer order backlog cleared by Friday."
+       },
+       {
+        "description": "Brief the Tuas night shift team on the paper fallback process on Thursday night.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: Thursday night, they're all in on Thursday. I'll brief the night shift on the paper fallback process on Thursday."
+       },
+       {
+        "description": "Nominate two super-users for the Tuas night shift by tomorrow.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-08",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: Super-users. Siti asked me to nominate two super-users for the Tuas night shift, the people everyone goes to with questions. I haven't picked them yet, I want to ask them first. I'll nominate the two super-users by tomorrow."
+       },
+       {
+        "description": "Call the servicing company today to reschedule Tuas forklift servicing to the week after go-live.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: And last one, sorry. The forklift servicing is booked for Monday the thirteenth. Of all the days. I'll call the servicing company today and move the forklift servicing to the week after go-live."
+       },
+       {
+        "description": "Book a dedicated truck today for the Harbourfront hotel group delivery scheduled for Monday.",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: That's what I was going to suggest. I'll book a dedicated truck for the Harbourfront order on Monday. I'll do it today, trucks for Monday get scarce by Wednesday."
+       },
+       {
+        "description": "Finish setting up the replenishment settings (minimum and maximum quantities) for the Pandan pick faces.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Nadia: One thing, and it's my mistake. I said at the last meeting that the replenishment settings for the pick faces were all done. They're done for Tuas. When I checked Pandan on Friday, about sixty of the pick faces had no minimum and maximum quantities, because they were added to the layout after the extract. So Pandan isn't done. I've set up about half of them. I'll have the replenishment settings for the Pandan pick faces finished by Thursday."
+       },
+       {
+        "description": "Complete the remaining train-the-trainer session for the second Tuas group on Thursday.",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Siti: So the train-the-trainer sessions. I scheduled three, like I said I would. I've run two of them, Pandan and the first Tuas one. The last one is Thursday for the second Tuas group. So that's in progress, finished Thursday."
+       },
+       {
+        "description": "Print laminated quick reference cards featuring the six most common screens to hang on scanner cradles by Friday.",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Siti: The quick reference cards. The supervisors asked for laminated cards they can hang on each scanner cradle with the six most common screens. I've designed them, I'll print the laminated quick reference cards by Friday, so they're on the cradles for Monday."
+       },
+       {
+        "description": "Send the approved warehouse go-live email to warehouse staff on Thursday.",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Siti: And the go-live email to the warehouse staff. I drafted it two weeks ago and it's been approved. I'll send it on Thursday, so people get it before the weekend and not on Monday morning."
+       },
+       {
+        "description": "Document the interface restart procedure (one page with screenshots) for the night shift by the end of the week.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: Fair. I'll document the interface restart procedure for the night shift. One page, with screenshots, no jargon. I'll have it by the end of the week."
+       },
+       {
+        "description": "Send the warehouse go/no-go checklist to Aisha by Thursday.",
+        "owner": "Farah Ismail",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: Okay, the last thing from me. Aisha wants the warehouse go or no-go checklist before the go or no-go call on Sunday. I'd like her to have it well before that. I'll send the go/no-go warehouse checklist to Aisha by Thursday."
+       },
+       {
+        "description": "Raise the overtime request today for the weekend warehouse crew at both sites.",
+        "owner": "Farah Ismail",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: But then Pandan needs a separate one, and Wei Lin will want one request, not two. No, it has to be me, I'm the manager for both. I'll raise the overtime request for the weekend warehouse crew today."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "access-and-audit-review-08.txt",
+      "predicted": [
+       {
+        "description": "Lock generic and shared accounts in production (AP account and Pandan warehouse account; test account already locked)",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-17",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'll create individual accounts for any AP clerks who don't have one tomorrow morning, and I'll lock all three shared generic accounts by the end of tomorrow. I've already locked the test account, actually, I did that on Tuesday night. So it's two left."
+       },
+       {
+        "description": "Set up a weekly automated extract of the firefighter access log and email it every Monday morning",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-20",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'll set up a weekly extract of the firefighter log for Ravi. It'll email him every Monday morning. I'll have it running by Monday."
+       },
+       {
+        "description": "Review the firefighter access log weekly starting Monday, July 20",
+        "owner": "Ravi Menon",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Ravi: Then I'll review the firefighter access log for the first time on Monday, and every Monday after that."
+       },
+       {
+        "description": "Write mitigating controls for the three accepted segregation-of-duties conflicts",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-21",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll write the mitigating controls for the three conflicts within three working days. So by Tuesday."
+       },
+       {
+        "description": "Approve written mitigating controls for the three segregation-of-duties conflicts upon receipt from Daniel",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: And I'll approve them. Send them to me when they're ready and I'll sign them off, it doesn't need a meeting."
+       },
+       {
+        "description": "Review the list of users with posting access to closed periods",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-20",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll review the list of users with posting access to closed periods on Monday. If there's anyone on it who shouldn't be, I'll tell Jun Wei the same day."
+       },
+       {
+        "description": "Have AP clerks retest the GR/IR clearing transaction in production",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll get one of my clerks to retest the GR/IR clearing tomorrow morning, and I'll tell Daniel if it still fails."
+       },
+       {
+        "description": "Confirm AP team's approval limits match current policy",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-21",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll confirm that my team's approval limits match the current policy by Tuesday."
+       },
+       {
+        "description": "Send list of sample requests for IT general controls testing to the team",
+        "owner": "Sofia Reyes",
+        "deadline": "2026-07-22",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Sofia: I'll send you our list of sample requests for the IT general controls by next Wednesday."
+       },
+       {
+        "description": "Confirm with audit manager whether external audit will rely on migration reconciliations",
+        "owner": "Sofia Reyes",
+        "deadline": "2026-07-22",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Sofia: I'll confirm with my manager whether we rely on the migration reconciliations, also by next Wednesday."
+       },
+       {
+        "description": "Send signed cutover reconciliation pack to external audit",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll send you the signed cutover reconciliation pack tomorrow."
+       },
+       {
+        "description": "Finish role design documentation",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-24",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: I'll finish the role design documentation by Friday next week, the twenty-fourth, which is before the auditors arrive."
+       },
+       {
+        "description": "Send system access documentation pack to external auditors",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-07-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: Then I'll send the auditors the system access documentation pack on the twenty-fourth as well, once Marcus's part is in."
+       },
+       {
+        "description": "Complete user access review for all finance roles",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-31",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: I'll have it complete by the end of the month."
+       },
+       {
+        "description": "Share last year's IT audit findings with Marcus Lee",
+        "owner": "Ravi Menon",
+        "deadline": "2026-07-16",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Ravi: I'll share last year's IT audit findings with you today, Marcus."
+       },
+       {
+        "description": "Rotate interface service account passwords in evening outage windows before auditors arrive",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'll rotate the interface service account passwords before the auditors arrive, by the twenty-fourth."
+       },
+       {
+        "description": "Review security audit log settings and make recommendation on logging levels",
+        "owner": "Jun Wei Ong",
+        "deadline": "2026-07-22",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Jun Wei: I'm reviewing the security audit log settings now to see what we can switch on without filling the disk. I'll have a recommendation by next Wednesday."
+       },
+       {
+        "description": "Remove temporary go-live superuser access from consultants at end of hypercare",
+        "owner": "Marcus Lee",
+        "deadline": "2026-08-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll remove the temporary go-live superuser access from the consultants at the end of hypercare, the seventh of August."
+       },
+       {
+        "description": "Log access issues and Jun Wei's planned outage windows in hypercare issue log",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-07-16",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: And I'll log today's access issues in the hypercare issue log this afternoon, including Jun Wei's outage windows."
+       },
+       {
+        "description": "Send list of AP clerks who used shared account to Jun Wei Ong",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-16",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll send you the list of AP clerks today, straight after this."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     }
+    ]
+   },
+   "models": {
+    "agent": "gemini-3.5-flash"
+   },
+   "validation_failures": {
+    "agent": 0
+   },
+   "api_failures": {
+    "agent": 0
+   }
+  },
+  {
+   "conditions": {
+    "agent": [
+     {
+      "transcript_file": "cutover-readiness-review-05.txt",
+      "predicted": [],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "finance-close-planning-06.txt",
+      "predicted": [
+       {
+        "description": "Run the end-to-end bank statement test in pre-production.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll run the end-to-end bank statement test in pre-production by Friday."
+       },
+       {
+        "description": "Write the work instruction for the manual bank reconciliation fallback.",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll write the work instruction for the manual bank reconciliation fallback by the end of next week."
+       },
+       {
+        "description": "Set up all five house bank accounts in the production system before cutover weekend.",
+        "owner": "Omar Rashid",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Omar: If I have the letters today, the bank needs two days, so I'll have all five house bank accounts set up before the cutover weekend. Before Friday the tenth at the latest."
+       },
+       {
+        "description": "Fix the payment file transfer file naming convention issue.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-06",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: Okay, then I'll have the payment file transfer fixed by Monday."
+       },
+       {
+        "description": "Close the three dormant bank accounts.",
+        "owner": "Omar Rashid",
+        "deadline": "2026-07-31",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Omar: I'll get the three dormant bank accounts closed by the end of the month."
+       },
+       {
+        "description": "Send Omar the list of bank GL accounts.",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll send Omar the list of bank GL accounts after this meeting."
+       },
+       {
+        "description": "Schedule the daily exchange rate upload job in production.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll schedule the daily exchange rate upload job in production. It has to be in before the lock, so by the tenth as well."
+       },
+       {
+        "description": "Clear remaining parked vendor invoices before the legacy lock.",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Hannah: I'll have the parked vendor invoices cleared by Thursday next week."
+       },
+       {
+        "description": "Send the payment run cut-off notice to vendors.",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-02",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll send the payment run cut-off notice to vendors tomorrow."
+       },
+       {
+        "description": "Clean up the remaining duplicate vendor records.",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-03",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Hannah: I'll have the remaining duplicate vendor records cleaned up by Friday."
+       },
+       {
+        "description": "Train two new AP clerks on invoice parking in the new system.",
+        "owner": "Hannah Goh",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Hannah: I'll train the two new AP clerks on invoice parking the week before go-live, so by the tenth."
+       },
+       {
+        "description": "Draft the first month-end close calendar for the July close.",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-15",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll draft the first month-end close calendar by the fifteenth, so it's out a full two weeks before the close starts."
+       },
+       {
+        "description": "Confirm Malaysian tax code mapping.",
+        "owner": "Grace Lim",
+        "deadline": "2026-07-06",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Grace: I'll have the Malaysian tax code mapping confirmed by Monday."
+       },
+       {
+        "description": "Configure the GST reporting variant on the new system.",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I can configure the GST reporting variant. I'll have it done by the seventeenth, that's the Friday after go-live."
+       },
+       {
+        "description": "Draw up the finance hypercare support rota.",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll draw up the finance hypercare support rota by Friday, so everyone has a week's notice."
+       },
+       {
+        "description": "Confirm with Marcus that finance users keep read-only access to legacy after go-live.",
+        "owner": "Daniel Tan",
+        "deadline": "2026-07-03",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll confirm with Marcus by Friday."
+       },
+       {
+        "description": "Share the internal audit checklist for cutover sign-off.",
+        "owner": "Ravi Menon",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Ravi: I'll share the internal audit checklist for the cutover sign-off today, so Priya and Daniel can check it against what they're already planning."
+       },
+       {
+        "description": "Update the finance FAQ page on the intranet before go-live.",
+        "owner": null,
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Wei Lin: Then the service desk team needs to update the finance FAQ on the intranet before go-live. I'd like it by Friday the tenth."
+       },
+       {
+        "description": "Send the action list round tonight.",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-01",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll send the action list round tonight."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "warehouse-go-live-readiness-07.txt",
+      "predicted": [
+       {
+        "description": "Set up scanner user accounts in production for all devices, including the six replacement scanners at Tuas once serial numbers are received.",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: I'm already setting up the scanner user accounts in production for all the devices. I've done Pandan, Tuas is half done. I'll have all of them done by Thursday, including the six new ones, if Tom sends me the serial numbers."
+       },
+       {
+        "description": "Arrange site access security gate clearance for the scanner vendor engineer visiting Tuas on Friday.",
+        "owner": "Marcus Lee",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll get Tom's engineer site access for Friday, I just need his name and IC number by Thursday."
+       },
+       {
+        "description": "Fix the returns movement type mapping in the interface between the warehouse system and transport side.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Kenji: I'm fixing the returns movement type mapping now. I'll have it fixed by Thursday."
+       },
+       {
+        "description": "Retest the customer returns process on Friday after the interface movement type mapping fix is completed.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: So I'll retest the returns process on Friday, after Kenji's fix is in."
+       },
+       {
+        "description": "Load all active carrier master data (18 carriers) into the transport system.",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Arjun: Twelve are in. I'll have all the carrier master data loaded by Thursday."
+       },
+       {
+        "description": "Confirm the go-live week delivery schedule with the three main carriers.",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-08",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll confirm the go-live week delivery schedule with the carriers tomorrow."
+       },
+       {
+        "description": "Send the new proof-of-delivery template with updated document numbers to the carriers.",
+        "owner": "Arjun Pillai",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll send the proof-of-delivery template to the carriers. It's ready, I just haven't sent it."
+       },
+       {
+        "description": "Run the final stock count at Tuas on Saturday morning following the Friday evening system lock.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-11",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: I'll run the final stock count at Tuas on Saturday morning, the eleventh."
+       },
+       {
+        "description": "Notify the purchasing team regarding the material creation freeze in legacy effective Wednesday, July 8.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Nadia: I'll tell the purchasing team about the material creation freeze today, straight after this."
+       },
+       {
+        "description": "Clear the remaining open transfer order backlog in legacy prior to the system lock.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-10",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Mei Ling: We had two hundred on Friday. We're down to about forty. I'll have the open transfer order backlog cleared by Friday."
+       },
+       {
+        "description": "Brief the night shift team on the paper fallback process for cutover weekend.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: Thursday night, they're all in on Thursday. I'll brief the night shift on the paper fallback process on Thursday."
+       },
+       {
+        "description": "Nominate two super-users for the Tuas night shift.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-08",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll nominate the two super-users by tomorrow."
+       },
+       {
+        "description": "Contact the servicing company to reschedule Tuas forklift servicing away from go-live Monday to the following week.",
+        "owner": "Mei Ling Chua",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Mei Ling: I'll call the servicing company today and move the forklift servicing to the week after go-live."
+       },
+       {
+        "description": "Book a dedicated truck for the Harbourfront hotel group delivery scheduled for Monday.",
+        "owner": "Arjun Pillai",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Arjun: I'll book a dedicated truck for the Harbourfront order on Monday. I'll do it today, trucks for Monday get scarce by Wednesday."
+       },
+       {
+        "description": "Complete the missing replenishment settings (minimum/maximum quantities) for the Pandan pick faces.",
+        "owner": "Nadia Karim",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Nadia: I've set up about half of them. I'll have the replenishment settings for the Pandan pick faces finished by Thursday."
+       },
+       {
+        "description": "Conduct the final train-the-trainer session for the second Tuas supervisor group.",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-09",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Siti: I've run two of them, Pandan and the first Tuas one. The last one is Thursday for the second Tuas group. So that's in progress, finished Thursday."
+       },
+       {
+        "description": "Print laminated quick reference cards with the six most common screens to attach to scanner cradles.",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Siti: I've designed them, I'll print the laminated quick reference cards by Friday, so they're on the cradles for Monday."
+       },
+       {
+        "description": "Send the pre-approved warehouse go-live announcement email to all warehouse staff.",
+        "owner": "Siti Hamid",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Siti: I drafted it two weeks ago and it's been approved. I'll send it on Thursday, so people get it before the weekend and not on Monday morning."
+       },
+       {
+        "description": "Document the WM to TMS interface restart procedure (with screenshots) for the night shift team.",
+        "owner": "Kenji Sato",
+        "deadline": "2026-07-10",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Kenji: I'll document the interface restart procedure for the night shift. One page, with screenshots, no jargon. I'll have it by the end of the week."
+       },
+       {
+        "description": "Send the warehouse go/no-go readiness checklist to Aisha.",
+        "owner": "Farah Ismail",
+        "deadline": "2026-07-09",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: I'll send the go/no-go warehouse checklist to Aisha by Thursday."
+       },
+       {
+        "description": "Submit the weekend warehouse crew overtime request for approval.",
+        "owner": "Farah Ismail",
+        "deadline": "2026-07-07",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Farah: I'll raise the overtime request for the weekend warehouse crew today."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "access-and-audit-review-08.txt",
+      "predicted": [],
+      "questions": [],
+      "error": "limit",
+      "error_message": "Review step or time limit reached"
+     }
+    ]
+   },
+   "models": {
+    "agent": "gemini-3.5-flash"
+   },
+   "validation_failures": {
+    "agent": 1
+   },
+   "api_failures": {
+    "agent": 0
+   }
+  }
+ ]
+}

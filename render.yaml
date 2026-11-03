@@ -27,6 +27,11 @@ services:
       # input price (docs/subtask-evaluation-report.md).
       - key: SUBTASK_PROVIDER
         value: gemini
+      # The meeting assistant reconciles each new meeting's parsed tasks with the board and
+      # proposes changes to existing tasks for approval. Extraction stays with the parser: the
+      # assistant found significantly fewer tasks on the long test set (docs/agent-evaluation.md).
+      - key: ENABLE_MEETING_AGENT
+        value: "true"
       # Optional; not used while GEMINI_API_KEY is set.
       - key: ANTHROPIC_API_KEY
         sync: false
@@ -99,3 +104,6 @@ services:
       # e.g. https://orchestrator-backend.onrender.com/api/v1, then trigger a frontend rebuild.
       - key: NEXT_PUBLIC_API_BASE
         sync: false
+      # Shows the meeting assistant (the backend's ENABLE_MEETING_AGENT must also be true).
+      - key: NEXT_PUBLIC_MEETING_AGENT_PREVIEW
+        value: "true"

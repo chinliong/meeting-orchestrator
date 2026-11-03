@@ -46,10 +46,17 @@ class Proposal(StrictModel):
         return self
 
 
+class ExistingItem(StrictModel):
+    """A parser-extracted candidate task that is already on the board, so it is not added again."""
+    item: StrictInt = Field(ge=0)
+    task_id: StrictInt = Field(gt=0)
+
+
 class ReviewPlan(StrictModel):
     summary: str = Field(min_length=1, max_length=2000)
     proposals: list[Proposal] = Field(max_length=30)
     questions: list[str] = Field(max_length=15)
+    existing_items: list[ExistingItem] = Field(default_factory=list, max_length=100)
 
 
 class ApplyInput(StrictModel):

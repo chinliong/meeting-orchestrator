@@ -1,0 +1,2155 @@
+{
+ "note": "Meeting-agent predictions on an empty board; see eval/agent_eval.py.",
+ "runs": [
+  {
+   "conditions": {
+    "agent": [
+     {
+      "transcript_file": "finance-workshop-01.txt",
+      "predicted": [
+       {
+        "description": "Compile and send the new cost center codes for APAC mapping",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll get the cost center codes over to you by Wednesday, Daniel. Full disclosure, I haven't actually compiled them yet, they're scattered across a couple of spreadsheets. I'll pull them together tomorrow and send them, so that's a fresh one on my plate."
+       },
+       {
+        "description": "Complete APAC cost center hierarchy mapping",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-19",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: I'm working through it right now, I'd say I'm about two-thirds of the way through the APAC cost centers.\n\nAisha: Two-thirds. And the finish line is \u2014\n\nDaniel: I can have APAC mapping wrapped by Friday."
+       },
+       {
+        "description": "Loop in banking team to confirm statement format for bank integration test",
+        "owner": "Aisha Rahman",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: I'll take that \u2014 I'll loop the banking team in and get them onto next week's call. I haven't reached out to them yet, so chalk that up as new on me."
+       },
+       {
+        "description": "Fix parser configuration for multi-currency bank statements",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: And separately \u2014 the actual parser config fix. I want to be clear it's not at zero. I've started tinkering, I've got a candidate fix half-built in the dev system already. But I can't finish it or test it until the banking team confirms the format, so it's mid-flight but stalled on that dependency."
+       },
+       {
+        "description": "Clear the eleven duplicate postings identified in open items report",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: What I have not done yet is the second pass to actually clear them out of the system. That's still ahead of me. I'll do the clearing before the dress rehearsal \u2014 that's next Thursday, right? Yeah, before Thursday."
+       },
+       {
+        "description": "Send change request for additional consulting days to Wei Lin's office",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-18",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I just need to actually send it over to Wei Lin's office for approval. I'll send it Thursday."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "logistics-workshop-02.txt",
+      "predicted": [],
+      "questions": [],
+      "error": "limit",
+      "error_message": "Review step or time limit reached"
+     },
+     {
+      "transcript_file": "security-workshop-03.txt",
+      "predicted": [
+       {
+        "description": "Package SoD conflicts into a readable report and circulate to team",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-18",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll write that up and circulate it to the team by tomorrow."
+       },
+       {
+        "description": "Prepare mitigating controls document for the 14 SoD conflicts before audit",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: Yes, I'll prepare the mitigating controls document before the audit on the twenty-fifth."
+       },
+       {
+        "description": "Build out EAM workflow configuration",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: I've actually been building out the EAM workflow configuration. That's in motion."
+       },
+       {
+        "description": "Schedule penetration test with external vendor",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-26",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll get the pen test scheduled by end of next week."
+       },
+       {
+        "description": "Tune production authorization trace settings to reduce log volume",
+        "owner": null,
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Somebody needs to tune the trace settings down. But we never decided who. It's not screaming-urgent yet, but it's also just... unassigned, sitting there."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "data-migration-workshop-04.txt",
+      "predicted": [
+       {
+        "description": "Rerun material master validation against the cleaned source file",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Priya: What's left is I need to rerun the validation against the cleaned file, and that \u2014 honestly that's chugging away right now as we speak, the job's running in the background. It'll land Monday, probably Monday morning."
+       },
+       {
+        "description": "Finalize customer master mapping",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-19",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: So I'll get on the final mapping today and I'm confident I can have it finalized by Friday. So it hasn't started, but Friday, put my name on it."
+       },
+       {
+        "description": "Request business sign-off for 18-hour cutover downtime window",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-06-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: I'll own the sign-off. I'll go request business approval for the eighteen-hour window \u2014 and I want that by, let's say next Wednesday, before we reconvene. I haven't even opened that conversation yet though, so that's a brand new one for me."
+       },
+       {
+        "description": "Build data reconciliation report template for post-load validation",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Priya: Yeah, the data reconciliation report template, for the post-load validation. So... this one's awkward. I started it, I got maybe halfway, and then the material master cleanup ate my whole week and I had to drop it."
+       },
+       {
+        "description": "Write rollback steps into the cutover runbook",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll take it. I'll write up the rollback section into the runbook. I can have that by Thursday."
+       },
+       {
+        "description": "Clean material master source extract file",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Priya: Anyway \u2014 the point is I went in and cleaned the source extract. That's behind me now, I finished scrubbing it yesterday afternoon, late, like six-ish. So the source is good."
+       },
+       {
+        "description": "Execute timed trial load for downtime window estimation",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: we did the timed trial load \u2014 that's done, we ran the full timed trial Saturday, end to end, real volumes."
+       },
+       {
+        "description": "Develop and test fallback rollback script on QA system",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: One \u2014 the fallback rollback script. That's done, I wrote it and I tested it on QA this week, ran the full rollback against the QA system and it behaved itself, so I'm calling that one finished and validated."
+       },
+       {
+        "description": "Confirm and communicate legacy freeze date with application owners",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-20",
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Priya: It's locked. I confirmed it with the application owners on Monday \u2014 July twentieth, no movement. And I sent the note round, so it's not just confirmed, it's communicated. People have it."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     }
+    ]
+   },
+   "models": {
+    "agent": "gemini-3.5-flash"
+   },
+   "validation_failures": {
+    "agent": 1
+   },
+   "api_failures": {
+    "agent": 0
+   }
+  },
+  {
+   "conditions": {
+    "agent": [
+     {
+      "transcript_file": "finance-workshop-01.txt",
+      "predicted": [
+       {
+        "description": "Compile and send cost center codes to Daniel.",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll get the cost center codes over to you by Wednesday, Daniel. Full disclosure, I haven't actually compiled them yet, they're scattered across a couple of spreadsheets. I'll pull them together tomorrow and send them, so that's a fresh one on my plate."
+       },
+       {
+        "description": "Loop the banking team in and get them onto next week's call.",
+        "owner": "Aisha Rahman",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: I'll take that \u2014 I'll loop the banking team in and get them onto next week's call. I haven't reached out to them yet, so chalk that up as new on me."
+       },
+       {
+        "description": "Complete parser config fix once format is confirmed by banking team.",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: I've started tinkering, I've got a candidate fix half-built in the dev system already. But I can't finish it or test it until the banking team confirms the format, so it's mid-flight but stalled on that dependency. Don't write it down as not-started, I've put real hours in."
+       },
+       {
+        "description": "Clear eleven duplicate postings out of the system before dress rehearsal on Thursday.",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: What I have not done yet is the second pass to actually clear them out of the system. That's still ahead of me. I'll do the clearing before the dress rehearsal \u2014 that's next Thursday, right? Yeah, before Thursday. So review's done, the clearing is the new to-do."
+       },
+       {
+        "description": "Send change request for additional consulting days to Wei Lin's office for approval.",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-18",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I've drafted that request \u2014 the draft is finished, it's written up with the justification. I just need to actually send it over to Wei Lin's office for approval. I'll send it Thursday. So the drafting's done, the sending's the pending bit."
+       },
+       {
+        "description": "Wrap up APAC cost center mapping.",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-19",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: APAC is the one still in motion. I'm working through it right now, I'd say I'm about two-thirds of the way through the APAC cost centers."
+       }
+      ],
+      "questions": [],
+      "steps": 5,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "logistics-workshop-02.txt",
+      "predicted": [
+       {
+        "description": "Chase vendor for firm barcode scanner patch date",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-19",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Agreed. I'll chase the vendor and get a firm patch date \u2014 I'll aim to have that by Friday. I haven't called them today yet, so that's a new one on me."
+       },
+       {
+        "description": "Reconfigure test environment for degraded-mode manual entry",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-17",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: Works for me, better than waiting. And actually \u2014 on the degraded-mode setup \u2014 I've already started. I'm reconfiguring the test environment to do manual entry instead of scanning. It's underway, I'm maybe a third of the way in, and I should have the environment ready by tomorrow."
+       },
+       {
+        "description": "Draft one-page risk note on scanner delay for steering committee",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-23",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Will do. I'll write the risk note and send it before Tuesday. Haven't touched it yet \u2014 I'll get to it after I finish the environment rebuild, so it's not started but it's on the list."
+       },
+       {
+        "description": "Investigate WM interface to TMS load testing timeout errors",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-22",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: Fair, yeah. Put it near the top. Second thing \u2014 the goods movement mapping. That one's fully done, off the list. I finished mapping all the movement types last week, tested them in QA, signed off, the whole thing. So you can take that one off entirely."
+       },
+       {
+        "description": "Update cutover runbook to reflect degraded-mode plan",
+        "owner": "Aisha Rahman",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: Fine, I'll take the runbook update myself. I'll fold in the degraded-mode steps. New one on me. Was there \u2014 did we ever decide on the cycle count freeze, or is that next week?"
+       },
+       {
+        "description": "Configure label printer integration",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: Last thing, actually \u2014 the label printer integration. I want to be honest about where it is. I started it, but when the scanner issue blew up I had to drop it mid-stream. So it's partially configured, sitting at maybe forty percent, definitely in motion but paused. I'll resume it once the timeout investigation is closed out, not before."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "security-workshop-03.txt",
+      "predicted": [
+       {
+        "description": "Write up and circulate finance role SoD conflict report",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-18",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll write that up and circulate it to the team by tomorrow."
+       },
+       {
+        "description": "Prepare mitigating controls document for finance role conflicts",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: Yes, I'll prepare the mitigating controls document before the audit on the twenty-fifth."
+       },
+       {
+        "description": "Build out EAM workflow configuration",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: Good, because \u2014 funny timing \u2014 on that exact workflow, I've actually been building out the EAM workflow configuration. That's in motion."
+       },
+       {
+        "description": "Tune production authorization trace settings to reduce log volume",
+        "owner": null,
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Somebody needs to tune the trace settings down. But we never decided who. It's not screaming-urgent yet, but it's also just... unassigned, sitting there."
+       },
+       {
+        "description": "Schedule penetration test with external vendor",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-26",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Yeah, will do, I'll get the pen test scheduled by end of next week."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "data-migration-workshop-04.txt",
+      "predicted": [
+       {
+        "description": "Rerun material master data validation against cleaned source file",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Priya: The cleanup's behind us. What's left is I need to rerun the validation against the cleaned file, and that \u2014 honestly that's chugging away right now as we speak, the job's running in the background. It'll land Monday, probably Monday morning."
+       },
+       {
+        "description": "Finalize customer master data mapping",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-19",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'm unblocked now, exactly. So I'll get on the final mapping today and I'm confident I can have it finalized by Friday. So it hasn't started, but Friday, put my name on it."
+       },
+       {
+        "description": "Request business approval for 18-hour downtime window",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-06-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: Yeah, that lands on me. I'll own the sign-off. I'll go request business approval for the eighteen-hour window \u2014 and I want that by, let's say next Wednesday, before we reconvene. I haven't even opened that conversation yet though, so that's a brand new one for me."
+       },
+       {
+        "description": "Build data reconciliation report template for post-load validation",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Priya: Yeah, the data reconciliation report template, for the post-load validation. So... this one's awkward. I started it, I got maybe halfway, and then the material master cleanup ate my whole week and I had to drop it."
+       },
+       {
+        "description": "Write up rollback section into cutover runbook",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll take it. I'll write up the rollback section into the runbook. I can have that by Thursday."
+       },
+       {
+        "description": "Clean material master source extract",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Priya: Same family of problem, yeah, but worse in production because the older records just don't have it populated at all. Anyway \u2014 the point is I went in and cleaned the source extract. That's behind me now, I finished scrubbing it yesterday afternoon, late, like six-ish. So the source is good."
+       },
+       {
+        "description": "Run full timed trial load for cutover",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: Yeah, this is the one that moved on us. So originally we scoped a twelve-hour downtime window for the big-bang load, that was the number everyone's been anchored on. But we did the timed trial load \u2014 that's done, we ran the full timed trial Saturday, end to end, real volumes. And the numbers came back ugly, honestly. It's closer to sixteen hours of actual processing, and that's before you add any contingency."
+       },
+       {
+        "description": "Develop and test fallback rollback script on QA",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: Two things, quick. One \u2014 the fallback rollback script. That's done, I wrote it and I tested it on QA this week, ran the full rollback against the QA system and it behaved itself, so I'm calling that one finished and validated. Two \u2014 and this is the gap \u2014 somebody needs to actually write the rollback steps up into the cutover runbook. In plain English, for the on-call team, because right now the only documentation is the script itself and a script is not a runbook."
+       },
+       {
+        "description": "Confirm and communicate legacy freeze date",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-20",
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Priya: It's locked. I confirmed it with the application owners on Monday \u2014 July twentieth, no movement. And I sent the note round, so it's not just confirmed, it's communicated. People have it."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     }
+    ]
+   },
+   "models": {
+    "agent": "gemini-3.5-flash"
+   },
+   "validation_failures": {
+    "agent": 0
+   },
+   "api_failures": {
+    "agent": 0
+   }
+  },
+  {
+   "conditions": {
+    "agent": [
+     {
+      "transcript_file": "finance-workshop-01.txt",
+      "predicted": [
+       {
+        "description": "Compile and send new cost center codes to Daniel",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: Yeah, sorry, I'm here now. Codes \u2014 I can do that. I'll get the cost center codes over to you by Wednesday, Daniel. Full disclosure, I haven't actually compiled them yet, they're scattered across a couple of spreadsheets. I'll pull them together tomorrow and send them, so that's a fresh one on my plate."
+       },
+       {
+        "description": "Complete APAC cost center mapping",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-19",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: I can have APAC mapping wrapped by Friday. With one big caveat \u2014 I need the new cost center codes from Priya by Wednesday, otherwise Friday slips. The last third is literally blocked on those codes."
+       },
+       {
+        "description": "Loop in the banking team for next week's call to confirm MT940 statement format",
+        "owner": "Aisha Rahman",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: Right. So diagnosis behind us, the fix is blocked on the banking team. I'll take that \u2014 I'll loop the banking team in and get them onto next week's call. I haven't reached out to them yet, so chalk that up as new on me."
+       },
+       {
+        "description": "Fix bank statement parser configuration for multi-currency files",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: And separately \u2014 the actual parser config fix. I want to be clear it's not at zero. I've started tinkering, I've got a candidate fix half-built in the dev system already. But I can't finish it or test it until the banking team confirms the format, so it's mid-flight but stalled on that dependency."
+       },
+       {
+        "description": "Clear eleven duplicate postings from the open items report",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: Eleven. What I have not done yet is the second pass to actually clear them out of the system. That's still ahead of me. I'll do the clearing before the dress rehearsal \u2014 that's next Thursday, right? Yeah, before Thursday. So review's done, the clearing is the new to-do."
+       },
+       {
+        "description": "Send change request for additional consulting days to Wei Lin's office",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-18",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: Yes, briefly. The bank integration rework is honestly the main reason I'm putting in a change request for additional consulting days. I've drafted that request \u2014 the draft is finished, it's written up with the justification. I just need to actually send it over to Wei Lin's office for approval. I'll send it Thursday."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "logistics-workshop-02.txt",
+      "predicted": [
+       {
+        "description": "Chase barcode scanner vendor to get a firm patch date",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-19",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Agreed. I'll chase the vendor and get a firm patch date \u2014 I'll aim to have that by Friday. I haven't called them today yet, so that's a new one on me."
+       },
+       {
+        "description": "Reconfigure test environment for degraded-mode manual entry",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-17",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: Works for me, better than waiting. And actually \u2014 on the degraded-mode setup \u2014 I've already started. I'm reconfiguring the test environment to do manual entry instead of scanning. It's underway, I'm maybe a third of the way in, and I should have the environment ready by tomorrow."
+       },
+       {
+        "description": "Draft a one-page risk note on scanner delay for steering committee",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-23",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Will do. I'll write the risk note and send it before Tuesday. Haven't touched it yet \u2014 I'll get to it after I finish the environment rebuild, so it's not started but it's on the list."
+       },
+       {
+        "description": "Investigate WM interface to TMS timeout logs and report back",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-22",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: Couple from my side. First \u2014 the WM interface to the transport management system. During load testing yesterday we got intermittent timeout errors, roughly one in every forty transactions failed. Not a hard fail, just flaky. I pulled the logs this morning \u2014 so the log extraction's done, I've got them \u2014 but I haven't actually gone through them yet. I'll dig in, figure out whether it's a timeout config on our side or something on the TMS side, and report back by Monday."
+       },
+       {
+        "description": "Update cutover runbook to reflect degraded-mode plan",
+        "owner": "Aisha Rahman",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: Fine, I'll take the runbook update myself. I'll fold in the degraded-mode steps. New one on me."
+       },
+       {
+        "description": "Label printer integration",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: Last thing, actually \u2014 the label printer integration. I want to be honest about where it is. I started it, but when the scanner issue blew up I had to drop it mid-stream. So it's partially configured, sitting at maybe forty percent, definitely in motion but paused. I'll resume it once the timeout investigation is closed out, not before."
+       }
+      ],
+      "questions": [],
+      "steps": 4,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "security-workshop-03.txt",
+      "predicted": [
+       {
+        "description": "Write up raw output from SoD conflict analysis run into a readable conflict report and circulate to team",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-18",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: About what I expected, honestly, given the finance roles are the messiest. So the run's behind us. What I haven't done yet \u2014 I need to package those fourteen into a readable conflict report, because right now it's just raw tool output, nobody can action that. I'll write that up and circulate it to the team by tomorrow."
+       },
+       {
+        "description": "Prepare mitigating controls document mapping each of the fourteen SoD conflicts prior to external audit",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: Yes, I'll prepare the mitigating controls document before the audit on the twenty-fifth. I do want to flag the dependency though, loudly \u2014 I can't really start in earnest until Marcus's report actually lands tomorrow. So as of right now it's not started, and it's sitting square on the critical path."
+       },
+       {
+        "description": "Build out EAM workflow configuration (approval routing, logging, notification step)",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-26",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: Good, because \u2014 funny timing \u2014 on that exact workflow, I've actually been building out the EAM workflow configuration. That's in motion. I've got the approval routing done and the logging set up, I'm maybe seventy percent there, I just need to finish the notification step and test it. Should wrap it next week."
+       },
+       {
+        "description": "Schedule penetration test with external vendor",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-26",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Yeah, will do, I'll get the pen test scheduled by end of next week. Haven't contacted the vendor yet, so fresh action."
+       },
+       {
+        "description": "Tune production authorization trace settings to decrease log volume",
+        "owner": null,
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Oh \u2014 one issue that's still floating, nobody owns it. The production authorization trace is generating way too much log volume, it's actually starting to fill the disk. Somebody needs to tune the trace settings down. But we never decided who. It's not screaming-urgent yet, but it's also just... unassigned, sitting there."
+       },
+       {
+        "description": "Run SoD conflict analysis for finance module roles",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-17",
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: It did, yeah. The analysis ran overnight, finished clean \u2014 I mean the run itself completed without errors, so the SoD conflict run is done. It flagged fourteen segregation-of-duties conflicts."
+       },
+       {
+        "description": "Build and unit-test twelve finance composite roles",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-15",
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Daniel: The finance composite roles are done. Finished building and unit-testing all twelve composite roles on Monday, they're sitting in QA right now, ready for the conflict mapping once we get there. So that whole piece is complete, you can close it."
+       },
+       {
+        "description": "User access review and dormant account disabling for legacy system decommission",
+        "owner": null,
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Daniel: That one's finished. You and I closed the legacy access review out two weeks ago \u2014 we disabled all the dormant accounts and documented every one of them. It's done, it's been done for a while."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "data-migration-workshop-04.txt",
+      "predicted": [
+       {
+        "description": "Material Master Data Source Cleanup",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Priya: Same family of problem, yeah, but worse in production because the older records just don't have it populated at all. Anyway \u2014 the point is I went in and cleaned the source extract. That's behind me now, I finished scrubbing it yesterday afternoon, late, like six-ish. So the source is good."
+       },
+       {
+        "description": "Material Master Data Validation Rerun",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-22",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Priya: The cleanup's behind us. What's left is I need to rerun the validation against the cleaned file, and that \u2014 honestly that's chugging away right now as we speak, the job's running in the background. It'll land Monday, probably Monday morning."
+       },
+       {
+        "description": "Customer Master Data Final Mapping",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-19",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'm unblocked now, exactly. So I'll get on the final mapping today and I'm confident I can have it finalized by Friday. So it hasn't started, but Friday, put my name on it."
+       },
+       {
+        "description": "Downtime Window Timed Trial Load",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: Yeah, this is the one that moved on us. So originally we scoped a twelve-hour downtime window for the big-bang load, that was the number everyone's been anchored on. But we did the timed trial load \u2014 that's done, we ran the full timed trial Saturday, end to end, real volumes."
+       },
+       {
+        "description": "Request Business Approval for 18-Hour Downtime Window",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-06-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: Yeah, that lands on me. I'll own the sign-off. I'll go request business approval for the eighteen-hour window \u2014 and I want that by, let's say next Wednesday, before we reconvene. I haven't even opened that conversation yet though, so that's a brand new one for me."
+       },
+       {
+        "description": "Data Reconciliation Report Template",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Priya: Yeah, the data reconciliation report template, for the post-load validation. So... this one's awkward. I started it, I got maybe halfway, and then the material master cleanup ate my whole week and I had to drop it."
+       },
+       {
+        "description": "Fallback Rollback Script Creation and QA Testing",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: Two things, quick. One \u2014 the fallback rollback script. That's done, I wrote it and I tested it on QA this week, ran the full rollback against the QA system and it behaved itself, so I'm calling that one finished and validated."
+       },
+       {
+        "description": "Write Rollback Section into Cutover Runbook",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll take it. I'll write up the rollback section into the runbook. I can have that by Thursday."
+       },
+       {
+        "description": "Confirm and Communicate Legacy Data Freeze Date",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Priya: It's locked. I confirmed it with the application owners on Monday \u2014 July twentieth, no movement. And I sent the note round, so it's not just confirmed, it's communicated. People have it."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     }
+    ]
+   },
+   "models": {
+    "agent": "gemini-3.5-flash"
+   },
+   "validation_failures": {
+    "agent": 0
+   },
+   "api_failures": {
+    "agent": 0
+   }
+  },
+  {
+   "conditions": {
+    "agent": [
+     {
+      "transcript_file": "finance-workshop-01.txt",
+      "predicted": [
+       {
+        "description": "Compile and send new cost center codes for APAC mapping to Daniel",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll get the cost center codes over to you by Wednesday, Daniel. Full disclosure, I haven't actually compiled them yet, they're scattered across a couple of spreadsheets. I'll pull them together tomorrow and send them, so that's a fresh one on my plate."
+       },
+       {
+        "description": "Complete APAC cost center hierarchy mapping",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-19",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: I'm working through it right now, I'd say I'm about two-thirds of the way through the APAC cost centers.\n\nAisha: Two-thirds. And the finish line is \u2014\n\nDaniel: I can have APAC mapping wrapped by Friday."
+       },
+       {
+        "description": "Loop in the banking team to confirm statement format for bank statement integration test",
+        "owner": "Aisha Rahman",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: I'll loop the banking team in and get them onto next week's call. I haven't reached out to them yet, so chalk that up as new on me."
+       },
+       {
+        "description": "Fix MT940 bank statement parser config for multi-currency statements",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: I've started tinkering, I've got a candidate fix half-built in the dev system already. But I can't finish it or test it until the banking team confirms the format, so it's mid-flight but stalled on that dependency. Don't write it down as not-started, I've put real hours in."
+       },
+       {
+        "description": "Clear eleven duplicate postings from open items report",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-18",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: What I have not done yet is the second pass to actually clear them out of the system. That's still ahead of me. I'll do the clearing before the dress rehearsal \u2014 that's next Thursday, right? Yeah, before Thursday. So review's done, the clearing is the new to-do."
+       },
+       {
+        "description": "Submit change request for additional consulting days to Wei Lin's office",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-18",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I've drafted that request \u2014 the draft is finished, it's written up with the justification. I just need to actually send it over to Wei Lin's office for approval. I'll send it Thursday. So the drafting's done, the sending's the pending bit."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "logistics-workshop-02.txt",
+      "predicted": [],
+      "questions": [],
+      "error": "limit",
+      "error_message": "Review step or time limit reached"
+     },
+     {
+      "transcript_file": "security-workshop-03.txt",
+      "predicted": [
+       {
+        "description": "Package the 14 SoD conflicts into a readable conflict report and circulate it to the team",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-18",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll write that up and circulate it to the team by tomorrow."
+       },
+       {
+        "description": "Prepare the mitigating controls document mapping each of the 14 SoD conflicts before the external audit",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: Yes, I'll prepare the mitigating controls document before the audit on the twenty-fifth."
+       },
+       {
+        "description": "Build out and test the EAM workflow configuration",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-24",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: That's in motion. I've got the approval routing done and the logging set up, I'm maybe seventy percent there, I just need to finish the notification step and test it. Should wrap it next week."
+       },
+       {
+        "description": "Schedule a penetration test with the external vendor",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-26",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll get the pen test scheduled by end of next week."
+       },
+       {
+        "description": "Tune down production authorization trace settings to prevent high log volume from filling disk",
+        "owner": null,
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Somebody needs to tune the trace settings down. But we never decided who. It's not screaming-urgent yet, but it's also just... unassigned, sitting there."
+       },
+       {
+        "description": "Run SoD conflict analysis for finance module roles",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: The analysis ran overnight, finished clean \u2014 I mean the run itself completed without errors, so the SoD conflict run is done."
+       },
+       {
+        "description": "Build and unit-test twelve finance composite roles",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-15",
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Daniel: Finished building and unit-testing all twelve composite roles on Monday, they're sitting in QA right now"
+       },
+       {
+        "description": "User access review for legacy system decommission",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Daniel: You and I closed the legacy access review out two weeks ago \u2014 we disabled all the dormant accounts and documented every one of them. It's done, it's been done for a while."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "data-migration-workshop-04.txt",
+      "predicted": [
+       {
+        "description": "Rerun material master validation against the cleaned source file",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Priya: What's left is I need to rerun the validation against the cleaned file, and that \u2014 honestly that's chugging away right now as we speak, the job's running in the background. It'll land Monday, probably Monday morning."
+       },
+       {
+        "description": "Finalize customer master mapping",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-20",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: So I'll get on the final mapping today and I'm confident I can have it finalized by Friday. So it hasn't started, but Friday, put my name on it."
+       },
+       {
+        "description": "Request business approval for the 18-hour downtime window",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-06-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: I'll go request business approval for the eighteen-hour window \u2014 and I want that by, let's say next Wednesday, before we reconvene. I haven't even opened that conversation yet though, so that's a brand new one for me."
+       },
+       {
+        "description": "Data reconciliation report template for post-load validation",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Priya: data reconciliation report template, for the post-load validation. So... this one's awkward. I started it, I got maybe halfway, and then the material master cleanup ate my whole week and I had to drop it."
+       },
+       {
+        "description": "Write up rollback steps into the cutover runbook",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll write up the rollback section into the runbook. I can have that by Thursday."
+       },
+       {
+        "description": "Clean source extract for material master",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Priya: I went in and cleaned the source extract. That's behind me now, I finished scrubbing it yesterday afternoon, late, like six-ish. So the source is good."
+       },
+       {
+        "description": "Run timed trial load for big-bang migration",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: we did the timed trial load \u2014 that's done, we ran the full timed trial Saturday, end to end, real volumes."
+       },
+       {
+        "description": "Write and test fallback rollback script on QA",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: the fallback rollback script. That's done, I wrote it and I tested it on QA this week, ran the full rollback against the QA system and it behaved itself, so I'm calling that one finished and validated."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     }
+    ]
+   },
+   "models": {
+    "agent": "gemini-3.5-flash"
+   },
+   "validation_failures": {
+    "agent": 1
+   },
+   "api_failures": {
+    "agent": 0
+   }
+  },
+  {
+   "conditions": {
+    "agent": [
+     {
+      "transcript_file": "finance-workshop-01.txt",
+      "predicted": [
+       {
+        "description": "Compile and send new cost center codes for APAC cost center mapping",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll get the cost center codes over to you by Wednesday, Daniel. Full disclosure, I haven't actually compiled them yet, they're scattered across a couple of spreadsheets. I'll pull them together tomorrow and send them, so that's a fresh one on my plate."
+       },
+       {
+        "description": "Complete APAC cost center hierarchy mapping",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-19",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: APAC is the one still in motion. I'm working through it right now, I'd say I'm about two-thirds of the way through the APAC cost centers."
+       },
+       {
+        "description": "Loop in the banking team and bring them onto next week's call to confirm statement format",
+        "owner": "Aisha Rahman",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: I'll take that \u2014 I'll loop the banking team in and get them onto next week's call. I haven't reached out to them yet, so chalk that up as new on me."
+       },
+       {
+        "description": "Update bank statement format parser config fix",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: I've started tinkering, I've got a candidate fix half-built in the dev system already. But I can't finish it or test it until the banking team confirms the format, so it's mid-flight but stalled on that dependency."
+       },
+       {
+        "description": "Clear eleven duplicate postings identified in open items report",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: What I have not done yet is the second pass to actually clear them out of the system. That's still ahead of me. I'll do the clearing before the dress rehearsal \u2014 that's next Thursday, right? Yeah, before Thursday. So review's done, the clearing is the new to-do."
+       },
+       {
+        "description": "Send change request for additional consulting days to Wei Lin's office",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-18",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I just need to actually send it over to Wei Lin's office for approval. I'll send it Thursday. So the drafting's done, the sending's the pending bit."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "logistics-workshop-02.txt",
+      "predicted": [
+       {
+        "description": "Chase barcode scanner vendor to get a firm patch date",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-19",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll chase the vendor and get a firm patch date \u2014 I'll aim to have that by Friday."
+       },
+       {
+        "description": "Reconfigure test environment for degraded-mode manual entry",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-17",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: I'm reconfiguring the test environment to do manual entry instead of scanning. It's underway, I'm maybe a third of the way in, and I should have the environment ready by tomorrow."
+       },
+       {
+        "description": "Draft a one-page risk note on the scanner delay for the steering committee",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-23",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll write the risk note and send it before Tuesday. Haven't touched it yet \u2014 I'll get to it after I finish the environment rebuild, so it's not started but it's on the list."
+       },
+       {
+        "description": "Analyze WM interface to TMS timeout logs and report back",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-22",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: I pulled the logs this morning \u2014 so the log extraction's done, I've got them \u2014 but I haven't actually gone through them yet. I'll dig in, figure out whether it's a timeout config on our side or something on the TMS side, and report back by Monday."
+       },
+       {
+        "description": "Update cutover runbook to reflect degraded-mode plan",
+        "owner": "Aisha Rahman",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: Fine, I'll take the runbook update myself. I'll fold in the degraded-mode steps."
+       },
+       {
+        "description": "Label printer integration",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: Last thing, actually \u2014 the label printer integration. I want to be honest about where it is. I started it, but when the scanner issue blew up I had to drop it mid-stream. So it's partially configured, sitting at maybe forty percent, definitely in motion but paused."
+       },
+       {
+        "description": "Barcode scanner firmware compatibility test matrix",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: I ran the full compatibility test matrix \u2014 finished that yesterday \u2014 tested every transaction type against the current firmware build, and it's the firmware, full stop."
+       },
+       {
+        "description": "Goods movement mapping",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Daniel: Second thing \u2014 the goods movement mapping. That one's fully done, off the list. I finished mapping all the movement types last week, tested them in QA, signed off, the whole thing."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "security-workshop-03.txt",
+      "predicted": [
+       {
+        "description": "Write up and circulate the SoD conflict report based on the completed conflict analysis",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-18",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I haven't done yet \u2014 I need to package those fourteen into a readable conflict report, because right now it's just raw tool output, nobody can action that. I'll write that up and circulate it to the team by tomorrow."
+       },
+       {
+        "description": "Prepare mitigating controls document mapping each of the 14 SoD conflicts (blocked on Marcus's report)",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: Yes, I'll prepare the mitigating controls document before the audit on the twenty-fifth. I do want to flag the dependency though, loudly \u2014 I can't really start in earnest until Marcus's report actually lands tomorrow. So as of right now it's not started, and it's sitting square on the critical path."
+       },
+       {
+        "description": "Build out emergency access management (EAM) workflow configuration ( approval routing, logging, notification step, and testing)",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: Good, because \u2014 funny timing \u2014 on that exact workflow, I've actually been building out the EAM workflow configuration. That's in motion. I've got the approval routing done and the logging set up, I'm maybe seventy percent there, I just need to finish the notification step and test it. Should wrap it next week."
+       },
+       {
+        "description": "Run SoD conflict analysis for finance module roles",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: It did, yeah. The analysis ran overnight, finished clean \u2014 I mean the run itself completed without errors, so the SoD conflict run is done. It flagged fourteen segregation-of-duties conflicts."
+       },
+       {
+        "description": "Build and unit-test finance composite roles",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Daniel: The finance composite roles are done. Finished building and unit-testing all twelve composite roles on Monday, they're sitting in QA right now, ready for the conflict mapping once we get there. So that whole piece is complete, you can close it."
+       },
+       {
+        "description": "Schedule penetration test with external vendor",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-26",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Yeah, will do, I'll get the pen test scheduled by end of next week. Haven't contacted the vendor yet, so fresh action."
+       },
+       {
+        "description": "Tune production authorization trace settings down to prevent disk log volume issues",
+        "owner": null,
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Oh \u2014 one issue that's still floating, nobody owns it. The production authorization trace is generating way too much log volume, it's actually starting to fill the disk. Somebody needs to tune the trace settings down. But we never decided who. It's not screaming-urgent yet, but it's also just... unassigned, sitting there."
+       },
+       {
+        "description": "User access review for legacy system decommission",
+        "owner": null,
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Daniel: That one's finished. You and I closed the legacy access review out two weeks ago \u2014 we disabled all the dormant accounts and documented every one of them. It's done, it's been done for a while."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "data-migration-workshop-04.txt",
+      "predicted": [
+       {
+        "description": "Material master source data cleanup",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Priya: The cleanup's behind us. What's left is I need to rerun the validation against the cleaned file"
+       },
+       {
+        "description": "Material master validation rerun against cleaned source extract",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-22",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Priya: I need to rerun the validation against the cleaned file, and that \u2014 honestly that's chugging away right now as we speak, the job's running in the background. It'll land Monday, probably Monday morning."
+       },
+       {
+        "description": "Customer master final mapping pass",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-19",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: So I'll get on the final mapping today and I'm confident I can have it finalized by Friday. So it hasn't started, but Friday, put my name on it."
+       },
+       {
+        "description": "Timed trial load for big-bang load",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: The trial itself is in the bag, that part's finished."
+       },
+       {
+        "description": "Request business approval for 18-hour downtime window",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-06-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: I'll go request business approval for the eighteen-hour window \u2014 and I want that by, let's say next Wednesday, before we reconvene. I haven't even opened that conversation yet though, so that's a brand new one for me."
+       },
+       {
+        "description": "Data reconciliation report template",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Priya: Yeah, the data reconciliation report template, for the post-load validation. So... this one's awkward. I started it, I got maybe halfway, and then the material master cleanup ate my whole week and I had to drop it."
+       },
+       {
+        "description": "Fallback rollback script creation and QA testing",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: One \u2014 the fallback rollback script. That's done, I wrote it and I tested it on QA this week, ran the full rollback against the QA system and it behaved itself, so I'm calling that one finished and validated."
+       },
+       {
+        "description": "Document rollback steps in the cutover runbook",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll take it. I'll write up the rollback section into the runbook. I can have that by Thursday."
+       },
+       {
+        "description": "Legacy freeze date confirmation and communication",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-20",
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Priya: It's locked. I confirmed it with the application owners on Monday \u2014 July twentieth, no movement. And I sent the note round, so it's not just confirmed, it's communicated. People have it."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     }
+    ]
+   },
+   "models": {
+    "agent": "gemini-3.5-flash"
+   },
+   "validation_failures": {
+    "agent": 0
+   },
+   "api_failures": {
+    "agent": 0
+   }
+  },
+  {
+   "conditions": {
+    "agent": [
+     {
+      "transcript_file": "finance-workshop-01.txt",
+      "predicted": [
+       {
+        "description": "Compile and send new cost center codes for APAC mapping to Daniel.",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: Yeah, sorry, I'm here now. Codes \u2014 I can do that. I'll get the cost center codes over to you by Wednesday, Daniel. Full disclosure, I haven't actually compiled them yet, they're scattered across a couple of spreadsheets. I'll pull them together tomorrow and send them, so that's a fresh one on my plate."
+       },
+       {
+        "description": "Complete APAC cost center mapping.",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-19",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: I can have APAC mapping wrapped by Friday. With one big caveat \u2014 I need the new cost center codes from Priya by Wednesday, otherwise Friday slips. The last third is literally blocked on those codes."
+       },
+       {
+        "description": "Loop the banking team in to confirm statement format for bank statement upload test.",
+        "owner": "Aisha Rahman",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: Right. So diagnosis behind us, the fix is blocked on the banking team. I'll take that \u2014 I'll loop the banking team in and get them onto next week's call. I haven't reached out to them yet, so chalk that up as new on me."
+       },
+       {
+        "description": "Fix bank statement parser config.",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: And separately \u2014 the actual parser config fix. I want to be clear it's not at zero. I've started tinkering, I've got a candidate fix half-built in the dev system already. But I can't finish it or test it until the banking team confirms the format, so it's mid-flight but stalled on that dependency. Don't write it down as not-started, I've put real hours in."
+       },
+       {
+        "description": "Clear eleven duplicate postings from system review.",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-18",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: Eleven. What I have not done yet is the second pass to actually clear them out of the system. That's still ahead of me. I'll do the clearing before the dress rehearsal \u2014 that's next Thursday, right? Yeah, before Thursday. So review's done, the clearing is the new to-do."
+       },
+       {
+        "description": "Send draft change request for consulting days to Wei Lin's office.",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-18",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: Yes, briefly. The bank integration rework is honestly the main reason I'm putting in a change request for additional consulting days. I've drafted that request \u2014 the draft is finished, it's written up with the justification. I just need to actually send it over to Wei Lin's office for approval. I'll send it Thursday. So the drafting's done, the sending's the pending bit."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "logistics-workshop-02.txt",
+      "predicted": [
+       {
+        "description": "Chase scanner vendor to get a firm patch release date",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-19",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll chase the vendor and get a firm patch date \u2014 I'll aim to have that by Friday. I haven't called them today yet, so that's a new one on me."
+       },
+       {
+        "description": "Reconfigure test environment to support manual entry degraded mode",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-17",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: I'm reconfiguring the test environment to do manual entry instead of scanning. It's underway, I'm maybe a third of the way in, and I should have the environment ready by tomorrow."
+       },
+       {
+        "description": "Draft one-page risk note on scanner delay for steering committee",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-22",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll write the risk note and send it before Tuesday. Haven't touched it yet \u2014 I'll get to it after I finish the environment rebuild, so it's not started but it's on the list."
+       },
+       {
+        "description": "Investigate WM-TMS interface timeout errors and logs",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-22",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: I pulled the logs this morning \u2014 so the log extraction's done, I've got them \u2014 but I haven't actually gone through them yet. I'll dig in, figure out whether it's a timeout config on our side or something on the TMS side, and report back by Monday."
+       },
+       {
+        "description": "Goods movement mapping for all movement types",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Daniel: Second thing \u2014 the goods movement mapping. That one's fully done, off the list. I finished mapping all the movement types last week, tested them in QA, signed off, the whole thing."
+       },
+       {
+        "description": "Update cutover runbook to reflect degraded-mode plan",
+        "owner": "Aisha Rahman",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: Fine, I'll take the runbook update myself. I'll fold in the degraded-mode steps. New one on me."
+       },
+       {
+        "description": "Label printer integration configuration",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: So it's partially configured, sitting at maybe forty percent, definitely in motion but paused. I'll resume it once the timeout investigation is closed out, not before."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "security-workshop-03.txt",
+      "predicted": [
+       {
+        "description": "Write up and circulate the SoD conflict analysis report",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-18",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll write that up and circulate it to the team by tomorrow."
+       },
+       {
+        "description": "Prepare mitigating controls document mapping each of the fourteen SoD conflicts",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: Yes, I'll prepare the mitigating controls document before the audit on the twenty-fifth."
+       },
+       {
+        "description": "Build out EAM workflow configuration",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: Good, because \u2014 funny timing \u2014 on that exact workflow, I've actually been building out the EAM workflow configuration. That's in motion."
+       },
+       {
+        "description": "Run SoD conflict analysis for finance module roles",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: The analysis ran overnight, finished clean \u2014 I mean the run itself completed without errors, so the SoD conflict run is done."
+       },
+       {
+        "description": "Build and unit-test twelve finance composite roles",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Daniel: The finance composite roles are done. Finished building and unit-testing all twelve composite roles on Monday, they're sitting in QA right now, ready for the conflict mapping once we get there. So that whole piece is complete, you can close it."
+       },
+       {
+        "description": "Tune production authorization trace settings down to manage log volume",
+        "owner": null,
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: Hmm. Let's park the ownership question for now but keep it on the board as an unassigned to-do, so it doesn't vanish."
+       },
+       {
+        "description": "Schedule penetration test with external vendor",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-26",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Yeah, will do, I'll get the pen test scheduled by end of next week."
+       },
+       {
+        "description": "User access review for legacy system decommission",
+        "owner": null,
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Daniel: That one's finished. You and I closed the legacy access review out two weeks ago \u2014 we disabled all the dormant accounts and documented every one of them. It's done, it's been done for a while."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "data-migration-workshop-04.txt",
+      "predicted": [
+       {
+        "description": "Material Master Data Source Cleanup",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Priya: I went in and cleaned the source extract. That's behind me now, I finished scrubbing it yesterday afternoon, late, like six-ish. So the source is good."
+       },
+       {
+        "description": "Material Master Rerun Validation Job",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-22",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Priya: What's left is I need to rerun the validation against the cleaned file, and that \u2014 honestly that's chugging away right now as we speak, the job's running in the background. It'll land Monday, probably Monday morning."
+       },
+       {
+        "description": "Customer Master Final Mapping Pass",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-19",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: So I'll get on the final mapping today and I'm confident I can have it finalized by Friday. So it hasn't started, but Friday, put my name on it."
+       },
+       {
+        "description": "Big-bang Cutover Timed Trial Load",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: The trial itself is in the bag, that part's finished."
+       },
+       {
+        "description": "Request Business Approval for 18-Hour Downtime Window",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-06-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: I'll own the sign-off. I'll go request business approval for the eighteen-hour window \u2014 and I want that by, let's say next Wednesday, before we reconvene. I haven't even opened that conversation yet though, so that's a brand new one for me."
+       },
+       {
+        "description": "Data Reconciliation Report Template",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-22",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Priya: I started it, I got maybe halfway, and then the material master cleanup ate my whole week and I had to drop it."
+       },
+       {
+        "description": "Fallback Rollback Script Creation and QA Testing",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: the fallback rollback script. That's done, I wrote it and I tested it on QA this week, ran the full rollback against the QA system and it behaved itself, so I'm calling that one finished and validated."
+       },
+       {
+        "description": "Write Rollback Section into Cutover Runbook",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll take it. I'll write up the rollback section into the runbook. I can have that by Thursday."
+       },
+       {
+        "description": "Confirm and Communicate Legacy Freeze Date",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-20",
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Priya: It's locked. I confirmed it with the application owners on Monday \u2014 July twentieth, no movement. And I sent the note round, so it's not just confirmed, it's communicated. People have it."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     }
+    ]
+   },
+   "models": {
+    "agent": "gemini-3.5-flash"
+   },
+   "validation_failures": {
+    "agent": 0
+   },
+   "api_failures": {
+    "agent": 0
+   }
+  },
+  {
+   "conditions": {
+    "agent": [
+     {
+      "transcript_file": "finance-workshop-01.txt",
+      "predicted": [
+       {
+        "description": "Compile and send the new cost center codes to Daniel to unblock APAC cost center mapping.",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll get the cost center codes over to you by Wednesday, Daniel."
+       },
+       {
+        "description": "Complete the APAC cost center mapping once the new cost center codes are received.",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-19",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: I can have APAC mapping wrapped by Friday. With one big caveat \u2014 I need the new cost center codes from Priya by Wednesday, otherwise Friday slips."
+       },
+       {
+        "description": "Loop in the banking team for next week's call to confirm the real statement format for MT940 multi-currency files.",
+        "owner": "Aisha Rahman",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: I'll take that \u2014 I'll loop the banking team in and get them onto next week's call."
+       },
+       {
+        "description": "Fix MT940 format parser configuration for multi-currency bank statements.",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: I've started tinkering, I've got a candidate fix half-built in the dev system already. But I can't finish it or test it until the banking team confirms the format, so it's mid-flight but stalled on that dependency."
+       },
+       {
+        "description": "Clear the eleven duplicate postings identified in the open items report.",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll do the clearing before the dress rehearsal \u2014 that's next Thursday, right? Yeah, before Thursday."
+       },
+       {
+        "description": "Send the drafted change request for additional consulting days to Wei Lin's office for approval.",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-18",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I just need to actually send it over to Wei Lin's office for approval. I'll send it Thursday."
+       }
+      ],
+      "questions": [],
+      "steps": 5,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "logistics-workshop-02.txt",
+      "predicted": [
+       {
+        "description": "Chase barcode scanner vendor for a firm patch release date",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-19",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll chase the vendor and get a firm patch date \u2014 I'll aim to have that by Friday."
+       },
+       {
+        "description": "Reconfigure test environment for degraded mode (manual entry instead of scanning)",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: I'm reconfiguring the test environment to do manual entry instead of scanning. It's underway, I'm maybe a third of the way in, and I should have the environment ready by tomorrow."
+       },
+       {
+        "description": "Draft one-page risk note on scanner delay for the steering committee",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-23",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll write the risk note and send it before Tuesday."
+       },
+       {
+        "description": "Investigate WM-TMS interface transaction timeout errors in logs and report back",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-22",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll dig in, figure out whether it's a timeout config on our side or something on the TMS side, and report back by Monday."
+       },
+       {
+        "description": "Update cutover runbook to include degraded-mode plan",
+        "owner": "Aisha Rahman",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: Fine, I'll take the runbook update myself. I'll fold in the degraded-mode steps."
+       },
+       {
+        "description": "Configure label printer integration",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: I started it, but when the scanner issue blew up I had to drop it mid-stream. So it's partially configured, sitting at maybe forty percent, definitely in motion but paused."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "security-workshop-03.txt",
+      "predicted": [
+       {
+        "description": "Write up and circulate the SoD conflict analysis report",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-18",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: What I haven't done yet \u2014 I need to package those fourteen into a readable conflict report, because right now it's just raw tool output, nobody can action that. I'll write that up and circulate it to the team by tomorrow."
+       },
+       {
+        "description": "Prepare mitigating controls document for SoD conflicts",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: Yes, I'll prepare the mitigating controls document before the audit on the twenty-fifth."
+       },
+       {
+        "description": "Build out EAM workflow configuration",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: Good, because \u2014 funny timing \u2014 on that exact workflow, I've actually been building out the EAM workflow configuration. That's in motion. I've got the approval routing done and the logging set up, I'm maybe seventy percent there, I just need to finish the notification step and test it. Should wrap it next week."
+       },
+       {
+        "description": "Tune production authorization trace settings to decrease log volume",
+        "owner": null,
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Oh \u2014 one issue that's still floating, nobody owns it. The production authorization trace is generating way too much log volume, it's actually starting to fill the disk. Somebody needs to tune the trace settings down. But we never decided who."
+       },
+       {
+        "description": "Schedule penetration test with external vendor",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-26",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: Yeah, will do, I'll get the pen test scheduled by end of next week. Haven't contacted the vendor yet, so fresh action."
+       },
+       {
+        "description": "Run SoD conflict analysis for finance module",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: It did, yeah. The analysis ran overnight, finished clean \u2014 I mean the run itself completed without errors, so the SoD conflict run is done. It flagged fourteen segregation-of-duties conflicts."
+       },
+       {
+        "description": "Build and unit-test finance composite roles",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Daniel: The finance composite roles are done. Finished building and unit-testing all twelve composite roles on Monday, they're sitting in QA right now, ready for the conflict mapping once we get there. So that whole piece is complete, you can close it."
+       },
+       {
+        "description": "User access review and dormant account disabling for legacy system decommission",
+        "owner": null,
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Daniel: That one's finished. You and I closed the legacy access review out two weeks ago \u2014 we disabled all the dormant accounts and documented every one of them. It's done, it's been done for a while."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "data-migration-workshop-04.txt",
+      "predicted": [
+       {
+        "description": "Rerun material master validation against the cleaned file",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Priya: What's left is I need to rerun the validation against the cleaned file, and that \u2014 honestly that's chugging away right now as we speak, the job's running in the background. It'll land Monday, probably Monday morning."
+       },
+       {
+        "description": "Finalize customer master mapping",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-19",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: So I'll get on the final mapping today and I'm confident I can have it finalized by Friday. So it hasn't started, but Friday, put my name on it."
+       },
+       {
+        "description": "Request business approval for the 18-hour downtime window",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-06-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: I'll go request business approval for the eighteen-hour window \u2014 and I want that by, let's say next Wednesday, before we reconvene. I haven't even opened that conversation yet though, so that's a brand new one for me."
+       },
+       {
+        "description": "Build data reconciliation report template",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Priya: Yeah, the data reconciliation report template, for the post-load validation. So... this one's awkward. I started it, I got maybe halfway, and then the material master cleanup ate my whole week and I had to drop it."
+       },
+       {
+        "description": "Write rollback section into cutover runbook",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll take it. I'll write up the rollback section into the runbook. I can have that by Thursday."
+       },
+       {
+        "description": "Clean source extract for material master",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Priya: the point is I went in and cleaned the source extract. That's behind me now, I finished scrubbing it yesterday afternoon, late, like six-ish. So the source is good."
+       },
+       {
+        "description": "Run full timed trial load for big-bang load",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: we did the timed trial load \u2014 that's done, we ran the full timed trial Saturday, end to end, real volumes."
+       },
+       {
+        "description": "Write and test fallback rollback script on QA",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: the fallback rollback script. That's done, I wrote it and I tested it on QA this week, ran the full rollback against the QA system and it behaved itself, so I'm calling that one finished and validated."
+       },
+       {
+        "description": "Confirm legacy freeze date with application owners and communicate",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Priya: It's locked. I confirmed it with the application owners on Monday \u2014 July twentieth, no movement. And I sent the note round, so it's not just confirmed, it's communicated. People have it."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     }
+    ]
+   },
+   "models": {
+    "agent": "gemini-3.5-flash"
+   },
+   "validation_failures": {
+    "agent": 0
+   },
+   "api_failures": {
+    "agent": 0
+   }
+  },
+  {
+   "conditions": {
+    "agent": [
+     {
+      "transcript_file": "finance-workshop-01.txt",
+      "predicted": [
+       {
+        "description": "Compile and send new cost center codes for APAC mapping",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-17",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: I'll get the cost center codes over to you by Wednesday, Daniel. Full disclosure, I haven't actually compiled them yet, they're scattered across a couple of spreadsheets. I'll pull them together tomorrow and send them, so that's a fresh one on my plate."
+       },
+       {
+        "description": "Complete APAC cost center hierarchy mapping",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-19",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: I can have APAC mapping wrapped by Friday. With one big caveat \u2014 I need the new cost center codes from Priya by Wednesday, otherwise Friday slips. The last third is literally blocked on those codes."
+       },
+       {
+        "description": "EMEA cost center hierarchy mapping",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Daniel: EMEA \u2014 that's behind us. I closed it out Tuesday, validated the whole thing against the org chart, signed it off, it's clean."
+       },
+       {
+        "description": "Investigate root cause of bank statement upload test failures",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Daniel: That diagnosis is finished, I know exactly what it is: it's a delimiter issue in the MT940 file, the multi-currency lines use a separator the parser doesn't expect. So root cause, that investigation's done and dusted."
+       },
+       {
+        "description": "Loop banking team into next week's call to confirm MT940 statement format",
+        "owner": "Aisha Rahman",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: I'll take that \u2014 I'll loop the banking team in and get them onto next week's call. I haven't reached out to them yet, so chalk that up as new on me."
+       },
+       {
+        "description": "Fix bank statement format parser configuration",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: I've started tinkering, I've got a candidate fix half-built in the dev system already. But I can't finish it or test it until the banking team confirms the format, so it's mid-flight but stalled on that dependency."
+       },
+       {
+        "description": "Review open items report and flag duplicate postings",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Priya: So I went through it this morning \u2014 and I mean properly, I did the full review of the open items report and flagged all the duplicates. That review's finished."
+       },
+       {
+        "description": "Clear eleven duplicate postings from the system before dress rehearsal",
+        "owner": "Priya Nair",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: What I have not done yet is the second pass to actually clear them out of the system. That's still ahead of me. I'll do the clearing before the dress rehearsal \u2014 that's next Thursday, right? Yeah, before Thursday. So review's done, the clearing is the new to-do."
+       },
+       {
+        "description": "Draft change request for additional consulting days",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Daniel: I've drafted that request \u2014 the draft is finished, it's written up with the justification."
+       },
+       {
+        "description": "Send change request for additional consulting days to Wei Lin's office",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-18",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I just need to actually send it over to Wei Lin's office for approval. I'll send it Thursday. So the drafting's done, the sending's the pending bit."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "logistics-workshop-02.txt",
+      "predicted": [
+       {
+        "description": "Chase vendor to get a firm scanner patch date",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-19",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll chase the vendor and get a firm patch date \u2014 I'll aim to have that by Friday."
+       },
+       {
+        "description": "Reconfigure test environment for degraded mode manual entry",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-17",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: I'm reconfiguring the test environment to do manual entry instead of scanning. It's underway, I'm maybe a third of the way in, and I should have the environment ready by tomorrow."
+       },
+       {
+        "description": "Draft one-page risk note on scanner delay for steering committee",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-23",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I'll write the risk note and send it before Tuesday. Haven't touched it yet \u2014 I'll get to it after I finish the environment rebuild, so it's not started but it's on the list."
+       },
+       {
+        "description": "Investigate WM interface to TMS timeout errors",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-22",
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: I pulled the logs this morning \u2014 so the log extraction's done, I've got them \u2014 but I haven't actually gone through them yet. I'll dig in, figure out whether it's a timeout config on our side or something on the TMS side, and report back by Monday."
+       },
+       {
+        "description": "Update cutover runbook to reflect degraded-mode plan",
+        "owner": "Aisha Rahman",
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: Fine, I'll take the runbook update myself. I'll fold in the degraded-mode steps."
+       },
+       {
+        "description": "Label printer integration",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Daniel: I started it, but when the scanner issue blew up I had to drop it mid-stream. So it's partially configured, sitting at maybe forty percent, definitely in motion but paused."
+       },
+       {
+        "description": "Barcode scanner firmware compatibility test matrix",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: I ran the full compatibility test matrix \u2014 finished that yesterday \u2014 tested every transaction type against the current firmware build, and it's the firmware, full stop."
+       },
+       {
+        "description": "Goods movement mapping",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Daniel: I finished mapping all the movement types last week, tested them in QA, signed off, the whole thing."
+       }
+      ],
+      "questions": [],
+      "steps": 3,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "security-workshop-03.txt",
+      "predicted": [
+       {
+        "description": "Package segregation-of-duties conflicts into a readable conflict report and circulate to team",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-18",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: I need to package those fourteen into a readable conflict report, because right now it's just raw tool output, nobody can action that. I'll write that up and circulate it to the team by tomorrow."
+       },
+       {
+        "description": "Prepare mitigating controls document mapping each conflict to a mitigating control before external audit",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: Yes, I'll prepare the mitigating controls document before the audit on the twenty-fifth. I do want to flag the dependency though, loudly \u2014 I can't really start in earnest until Marcus's report actually lands tomorrow. So as of right now it's not started"
+       },
+       {
+        "description": "Build EAM workflow configuration including approval routing, logging, and notification step",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Marcus: I've actually been building out the EAM workflow configuration. That's in motion. I've got the approval routing done and the logging set up, I'm maybe seventy percent there, I just need to finish the notification step and test it."
+       },
+       {
+        "description": "Tune production authorization trace settings down to reduce log volume",
+        "owner": null,
+        "deadline": null,
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Marcus: The production authorization trace is generating way too much log volume, it's actually starting to fill the disk. Somebody needs to tune the trace settings down. But we never decided who."
+       },
+       {
+        "description": "Schedule penetration test with external vendor",
+        "owner": "Marcus Wong",
+        "deadline": "2026-06-26",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Priya: Marcus \u2014 different thing \u2014 can you schedule a penetration test with the external vendor? Ideally kicked off by end of next week.\n\nMarcus: Yeah, will do, I'll get the pen test scheduled by end of next week."
+       },
+       {
+        "description": "Run SoD conflict analysis for finance module roles",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: The analysis ran overnight, finished clean \u2014 I mean the run itself completed without errors, so the SoD conflict run is done."
+       },
+       {
+        "description": "Build and unit-test twelve finance composite roles",
+        "owner": "Daniel Tan",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Daniel: The finance composite roles are done. Finished building and unit-testing all twelve composite roles on Monday, they're sitting in QA right now"
+       },
+       {
+        "description": "User access review for legacy system decommission",
+        "owner": null,
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Daniel: You and I closed the legacy access review out two weeks ago \u2014 we disabled all the dormant accounts and documented every one of them. It's done"
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     },
+     {
+      "transcript_file": "data-migration-workshop-04.txt",
+      "predicted": [
+       {
+        "description": "Material master data validation rerun",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Priya: The cleanup's behind us. What's left is I need to rerun the validation against the cleaned file, and that \u2014 honestly that's chugging away right now as we speak, the job's running in the background. It'll land Monday, probably Monday morning."
+       },
+       {
+        "description": "Customer master mapping final pass",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-26",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: So I'll get on the final mapping today and I'm confident I can have it finalized by Friday. So it hasn't started, but Friday, put my name on it."
+       },
+       {
+        "description": "Request business approval for 18-hour downtime window",
+        "owner": "Aisha Rahman",
+        "deadline": "2026-06-24",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Aisha: I'll own the sign-off. I'll go request business approval for the eighteen-hour window \u2014 and I want that by, let's say next Wednesday, before we reconvene. I haven't even opened that conversation yet though, so that's a brand new one for me."
+       },
+       {
+        "description": "Data reconciliation report template for post-load validation",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "in_progress",
+        "confidence": null,
+        "source_decision": "Priya: the data reconciliation report template, for the post-load validation. So... this one's awkward. I started it, I got maybe halfway, and then the material master cleanup ate my whole week and I had to drop it."
+       },
+       {
+        "description": "Write rollback steps into cutover runbook",
+        "owner": "Daniel Tan",
+        "deadline": "2026-06-25",
+        "status": "todo",
+        "confidence": null,
+        "source_decision": "Daniel: I'll write up the rollback section into the runbook. I can have that by Thursday."
+       },
+       {
+        "description": "Material master source extract cleanup",
+        "owner": "Priya Nair",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Priya: the point is I went in and cleaned the source extract. That's behind me now, I finished scrubbing it yesterday afternoon, late, like six-ish. So the source is good."
+       },
+       {
+        "description": "Full timed trial load",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: we ran the full timed trial Saturday, end to end, real volumes. And the numbers came back ugly, honestly. It's closer to sixteen hours of actual processing, and that's before you add any contingency."
+       },
+       {
+        "description": "Fallback rollback script development and QA testing",
+        "owner": "Marcus Wong",
+        "deadline": null,
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Marcus: the fallback rollback script. That's done, I wrote it and I tested it on QA this week, ran the full rollback against the QA system and it behaved itself, so I'm calling that one finished and validated."
+       },
+       {
+        "description": "Confirm and communicate legacy freeze date",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-20",
+        "status": "done",
+        "confidence": null,
+        "source_decision": "Priya: It's locked. I confirmed it with the application owners on Monday \u2014 July twentieth, no movement. And I sent the note round, so it's not just confirmed, it's communicated."
+       }
+      ],
+      "questions": [],
+      "steps": 2,
+      "model": "gemini-3.5-flash"
+     }
+    ]
+   },
+   "models": {
+    "agent": "gemini-3.5-flash"
+   },
+   "validation_failures": {
+    "agent": 0
+   },
+   "api_failures": {
+    "agent": 0
+   }
+  }
+ ]
+}

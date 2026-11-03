@@ -79,8 +79,19 @@ TOOLS = [
             "evidence": {"type": "string"}, "reason": {"type": "string"},
         }, "required": ["kind", "task_id", "after", "evidence", "reason"]}},
         "questions": {"type": "array", "items": {"type": "string"}},
+        "existing_items": {"type": "array", "description": "Candidate tasks already on the board.",
+                           "items": {"type": "object", "properties": {
+                               "item": {"type": "integer"}, "task_id": {"type": "integer"}},
+                               "required": ["item", "task_id"]}},
     }, ["summary", "proposals", "questions"]),
 ]
+
+# Sent with a meeting review when the parser has already extracted the meeting's tasks.
+CANDIDATES_REQUEST = (
+    "The parser has already extracted candidate_tasks from this new meeting. Each is added to the "
+    "board as a new task unless you list it in existing_items with the id of the existing task it "
+    "repeats or continues. Do not propose new tasks yourself. Propose updates to existing tasks that "
+    "this meeting changes, with evidence, whether or not a candidate covers them.")
 
 class RecoverableModelError(gemini.GeminiError):
     """Incomplete tool output that may be corrected within the existing call budget."""
@@ -180,9 +191,19 @@ def model_turn(contents: list, allowed: list[str], model: str, timeout: float,
 
 
 def validate_plan(raw: dict, transcript: str, tasks: list[dict], meeting_date: str,
-                  *, enforce_meeting_date=True, label_speakers=False) -> dict:
+                  *, enforce_meeting_date=True, label_speakers=False, candidates=None) -> dict:
     plan = ReviewPlan.model_validate(raw).model_dump(mode="json")
     by_id = {t["id"]: t for t in tasks}
+    if candidates is not None:
+        # The parser's candidates are the meeting's new tasks; the assistant only reconciles them.
+        plan["proposals"] = [p for p in plan["proposals"] if p["kind"] == "update"]
+        items = [e["item"] for e in plan["existing_items"]]
+        if len(set(items)) != len(items) or any(i >= len(candidates) for i in items):
+            raise ValueError("Each existing_items entry must name a different candidate_tasks index.")
+        if any(e["task_id"] not in by_id for e in plan["existing_items"]):
+            raise ValueError("existing_items must point at tasks on this board.")
+    else:
+        plan["existing_items"] = []
     seen = set()
     created = set()
     accepted = []
@@ -225,12 +246,17 @@ def validate_plan(raw: dict, transcript: str, tasks: list[dict], meeting_date: s
     return plan
 
 
-def run_review(payload: ReviewInput, board: dict, meetings: dict[int, dict]) -> dict:
+def run_review(payload: ReviewInput, board: dict, meetings: dict[int, dict], candidates=None) -> dict:
+    """Review a new meeting against the board. With `candidates` (the parser's tasks for this
+    meeting), the review reconciles them with existing tasks instead of proposing new ones."""
     model = os.getenv("GEMINI_MODEL") or gemini.DEFAULT_MODEL
-    contents = [{"role": "user", "parts": [{"text": json.dumps({
-        "new_meeting": payload.model_dump(mode="json"),
-        "request": "Compare this new meeting with the board and propose supported changes.",
-    })}]}]
+    request = {"new_meeting": payload.model_dump(mode="json"),
+               "request": "Compare this new meeting with the board and propose supported changes."}
+    if candidates is not None:
+        request["request"] = CANDIDATES_REQUEST
+        request["candidate_tasks"] = [{"item": i, **{k: c[k] for k in ("description", "owner", "deadline", "status")}}
+                                      for i, c in enumerate(candidates)]
+    contents = [{"role": "user", "parts": [{"text": json.dumps(request)}]}]
     trace = []
     board_read = False
     context_used = len(json.dumps(board)) + len(payload.transcript)
@@ -283,7 +309,7 @@ def run_review(payload: ReviewInput, board: dict, meetings: dict[int, dict]) -> 
                 else:
                     try:
                         plan = validate_plan(args, payload.transcript, board["tasks"], payload.meeting_date.isoformat(),
-                                             label_speakers=True)
+                                             label_speakers=True, candidates=candidates)
                     except (ValueError, ValidationError) as exc:
                         result = {"error": str(exc)[:1500], "instruction": "Correct the review and submit again."}
                         trace.append({"label": "Requested correction of an invalid suggestion", "tool": "validation"})

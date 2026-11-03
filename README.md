@@ -8,10 +8,13 @@ recordings for end-to-end processing.
 
 > ICT4011 Capstone Project.
 
-An opt-in **local project assistant preview** adds a floating chat for project questions,
-task-change suggestions and meeting follow-up reviews. Run `backend/.venv/bin/python scripts/agent_preview.py` from
-the repository root to try it on an isolated sample database with your current Gemini model.
-See [the preview guide](docs/agent-preview.md). It is disabled by default and does not deploy anything.
+A **meeting assistant** adds a floating chat for project questions and task-change suggestions,
+and reconciles each new meeting with the board: the parser still extracts the meeting's tasks, and
+the assistant keeps those already on the board from being added twice and proposes changes to
+existing tasks for approval. It is on in the deployed app (`render.yaml`) and off by default
+locally. See [the assistant guide](docs/agent-preview.md) and its
+[evaluation](docs/agent-evaluation.md). To try it on an isolated sample database, run
+`backend/.venv/bin/python scripts/agent_preview.py` from the repository root.
 
 To use the assistant with your regular development accounts and boards, set
 `ENABLE_MEETING_AGENT=true` in `backend/.env` and `NEXT_PUBLIC_MEETING_AGENT_PREVIEW=true`
@@ -165,8 +168,8 @@ that invite guessing, are limited per visitor (`backend/app/ratelimit.py`, using
 | Sign in | 10 per minute |
 | Request a password reset | 5 per hour |
 
-Agent chat/review reserves six calls and agent transcript parsing reserves seven calls from the
-shared AI allowance, covering their maximum tool loop and, for parsing, its summary. All text-parse
+Assistant chat reserves six calls from the shared AI allowance, a meeting review seven (the parser's
+extraction plus the assistant's maximum tool loop) and assistant transcript parsing eight, adding its summary. All text-parse
 entry points share the parse allowance.
 
 Everything else (viewing boards, editing tasks) is not limited, and the summary the original parser writes
@@ -359,6 +362,7 @@ uses the one the evaluation picked.
 | Task extraction | Gemini Flash, Claude Sonnet, Claude Haiku | **Gemini Flash** | Never significantly behind Claude Sonnet on F1, more precise, a tenth of the price; Claude Haiku sets 40-52% of deadlines a day late | [evaluation-report.md](docs/evaluation-report.md) |
 | Speech-to-text | Deepgram Nova-3, hosted Whisper large-v3 and large-v3-turbo, local Whisper | **Deepgram Nova-3** | Lowest word error rate on both AMI meetings (13.0% and 15.3%), and hosted, so it fits a small server | [asr-evaluation.md](docs/asr-evaluation.md) |
 | Subtask checklists | Gemini Flash, Claude Sonnet | **Gemini Flash** | Same quality (4.79 vs 4.82 and 4.87 vs 4.88 out of 5, no significant difference), a tenth of the price, one provider | [subtask-evaluation-report.md](docs/subtask-evaluation-report.md) |
+| Tasks from a meeting when the assistant is on | Meeting assistant, extraction parser | **Parser**; the assistant reconciles | The assistant was as precise but found fewer tasks: F1 0.875 vs 0.929 on the short set (p=0.089) and 0.651 vs 0.888 on the long set (p=0.0003) | [agent-evaluation.md](docs/agent-evaluation.md) |
 
 ### Task extraction
 

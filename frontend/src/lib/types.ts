@@ -165,8 +165,12 @@ export interface AgentProposal {
   task_id: number | null;
   before: AgentTaskFields | null;
   after: AgentTaskFields;
+  // An exact quote, except for a task the parser extracted, where it is the parser's source
+  // decision (possibly paraphrased, possibly empty).
   evidence: string;
   reason: string;
+  // Present only on tasks the parser extracted.
+  confidence?: number | null;
 }
 
 export type AgentMutation = "apply" | "undo" | "refresh";

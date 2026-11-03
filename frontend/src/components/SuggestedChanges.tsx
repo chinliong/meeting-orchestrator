@@ -19,7 +19,8 @@ export function ChangeDetails({ change }: { change: AgentProposal }) {
           <dd className="min-w-0 break-words text-slate-700">{change.before && <><span className="text-slate-400 line-through">{change.before[key] === null ? "Not set" : value(change.before[key], key)}</span><span className="mx-1.5 text-slate-400" aria-label="changes to">→</span></>}{change.after[key] === null ? "Not set" : value(change.after[key], key)}</dd>
         </div>)}
     </dl>
-    <details className="text-[11px] leading-relaxed text-slate-500"><summary className="cursor-pointer hover:text-brand">Why this change?</summary><blockquote className="mt-2 border-l-2 border-brand-100 pl-2">“{change.evidence}”</blockquote></details>
+    {/* A parser-extracted task carries its source decision, which may be paraphrased or empty. */}
+    {change.evidence && <details className="text-[11px] leading-relaxed text-slate-500"><summary className="cursor-pointer hover:text-brand">{change.confidence != null ? "Why this task?" : "Why this change?"}</summary><blockquote className="mt-2 border-l-2 border-brand-100 pl-2">{change.confidence != null ? change.evidence : `“${change.evidence}”`}</blockquote></details>}
   </div>;
 }
 
