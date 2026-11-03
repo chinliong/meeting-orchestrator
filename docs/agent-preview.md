@@ -35,8 +35,11 @@ The API listens at `127.0.0.1:8100`. Both listeners are restricted to this compu
 
 1. Use the existing **New meeting** card: enter the title/date, then paste a transcript or upload a recording.
 2. The meeting and new tasks save automatically. No confirmation opens when there are no updates to existing tasks.
-3. If existing tasks would change, **Suggested changes** shows only those updates. Uncheck anything unwanted,
-   then choose **Apply selected**. Closing the confirmation leaves existing tasks untouched; the meeting and new tasks stay saved.
+3. If existing tasks would change, **Suggested changes** shows those updates, ticked. Tasks the assistant
+   matched to ones already on the board are listed, unticked, under "tasks looked already on the board";
+   tick any that are really new. **Apply** applies what is ticked and dismisses the rest; with nothing
+   ticked the button reads **Dismiss all**. **Not now** leaves the suggestions waiting under Changes; the
+   meeting and new tasks stay saved either way.
 4. Open the blue assistant button for questions about saved meetings or current tasks. Try
    “What is Priya working on?” and then “Move that task's deadline to this Friday.”
 5. The board toolbar’s **Changes** menu shows an approval count and contains **Suggested changes** and **Recent changes**.
@@ -124,8 +127,10 @@ are the result and the agent is not called. Otherwise the agent receives them as
 `candidate_tasks`: it lists those that repeat or continue an existing task under `existing_items`, so
 they are not added again, and proposes updates to existing tasks. Any new task it proposes itself
 is ignored in a meeting review; the remaining candidates are added with their extraction score and
-source decision. Each candidate matched to an existing task is named in a note after the import, so a
-wrong match can be noticed and the task added by hand.
+source decision. Each candidate matched to an existing task is kept, unticked, as a possible duplicate
+in the pending review, so a wrong match can be added with one tick; adding one links it to the meeting
+and keeps its score and source. Possible duplicates do not count towards the Changes badge, and the
+review opens by itself only when it has suggested changes.
 
 The board is sent with the meeting, so no model call is spent fetching it. The meeting-review agent
 then has two tools: `read_meeting`, to retrieve an earlier meeting when it needs context, and
@@ -196,6 +201,7 @@ All endpoints are under `/api/v1/projects/{project_id}/agent` and require curren
 | `GET /reviews/{id}` | Retrieve the proposal, source, activity and apply receipt |
 | `POST /reviews/{id}/apply` | Apply the selected integer `proposal_ids` from the stored draft |
 | `POST /reviews/{id}/refresh` | Recheck a draft against current tasks without importing another meeting or creating tasks |
+| `POST /reviews/{id}/dismiss` | Turn down every suggestion in a draft; nothing on the board changes, and it is listed as dismissed |
 | `POST /reviews/{id}/undo` | Reverse that batch if its board and meeting have not changed |
 
 Chat is limited by `RATE_LIMIT_AGENT_CHAT` (default 30/hour). Text-parse entry points and assistant recordings

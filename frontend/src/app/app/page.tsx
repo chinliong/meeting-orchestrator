@@ -712,7 +712,8 @@ export default function DashboardPage() {
       reloadTasksRef.current();
       setSummaryShownFor(result.meeting_id);
       summaries.waitForSummary(result.meeting_id, workspaceTokenFor(selectedProject));
-      if (result.review) setMeetingLaunch({ id: Date.now(), projectId, review: result.review });
+      // Open the dialog for suggested changes only; possible duplicates wait under Changes.
+      if (result.review?.proposals.some(p => !p.possible_duplicate)) setMeetingLaunch({ id: Date.now(), projectId, review: result.review });
       return result.questions;
     }
     const meeting: Meeting = await withDuplicateCheck(checkDuplicate =>
@@ -779,7 +780,8 @@ export default function DashboardPage() {
       try {
         const result = await api.getRecordingAssistantResult(projectId, meeting.id, boardToken);
         if (assistantScopeRef.current !== scope) return;
-        if (result.review) setMeetingLaunch({ id: Date.now(), projectId, review: result.review });
+        // Open the dialog for suggested changes only; possible duplicates wait under Changes.
+        if (result.review?.proposals.some(p => !p.possible_duplicate)) setMeetingLaunch({ id: Date.now(), projectId, review: result.review });
         return result.questions;
       } catch {
         // The recording is already saved: don't leave the upload ready to submit again.

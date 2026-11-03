@@ -371,8 +371,9 @@ and validation are described in [agent-preview.md](agent-preview.md).
 | `POST /reviews` | Generate a draft review of a meeting without importing it |
 | `GET /reviews` | `view=pending` (drafts awaiting approval) or `view=history` (applied and undone changes) |
 | `GET /reviews/{id}` | One review: its proposals, source and apply receipt |
-| `POST /reviews/{id}/apply` | Apply the chosen `proposal_ids`; refuses targets edited since the draft was made |
+| `POST /reviews/{id}/apply` | Apply the chosen `proposal_ids`, dismissing the rest; refuses targets edited since the draft was made |
 | `POST /reviews/{id}/refresh` | Recheck a draft against the current board |
+| `POST /reviews/{id}/dismiss` | Turn down every suggestion in a draft without changing the board |
 | `POST /reviews/{id}/undo` | Reverse an applied review if its tasks have not changed since |
 
 ## Internal: daily reminder trigger

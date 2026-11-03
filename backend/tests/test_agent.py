@@ -376,6 +376,10 @@ def test_parse_saves_new_work_but_requires_confirmation_for_updates(client, proj
         assert task.status == TaskStatus.IN_PROGRESS
         assert db_session.query(Meeting).count() == 1
         assert db_session.query(Task).count() == 1 + expected_new
+    elif kind == "matched":
+        # The matched task waits, unticked, as a possible duplicate rather than being dropped.
+        review = data["review"]
+        assert [(p["kind"], p["possible_duplicate"], p["duplicate_of"]["id"]) for p in review["proposals"]] == [("create", True, task.id)]
     else:
         assert data["review"] is None
     # A retry cannot duplicate the imported meeting or its new tasks.
@@ -1077,16 +1081,65 @@ def test_parser_failure_saves_nothing(client, project, task, enabled, monkeypatc
     assert db_session.query(Task).count() == 1
 
 
-def test_matched_candidates_are_named_in_a_note(client, project, task, enabled, monkeypatch, db_session):
+def import_with_match(client, project, task, monkeypatch, updates=False):
+    """Import TRANSCRIPT with the parser's one candidate matched to `task` (and, optionally, an update)."""
     plan = plan_for(task.id)
-    plan["proposals"] = []
+    plan["proposals"] = plan["proposals"][:1] if updates else []
     plan["existing_items"] = [{"item": 0, "task_id": task.id}]
     fake_model(monkeypatch, plan)
     response = parse_with_assistant(client, project)
     assert response.status_code == 201, response.text
-    assert response.json()["new_task_count"] == 0
-    assert any("“Write the release notes” is already on the board as “Finish the landing page design”" in q
-               for q in response.json()["questions"])
+    return response.json()
+
+
+def test_matched_candidate_waits_as_an_unticked_possible_duplicate(client, project, task, enabled, monkeypatch, db_session):
+    data = import_with_match(client, project, task, monkeypatch)
+    assert data["new_task_count"] == 0
+    assert any("already on the board" in q and "Changes" in q for q in data["questions"])
+    item = data["review"]["proposals"][0]
+    assert item["possible_duplicate"] and item["duplicate_of"]["description"] == "Finish the landing page design"
+    assert item["id"] not in data["review"]["unavailable_proposal_ids"]  # resembling a task is expected here
+    # It does not count as a suggested change in the toolbar badge.
+    pending = client.get(f"/api/v1/projects/{project['id']}/agent/reviews?view=pending").json()
+    assert [(p["change_count"], p["possible_duplicates"]) for p in pending] == [(0, 1)]
+
+
+def test_adding_a_possible_duplicate_links_it_to_its_meeting_and_undo_keeps_the_meeting(
+        client, project, task, enabled, monkeypatch, db_session):
+    data = import_with_match(client, project, task, monkeypatch)
+    review, item = data["review"], data["review"]["proposals"][0]
+    applied = client.post(route(project, review, "/apply"), json={"proposal_ids": [item["id"]]})
+    assert applied.status_code == 200, applied.text
+    added = db_session.query(Task).filter(Task.id != task.id).one()
+    assert (added.description, added.meeting_id, added.confidence) == ("Write the release notes", data["meeting_id"], 0.9)
+    assert client.post(route(project, review, "/undo")).status_code == 200
+    assert db_session.query(Task).count() == 1
+    assert db_session.query(Meeting).count() == 1  # only the added task is removed
+
+
+def test_refresh_keeps_possible_duplicates(client, project, task, enabled, monkeypatch, db_session):
+    review = import_with_match(client, project, task, monkeypatch, updates=True)["review"]
+    fake_model(monkeypatch, plan_for(task.id))
+    refreshed = client.post(route(project, review, "/refresh"))
+    assert refreshed.status_code == 200, refreshed.text
+    kinds = sorted((p["kind"], bool(p.get("possible_duplicate"))) for p in refreshed.json()["proposals"])
+    assert kinds == [("create", True), ("update", False)]
+    assert len({p["id"] for p in refreshed.json()["proposals"]}) == 2
+
+
+def test_dismissing_resolves_a_draft_without_changing_the_board(client, project, task, enabled, monkeypatch, db_session):
+    review = import_with_match(client, project, task, monkeypatch, updates=True)["review"]
+    dismissed = client.post(route(project, review, "/dismiss"))
+    assert dismissed.status_code == 200, dismissed.text
+    assert dismissed.json()["status"] == "dismissed"
+    db_session.refresh(task)
+    assert task.status == TaskStatus.IN_PROGRESS and db_session.query(Task).count() == 1
+    assert client.get(f"/api/v1/projects/{project['id']}/agent/reviews?view=pending").json() == []
+    history = client.get(f"/api/v1/projects/{project['id']}/agent/reviews?view=history").json()
+    assert [h["status"] for h in history if h["id"] == review["id"]] == ["dismissed"]
+    assert client.post(route(project, review, "/dismiss")).status_code == 200  # repeating is harmless
+    assert client.post(route(project, review, "/apply"), json={"proposal_ids": [0]}).status_code == 409
+
 
 
 def test_empty_board_import_reserves_only_the_parser_and_summary(client, project, enabled, monkeypatch, agent_limits_on):

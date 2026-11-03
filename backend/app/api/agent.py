@@ -79,7 +79,7 @@ def stale_details(db, project_id, plan, source, tasks=None):
                 or not meeting.meeting_date or meeting.meeting_date.isoformat() != source["meeting_date"]):
             return "The source meeting was removed or changed. Ask the assistant for fresh suggestions.", [p["id"] for p in plan["proposals"]]
     unavailable = [p["id"] for p in plan["proposals"] if p["kind"] == "update" and target_changed(p, tasks)]
-    unavailable.extend(p["id"] for p in plan["proposals"] if p["kind"] == "create"
+    unavailable.extend(p["id"] for p in plan["proposals"] if p["kind"] == "create" and not p.get("possible_duplicate")
                        and agent_llm.likely_duplicate(p["after"]["description"], list(tasks.values())))
     return ("Some suggested tasks changed or already exist. Unavailable suggestions need refreshing; other suggestions can still be applied."
             if unavailable else None), unavailable
@@ -200,7 +200,7 @@ def list_reviews(project_id: int, view: Literal["all", "pending", "history"] = "
     if view == "pending":
         query = query.filter(AgentReview.status == "draft")
     elif view == "history":
-        query = query.filter(AgentReview.status.in_(["applied", "undone"]))
+        query = query.filter(AgentReview.status.in_(["applied", "undone", "dismissed"]))
     query = query.order_by(AgentReview.created_at.desc(), AgentReview.id.desc())
     rows = query.all() if view != "history" else query.limit(10).all()
     items = []
@@ -224,8 +224,10 @@ def list_reviews(project_id: int, view: Literal["all", "pending", "history"] = "
         # Chat changes share one generic title; name the first changed task instead.
         title = proposals[0]["after"]["description"] if mode == "chat" and proposals else json.loads(r.input_json)["title"]
         reason, _ = stale_details(db, project_id, plan, json.loads(r.input_json), tasks) if view == "pending" else (None, [])
+        duplicates = sum(1 for p in proposals if p.get("possible_duplicate"))
         items.append({"stale": bool(reason), "stale_reason": reason, "id": r.id, "mode": mode, "title": title, "status": r.status,
-                      "change_count": len(receipt["proposal_ids"]) if receipt else len(proposals),
+                      "change_count": len(receipt["proposal_ids"]) if receipt else len(proposals) - duplicates,
+                      "possible_duplicates": 0 if receipt else duplicates,
                       "created_at": r.created_at.isoformat() + "Z"})
     return items if view == "pending" else items[:10]
 
@@ -276,24 +278,26 @@ def with_candidates(plan, candidates, tasks=()):
     """Add the parser's candidates as new-task proposals, except those already on the board.
 
     They keep their extraction score and source decision, so the board treats them like any
-    parsed task: a score below the review threshold still marks the card "Check this". Each
-    candidate matched to an existing task is named in a note, so a wrong match can be noticed.
+    parsed task: a score below the review threshold still marks the card "Check this". A
+    candidate matched to an existing task is kept as an unticked possible duplicate, so a wrong
+    match can be added with one tick.
     """
     existing = {e["item"]: e["task_id"] for e in plan.get("existing_items", [])}
     by_id = {t["id"]: t for t in tasks}
     next_id = max((p["id"] for p in plan["proposals"]), default=-1) + 1
     for i, c in enumerate(candidates):
+        proposal = {"id": next_id, "kind": "create", "task_id": None, "before": None,
+                    "after": {k: c[k] for k in ("description", "owner", "deadline", "status")},
+                    "evidence": c.get("source_decision") or "", "reason": "Extracted from the meeting.",
+                    "confidence": c["confidence"]}
         if i in existing:
             match = by_id.get(existing[i])
-            if match:
-                plan["questions"].append(f'“{c["description"]}” is already on the board as “{match["description"]}”. '
-                                         "No extra copy was added.")
-            continue
-        plan["proposals"].append({
-            "id": next_id, "kind": "create", "task_id": None, "before": None,
-            "after": {k: c[k] for k in ("description", "owner", "deadline", "status")},
-            "evidence": c.get("source_decision") or "", "reason": "Extracted from the meeting.",
-            "confidence": c["confidence"]})
+            if match is None:
+                continue
+            # Matched to an existing task: kept as an unticked item, so a wrong match is one tick to fix.
+            proposal.update(possible_duplicate=True, reason=f"Looks like “{match['description']}”, already on the board.",
+                            duplicate_of={"id": match["id"], "description": match["description"]})
+        plan["proposals"].append(proposal)
         next_id += 1
     return plan
 
@@ -391,7 +395,7 @@ def apply_stored_review(db, project_id, review, proposal_ids, *, commit=True, re
     for p in proposals:
         if p["kind"] == "update" and target_changed(p, by_id):
             conflict(db, "A task you selected has changed. Ask the assistant for fresh suggestions for that task.")
-        if p["kind"] == "create" and agent_llm.likely_duplicate(p["after"]["description"], current):
+        if p["kind"] == "create" and not p.get("possible_duplicate") and agent_llm.likely_duplicate(p["after"]["description"], current):
             conflict(db, "A similar task was added while these suggestions were being prepared. Ask the assistant to check that task.")
     source = json.loads(review.input_json)
     meeting = None
@@ -417,7 +421,8 @@ def apply_stored_review(db, project_id, review, proposal_ids, *, commit=True, re
         if p["kind"] == "create":
             # Parser-extracted tasks keep their score. A task the assistant proposed from chat has
             # none, and stores none rather than a default 1.0 that would read as "100% confident".
-            task = Task(project_id=project_id, meeting_id=meeting.id if meeting else None,
+            task_meeting = meeting.id if meeting else plan.get("source_meeting_id")
+            task = Task(project_id=project_id, meeting_id=task_meeting,
                         confidence=p.get("confidence"), source_decision=p["evidence"] or None)
             db.add(task)
         else:
@@ -464,9 +469,11 @@ def finish_meeting_import(db, review, *, recording_id=None):
     db.query(Project).filter_by(id=project_id).with_for_update().first()
     current = board_snapshot(db, project_id, lock=True)
     by_id = {t["id"]: t for t in current}
-    creates, updates, questions = [], [], list(plan["questions"])
+    creates, updates, possible, questions = [], [], [], list(plan["questions"])
     for proposal in plan["proposals"]:
-        if proposal["kind"] == "update":
+        if proposal.get("possible_duplicate"):
+            possible.append(proposal)
+        elif proposal["kind"] == "update":
             if target_changed(proposal, by_id):
                 questions.append(f'“{proposal["after"]["description"]}” changed while parsing. Its update was withheld; ask the assistant to check it again.')
             else:
@@ -485,11 +492,11 @@ def finish_meeting_import(db, review, *, recording_id=None):
     imported = apply_stored_review(db, project_id, review, [p["id"] for p in creates], commit=False,
                                   recording_id=recording_id)
     pending = None
-    if updates:
+    if updates or possible:
         pending = AgentReview(id=str(uuid.uuid4()), project_id=project_id, status="draft",
                               expires_at=datetime.utcnow() + timedelta(hours=1),
                               input_json=review.input_json,
-                              plan_json=json.dumps({**plan, "mode": "meeting_updates", "proposals": updates,
+                              plan_json=json.dumps({**plan, "mode": "meeting_updates", "proposals": updates + possible,
                                                     "source_meeting_id": imported["receipt"]["meeting_id"]}),
                               baseline_hash=fingerprint(board_snapshot(db, project_id)))
         db.add(pending)
@@ -497,8 +504,12 @@ def finish_meeting_import(db, review, *, recording_id=None):
     db.commit()
     if pending:
         db.refresh(pending)
+    notes = list(plan["questions"])
+    if possible:
+        notes.append(f"{len(possible)} {'task looks' if len(possible) == 1 else 'tasks look'} already on the board, so "
+                     f"{'it was' if len(possible) == 1 else 'they were'} not added. Review under Changes to add any that are new.")
     return {"meeting_id": imported["receipt"]["meeting_id"], "new_task_count": len(creates), "saved_review": imported,
-            "review": output(pending) if pending else None, "questions": plan["questions"]}
+            "review": output(pending) if pending else None, "questions": notes}
 
 
 def parse_recording_with_assistant(db, meeting):
@@ -579,6 +590,9 @@ def refresh_review(request: Request, project_id: int, review_id: str,
             fresh = agent_llm.run_review(payload, board, meetings)
             # Refreshing a saved meeting never reimports work or changes additional tasks.
             fresh["proposals"] = [p for p in fresh["proposals"] if p["kind"] == "update" and p["task_id"] in allowed_ids]
+            next_id = max((p["id"] for p in fresh["proposals"]), default=-1) + 1
+            for offset, p in enumerate(q for q in plan["proposals"] if q.get("possible_duplicate")):
+                fresh["proposals"].append({**p, "id": next_id + offset})
             if allowed_ids - {task["id"] for task in tasks}:
                 fresh["questions"].append("A task from these suggested changes was removed. Use Add task if you want to recreate it.")
         else:
@@ -608,6 +622,24 @@ def refresh_review(request: Request, project_id: int, review_id: str,
     db.commit()
     db.refresh(review)
     return output(review, db)
+
+
+@router.post("/reviews/{review_id}/dismiss")
+def dismiss_review(project_id: int, review_id: str, user: Optional[User] = Depends(get_optional_user),
+                   x_workspace_token: Optional[str] = Header(None), db: Session = Depends(get_db)):
+    """Turn down every suggestion in a draft. Nothing on the board changes."""
+    review = load_review(db, project_id, review_id, user, x_workspace_token)
+    if review.status == "dismissed":
+        return output(review)
+    if review.status != "draft":
+        raise HTTPException(409, "These suggested changes have already been resolved.")
+    claimed = db.query(AgentReview).filter_by(id=review_id, status="draft").update(
+        {"status": "dismissed"}, synchronize_session=False)
+    if not claimed:
+        conflict(db, "These suggested changes were resolved elsewhere. Reopen them to see the result.")
+    db.commit()
+    db.refresh(review)
+    return output(review)
 
 
 @router.post("/reviews/{review_id}/undo")

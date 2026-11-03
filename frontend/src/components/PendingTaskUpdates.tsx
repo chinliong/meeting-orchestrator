@@ -72,7 +72,9 @@ export default function PendingTaskUpdates({ project, refreshKey, boardTasks, on
       {pending.length === 0 && !error && <p className="px-2 pb-3 pt-1 text-xs text-slate-400">Nothing awaiting approval.</p>}
       {pending.map(item => <button key={item.id} disabled={!!loadingId} onClick={() => void review(item.id)} className="flex w-full items-center gap-2 rounded-lg px-2 py-2.5 text-left hover:bg-slate-50 disabled:opacity-50">
         <span className="min-w-0 flex-1"><span className="block truncate text-xs font-medium text-slate-700">{item.title}</span>
-          <span className="mt-1 block text-[11px] text-slate-400">{item.change_count} change{item.change_count === 1 ? "" : "s"}{item.stale ? " · Refresh available" : ""}</span></span>
+          <span className="mt-1 block text-[11px] text-slate-400">{item.change_count || !item.possible_duplicates
+            ? `${item.change_count} change${item.change_count === 1 ? "" : "s"}`
+            : `${item.possible_duplicates} possibly already on the board`}{item.stale ? " · Refresh available" : ""}</span></span>
         <span className="text-slate-400" aria-hidden="true">›</span>
       </button>)}
       {error && <p role="alert" className="px-2 py-2 text-xs text-rose-700">{error} <button className="underline" onClick={() => setRetry(n => n + 1)}>Try again</button></p>}

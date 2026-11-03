@@ -171,6 +171,9 @@ export interface AgentProposal {
   reason: string;
   // Present only on tasks the parser extracted.
   confidence?: number | null;
+  // A task the assistant matched to one already on the board; unticked unless the user adds it.
+  possible_duplicate?: boolean;
+  duplicate_of?: { id: number; description: string };
 }
 
 export type AgentMutation = "apply" | "undo" | "refresh";
@@ -189,7 +192,7 @@ export interface AgentReview {
   stale_reason?: string | null;
   id: string;
   mode: "meeting" | "chat" | "meeting_updates";
-  status: "draft" | "applied" | "undone";
+  status: "draft" | "applied" | "undone" | "dismissed";
   created_at: string;
   expires_at: string | null;
   input: AgentReviewInput;
@@ -212,6 +215,8 @@ export interface AgentReviewListItem {
   title: string;
   status: AgentReview["status"];
   change_count: number;
+  /** Possible duplicates in a pending review; not counted as suggested changes. */
+  possible_duplicates?: number;
   created_at: string;
 }
 

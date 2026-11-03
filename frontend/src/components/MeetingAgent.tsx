@@ -14,11 +14,16 @@ const KIND: Record<AgentReview["mode"], string> = { meeting: "Meeting added", me
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 const countLabel = (mode: AgentReview["mode"], n: number) =>
   mode === "meeting" ? plural(n, "new task") : plural(n, "change");
+// Suggested changes start ticked; possible duplicates start unticked, since the assistant
+// believes they are already on the board.
+const defaultSelection = (review?: AgentReview | null) =>
+  review?.proposals.filter(p => !p.possible_duplicate && !review.unavailable_proposal_ids?.includes(p.id)).map(p => p.id);
 const when = (iso: string) => new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
 function StatusLabel({ status }: { status: string }) {
   const [label, dot] = status === "draft" ? ["Pending approval", "bg-status-progress"]
     : status === "undone" ? ["Undone", "bg-slate-400"]
+    : status === "dismissed" ? ["Dismissed", "bg-slate-400"]
     : ["Applied", "bg-status-done"];
   return <span className="inline-flex shrink-0 items-center gap-2">
     <span aria-hidden="true" className={`h-2 w-2 shrink-0 rounded-full ${dot}`} />
@@ -46,7 +51,7 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
   const [fromList, setFromList] = useState(false);
   const [history, setHistory] = useState<AgentReviewListItem[] | null>(null);
   const [selected, setSelected] = useState<number[]>([]);
-  const [busy, setBusy] = useState<"apply" | "undo" | "load" | "refresh" | null>(null);
+  const [busy, setBusy] = useState<"apply" | "undo" | "load" | "refresh" | "dismiss" | null>(null);
   const [confirmRemoval, setConfirmRemoval] = useState(false);
   const cancelRemoval = useRef<HTMLButtonElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +64,7 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
     if (!launch) return;
     setReview(launch.review ?? null);
     setFromList(false);
-    setSelected(launch.review?.receipt?.proposal_ids ?? launch.review?.proposals.filter(p => !launch.review?.unavailable_proposal_ids?.includes(p.id)).map(p => p.id) ?? []);
+    setSelected(launch.review?.receipt?.proposal_ids ?? defaultSelection(launch.review) ?? []);
     setError(null); setConfirmRemoval(false);
     setOpen(true);
     void loadHistory();
@@ -112,7 +117,7 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
     }
   }
 
-  async function perform(action: "apply" | "undo" | "load" | "refresh", id?: string) {
+  async function perform(action: "apply" | "undo" | "load" | "refresh" | "dismiss", id?: string) {
     if (inFlight.current) return;
     inFlight.current = true;
     setBusy(action); setError(null);
@@ -120,12 +125,14 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
       const result = action === "load" ? await api.getAgentReview(project.id, id!, token)
         : action === "refresh" ? await api.refreshAgentReview(project.id, review!.id, token)
         : action === "apply" ? await api.applyAgentReview(project.id, review!.id, selected, token)
+        : action === "dismiss" ? await api.dismissAgentReview(project.id, review!.id, token)
         : await api.undoAgentReview(project.id, review!.id, token);
       if (!mounted.current) return;
       setConfirmRemoval(false);
       if (action === "load") setFromList(true);
-      setReview(result); setSelected(result.receipt?.proposal_ids ?? result.proposals.filter(p => !result.unavailable_proposal_ids?.includes(p.id)).map(p => p.id));
-      if (action !== "load") onChanged(result, action);
+      setReview(result); setSelected(result.receipt?.proposal_ids ?? defaultSelection(result) ?? []);
+      // Dismissing changes nothing on the board; it only refreshes the pending list.
+      if (action !== "load") onChanged(result, action === "dismiss" ? "refresh" : action);
       onReviewChanged(result);
       await loadHistory();
     } catch (err) {
@@ -162,10 +169,13 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
   // Once saved, show only what was actually applied.
   const shown = review ? (review.receipt ? review.proposals.filter(p => review.receipt!.proposal_ids.includes(p.id)) : review.proposals) : [];
   const sourceUnavailable = review?.stale_reason?.startsWith("The source meeting");
-  const eligible = shown.filter(p => !review?.unavailable_proposal_ids?.includes(p.id));
+  const changes = shown.filter(p => !(isDraft && p.possible_duplicate));
+  const duplicates = isDraft ? shown.filter(p => p.possible_duplicate) : [];
+  const eligible = changes.filter(p => !review?.unavailable_proposal_ids?.includes(p.id));
   const appliedCount = review?.receipt?.proposal_ids.length ?? 0;
   const statusLine = !review ? "" : isDraft
     ? (mode === "meeting_updates" ? "The meeting and its new tasks are already saved. Review the suggested changes." : "Uncheck anything you don’t want.")
+    : review.status === "dismissed" ? "These suggested changes were dismissed. Nothing on the board changed."
     : review.status === "applied"
       ? (mode === "meeting" ? `Added this meeting and ${plural(appliedCount, "new task")}.` : `Applied ${plural(appliedCount, "change")}.`)
       : (mode === "meeting" ? "This meeting and the tasks it added were removed." : "These changes were reversed.");
@@ -232,12 +242,14 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
                 <ul className="mt-2 list-disc space-y-2 pl-5 text-sm leading-relaxed text-amber-900">{review.questions.map((q, i) => <li key={i}>{q}</li>)}</ul>
               </section>}
               <div className="flex items-center justify-between gap-3">
-                <h3 className="font-semibold text-slate-900">{plural(shown.length, "change")}</h3>
+                <h3 className="font-semibold text-slate-900">{plural(changes.length, "change")}</h3>
                 {editable && eligible.length > 1 && <button className="text-sm font-medium text-brand-900 underline underline-offset-4" disabled={!!busy}
-                  onClick={() => setSelected(selected.length === eligible.length ? [] : eligible.map(p => p.id))}>{selected.length === eligible.length ? "Clear selection" : "Select all"}</button>}
+                  onClick={() => { const all = eligible.every(p => selected.includes(p.id)); const ids = new Set(eligible.map(p => p.id));
+                    setSelected(all ? selected.filter(id => !ids.has(id)) : [...selected.filter(id => !ids.has(id)), ...ids]); }}>
+                  {eligible.every(p => selected.includes(p.id)) ? "Clear selection" : "Select all"}</button>}
               </div>
-              {shown.length === 0 && <p className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600">{review.questions.length ? "No changes are ready to apply." : "Your tasks are already up to date."}</p>}
-              {shown.map(p => <article key={p.id} className={`rounded-xl border bg-white p-4 sm:p-5 ${editable && selected.includes(p.id) ? "border-brand-500 ring-1 ring-brand-500" : "border-slate-200"}`}>
+              {changes.length === 0 && duplicates.length === 0 && <p className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600">{review.questions.length ? "No changes are ready to apply." : "Your tasks are already up to date."}</p>}
+              {changes.map(p => <article key={p.id} className={`rounded-xl border bg-white p-4 sm:p-5 ${editable && selected.includes(p.id) ? "border-brand-500 ring-1 ring-brand-500" : "border-slate-200"}`}>
                 <label className="flex items-start gap-3">
                   {editable && <input type="checkbox" checked={selected.includes(p.id)} disabled={!!busy || review.unavailable_proposal_ids?.includes(p.id)} className="mt-1 h-4 w-4 shrink-0 accent-brand-700"
                     onChange={e => setSelected(e.target.checked ? [...selected, p.id] : selected.filter(id => id !== p.id))} />}
@@ -255,7 +267,21 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
                 {/* A parser-extracted task carries its source decision, which may be paraphrased or empty. */}
                 {p.evidence && <details className="mt-3 text-xs text-slate-500"><summary className="cursor-pointer">{p.confidence != null ? "Why this task?" : "Why this change?"}</summary><blockquote className="mt-2 border-l-2 border-brand-100 bg-brand-50/60 px-3 py-2 text-sm leading-relaxed text-slate-700">{p.confidence != null ? p.evidence : `“${p.evidence}”`}</blockquote></details>}
               </article>)}
-              {isDraft && <p className="text-xs text-slate-500">{expired ? "These suggested changes expired after an hour. Refresh to check them again." : "Your tasks are checked again before any changes are applied."}</p>}
+              {duplicates.length > 0 && <details className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+                <summary className="cursor-pointer text-sm font-semibold text-slate-900">
+                  {duplicates.length === 1 ? "1 task looked" : `${duplicates.length} tasks looked`} already on the board
+                  <span className="ml-1 font-normal text-slate-500">· tick any that are new to add them</span>
+                </summary>
+                <ul className="mt-3 space-y-3">{duplicates.map(p => <li key={p.id}>
+                  <label className="flex items-start gap-3 text-sm">
+                    {editable && <input type="checkbox" checked={selected.includes(p.id)} disabled={!!busy} className="mt-0.5 h-4 w-4 shrink-0 accent-brand-700"
+                      onChange={e => setSelected(e.target.checked ? [...selected, p.id] : selected.filter(id => id !== p.id))} />}
+                    <span><span className="font-medium text-slate-900">Add “{p.after.description}”</span>
+                      <span className="block text-xs text-slate-500">Looks like “{p.duplicate_of?.description}”</span></span>
+                  </label>
+                </li>)}</ul>
+              </details>}
+              {isDraft && <p className="text-xs text-slate-500">{expired ? "These suggested changes expired after an hour. Refresh to check them again." : "Unticked items are dismissed. Your tasks are checked again before any changes are applied."}</p>}
             </div>}
           </div>
           {review && <footer className="shrink-0 border-t border-slate-200 bg-white px-5 py-4 sm:px-7">
@@ -270,7 +296,9 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
               <button className={SECONDARY} disabled={!!busy} onClick={close}>{isDraft ? "Not now" : "Done"}</button>
               {isDraft && (sourceUnavailable || (expired && mode === "meeting")) && <button className={SECONDARY} onClick={() => { close(); onNewMeeting(); }}>New meeting</button>}
               {isDraft && !sourceUnavailable && mode !== "meeting" && (expired || review.stale) && <button className={SECONDARY} disabled={!!busy} onClick={() => void perform("refresh")}>{busy === "refresh" ? "Refreshing…" : "Refresh"}</button>}
-              {isDraft && <button className={PRIMARY} disabled={!!busy || !editable || selected.length === 0} onClick={() => void perform("apply")}>{busy === "apply" ? "Applying…" : "Apply selected"}</button>}
+              {isDraft && (selected.length > 0
+                ? <button className={PRIMARY} disabled={!!busy || !editable} onClick={() => void perform("apply")}>{busy === "apply" ? "Applying…" : `Apply ${selected.length}`}</button>
+                : <button className={PRIMARY} disabled={!!busy} onClick={() => void perform("dismiss")}>{busy === "dismiss" ? "Dismissing…" : "Dismiss all"}</button>)}
               {review.status === "applied" && (mode === "meeting"
                 ? <button className="rounded-lg px-3 py-2 text-xs text-slate-400 hover:bg-rose-50 hover:text-rose-700 focus-visible:ring-2 focus-visible:ring-rose-300" disabled={!!busy} onClick={() => setConfirmRemoval(true)}>Remove meeting…</button>
                 : <button className={SECONDARY} disabled={!!busy} onClick={() => void perform("undo")}>{busy === "undo" ? "Undoing…" : "Undo these changes"}</button>)}
