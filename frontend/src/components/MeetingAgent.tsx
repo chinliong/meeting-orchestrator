@@ -20,8 +20,11 @@ const defaultSelection = (review?: AgentReview | null) =>
   review?.proposals.filter(p => !p.possible_duplicate && !review.unavailable_proposal_ids?.includes(p.id)).map(p => p.id);
 const when = (iso: string) => new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
-function StatusLabel({ status }: { status: string }) {
+// A meeting import is saved without approval, so it reads Added / Removed rather than Applied / Undone.
+function StatusLabel({ status, mode }: { status: string; mode: AgentReview["mode"] }) {
   const [label, dot] = status === "draft" ? ["Pending approval", "bg-status-progress"]
+    : mode === "meeting" && status === "applied" ? ["Added", "bg-status-done"]
+    : mode === "meeting" && status === "undone" ? ["Removed", "bg-slate-400"]
     : status === "undone" ? ["Undone", "bg-slate-400"]
     : status === "dismissed" ? ["Dismissed", "bg-slate-400"]
     : ["Applied", "bg-status-done"];
@@ -218,7 +221,7 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
                         <span className="block truncate font-medium text-slate-900">{h.title}</span>
                         <span className="block text-xs text-slate-500">{countLabel(h.mode, h.change_count)} · {when(h.created_at)}</span>
                       </span>
-                      <StatusLabel status={h.status} />
+                      <StatusLabel status={h.status} mode={h.mode} />
                       <span className="text-slate-400" aria-hidden="true">›</span>
                     </button>
                   </li>)}
@@ -229,7 +232,7 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
                 <div className="flex flex-wrap items-center gap-2">
                   {isDraft && <h3 className="font-semibold text-slate-900">{review.input.title}</h3>}
                   <span className="text-xs text-slate-500">{when(review.created_at)}</span>
-                  <StatusLabel status={review.status} />
+                  <StatusLabel status={review.status} mode={mode} />
                 </div>
                 <p role="status" className="mt-2 text-sm text-slate-600">{statusLine}</p>
                 <details className="mt-3 text-xs text-slate-500"><summary className="cursor-pointer font-medium">{mode === "chat" ? "View your request" : "View transcript"}</summary>
