@@ -38,7 +38,7 @@ def switch(page, name):
 
 def paste(page, text):
     page.get_by_placeholder("Paste the raw meeting transcript here.").fill(text)
-    page.get_by_role("button", name="Parse transcript").click()
+    page.get_by_role("button", name="Extract tasks").click()
 
 def filter_pill(page, owner):
     """Choose an owner in the owner filter (now a dropdown with checkboxes)."""
@@ -124,7 +124,7 @@ with sync_playwright() as p:
     before = cards(page)
     page.get_by_role("button", name="Audio / video").click()
     page.locator("input[type=file][accept='audio/*,video/*']").set_input_files(silent_wav())
-    page.get_by_role("button", name="Transcribe & parse").click()
+    page.get_by_role("button", name="Transcribe & extract tasks").click()
     time.sleep(1)
     switch(page, "Board B")
     end = time.time() + 30

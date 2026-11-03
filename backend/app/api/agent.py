@@ -34,7 +34,7 @@ def enabled():
 
 def require_enabled():
     if not enabled():
-        raise HTTPException(404, "Meeting agent preview is not enabled.")
+        raise HTTPException(404, "The meeting assistant is not enabled.")
 
 
 router = APIRouter(prefix="/projects/{project_id}/agent", tags=["meeting-agent"],
@@ -123,7 +123,7 @@ def load_review(db, project_id, review_id, user, token):
     require_project_edit(db, project_id, user, token)
     review = db.query(AgentReview).filter_by(id=review_id, project_id=project_id).first()
     if review is None:
-        raise HTTPException(404, "Review not found in this project.")
+        raise HTTPException(404, "These suggested changes were not found on this board.")
     return review
 
 
@@ -134,7 +134,7 @@ def conflict(db, message):
 
 def project_context(db, project, tasks):
     if len(tasks) > agent_llm.MAX_TASKS:
-        raise HTTPException(422, "The preview supports boards with up to 200 tasks. Use a smaller project.")
+        raise HTTPException(422, "The assistant works with boards of up to 200 tasks.")
     source_ids = {t["meeting_id"] for t in tasks if t["meeting_id"] is not None}
     source_ids.update(row[0] for row in db.query(Meeting.id).filter_by(
         project_id=project.id, status=MeetingStatus.COMPLETE).order_by(
@@ -170,7 +170,7 @@ def chat(request: Request, project_id: int, payload: ChatInput,
         raise HTTPException(422, str(exc)) from exc
     except GeminiError as exc:
         log.warning("assistant failed: %s", exc)
-        raise HTTPException(502, "Gemini couldn't complete that answer. Your board has not changed. Please try again.") from exc
+        raise HTTPException(502, "The assistant couldn’t answer that just now. Nothing was changed. Please try again.") from exc
     db.expire_all()
     require_project_view(db, project_id, user, x_workspace_token)
     proposals = answer.pop("proposals")
@@ -295,7 +295,7 @@ def with_candidates(plan, candidates, tasks=()):
             if match is None:
                 continue
             # Matched to an existing task: kept as an unticked item, so a wrong match is one tick to fix.
-            proposal.update(possible_duplicate=True, reason=f"Looks like “{match['description']}”, already on the board.",
+            proposal.update(possible_duplicate=True, reason=f"Possible duplicate of “{match['description']}”.",
                             duplicate_of={"id": match["id"], "description": match["description"]})
         plan["proposals"].append(proposal)
         next_id += 1
@@ -323,7 +323,7 @@ def run_meeting_review(db, project, payload):
         raise HTTPException(422, str(exc)) from exc
     except GeminiError as exc:
         log.warning("agent review failed: %s", exc)
-        raise HTTPException(502, "Gemini couldn't complete a valid review within its limits. No tasks changed. Try again.") from exc
+        raise HTTPException(502, "The assistant couldn’t finish reviewing this meeting. Nothing was changed. Please try again.") from exc
     return tasks, with_candidates(plan, candidates, tasks)
 
 
@@ -364,10 +364,10 @@ def apply_stored_review(db, project_id, review, proposal_ids, *, commit=True, re
     selected = sorted(proposal_ids)
     if review.status == "applied":
         if json.loads(review.receipt_json)["proposal_ids"] != selected:
-            raise HTTPException(409, "This review was already applied with a different selection.")
+            raise HTTPException(409, "These suggested changes were already applied with a different selection.")
         return output(review)
     if review.status != "draft" or review_expired(review):
-        raise HTTPException(409, "This review is no longer available to apply. Run a new review.")
+        raise HTTPException(409, "These suggested changes have expired. Refresh them to check again.")
     plan = json.loads(review.plan_json)
     if plan.get("mode") == "meeting_updates":
         source_meeting = db.get(Meeting, plan.get("source_meeting_id"))
@@ -388,7 +388,7 @@ def apply_stored_review(db, project_id, review, proposal_ids, *, commit=True, re
     claimed = db.query(AgentReview).filter_by(id=review_id, status="draft").update(
         {"status": "applying"}, synchronize_session=False)
     if not claimed:
-        conflict(db, "This review changed in another request. Reopen it to see the result.")
+        conflict(db, "These suggested changes were updated elsewhere. Reopen them to see the result.")
     db.expire_all()
     current = board_snapshot(db, project_id, lock=True)
     by_id = {t["id"]: t for t in current}
@@ -481,7 +481,7 @@ def finish_meeting_import(db, review, *, recording_id=None):
         else:
             match = agent_llm.likely_duplicate(proposal["after"]["description"], current)
             if match:
-                questions.append(f'“{proposal["after"]["description"]}” looks like “{match["description"]}”, already on the board. No extra copy was added.')
+                questions.append(f'“{proposal["after"]["description"]}” is a possible duplicate of “{match["description"]}” and was not added.')
             else:
                 creates.append(proposal)
                 current.append({"description": proposal["after"]["description"]})
@@ -506,8 +506,8 @@ def finish_meeting_import(db, review, *, recording_id=None):
         db.refresh(pending)
     notes = list(plan["questions"])
     if possible:
-        notes.append(f"{len(possible)} {'task looks' if len(possible) == 1 else 'tasks look'} already on the board, so "
-                     f"{'it was' if len(possible) == 1 else 'they were'} not added. Review under Changes to add any that are new.")
+        notes.append(f"{len(possible)} possible {'duplicate was' if len(possible) == 1 else 'duplicates were'} not added. "
+                     "Review them under Changes.")
     return {"meeting_id": imported["receipt"]["meeting_id"], "new_task_count": len(creates), "saved_review": imported,
             "review": output(pending) if pending else None, "questions": notes}
 
@@ -649,11 +649,11 @@ def undo_review(project_id: int, review_id: str, user: Optional[User] = Depends(
     if review.status == "undone":
         return output(review)
     if review.status != "applied":
-        raise HTTPException(409, "Only an applied review can be undone.")
+        raise HTTPException(409, "Only applied changes can be undone.")
     claimed = db.query(AgentReview).filter_by(id=review_id, status="applied").update(
         {"status": "undoing"}, synchronize_session=False)
     if not claimed:
-        conflict(db, "This review changed in another request. Reopen it to see the result.")
+        conflict(db, "These suggested changes were updated elsewhere. Reopen them to see the result.")
     db.expire_all()
     receipt = json.loads(review.receipt_json)
     current = {t["id"]: t for t in board_snapshot(db, project_id, lock=True)}
@@ -679,7 +679,7 @@ def undo_review(project_id: int, review_id: str, user: Optional[User] = Depends(
     if receipt["meeting_id"] is not None:
         meeting = db.get(Meeting, receipt["meeting_id"])
         if meeting is None:
-            conflict(db, "The saved meeting was removed. This review can no longer be undone.")
+            conflict(db, "The saved meeting was removed. These changes can no longer be undone.")
         source = json.loads(review.input_json)
         if (meeting.title != source["title"] or meeting.transcript_text != source["transcript"]
                 or not meeting.meeting_date or meeting.meeting_date.isoformat() != source["meeting_date"]):

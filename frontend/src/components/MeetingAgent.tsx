@@ -174,7 +174,7 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
   const eligible = changes.filter(p => !review?.unavailable_proposal_ids?.includes(p.id));
   const appliedCount = review?.receipt?.proposal_ids.length ?? 0;
   const statusLine = !review ? "" : isDraft
-    ? (mode === "meeting_updates" ? "The meeting and its new tasks are already saved. Review the suggested changes." : "Uncheck anything you don’t want.")
+    ? (mode === "meeting_updates" ? "The meeting and its new tasks are already saved. Review the suggested changes." : "Deselect anything you don’t want.")
     : review.status === "dismissed" ? "These suggested changes were dismissed. Nothing on the board changed."
     : review.status === "applied"
       ? (mode === "meeting" ? `Added this meeting and ${plural(appliedCount, "new task")}.` : `Applied ${plural(appliedCount, "change")}.`)
@@ -238,7 +238,7 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
               </section>
               {isDraft && review.stale && <p role="alert" className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600">{sourceUnavailable ? "This meeting changed or was removed. Add the correct transcript to check these suggested changes." : "Your tasks changed. Refresh these suggested changes, or apply those still available."}</p>}
               {isDraft && review.questions.length > 0 && <section className="rounded-xl border border-amber-200 bg-amber-50 p-5">
-                <h3 className="font-semibold text-amber-950">Not changed: needs clarification</h3>
+                <h3 className="font-semibold text-amber-950">Needs your input</h3>
                 <ul className="mt-2 list-disc space-y-2 pl-5 text-sm leading-relaxed text-amber-900">{review.questions.map((q, i) => <li key={i}>{q}</li>)}</ul>
               </section>}
               <div className="flex items-center justify-between gap-3">
@@ -269,19 +269,19 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
               </article>)}
               {duplicates.length > 0 && <details className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
                 <summary className="cursor-pointer text-sm font-semibold text-slate-900">
-                  {duplicates.length === 1 ? "1 task looked" : `${duplicates.length} tasks looked`} already on the board
-                  <span className="ml-1 font-normal text-slate-500">· tick any that are new to add them</span>
+                  Possible duplicates ({duplicates.length})
+                  <span className="ml-1 font-normal text-slate-500">· Select any that are new tasks to add them</span>
                 </summary>
                 <ul className="mt-3 space-y-3">{duplicates.map(p => <li key={p.id}>
                   <label className="flex items-start gap-3 text-sm">
                     {editable && <input type="checkbox" checked={selected.includes(p.id)} disabled={!!busy} className="mt-0.5 h-4 w-4 shrink-0 accent-brand-700"
                       onChange={e => setSelected(e.target.checked ? [...selected, p.id] : selected.filter(id => id !== p.id))} />}
                     <span><span className="font-medium text-slate-900">Add “{p.after.description}”</span>
-                      <span className="block text-xs text-slate-500">Looks like “{p.duplicate_of?.description}”</span></span>
+                      <span className="block text-xs text-slate-500">Possible duplicate of “{p.duplicate_of?.description}”</span></span>
                   </label>
                 </li>)}</ul>
               </details>}
-              {isDraft && <p className="text-xs text-slate-500">{expired ? "These suggested changes expired after an hour. Refresh to check them again." : "Unticked items are dismissed. Your tasks are checked again before any changes are applied."}</p>}
+              {isDraft && <p className="text-xs text-slate-500">{expired ? "These suggested changes expired after an hour. Refresh to check them again." : "Items you don’t select are dismissed. Your tasks are checked again before any changes are applied."}</p>}
             </div>}
           </div>
           {review && <footer className="shrink-0 border-t border-slate-200 bg-white px-5 py-4 sm:px-7">

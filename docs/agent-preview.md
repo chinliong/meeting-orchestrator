@@ -36,8 +36,8 @@ The API listens at `127.0.0.1:8100`. Both listeners are restricted to this compu
 1. Use the existing **New meeting** card: enter the title/date, then paste a transcript or upload a recording.
 2. The meeting and new tasks save automatically. No confirmation opens when there are no updates to existing tasks.
 3. If existing tasks would change, **Suggested changes** shows those updates, ticked. Tasks the assistant
-   matched to ones already on the board are listed, unticked, under "tasks looked already on the board";
-   tick any that are really new. **Apply** applies what is ticked and dismisses the rest; with nothing
+   matched to ones already on the board are listed, unticked, under "Possible duplicates"; select any
+   that are really new. **Apply** applies what is ticked and dismisses the rest; with nothing
    ticked the button reads **Dismiss all**. **Not now** leaves the suggestions waiting under Changes; the
    meeting and new tasks stay saved either way.
 4. Open the blue assistant button for questions about saved meetings or current tasks. Try

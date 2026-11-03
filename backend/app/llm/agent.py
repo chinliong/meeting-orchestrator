@@ -270,7 +270,7 @@ def run_review(payload: ReviewInput, board: dict, meetings: dict[int, dict], can
     trace = [{"label": f"Read {len(board['tasks'])} existing tasks", "tool": "read_board"}]
     context_used = len(json.dumps(board)) + len(payload.transcript)
     if context_used > MAX_CONTEXT_CHARS:
-        raise ValueError("This board and transcript are too large for the preview. Try a smaller project.")
+        raise ValueError("This meeting is too long to compare with a board this size. Try a shorter transcript or a smaller board.")
     started = time.monotonic()
     for step in range(MAX_STEPS):
         remaining = MAX_SECONDS - (time.monotonic() - started)

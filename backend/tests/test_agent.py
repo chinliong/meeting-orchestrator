@@ -694,7 +694,7 @@ def test_near_duplicate_creates_become_questions_instead_of_tasks(client, projec
     response = parse_with_assistant(client, project)
     assert response.status_code == 201, response.text
     assert response.json()["new_task_count"] == 0
-    assert any("already on the board" in q for q in response.json()["questions"])
+    assert any("possible duplicate" in q for q in response.json()["questions"])
     assert db_session.query(Task).count() == 2
 
 
@@ -1095,7 +1095,7 @@ def import_with_match(client, project, task, monkeypatch, updates=False):
 def test_matched_candidate_waits_as_an_unticked_possible_duplicate(client, project, task, enabled, monkeypatch, db_session):
     data = import_with_match(client, project, task, monkeypatch)
     assert data["new_task_count"] == 0
-    assert any("already on the board" in q and "Changes" in q for q in data["questions"])
+    assert any("possible duplicate" in q and "Changes" in q for q in data["questions"])
     item = data["review"]["proposals"][0]
     assert item["possible_duplicate"] and item["duplicate_of"]["description"] == "Finish the landing page design"
     assert item["id"] not in data["review"]["unavailable_proposal_ids"]  # resembling a task is expected here

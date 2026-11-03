@@ -31,7 +31,7 @@ def card_text(pg): return card(pg).inner_text() if card(pg).count() else ""
 def paste(pg, text, title=""):
     pg.get_by_placeholder("Meeting title (optional)").fill(title)
     pg.get_by_placeholder("Paste the raw meeting transcript here.").fill(text)
-    pg.get_by_role("button", name="Parse transcript").click()
+    pg.get_by_role("button", name="Extract tasks").click()
 def wait(fn, t=15):
     end = time.time() + t
     while time.time() < end:

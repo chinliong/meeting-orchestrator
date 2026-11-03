@@ -54,7 +54,7 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio, assistan
       setFile(null);
       setMeetingDate(today());
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to process transcript");
+      setError(err instanceof Error ? err.message : "The transcript couldn’t be processed. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -171,11 +171,11 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio, assistan
           ) : null}
           {submitting
             ? mode === "audio"
-              ? "Transcribing & parsing..."
-              : "Parsing..."
+              ? "Transcribing and extracting tasks…"
+              : "Extracting tasks…"
             : mode === "audio"
-              ? "Transcribe & parse"
-              : "Parse transcript"}
+              ? "Transcribe & extract tasks"
+              : "Extract tasks"}
         </button>
         {assistantEnabled && mode === "text" && <p className="mt-3 text-xs leading-relaxed text-slate-400">New tasks are added automatically. Updates to existing tasks need your confirmation.</p>}
       </div>

@@ -212,7 +212,7 @@ export default function AccountModal({
       setTestResult(
         count > 0
           ? `Sent — ${count} task${count === 1 ? "" : "s"} included.`
-          : "Sent — you have no tasks due right now, so it's just a confirmation email."
+          : "Sent — you have no tasks due right now, so this is a confirmation email only."
       );
     } catch (err) {
       setNotifyError(readableError(err, "Failed to send test email"));

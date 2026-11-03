@@ -29,7 +29,7 @@ with sync_playwright() as p:
     for i in range(3):
         pg.get_by_placeholder("Meeting title (optional)").fill(f"Meeting {i+1}")
         pg.get_by_placeholder("Paste the raw meeting transcript here.").fill(f"Transcript number {i+1} about the APAC mapping.")
-        pg.get_by_role("button", name="Parse transcript").click(); time.sleep(4)
+        pg.get_by_role("button", name="Extract tasks").click(); time.sleep(4)
     panel = pg.inner_text("body")
     check("3rd parse shows the rate-limit message", "limit for parsing transcripts" in panel, panel[-160:].replace("\n", " "))
     check("the first two meetings were parsed", pg.locator('[aria-label="Delete task"]').count() >= 4, str(pg.locator('[aria-label="Delete task"]').count()))

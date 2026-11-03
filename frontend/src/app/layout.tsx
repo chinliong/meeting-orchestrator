@@ -19,7 +19,7 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "Meeting Orchestrator — AI action items from transcripts",
   description:
-    "AI-powered meeting transcript parsing that extracts decisions, action items, owners, and deadlines onto a Kanban board.",
+    "Turns meeting transcripts into tracked action items, with owners and deadlines, on a Kanban board.",
   icons: { icon: "/logo.png" },
 };
 
