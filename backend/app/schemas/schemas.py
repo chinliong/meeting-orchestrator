@@ -137,7 +137,8 @@ class TaskOut(BaseModel):
     owner: Optional[str]
     deadline: Optional[date]
     status: TaskStatus
-    confidence: float
+    # None when no extraction score exists (tasks created by the project assistant).
+    confidence: Optional[float]
     source_decision: Optional[str]
     created_at: datetime
     # Rollup counts (computed on the model) so cards can show progress without fetching children.
@@ -195,7 +196,8 @@ class TaskRestoreData(BaseModel):
     owner: Optional[str] = None
     deadline: Optional[date] = None
     status: TaskStatus = TaskStatus.TODO
-    confidence: float = 1.0
+    # Keeps a missing score missing, so undoing a delete doesn't turn it into 1.0.
+    confidence: Optional[float] = 1.0
     source_decision: Optional[str] = None
 
 

@@ -19,3 +19,6 @@ frontend/build/
 frontend/.next/
 frontend/.env
 frontend/.env.local
+
+# Isolated agent preview database, logs and local links.
+.local-agent/

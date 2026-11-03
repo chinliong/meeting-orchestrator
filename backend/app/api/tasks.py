@@ -70,11 +70,11 @@ def create_task(
 ):
     """Add a task by hand — for work that wasn't captured in any meeting transcript.
 
-    Manually-added tasks have no source meeting and carry full confidence (confidence=1.0,
-    the model default), so the UI knows not to show an extraction-confidence badge for them.
+    Manually-added tasks have no source meeting and carry full confidence (confidence=1.0); the
+    UI shows no extraction-confidence badge for a task without a source meeting.
     """
     require_project_edit(db, payload.project_id, user, x_workspace_token)
-    task = Task(**payload.model_dump())
+    task = Task(**payload.model_dump(), confidence=1.0)
     db.add(task)
     db.commit()
     db.refresh(task)

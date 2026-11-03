@@ -8,6 +8,16 @@ recordings for end-to-end processing.
 
 > ICT4011 Capstone Project.
 
+An opt-in **local project assistant preview** adds a floating chat for project questions,
+task-change suggestions and meeting follow-up reviews. Run `backend/.venv/bin/python scripts/agent_preview.py` from
+the repository root to try it on an isolated sample database with your current Gemini model.
+See [the preview guide](docs/agent-preview.md). It is disabled by default and does not deploy anything.
+
+To use the assistant with your regular development accounts and boards, set
+`ENABLE_MEETING_AGENT=true` in `backend/.env` and `NEXT_PUBLIC_MEETING_AGENT_PREVIEW=true`
+in `frontend/.env.local`, then restart both development servers. Use the normal app at
+http://localhost:3000 with its API at http://localhost:8000; a separate preview is optional.
+
 ## Features
 
 - **Transcript parsing**: paste raw meeting text; the LLM returns structured decisions and
@@ -18,7 +28,9 @@ recordings for end-to-end processing.
   / Done with drag-and-drop status changes) and a month calendar that plots tasks by their deadline
   with drag-to-reschedule (drag onto a "no deadline" tray to clear it). Both support owner filtering
   and a search across task text, owners, and source meetings, and the Kanban board can be sorted
-  by deadline. Cards show extraction confidence, or a "Check this" flag below 0.85. Signed-in
+  by deadline. Cards show a "Check this" flag when extraction confidence is below 0.85; the score
+  itself is at the top of the task's detail view, with the meeting and the decision the task came
+  from. Signed-in
   users can view one project, all their projects, or a chosen set of them together.
 - **Task detail, AI subtasks and attachments**: open any task to break it into a checklist of
   subtasks (add them by hand, or have the LLM generate them from the task's own details or from
@@ -148,16 +160,21 @@ that invite guessing, are limited per visitor (`backend/app/ratelimit.py`, using
 |---|---|
 | Parse a transcript | 20 per hour |
 | Upload a recording | 10 per hour |
-| AI summaries and subtask suggestions (shared) | 30 per hour |
+| Shared AI call allowance | 30 per hour |
+| Assistant messages (also use shared AI allowance) | 30 per hour |
 | Sign in | 10 per minute |
 | Request a password reset | 5 per hour |
 
-Everything else (viewing boards, editing tasks) is not limited, and the summary the server writes
+Agent chat/review reserves six calls and agent transcript parsing reserves seven calls from the
+shared AI allowance, covering their maximum tool loop and, for parsing, its summary. All text-parse
+entry points share the parse allowance.
+
+Everything else (viewing boards, editing tasks) is not limited, and the summary the original parser writes
 for each new meeting is covered by the parse or upload limit rather than the AI one. Over a limit the API answers
 `429` with a message the app shows as it is, e.g. "You've reached the limit for parsing
 transcripts for now. Please try again later." Each limit can be changed with an environment
 variable (`RATE_LIMIT_PARSE`, `RATE_LIMIT_AUDIO`, `RATE_LIMIT_AI`, `RATE_LIMIT_LOGIN`,
-`RATE_LIMIT_RESET`, e.g. `"20/hour"`), and `RATE_LIMITS_ENABLED=false` turns limiting off.
+`RATE_LIMIT_RESET`, `RATE_LIMIT_AGENT_CHAT`, e.g. `"20/hour"`), and `RATE_LIMITS_ENABLED=false` turns limiting off.
 
 Counts are kept in memory, which suits the single deployed instance; several instances would need
 a shared store such as Redis. On Render the visitor's address is read from Cloudflare's

@@ -102,6 +102,7 @@ class Project(Base):
     owner = relationship("User", back_populates="projects")
     meetings = relationship("Meeting", back_populates="project", cascade="all, delete-orphan")
     tasks = relationship("Task", back_populates="project", cascade="all, delete-orphan")
+    agent_reviews = relationship("AgentReview", back_populates="project", cascade="all, delete-orphan")
     reminder_subscriptions = relationship(
         "ReminderSubscription", back_populates="project", cascade="all, delete-orphan"
     )
@@ -152,7 +153,9 @@ class Task(Base):
     owner = Column(String, nullable=True)
     deadline = Column(Date, nullable=True)
     status = Column(Enum(TaskStatus), default=TaskStatus.TODO, nullable=False)
-    confidence = Column(Float, default=1.0)
+    # Extraction score from the parser. NULL means no score exists (tasks created by the
+    # project assistant). No column default: SQLAlchemy would replace an explicit None with it.
+    confidence = Column(Float, nullable=True)
     source_decision = Column(Text, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     # The deadline (if any) this task last sent an email reminder for — keeps the daily
@@ -178,7 +181,6 @@ class Task(Base):
     subscriber_reminders = relationship(
         "SubscriberReminder", back_populates="task", cascade="all, delete-orphan"
     )
-
     @property
     def meeting_title(self) -> str | None:
         """Title of the source meeting, or None for manually-added tasks."""
@@ -196,6 +198,24 @@ class Task(Base):
         if self.meeting.meeting_date:
             return self.meeting.meeting_date
         return self.meeting.created_at.date() if self.meeting.created_at else None
+
+
+class AgentReview(Base):
+    """Server-owned proposal, baseline and receipt; never trust a client-supplied patch."""
+
+    __tablename__ = "agent_reviews"
+
+    id = Column(String, primary_key=True)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False, index=True)
+    status = Column(String, nullable=False, default="draft")
+    created_at = Column(DateTime, server_default=func.now())
+    expires_at = Column(DateTime, nullable=False)
+    input_json = Column(Text, nullable=False)
+    plan_json = Column(Text, nullable=False)
+    baseline_hash = Column(String, nullable=False)
+    receipt_json = Column(Text, nullable=True)
+
+    project = relationship("Project", back_populates="agent_reviews")
 
 
 class Subtask(Base):

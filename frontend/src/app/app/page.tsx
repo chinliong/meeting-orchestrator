@@ -11,6 +11,9 @@ import ExportButton from "@/components/ExportButton";
 import Filters from "@/components/Filters";
 import KanbanBoard from "@/components/KanbanBoard";
 import MeetingFilter from "@/components/MeetingFilter";
+import MeetingAgent, { type ReviewLaunch } from "@/components/MeetingAgent";
+import PendingTaskUpdates from "@/components/PendingTaskUpdates";
+import ProjectAssistant from "@/components/ProjectAssistant";
 import MeetingSummaryCard, { MeetingSummaryList } from "@/components/MeetingSummaryCard";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import ProjectModal from "@/components/ProjectModal";
@@ -42,6 +45,8 @@ import {
   workspaceTokenFor,
 } from "@/lib/session";
 import type {
+  AgentMutation,
+  AgentReview,
   AuthResponse,
   Meeting,
   MeetingListItem,
@@ -102,6 +107,11 @@ export default function DashboardPage() {
   const [boardReminder, setBoardReminder] = useState<{ projectId: number; subscribed: boolean } | null>(null);
   const [boardReminderBusy, setBoardReminderBusy] = useState(false);
   // The board's meeting list reloads whenever this changes (a meeting added, finished or deleted).
+  const [assistantOpen, setAssistantOpen] = useState(false);
+  const [inlineReview, setInlineReview] = useState<{ projectId: number; review: AgentReview } | null>(null);
+  const [reviewEvent, setReviewEvent] = useState<AgentReview | null>(null);
+  const [pendingUpdatesKey, setPendingUpdatesKey] = useState(0);
+  const [meetingLaunch, setMeetingLaunch] = useState<(ReviewLaunch & { projectId: number }) | null>(null);
   const [meetingsKey, setMeetingsKey] = useState(0);
   // The meeting just added here: its row and its tasks are marked "New" until the board changes.
   const [latestMeetingId, setLatestMeetingId] = useState<number | null>(null);
@@ -542,12 +552,40 @@ export default function DashboardPage() {
     depth: undoDepth,
     nonce: undoNonce,
     push: pushUndo,
+    remove: removeUndo,
     undo: handleUndo,
     clear: clearUndoHistory,
     generation: undoGeneration,
   } = useUndoHistory(`${viewKey}|${session?.mode}|${user?.id}`, setLoadError);
 
   // --- task handlers ---
+  const assistantScope = `${viewKey}|${session?.mode}|${user?.id}`;
+  const assistantScopeRef = useRef(assistantScope);
+  assistantScopeRef.current = assistantScope;
+  useEffect(() => { setAssistantOpen(false); setInlineReview(null); setMeetingLaunch(null); }, [assistantScope]);
+  const refreshAssistantBoard = () => { reloadTasksRef.current(); setMeetingsKey(k => k + 1); setPendingUpdatesKey(k => k + 1); };
+  const handleAssistantChanged = (review: AgentReview, action: AgentMutation) => {
+    if (assistantScopeRef.current !== assistantScope || !selectedProject) return;
+    setReviewEvent(review);
+    // Removing an imported meeting needs the confirmation in Recent changes.
+    // Only approved task changes belong in the main keyboard/button Undo stack.
+    if (action === "apply" && review.mode !== "meeting" && review.receipt?.meeting_id == null) {
+      const token = workspaceTokenFor(selectedProject), projectId = selectedProject.id;
+      const key = `assistant:${review.id}`;
+      removeUndo(key);
+      pushUndo({ key, label: "suggested changes", run: async () => {
+        const result = await api.undoAgentReview(projectId, review.id, token);
+        if (assistantScopeRef.current === assistantScope) { setReviewEvent(result); refreshAssistantBoard(); }
+      } });
+    } else if (action === "undo") removeUndo(`assistant:${review.id}`);
+    refreshAssistantBoard();
+  };
+  const openSuggestedChanges = (review: AgentReview) => {
+    if (!selectedProject) return;
+    if (review.mode === "chat" && review.proposals.length <= 2) setInlineReview({ projectId: selectedProject.id, review: { ...review } });
+    else setMeetingLaunch({ id: Date.now(), projectId: selectedProject.id, review });
+  };
+
   const handleStatusChange = async (taskId: number, status: TaskStatus) => {
     const prev = tasks.find((t) => t.id === taskId)?.status;
     const gen = undoGeneration();
@@ -651,22 +689,34 @@ export default function DashboardPage() {
   const handleTranscriptSubmit = async (title: string, transcriptText: string, meetingDate: string) => {
     if (!selectedProjectId) return;
     const projectId = selectedProjectId;
-    const submit = (checkDuplicate: boolean) =>
-      api.submitTranscript(projectId, title, transcriptText, meetingDate, checkDuplicate);
-    let meeting: Meeting;
-    try {
-      meeting = await submit(true);
-    } catch (err) {
-      // The same transcript already on this board: ask before adding a second copy of its tasks.
-      const earlier = duplicateOf(err);
-      if (!earlier) throw err;
-      const addAgain = await new Promise<boolean>((resolve) =>
-        setDuplicatePrompt({ title: earlier.title, createdAt: earlier.created_at, resolve })
-      );
-      setDuplicatePrompt(null);
-      if (!addAgain) throw new Error("Not added: this transcript is already on this board.");
-      meeting = await submit(false);
+    const withDuplicateCheck = async <T,>(submit: (checkDuplicate: boolean) => Promise<T>): Promise<T> => {
+      try { return await submit(true); }
+      catch (err) {
+        const earlier = duplicateOf(err);
+        if (!earlier) throw err;
+        const addAgain = await new Promise<boolean>(resolve => setDuplicatePrompt({ title: earlier.title, createdAt: earlier.created_at, resolve }));
+        setDuplicatePrompt(null);
+        if (!addAgain) throw new Error("Not added: this transcript is already on this board.");
+        return submit(false);
+      }
+    };
+    if (process.env.NEXT_PUBLIC_MEETING_AGENT_PREVIEW === "true" && selectedProject) {
+      const result = await withDuplicateCheck(checkDuplicate => api.parseWithAssistant(projectId, {
+        title: title.trim() || `Meeting ${meetingDate}`, meeting_date: meetingDate,
+        transcript: transcriptText, instructions: "", check_duplicate: checkDuplicate,
+      }, workspaceTokenFor(selectedProject)));
+      if (result.saved_review) handleAssistantChanged(result.saved_review, "apply");
+      setMeetingsKey(k => k + 1);
+      setLatestMeetingId(result.meeting_id);
+      setSelectedMeetingIds([]);
+      reloadTasksRef.current();
+      setSummaryShownFor(result.meeting_id);
+      summaries.waitForSummary(result.meeting_id, workspaceTokenFor(selectedProject));
+      if (result.review) setMeetingLaunch({ id: Date.now(), projectId, review: result.review });
+      return result.questions;
     }
+    const meeting: Meeting = await withDuplicateCheck(checkDuplicate =>
+      api.submitTranscript(projectId, title, transcriptText, meetingDate, checkDuplicate));
     setMeetingsKey((k) => k + 1);
     // A failed extraction still comes back as 201 with status "failed", so check it: throwing
     // keeps the pasted transcript in the form and shows the error instead of a silent no-op.
@@ -685,10 +735,13 @@ export default function DashboardPage() {
 
   const handleAudioSubmit = async (title: string, file: File, meetingDate: string) => {
     if (!selectedProjectId) return;
+    const scope = assistantScope;
+    const projectId = selectedProjectId;
+    const useAssistant = process.env.NEXT_PUBLIC_MEETING_AGENT_PREVIEW === "true";
     // The board this recording belongs to, whose token the polling keeps using.
     const board = projects.find((p) => p.id === selectedProjectId);
     const boardToken = board ? workspaceTokenFor(board) : undefined;
-    const meeting = await api.submitAudio(selectedProjectId, title, file, meetingDate);
+    const meeting = await api.submitAudio(projectId, title, file, meetingDate, useAssistant);
     setMeetingsKey((k) => k + 1); // listed straight away, as "Processing…"
     // A long recording can take many minutes on the free server (converting the audio alone runs
     // for minutes). The job keeps going on the server whatever the browser does, so give up
@@ -711,6 +764,7 @@ export default function DashboardPage() {
         if (err instanceof ApiError) throw err;
       }
     }
+    if (assistantScopeRef.current !== scope) return;
     setMeetingsKey((k) => k + 1);
     if (current.status === "failed") {
       throw new Error(current.error_message || "Transcription failed.");
@@ -720,6 +774,18 @@ export default function DashboardPage() {
     reloadTasksRef.current();
     setSummaryShownFor(meeting.id);
     summaries.waitForSummary(meeting.id, boardToken);
+    if (useAssistant && boardToken) {
+      setPendingUpdatesKey(k => k + 1);
+      try {
+        const result = await api.getRecordingAssistantResult(projectId, meeting.id, boardToken);
+        if (assistantScopeRef.current !== scope) return;
+        if (result.review) setMeetingLaunch({ id: Date.now(), projectId, review: result.review });
+        return result.questions;
+      } catch {
+        // The recording is already saved: don't leave the upload ready to submit again.
+        setLoadError("Recording saved. Couldn’t open its suggested changes; open Changes to review them.");
+      }
+    }
   };
 
   const performDeleteMeeting = async () => {
@@ -951,7 +1017,7 @@ export default function DashboardPage() {
         onOpenAccount={() => setShowAccount(true)}
       />
 
-      <main className="mx-auto max-w-screen-2xl px-4 py-6 sm:px-6">
+      <main className={`mx-auto max-w-screen-2xl px-4 py-6 sm:px-6 ${assistantOpen && !searchAllProjects ? "lg:mr-[384px]" : ""}`}>
         {loadError && (
           <div
             role="alert"
@@ -1056,20 +1122,22 @@ export default function DashboardPage() {
               </div>
             </div>
 
+
             <div className="mb-6">
               <StatsBar tasks={statsTasks} scope={statsScope} />
             </div>
 
-            <div className={showCapture ? "grid gap-6 lg:grid-cols-[340px_1fr]" : ""}>
+            <div className={showCapture ? (assistantOpen ? "grid gap-6 xl:grid-cols-[260px_1fr] 2xl:grid-cols-[300px_1fr]" : "grid gap-6 lg:grid-cols-[340px_1fr]") : ""}>
               {showCapture && (
-                <div className="lg:sticky lg:top-20 lg:self-start">
-                  <TranscriptUpload onSubmitText={handleTranscriptSubmit} onSubmitAudio={handleAudioSubmit} />
+                <div className={assistantOpen ? "xl:sticky xl:top-20 xl:self-start" : "lg:sticky lg:top-20 lg:self-start"}>
+                  <TranscriptUpload assistantEnabled={process.env.NEXT_PUBLIC_MEETING_AGENT_PREVIEW === "true"} onSubmitText={handleTranscriptSubmit} onSubmitAudio={handleAudioSubmit} />
                 </div>
               )}
 
               <div className="min-w-0 space-y-4">
-                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-                  <div className="relative w-full sm:min-w-[200px] sm:flex-1">
+                <div className="board-toolbar" role="group" aria-label="Task controls">
+                  <div className="board-toolbar-layout">
+                  <div className="board-toolbar-search relative min-w-0">
                     <svg
                       viewBox="0 0 20 20"
                       className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
@@ -1085,7 +1153,7 @@ export default function DashboardPage() {
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                       placeholder="Search tasks…"
-                      className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-9 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                      className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-9 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
                     />
                     {search && (
                       <button
@@ -1100,13 +1168,11 @@ export default function DashboardPage() {
                     )}
                   </div>
 
-                  {/* Action controls: keep these on one tidy row (they share a line on mobile,
-                      while the search box gets its own full-width row above). */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-normal">
-                  <div className="flex shrink-0 rounded-lg bg-slate-900/[0.05] p-1 text-sm font-medium">
+                  <div className="board-toolbar-view flex h-10 items-stretch rounded-lg bg-slate-900/[0.05] p-1 font-display text-xs font-semibold sm:text-sm" role="group" aria-label="Task view">
                     <button
                       onClick={() => setView("board")}
-                      className={`rounded-md px-3 py-1 transition ${
+                      aria-pressed={activeView === "board"}
+                      className={`rounded-md px-2.5 transition sm:px-3 ${
                         activeView === "board" ? "bg-ink text-white shadow-sm" : "text-slate-500 hover:text-slate-700"
                       }`}
                     >
@@ -1114,7 +1180,8 @@ export default function DashboardPage() {
                     </button>
                     <button
                       onClick={() => setView("calendar")}
-                      className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1 transition ${
+                      aria-pressed={activeView === "calendar"}
+                      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 transition sm:px-3 ${
                         activeView === "calendar" ? "bg-ink text-white shadow-sm" : "text-slate-500 hover:text-slate-700"
                       }`}
                     >
@@ -1124,24 +1191,29 @@ export default function DashboardPage() {
                       Calendar
                     </button>
                   </div>
+                  {process.env.NEXT_PUBLIC_MEETING_AGENT_PREVIEW === "true" && selectedProject && !searchAllProjects && canEdit && (
+                    <div className="board-toolbar-suggestions min-w-0"><PendingTaskUpdates key={`${selectedProject.id}:${session?.mode}:${user?.id}:${workspaceTokenFor(selectedProject)}`}
+                      project={selectedProject} boardTasks={tasks} refreshKey={`${meetingsKey}:${pendingUpdatesKey}`}
+                      onReview={openSuggestedChanges} onHistory={() => setMeetingLaunch({ id: Date.now(), projectId: selectedProject.id })} /></div>
+                  )}
                   {cardsEditable && (
-                    <div className="flex items-center gap-2">
+                    <div className="board-toolbar-actions flex items-center justify-end gap-1 sm:gap-2" role="group" aria-label="Task actions">
                       <button
                         onClick={handleUndo}
                         disabled={undoDepth === 0}
                         title="Undo (⌘Z / Ctrl+Z)"
                         aria-label="Undo"
-                        className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-900/5 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
+                        className="inline-flex h-10 min-w-10 shrink-0 items-center justify-center gap-1.5 rounded-lg px-2.5 text-[13px] font-medium text-slate-600 sm:text-sm transition hover:bg-slate-900/5 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
                       >
                         <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
                           <path d="M8 5V2.5a.5.5 0 00-.82-.38l-4.5 3.75a.5.5 0 000 .76l4.5 3.75A.5.5 0 008 10V7.5h3.5a4 4 0 110 8H7a1 1 0 100 2h4.5a6 6 0 100-12H8z" />
                         </svg>
-                        <span className="hidden sm:inline">Undo</span>
+                        <span className="board-undo-label">Undo</span>
                       </button>
                       {showCapture && (
                       <button
                         onClick={() => setCreatingTask(true)}
-                        className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-ink px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-ink-700"
+                        className="inline-flex h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-ink px-2.5 text-[13px] font-medium sm:px-3 sm:text-sm text-white shadow-sm transition hover:bg-ink-700"
                       >
                         <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
                           <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" />
@@ -1331,8 +1403,10 @@ export default function DashboardPage() {
           duplicatePrompt && (
             <>
               This exact transcript is already on this board as “{duplicatePrompt.title}”
-              {duplicatePrompt.createdAt && <>, added {formatAddedAt(duplicatePrompt.createdAt)}</>}. Adding it
-              again creates a second copy of its tasks.
+              {duplicatePrompt.createdAt && <>, added {formatAddedAt(duplicatePrompt.createdAt)}</>}.
+              {process.env.NEXT_PUBLIC_MEETING_AGENT_PREVIEW === "true"
+                ? " Add it again as a separate meeting? Existing tasks will still be checked to avoid duplicate work."
+                : " Adding it again creates a second copy of its tasks."}
             </>
           )
         }
@@ -1358,6 +1432,29 @@ export default function DashboardPage() {
         onConfirm={performDeleteProject}
         onCancel={() => setProjectDeletion(null)}
       />
+
+      {process.env.NEXT_PUBLIC_MEETING_AGENT_PREVIEW === "true" && selectedProject && !searchAllProjects && (
+        <ProjectAssistant key={`${selectedProject.id}:${session?.mode}:${user?.id}:${workspaceTokenFor(selectedProject)}`} project={selectedProject}
+          onSuggestionsChanged={() => setPendingUpdatesKey(k => k + 1)}
+          meetingCount={meetings.length}
+          inlineReview={inlineReview?.projectId === selectedProject.id ? inlineReview.review : null}
+          reviewEvent={reviewEvent}
+          onOpenReview={openSuggestedChanges}
+          open={assistantOpen}
+          onOpenChange={setAssistantOpen}
+          onNewMeeting={() => { setAssistantOpen(false); requestAnimationFrame(() => { document.getElementById("new-meeting")?.scrollIntoView({ behavior: "smooth", block: "center" }); document.getElementById("meeting-transcript")?.focus({ preventScroll: true }); }); }}
+          onChanged={handleAssistantChanged}
+          onOpenTask={id => { reloadTasksRef.current(); setEditingTaskId(id); }}
+          onOpenMeeting={id => { setMeetingsKey(k => k + 1); setSelectedMeetingIds([id]); setSummaryShownFor(id); }} />
+      )}
+
+      {process.env.NEXT_PUBLIC_MEETING_AGENT_PREVIEW === "true" && selectedProject && !searchAllProjects && canEdit && (
+        <MeetingAgent key={`${selectedProject.id}:${session?.mode}:${user?.id}`} project={selectedProject}
+          reviewEvent={reviewEvent}
+          launch={meetingLaunch?.projectId === selectedProject.id ? meetingLaunch : null}
+          onNewMeeting={() => { setAssistantOpen(false); requestAnimationFrame(() => { document.getElementById("new-meeting")?.scrollIntoView({ behavior: "smooth", block: "center" }); document.getElementById("meeting-transcript")?.focus({ preventScroll: true }); }); }}
+          onChanged={handleAssistantChanged} onReviewChanged={setReviewEvent} onClose={() => setMeetingLaunch(null)} />
+      )}
 
       <ShareModal
         project={shareProject}

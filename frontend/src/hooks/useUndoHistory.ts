@@ -23,6 +23,7 @@ export function useUndoHistory(resetKey: string, onError: (message: string) => v
   // so an action that finishes after the user has switched boards is not added to the new board's
   // history.
   const genRef = useRef(0);
+  const undoing = useRef(false);
 
   const clear = useCallback(() => {
     genRef.current += 1;
@@ -42,16 +43,23 @@ export function useUndoHistory(resetKey: string, onError: (message: string) => v
     setDepth(stackRef.current.length);
   }, []);
 
+  const remove = useCallback((key: string) => {
+    stackRef.current = stackRef.current.filter(action => action.key !== key);
+    setDepth(stackRef.current.length);
+  }, []);
+
   const undo = useCallback(async () => {
+    if (undoing.current) return;
     const action = stackRef.current.pop();
     setDepth(stackRef.current.length);
     if (!action) return;
+    undoing.current = true;
     try {
       await action.run();
       setNonce((n) => n + 1);
     } catch (err) {
       onError((err as Error).message);
-    }
+    } finally { undoing.current = false; }
   }, [onError]);
 
   useEffect(() => {
@@ -66,5 +74,5 @@ export function useUndoHistory(resetKey: string, onError: (message: string) => v
     return () => window.removeEventListener("keydown", onKey);
   }, [undo]);
 
-  return { depth, nonce, push, undo, clear, generation };
+  return { depth, nonce, push, undo, clear, generation, remove };
 }

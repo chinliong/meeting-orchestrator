@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 
 import AttachmentList from "@/components/AttachmentList";
 import SubtaskList from "@/components/SubtaskList";
+import { formatMeetingDate, isLowConfidence } from "@/lib/format";
 import type { Task, TaskMeta, TaskStatus, UndoAction } from "@/lib/types";
 
 interface TaskValues {
@@ -107,6 +108,13 @@ export default function EditTaskModal({
   }, [open, task?.id, syncNonce]);
 
   if (!open) return null;
+
+  // The source meeting's date, as the task card shows it, unless the title already has it.
+  const formattedMeetingDate = task?.meeting_date ? formatMeetingDate(task.meeting_date) : null;
+  const meetingDate =
+    formattedMeetingDate !== null && !task?.meeting_title?.includes(formattedMeetingDate)
+      ? formattedMeetingDate
+      : null;
 
   // --- create mode: collect the fields and submit once ---
   const handleSubmit = async (e: React.FormEvent) => {
@@ -231,6 +239,53 @@ export default function EditTaskModal({
               : "Edits save automatically as you go."}
         </p>
 
+        {/* Where the task came from, read before checking the fields against it: its meeting,
+            the extraction score and the decision behind it. Manual tasks have none, so no block. */}
+        {task && (task.source_decision || task.meeting_id !== null) && (
+          <div className="mt-4 rounded-lg bg-slate-50 px-3.5 py-3 ring-1 ring-slate-200/70">
+            {task.meeting_id !== null && (
+              <div className="flex items-start justify-between gap-3 text-xs leading-5 text-slate-500">
+                {/* The title wraps rather than truncates; the date never splits across lines. */}
+                <span className="min-w-0">
+                  From <span className="font-medium text-slate-600">{task.meeting_title}</span>
+                  {meetingDate && <span className="whitespace-nowrap"> · {meetingDate}</span>}
+                </span>
+                {/* Only the parser scores tasks; assistant-created tasks have no score. */}
+                {/* Amber below the review threshold, matching the card's "Check this" flag. */}
+                {task.confidence !== null &&
+                  (isLowConfidence(task.confidence) ? (
+                    <span
+                      className="inline-flex shrink-0 cursor-help items-center gap-1.5 rounded-full bg-amber-50 px-2 py-0.5 font-medium tabular-nums text-amber-700 ring-1 ring-amber-200"
+                      title="The AI was unsure about this one. Check the owner and deadline before relying on it."
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden />
+                      {Math.round(task.confidence * 100)}% · Check this
+                    </span>
+                  ) : (
+                    <span
+                      className="shrink-0 cursor-help rounded-full bg-white px-2 py-0.5 font-medium tabular-nums text-slate-600 ring-1 ring-slate-200"
+                      title="How explicitly the meeting stated this item, as rated by the AI. It is not a probability that the task is correct."
+                    >
+                      {Math.round(task.confidence * 100)}% confidence
+                    </span>
+                  ))}
+              </div>
+            )}
+            {/* Not in quotation marks: the parser may paraphrase. */}
+            {task.source_decision ? (
+              <SourceText
+                key={task.id}
+                text={task.source_decision}
+                className={task.meeting_id !== null ? "mt-1.5" : ""}
+              />
+            ) : (
+              // The parser leaves this empty when the meeting doesn't make the origin clear. Said
+              // plainly so the box isn't half-empty; it is not a review flag (that is the score's job).
+              <p className="mt-1.5 text-sm text-slate-400">No source decision was recorded for this task.</p>
+            )}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           <div>
             <label className="mb-1 block font-display text-sm font-semibold text-slate-700">Description</label>
@@ -287,7 +342,7 @@ export default function EditTaskModal({
             </select>
           </div>
 
-          {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
+          {error &&<p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
           {autoSaveError && (
             <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{autoSaveError}</p>
           )}
@@ -334,6 +389,61 @@ export default function EditTaskModal({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// "Aisha:", "Daniel Tan:" or a recording's "Speaker 1:" opening a line of a quoted exchange.
+const SPEAKER = /^([A-Z][\w.'-]*(?: [A-Z0-9][\w.'-]*){0,2}):\s/;
+
+/**
+ * The task's source text, folded to three lines when longer. The assistant quotes whole
+ * exchanges, which would otherwise push the editable fields down; the first lines already say
+ * who committed to what. Speaker names are bold so a multi-turn quote reads as dialogue.
+ */
+function SourceText({ text, className }: { text: string; className: string }) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [overflows, setOverflows] = useState(false);
+
+  // Measured while folded, so "Show more" appears only when something is actually hidden.
+  useEffect(() => {
+    const el = ref.current;
+    if (el && !expanded) setOverflows(el.scrollHeight > el.clientHeight + 1);
+  }, [text, expanded]);
+
+  return (
+    <div className={className}>
+      <p
+        ref={ref}
+        className={`whitespace-pre-line text-sm leading-relaxed text-slate-700 ${expanded ? "" : "line-clamp-3"}`}
+      >
+        {text.split("\n").map((line, i) => {
+          const speaker = line.match(SPEAKER);
+          return (
+            <Fragment key={i}>
+              {i > 0 && "\n"}
+              {speaker ? (
+                <>
+                  <span className="font-semibold text-slate-800">{speaker[1]}:</span>
+                  {line.slice(speaker[1].length + 1)}
+                </>
+              ) : (
+                line
+              )}
+            </Fragment>
+          );
+        })}
+      </p>
+      {overflows && (
+        <button
+          type="button"
+          onClick={() => setExpanded((e) => !e)}
+          className="mt-1 text-xs font-medium text-slate-500 hover:text-brand"
+        >
+          {expanded ? "Show less" : "Show more"}
+        </button>
+      )}
     </div>
   );
 }

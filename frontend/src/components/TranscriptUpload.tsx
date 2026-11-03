@@ -3,8 +3,9 @@
 import { useState } from "react";
 
 interface Props {
-  onSubmitText: (title: string, transcriptText: string, meetingDate: string) => Promise<void>;
-  onSubmitAudio: (title: string, file: File, meetingDate: string) => Promise<void>;
+  assistantEnabled?: boolean;
+  onSubmitText: (title: string, transcriptText: string, meetingDate: string) => Promise<void | string[]>;
+  onSubmitAudio: (title: string, file: File, meetingDate: string) => Promise<void | string[]>;
 }
 
 type Mode = "text" | "audio";
@@ -15,7 +16,7 @@ const today = () => new Date().toLocaleDateString("en-CA");
 /** Largest recording accepted; matches MAX_AUDIO_BYTES in backend/app/api/transcripts.py. */
 const MAX_AUDIO_MB = 500;
 
-export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props) {
+export default function TranscriptUpload({ onSubmitText, onSubmitAudio, assistantEnabled = false }: Props) {
   const [mode, setMode] = useState<Mode>("text");
   const [title, setTitle] = useState("");
   // Deadline cues like "by Friday" resolve against this date. Defaulting to today is right for
@@ -24,6 +25,7 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [questions, setQuestions] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,11 +40,14 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
 
     setSubmitting(true);
     setError(null);
+    setQuestions([]);
     try {
       if (mode === "text") {
-        await onSubmitText(title, text, meetingDate);
+        const notes = await onSubmitText(title, text, meetingDate);
+        setQuestions(notes || []);
       } else if (file) {
-        await onSubmitAudio(title, file, meetingDate);
+        const notes = await onSubmitAudio(title, file, meetingDate);
+        setQuestions(notes || []);
       }
       setTitle("");
       setText("");
@@ -62,6 +67,7 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
 
   return (
     <form
+      id="new-meeting"
       onSubmit={handleSubmit}
       className="relative overflow-hidden rounded-2xl bg-ink p-6 text-slate-100 shadow-card"
     >
@@ -115,6 +121,9 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
 
         {mode === "text" ? (
           <textarea
+            id="meeting-transcript"
+            minLength={assistantEnabled ? 20 : undefined}
+            maxLength={assistantEnabled ? 60000 : undefined}
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Paste the raw meeting transcript here."
@@ -141,6 +150,8 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
           </label>
         )}
 
+        {questions.length > 0 && <details className="mt-3 rounded-lg border border-white/15 p-3 text-xs text-slate-300"><summary className="cursor-pointer">Meeting saved · {questions.length} point{questions.length === 1 ? "" : "s"} to clarify</summary><ul className="mt-2 list-disc space-y-2 pl-4">{questions.map((q, i) => <li key={i}>{q}</li>)}</ul></details>}
+
         {error && (
           <p className="mt-3 rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
             {error}
@@ -166,6 +177,7 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio }: Props)
               ? "Transcribe & parse"
               : "Parse transcript"}
         </button>
+        {assistantEnabled && mode === "text" && <p className="mt-3 text-xs leading-relaxed text-slate-400">New tasks are added automatically. Updates to existing tasks need your confirmation.</p>}
       </div>
     </form>
   );

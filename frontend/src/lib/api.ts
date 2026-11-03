@@ -1,4 +1,10 @@
 import type {
+  AgentReview,
+  AssistantImportResult,
+  AgentReviewInput,
+  AgentReviewListItem,
+  AssistantAnswer,
+  AssistantMessage,
   Attachment,
   AuthResponse,
   DeletedTask,
@@ -111,7 +117,7 @@ function authHeaders(): Record<string, string> {
   return headers;
 }
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
+async function request<T>(path: string, options?: RequestInit, maxAttempts = 5): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options?.headers as Record<string, string> | undefined),
@@ -120,13 +126,46 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   // A caller may pin a specific board's token (see getMeeting); otherwise use the active board's.
   if (workspaceToken && !headers["X-Workspace-Token"]) headers["X-Workspace-Token"] = workspaceToken;
 
-  const res = await fetchWithRetry(`${API_BASE}${path}`, { ...options, headers });
+  const res = await fetchWithRetry(`${API_BASE}${path}`, { ...options, headers }, maxAttempts);
   await throwIfFailed(res, path);
   if (res.status === 204) return undefined as T;
   return res.json();
 }
 
 export const api = {
+  chatWithAssistant: (projectId: number, message: string, history: AssistantMessage[], currentDate: string, token: string) =>
+    request<AssistantAnswer>(`/projects/${projectId}/agent/chat`, {
+      method: "POST", body: JSON.stringify({ message, history, current_date: currentDate }),
+      headers: { "X-Workspace-Token": token },
+    }, 1),
+  // Pin the board credential. Paid reviews and mutations do not auto-retry: a dropped
+  // response might still have completed on the server. Saved history recovers the result.
+  listAgentReviews: (projectId: number, token: string, view: "all" | "pending" | "history" = "all") =>
+    request<AgentReviewListItem[]>(`/projects/${projectId}/agent/reviews?view=${view}`, { headers: { "X-Workspace-Token": token } }),
+  getAgentReview: (projectId: number, id: string, token: string) =>
+    request<AgentReview>(`/projects/${projectId}/agent/reviews/${id}`, { headers: { "X-Workspace-Token": token } }),
+  parseWithAssistant: (projectId: number, input: AgentReviewInput, token: string) =>
+    request<AssistantImportResult>(`/projects/${projectId}/agent/parse`, {
+      method: "POST", body: JSON.stringify(input), headers: { "X-Workspace-Token": token },
+    }, 1),
+  getRecordingAssistantResult: (projectId: number, meetingId: number, token: string) =>
+    request<AssistantImportResult>(`/projects/${projectId}/agent/recordings/${meetingId}/result`, { headers: { "X-Workspace-Token": token } }),
+  createAgentReview: (projectId: number, input: AgentReviewInput, token: string) =>
+    request<AgentReview>(`/projects/${projectId}/agent/reviews`, {
+      method: "POST", body: JSON.stringify(input), headers: { "X-Workspace-Token": token },
+    }, 1),
+  applyAgentReview: (projectId: number, id: string, proposalIds: number[], token: string) =>
+    request<AgentReview>(`/projects/${projectId}/agent/reviews/${id}/apply`, {
+      method: "POST", body: JSON.stringify({ proposal_ids: proposalIds }), headers: { "X-Workspace-Token": token },
+    }, 1),
+  refreshAgentReview: (projectId: number, id: string, token: string) =>
+    request<AgentReview>(`/projects/${projectId}/agent/reviews/${id}/refresh`, {
+      method: "POST", headers: { "X-Workspace-Token": token },
+    }, 1),
+  undoAgentReview: (projectId: number, id: string, token: string) =>
+    request<AgentReview>(`/projects/${projectId}/agent/reviews/${id}/undo`, {
+      method: "POST", headers: { "X-Workspace-Token": token },
+    }, 1),
   // --- system ---
   health: () => request<{ status: string }>("/health"),
 
@@ -348,7 +387,7 @@ export const api = {
   updateMeeting: (id: number, title: string) =>
     request<Meeting>(`/transcripts/${id}`, { method: "PATCH", body: JSON.stringify({ title }) }),
 
-  submitAudio: async (projectId: number, title: string, file: File, meetingDate: string): Promise<Meeting> => {
+  submitAudio: async (projectId: number, title: string, file: File, meetingDate: string, useAssistant = false): Promise<Meeting> => {
     const form = new FormData();
     form.set("project_id", String(projectId));
     form.set("title", title);
@@ -358,8 +397,9 @@ export const api = {
     const headers: Record<string, string> = {};
     if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
     if (workspaceToken) headers["X-Workspace-Token"] = workspaceToken;
-    const res = await fetchWithRetry(`${API_BASE}/transcripts/audio`, { method: "POST", body: form, headers });
-    await throwIfFailed(res, "/transcripts/audio");
+    const path = useAssistant ? `/projects/${projectId}/agent/recordings` : "/transcripts/audio";
+    const res = await fetchWithRetry(`${API_BASE}${path}`, { method: "POST", body: form, headers });
+    await throwIfFailed(res, path);
     return res.json();
   },
 };

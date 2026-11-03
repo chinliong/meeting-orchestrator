@@ -21,7 +21,8 @@ Environment variables (each limit is a count per period, e.g. "20/hour"):
     RATE_LIMITS_ENABLED   "false" turns limiting off (the test suite does this). Default on.
     RATE_LIMIT_PARSE      transcripts parsed.        Default 20/hour.
     RATE_LIMIT_AUDIO      recordings uploaded.       Default 10/hour.
-    RATE_LIMIT_AI         summaries and subtask generations together. Default 30/hour.
+    RATE_LIMIT_AI         shared AI call allowance. Default 30/hour.
+    RATE_LIMIT_AGENT_CHAT assistant requests (also use shared AI allowance). Default 30/hour.
     RATE_LIMIT_LOGIN      sign-in attempts.          Default 10/minute.
     RATE_LIMIT_RESET      password-reset requests.   Default 5/hour.
     RATE_LIMIT_RESET_CODE reset-code attempts.       Default 10/minute.
@@ -67,9 +68,25 @@ limiter = Limiter(
 
 # Summaries and subtask generation share one allowance, so neither can be used to get around
 # the other's limit.
-ai_limit = limiter.shared_limit(AI, scope="ai-generation",
+ai_limit = limiter.shared_limit(lambda: _limit("AI", "30/hour"), scope="ai-generation",
                                 error_message="You've reached the limit for AI summaries and "
                                               "subtask suggestions for now. Please try again later.")
+
+audio_limit = limiter.shared_limit(AUDIO, scope="recording-upload",
+                                  error_message="You've reached the limit for uploading recordings for now. "
+                                                "Please try again later.")
+
+
+# All transcript entry points share one allowance. Agent requests reserve their
+# bounded maximum model-call cost from the same AI allowance as summaries/subtasks.
+parse_limit = limiter.shared_limit(lambda: _limit("PARSE", "20/hour"), scope="transcript-parse",
+                                   error_message="You've reached the limit for parsing transcripts. Please try again later.")
+agent_chat_limit = limiter.limit(lambda: _limit("AGENT_CHAT", "30/hour"),
+                                 error_message="You've reached the assistant message limit. Please try again later.")
+agent_ai_limit = limiter.shared_limit(lambda: _limit("AI", "30/hour"), scope="ai-generation", cost=6,
+                                     error_message="You've reached the AI usage limit. Please try again later.")
+agent_parse_ai_limit = limiter.shared_limit(lambda: _limit("AI", "30/hour"), scope="ai-generation", cost=7,
+                                           error_message="You've reached the AI usage limit. Please try again later.")
 
 
 def rate_limit_exceeded(request: Request, exc: RateLimitExceeded) -> JSONResponse:

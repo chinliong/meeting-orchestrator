@@ -116,3 +116,31 @@ input[type="date"]::-webkit-date-and-time-value {
     animation: none;
   }
 }
+
+/* Respond to the available board width, including its docked-chat layout. */
+.board-toolbar { container-type: inline-size; }
+.board-toolbar-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "search search" "view actions";
+  align-items: center;
+  gap: 8px;
+}
+.board-toolbar-search { grid-area: search; }
+.board-toolbar-layout:has(.board-toolbar-suggestions) .board-toolbar-search { padding-right: 120px; }
+.board-toolbar-view { grid-area: view; justify-self: start; }
+.board-toolbar-suggestions { grid-column: 2; grid-row: 1; justify-self: end; }
+.board-toolbar-actions { grid-area: actions; }
+@container (min-width: 800px) {
+  .board-toolbar-layout {
+    grid-template-columns: minmax(160px, 1fr) auto auto auto;
+    grid-template-areas: "search view suggestions actions";
+    column-gap: 8px;
+  }
+  .board-toolbar-layout:has(.board-toolbar-suggestions) .board-toolbar-search { padding-right: 0; }
+  .board-toolbar-suggestions { grid-area: suggestions; }
+}
+@container (max-width: 340px) {
+  .board-toolbar-view button { padding-inline: 7px; }
+  .board-undo-label { display: none; }
+}

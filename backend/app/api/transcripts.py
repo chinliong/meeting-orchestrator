@@ -35,7 +35,7 @@ from app.models.models import (
     User,
     is_summary_failure,
 )
-from app.ratelimit import AUDIO, PARSE, ai_limit, limiter
+from app.ratelimit import ai_limit, audio_limit, parse_limit
 from app.schemas.schemas import (
     MeetingListItem,
     MeetingOut,
@@ -176,8 +176,8 @@ async def _save_upload(file: UploadFile, suffix: str) -> str:
     return path
 
 
-def _transcribe_and_extract(meeting_id: int, path: str) -> None:
-    """Background job: transcribe the uploaded recording at `path`, then run the parser.
+def _transcribe_and_extract(meeting_id: int, path: str, use_assistant: bool = False) -> None:
+    """Background job: transcribe the recording, then reconcile or extract its tasks.
 
     Runs after the HTTP response is sent (in a worker thread), so it opens its own DB session —
     the request-scoped session is already closed. Doing transcription here, off the request,
@@ -209,7 +209,25 @@ def _transcribe_and_extract(meeting_id: int, path: str) -> None:
             return
         meeting.transcript_text = text
         db.commit()
-        _extract_and_store_tasks(meeting, db)
+        if use_assistant:
+            # Import lazily: the assistant API uses write_summary from this module.
+            from app.api.agent import parse_recording_with_assistant
+            try:
+                parse_recording_with_assistant(db, meeting)
+            except (StaleDataError, ObjectDeletedError, IntegrityError):
+                raise
+            except Exception:
+                db.rollback()
+                log.exception("assistant extraction failed for recording %s", meeting_id)
+                meeting = db.get(Meeting, meeting_id)
+                if meeting is None:
+                    return
+                meeting.status = MeetingStatus.FAILED
+                meeting.error_message = EXTRACTION_FAILED
+                db.commit()
+                return
+        else:
+            _extract_and_store_tasks(meeting, db)
     except (StaleDataError, ObjectDeletedError, IntegrityError):
         # Deleted during the extraction instead: the save finds no meeting, so there is nothing to keep.
         db.rollback()
@@ -288,8 +306,7 @@ def recover_interrupted_meetings(up_to_id: int) -> int:
 
 
 @router.post("", response_model=MeetingOut, status_code=201)
-@limiter.limit(PARSE, error_message="You've reached the limit for parsing transcripts for now. "
-                                    "Please try again later.")
+@parse_limit
 def submit_transcript(
     request: Request,
     background_tasks: BackgroundTasks,
@@ -329,8 +346,7 @@ def submit_transcript(
 
 
 @router.post("/audio", response_model=MeetingOut, status_code=201)
-@limiter.limit(AUDIO, error_message="You've reached the limit for uploading recordings for now. "
-                                    "Please try again later.")
+@audio_limit
 async def submit_audio(
     request: Request,
     background_tasks: BackgroundTasks,
@@ -349,7 +365,19 @@ async def submit_audio(
     request so a slow Whisper call can't time out the connection (which the browser reported
     as an opaque "Failed to fetch").
     """
+    return await accept_audio(background_tasks, project_id, title, meeting_date, file,
+                              user, x_workspace_token, db)
+
+
+async def accept_audio(background_tasks, project_id, title, meeting_date, file, user,
+                       x_workspace_token, db, *, use_assistant=False):
+    """Shared upload implementation; each entry point applies its own AI usage allowance."""
     project = require_project_edit(db, project_id, user, x_workspace_token)
+    if use_assistant:
+        from app.api.agent import require_enabled
+        require_enabled()
+        if not os.getenv("GEMINI_API_KEY"):
+            raise HTTPException(503, "Configure GEMINI_API_KEY on the local backend to run the agent.")
 
     if not transcription.is_available():
         raise HTTPException(
@@ -380,7 +408,7 @@ async def submit_audio(
         os.unlink(path)  # no job will run to clean it up
         raise
 
-    background_tasks.add_task(_transcribe_and_extract, meeting.id, path)
+    background_tasks.add_task(_transcribe_and_extract, meeting.id, path, use_assistant)
     return meeting
 
 

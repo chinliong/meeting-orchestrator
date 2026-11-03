@@ -12,7 +12,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 
-from app.api import attachments, auth, internal, projects, subtasks, tasks, transcripts
+from app.api import agent, attachments, auth, internal, projects, subtasks, tasks, transcripts
 from app.db import Base, engine
 from app.llm import transcription
 from app.ratelimit import TRUSTED_IP_HEADERS, limiter, rate_limit_exceeded
@@ -98,6 +98,7 @@ app.include_router(tasks.router, prefix="/api/v1")
 app.include_router(subtasks.router, prefix="/api/v1")
 app.include_router(attachments.router, prefix="/api/v1")
 app.include_router(internal.router, prefix="/api/v1")
+app.include_router(agent.router, prefix="/api/v1")
 
 
 @app.get("/api/v1/health")
@@ -128,6 +129,7 @@ def health():
         extraction = {"provider": "unavailable", "error": type(exc).__name__}
     return {
         "status": "ok",
+        "features": {"meeting_agent": agent.enabled()},
         "extraction": extraction,
         "transcription": {"available": transcription.is_available()},
         # Whether limits are on, and where the visitor's address is read from: behind Render's

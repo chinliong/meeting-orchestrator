@@ -836,7 +836,8 @@ def test_audio_upload_reaches_transcription_as_a_file_on_disk(client, project, m
     monkeypatch.setattr("app.api.transcripts.transcription.is_available", lambda: True)
     monkeypatch.setattr(
         "app.api.transcripts._transcribe_and_extract",
-        lambda meeting_id, path: captured.update(meeting_id=meeting_id, path=path),
+        lambda meeting_id, path, use_assistant=False: captured.update(
+            meeting_id=meeting_id, path=path, use_assistant=use_assistant),
     )
     resp = client.post(
         "/api/v1/transcripts/audio",
@@ -844,6 +845,7 @@ def test_audio_upload_reaches_transcription_as_a_file_on_disk(client, project, m
         files={"file": ("m.wav", b"audio-bytes", "audio/wav")},
     )
     assert resp.status_code == 201
+    assert captured["use_assistant"] is False
     path = captured["path"]
     try:
         assert isinstance(path, str) and path.endswith(".wav")

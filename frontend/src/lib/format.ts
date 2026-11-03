@@ -99,25 +99,6 @@ export function formatBytes(bytes: number): string {
   return `${value < 10 ? value.toFixed(1) : Math.round(value)} ${units[i]}`;
 }
 
-/**
- * Accent colour for the confidence meter, by how explicit the extraction was.
- * The chip itself stays a neutral chip; this colours just the icon + number so
- * high/medium/low still reads at a glance without a loud coloured pill.
- */
-export function confidenceColor(confidence: number): string {
-  if (confidence >= LOW_CONFIDENCE) return "text-emerald-600";
-  if (confidence >= 0.6) return "text-amber-600";
-  return "text-slate-400";
-}
-
-/**
- * Below this, a card is flagged for review rather than shown as a percentage.
- *
- * Set from Claude Sonnet's scores: every Sonnet item scored below 0.85 in the evaluation was
- * spurious. Gemini Flash, the implemented model, never scored an item below 0.85, so on it the
- * flag rarely if ever fires. The score is not a calibrated probability on either model.
- * See docs/evaluation-appendix.md, "Is the confidence score meaningful?".
- */
 // The backend's rule for new passwords (app/api/auth.py), checked here too so the message shows at once.
 export const MIN_PASSWORD_LENGTH = 8;
 
@@ -127,6 +108,15 @@ export function passwordTooShort(password: string): string | null {
     : null;
 }
 
+/**
+ * Below this, a card is flagged "Check this". Above it the card shows nothing; the score is
+ * only in the task's detail view.
+ *
+ * Set from Claude Sonnet's scores: every Sonnet item scored below 0.85 in the evaluation was
+ * spurious. Gemini Flash, the implemented model, never scored an item below 0.85, so on it the
+ * flag rarely if ever fires. The score is not a calibrated probability on either model.
+ * See docs/evaluation-appendix.md, "Is the confidence score meaningful?".
+ */
 export const LOW_CONFIDENCE = 0.85;
 
 export function isLowConfidence(confidence: number): boolean {

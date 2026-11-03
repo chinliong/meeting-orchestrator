@@ -60,7 +60,8 @@ export interface Task {
   owner: string | null;
   deadline: string | null;
   status: TaskStatus;
-  confidence: number;
+  // Null when there is no extraction score (tasks created by the project assistant).
+  confidence: number | null;
   source_decision: string | null;
   created_at: string;
   // Rollup counts so cards can show progress without fetching the children.
@@ -105,6 +106,7 @@ export interface DeletedTask {
 
 /** A reversible action on the undo stack. `run` performs the inverse of what just happened. */
 export interface UndoAction {
+  key?: string;
   label: string;
   run: () => void | Promise<void>;
 }
@@ -145,4 +147,93 @@ export interface Meeting {
   summary_failed: boolean;
   created_at: string;
   tasks: Task[];
+}
+
+export interface AgentReviewInput {
+  title: string;
+  meeting_date: string;
+  transcript: string;
+  instructions: string;
+  check_duplicate?: boolean;
+}
+
+export type AgentTaskFields = Pick<Task, "description" | "owner" | "deadline" | "status">;
+
+export interface AgentProposal {
+  id: number;
+  kind: "create" | "update";
+  task_id: number | null;
+  before: AgentTaskFields | null;
+  after: AgentTaskFields;
+  evidence: string;
+  reason: string;
+}
+
+export type AgentMutation = "apply" | "undo" | "refresh";
+
+export interface AssistantImportResult {
+  meeting_id: number;
+  new_task_count: number;
+  saved_review?: AgentReview;
+  review: AgentReview | null;
+  questions: string[];
+}
+
+export interface AgentReview {
+  unavailable_proposal_ids?: number[];
+  stale?: boolean;
+  stale_reason?: string | null;
+  id: string;
+  mode: "meeting" | "chat" | "meeting_updates";
+  status: "draft" | "applied" | "undone";
+  created_at: string;
+  expires_at: string | null;
+  input: AgentReviewInput;
+  summary: string;
+  questions: string[];
+  proposals: AgentProposal[];
+  model: string;
+  steps: number;
+  elapsed_seconds: number;
+  trace: { label: string; tool: string }[];
+  receipt: { proposal_ids: number[]; meeting_id: number | null; applied_at: string } | null;
+}
+
+export interface AgentReviewListItem {
+  stale?: boolean;
+  stale_reason?: string | null;
+  id: string;
+  mode: AgentReview["mode"];
+  /** Meeting title, or the first changed task for chat edits. */
+  title: string;
+  status: AgentReview["status"];
+  change_count: number;
+  created_at: string;
+}
+
+export interface AssistantSource {
+  kind: "task" | "meeting";
+  id: number;
+  title: string;
+  quote: string;
+  owner: string | null;
+  status: TaskStatus | null;
+  deadline: string | null;
+  meeting_date: string | null;
+}
+
+export interface AssistantAnswer {
+  answer: string;
+  sources: AssistantSource[];
+  questions: string[];
+  next_action: "none" | "review_meeting";
+  review: AgentReview | null;
+  model: string;
+  trace: { label: string; tool: string }[];
+  elapsed_seconds: number;
+}
+
+export interface AssistantMessage {
+  role: "user" | "assistant";
+  content: string;
 }
