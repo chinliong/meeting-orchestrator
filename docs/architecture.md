@@ -7,7 +7,11 @@
    token. Either is attached to subsequent requests.
 2. The user submits a meeting: pasted transcript text or an uploaded audio/video file.
 3. The frontend calls the FastAPI backend (`POST /transcripts` for text, `POST /transcripts/audio`
-   for files). Write endpoints require edit access to the target board.
+   for files). Write endpoints require edit access to the target board. With the meeting
+   assistant on, as deployed, it calls `POST /projects/{id}/agent/parse` or `.../agent/recordings`
+   instead: the same extraction runs, and on a board that already has tasks the assistant then
+   keeps tasks already there from being added twice and proposes changes to existing tasks for
+   the user to approve.
 4. For audio, the backend first transcribes the file with a hosted service (Deepgram Nova-3) to
    obtain the transcript text, labelled by speaker ("Speaker 1: ...").
 5. The backend sends the transcript to Gemini with a forced function-call schema; the response
@@ -115,6 +119,10 @@ flowchart LR
   - `GET|POST /tasks/{id}/attachments`, `GET|DELETE /attachments/{id}`. Bytes are streamed back
     behind the same credential headers as every other call, so an attachment is not reachable
     through a bare unauthenticated link.
+  - `/projects/{id}/agent/...` (meeting assistant, when `ENABLE_MEETING_AGENT=true`): import a
+    meeting against the board, where the parser extracts the tasks and the assistant marks those
+    already on the board and proposes changes to existing tasks for approval; chat; and apply,
+    refresh and undo of reviewed changes. See [agent-preview.md](agent-preview.md).
   - `PATCH /auth/notifications` (set deadline-reminder preferences), `POST /auth/notifications/test`
     (send a one-off preview digest).
   - `GET /health`: liveness, plus the extraction model the deployment will actually use and
@@ -234,6 +242,7 @@ erDiagram
     USER ||--o{ REMINDER_SUBSCRIPTION : "subscribes"
     REMINDER_SUBSCRIPTION ||--o{ SUBSCRIBER_REMINDER : "sent"
     TASK ||--o{ SUBSCRIBER_REMINDER : "reminded about"
+    PROJECT ||--o{ AGENT_REVIEW : "assistant reviews"
     USER {
         int id PK
         string email
@@ -306,6 +315,16 @@ erDiagram
         int subscription_id FK
         int task_id FK
         date notified_for
+    }
+    AGENT_REVIEW {
+        string id PK
+        int project_id FK
+        string status
+        text input_json
+        text plan_json
+        string baseline_hash
+        text receipt_json
+        datetime expires_at
     }
 ```
 

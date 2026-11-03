@@ -175,9 +175,9 @@ also receive content-level subtask/attachment checks. Older receipts keep their 
 board-wide undo check.
 
 The interface is enabled only with `NEXT_PUBLIC_MEETING_AGENT_PREVIEW=true`; the backend requires
-`ENABLE_MEETING_AGENT=true`. Both default to off. The local launcher sets both only for its child
-processes. The added table is created by the existing SQLAlchemy table initialization; no existing
-columns are altered. Render configuration and deployed environment settings are unchanged.
+`ENABLE_MEETING_AGENT=true`. Both default to off locally; `render.yaml` sets both for the deployed
+app. The local launcher sets both only for its child processes. The added table is created by the
+existing SQLAlchemy table initialization; no existing columns are altered.
 
 All endpoints are under `/api/v1/projects/{project_id}/agent` and require current project access. Review endpoints require edit access; chat permits view access:
 
@@ -217,7 +217,7 @@ project isolation, and applying/undoing changes without creating a meeting.
 
 Exact evidence matching proves that a quote exists, **not** that a proposed interpretation is
 correct. Semantic duplicate detection and relative-date reasoning still depend on Gemini and
-human review. This preview is a bounded agent, not an autonomous project manager. It accepts pasted
+human review. The assistant is a bounded agent, not an autonomous project manager. It accepts pasted
 text and transcribed recordings. With the preview enabled, the frontend uploads recordings to
 `POST /api/v1/projects/{project_id}/agent/recordings`; the backend checks the preview flag and
 Gemini configuration before accepting that upload. The original `/transcripts/audio` endpoint

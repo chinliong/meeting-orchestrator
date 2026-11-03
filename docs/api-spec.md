@@ -354,6 +354,27 @@ found. The client fetches this with the auth/workspace headers, so it isn't a pl
 ### `DELETE /attachments/{attachment_id}`
 Removes the attachment. Requires edit access. `204`. `404` if not found.
 
+## Meeting assistant
+
+Mounted only when `ENABLE_MEETING_AGENT=true` (otherwise `404`); all paths are under
+`/projects/{project_id}/agent`. Chat needs view access, everything else edit access. A meeting's
+tasks are extracted by the parser above; the assistant reconciles them with the board and proposes
+changes to existing tasks, which are applied only when the user approves them. Behaviour, limits
+and validation are described in [agent-preview.md](agent-preview.md).
+
+| Method and path | Purpose |
+|---|---|
+| `POST /parse` | Import a pasted transcript: save the meeting and its new tasks, and return a draft of changes to existing tasks, if any |
+| `POST /recordings` | Upload audio/video; it is transcribed and imported the same way in the background |
+| `GET /recordings/{meeting_id}/result` | The import result and pending changes once a recording has finished |
+| `POST /chat` | Ask about the board; editors may receive a draft of task changes |
+| `POST /reviews` | Generate a draft review of a meeting without importing it |
+| `GET /reviews` | `view=pending` (drafts awaiting approval) or `view=history` (applied and undone changes) |
+| `GET /reviews/{id}` | One review: its proposals, source and apply receipt |
+| `POST /reviews/{id}/apply` | Apply the chosen `proposal_ids`; refuses targets edited since the draft was made |
+| `POST /reviews/{id}/refresh` | Recheck a draft against the current board |
+| `POST /reviews/{id}/undo` | Reverse an applied review if its tasks have not changed since |
+
 ## Internal: daily reminder trigger
 
 ### `GET /internal/notify-due-tasks`
