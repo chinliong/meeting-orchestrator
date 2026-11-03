@@ -59,12 +59,19 @@ export default function PendingTaskUpdates({ project, refreshKey, boardTasks, on
 
   const count = pending.reduce((sum, item) => sum + item.change_count, 0);
   return <div ref={container} className="relative" aria-label="Suggested changes and history">
-    <button ref={trigger} aria-label={count ? `Review ${count} suggested change${count === 1 ? "" : "s"}` : "Changes"} aria-expanded={expanded}
+    <button ref={trigger} aria-label={loadingId ? "Opening suggested changes" : count ? `Review ${count} suggested change${count === 1 ? "" : "s"}` : "Changes"}
+      aria-expanded={expanded} aria-busy={!!loadingId}
       aria-controls={expanded ? "suggested-changes-list" : undefined} disabled={!!loadingId}
-      className={`inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-lg border bg-white px-3 text-[13px] font-medium transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:opacity-50 sm:text-sm ${expanded ? "border-slate-300 text-slate-800" : "border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-800"}`}
+      className={`inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-lg border bg-white px-3 text-[13px] font-medium transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:cursor-wait sm:text-sm ${expanded ? "border-slate-300 text-slate-800" : "border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-800"}`}
       onClick={() => setExpanded(v => !v)}>
-      {loadingId ? "Opening…" : "Changes"}
-      {count > 0 && !loadingId && <span aria-hidden="true" className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1.5 text-[11px] font-semibold tabular-nums leading-none text-white">{count}</span>}
+      Changes
+      {/* While a review opens, a spinner takes the badge's place, so the button keeps its width. */}
+      {loadingId
+        ? <svg className="h-5 w-5 animate-spin text-brand" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+          </svg>
+        : count > 0 && <span aria-hidden="true" className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1.5 text-[11px] font-semibold tabular-nums leading-none text-white">{count}</span>}
       <svg className={`h-3 w-3 text-slate-400 transition ${expanded ? "rotate-180" : ""}`} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="m4 6 4 4 4-4" /></svg>
     </button>
     {expanded && <div id="suggested-changes-list" className="absolute right-0 top-full z-30 mt-2 w-[min(300px,calc(100vw-40px))] rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
