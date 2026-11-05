@@ -53,7 +53,8 @@ approval in the chat. View-only users can ask questions but cannot change anythi
    numbered candidates. It may read earlier meetings for context, then submits a review: which
    candidates repeat existing tasks, and which existing tasks the meeting changes.
 3. The server checks the review before saving anything, and returns any rejection to the model to
-   correct. Every suggestion must:
+   correct; a quote that is not exact is named, with the closest transcript sentence to copy. Every
+   suggestion must:
    - quote an exact line of the new transcript (labelled with its speaker, e.g. "Priya: …");
    - refer to a real task on this board and change at least one field;
    - name a new or changed owner in that quote (a first name, or the speaker's own "I'll do it",
