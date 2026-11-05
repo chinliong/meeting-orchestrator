@@ -174,7 +174,3 @@ class TranscriptParser:
                  time.perf_counter() - started)
         return ExtractionResult.model_validate(args)
 
-
-def parse_transcript(transcript_text: str, meeting_date: date | None = None) -> ExtractionResult:
-    """Convenience entrypoint: raw transcript text in, structured ExtractionResult out."""
-    return TranscriptParser().parse(transcript_text, meeting_date)

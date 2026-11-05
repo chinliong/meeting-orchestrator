@@ -1,6 +1,6 @@
 # Local one-command startup: `docker compose up --build`
 # Frontend on http://localhost:3000, backend on http://localhost:8000.
-# Set ANTHROPIC_API_KEY in a root .env file (see .env.example) before running.
+# Set GEMINI_API_KEY in a root .env file (see .env.example) before running.
 services:
   backend:
     build:
@@ -11,8 +11,9 @@ services:
     ports:
       - "8000:8000"
     environment:
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?set ANTHROPIC_API_KEY in .env}
-      CLAUDE_MODEL: ${CLAUDE_MODEL:-claude-sonnet-4-6}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:?set GEMINI_API_KEY in .env}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash}
+      AUTH_SECRET: ${AUTH_SECRET:-dev-insecure-secret-change-me-in-production}
       DATABASE_URL: ${DATABASE_URL:-sqlite:////data/orchestrator.db}
     volumes:
       - backend_data:/data

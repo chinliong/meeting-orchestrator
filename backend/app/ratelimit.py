@@ -57,9 +57,7 @@ def _limit(name: str, default: str) -> str:
     return os.getenv(f"RATE_LIMIT_{name}", default)
 
 
-PARSE = _limit("PARSE", "20/hour")
 AUDIO = _limit("AUDIO", "10/hour")
-AI = _limit("AI", "30/hour")
 LOGIN = _limit("LOGIN", "10/minute")
 RESET = _limit("RESET", "5/hour")
 RESET_CODE = _limit("RESET_CODE", "10/minute")
