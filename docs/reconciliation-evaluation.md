@@ -44,5 +44,5 @@ Reviews: 8; not completed within limits: 0; provider errors excluded: 0; model c
 One run of eight scenarios with one annotator; the scenarios were written for this test, after the
 agent was built. Each changed owner, deadline or status is a value; a suggestion is exactly right
 when it changes the expected values and nothing else. Owners are compared by first name, as in the
-parser evaluation. Every suggestion still needs the user's
-approval in the app, so a wrong one costs a dismissal, not a wrong board.
+parser evaluation. Every suggestion still needs the user's approval in the app, so a wrong one
+costs a dismissal, not a wrong board.

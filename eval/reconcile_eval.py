@@ -14,8 +14,9 @@ What is scored:
 
 * Repeats: an extracted task the agent marks as already on the board, against the expected
   board task. A new task marked as a repeat would be held back from the board, so it counts
-  against precision. "App" figures add the app's wording check (likely_duplicate), which also
-  holds back near-identical wording the agent did not mark.
+  against precision. "App" figures add the app's wording check against the board
+  (likely_duplicate), which also holds back near-identical wording the agent did not mark. (The
+  app also applies it between a meeting's own new tasks; no scenario has two such tasks.)
 * Updates: the board tasks it suggests changing, and each changed owner, deadline or status
   against the answer key. A change the key does not expect is a wrong change. Owners are compared
   by first name, as in the parser evaluation, so "Priya Nair" and "Priya" are the same person.
@@ -26,7 +27,7 @@ What is scored:
 Usage (from the repo root, with the backend virtualenv active):
 
     python -m eval.reconcile_eval --simulate        # free: a stand-in model that answers from the key
-    python -m eval.reconcile_eval --run             # calls Gemini once per scenario review
+    python -m eval.reconcile_eval --run             # calls Gemini: one review per scenario, 1-6 calls each
     python -m eval.reconcile_eval --write-report    # free: scores the saved run
 """
 from __future__ import annotations
@@ -302,8 +303,8 @@ def render(r: dict) -> str:
         "One run of eight scenarios with one annotator; the scenarios were written for this test, after the",
         "agent was built. Each changed owner, deadline or status is a value; a suggestion is exactly right",
         "when it changes the expected values and nothing else. Owners are compared by first name, as in the",
-        "parser evaluation. Every suggestion still needs the user's",
-        "approval in the app, so a wrong one costs a dismissal, not a wrong board.",
+        "parser evaluation. Every suggestion still needs the user's approval in the app, so a wrong one",
+        "costs a dismissal, not a wrong board.",
         "",
     ]
     return "\n".join(lines)
