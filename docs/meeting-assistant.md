@@ -9,9 +9,9 @@ The meeting assistant does two things on a board:
 - **Answers questions in chat** about the board and its meetings, and can suggest task changes
   when you ask for them.
 
-It runs on Gemini (`GEMINI_MODEL`, `GEMINI_API_KEY`). Why extraction stays with the parser is in
-[agent-evaluation.md](agent-evaluation.md); how well the assistant reconciles a follow-up meeting
-with the board is measured in [reconciliation-evaluation.md](reconciliation-evaluation.md).
+It runs on Gemini (`GEMINI_MODEL`, `GEMINI_API_KEY`). [agent-evaluation.md](agent-evaluation.md)
+explains why extraction stays with the parser (Part 1) and measures how well the assistant
+reconciles a follow-up meeting with the board (Part 2).
 
 ## Using it
 
@@ -129,7 +129,7 @@ again and access rules. Limits that remain:
 - An exact quote proves the line exists, not that the suggestion reads it correctly; that is why
   every change needs approval.
 - Reconciliation was measured on eight follow-up meetings written for the test, where each change
-  is stated plainly ([reconciliation-evaluation.md](reconciliation-evaluation.md)); real meetings
+  is stated plainly ([agent-evaluation.md](agent-evaluation.md), Part 2); real meetings
   are messier.
 - Two people with the same first name in one meeting can confuse the owner check.
 
