@@ -2,14 +2,14 @@
  "repeats": {
   "agent": {
    "precision": 1.0,
-   "recall": 1.0,
-   "f1": 1.0,
+   "recall": 0.902,
+   "f1": 0.948,
    "new_tasks_held_back": 0
   },
   "app": {
    "precision": 1.0,
-   "recall": 1.0,
-   "f1": 1.0,
+   "recall": 0.902,
+   "f1": 0.948,
    "new_tasks_held_back": 0
   },
   "expected": 34,
@@ -18,92 +18,237 @@
  "updates": {
   "tasks": {
    "precision": 1.0,
-   "recall": 1.0,
-   "f1": 1.0
+   "recall": 0.897,
+   "f1": 0.946
   },
   "fields": {
    "precision": 1.0,
-   "recall": 1.0,
-   "f1": 1.0
+   "recall": 0.914,
+   "f1": 0.955
   },
-  "exact": 26,
-  "expected_tasks": 26,
-  "expected_fields": 31,
+  "exact": 70,
+  "expected_tasks": 78,
+  "expected_fields": 93,
   "wrong_changes": 0,
   "description_rewords": 0
  },
  "reviews": {
-  "scored": 8,
-  "not_completed": 0,
+  "scored": 24,
+  "not_completed": 2,
   "provider_errors_excluded": 0,
-  "mean_steps": 1.62,
-  "questions": 1,
+  "mean_steps": 1.5,
+  "questions": 2,
   "model": "gemini-3.5-flash"
  },
+ "runs": 3,
+ "per_run": [
+  {
+   "repeats": {
+    "agent": {
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "new_tasks_held_back": 0
+    },
+    "app": {
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "new_tasks_held_back": 0
+    },
+    "expected": 34,
+    "new_tasks": 16
+   },
+   "updates": {
+    "tasks": {
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0
+    },
+    "fields": {
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0
+    },
+    "exact": 26,
+    "expected_tasks": 26,
+    "expected_fields": 31,
+    "wrong_changes": 0,
+    "description_rewords": 0
+   },
+   "reviews": {
+    "scored": 8,
+    "not_completed": 0,
+    "provider_errors_excluded": 0,
+    "mean_steps": 1.62,
+    "questions": 1
+   }
+  },
+  {
+   "repeats": {
+    "agent": {
+     "precision": 1.0,
+     "recall": 0.853,
+     "f1": 0.921,
+     "new_tasks_held_back": 0
+    },
+    "app": {
+     "precision": 1.0,
+     "recall": 0.853,
+     "f1": 0.921,
+     "new_tasks_held_back": 0
+    },
+    "expected": 34,
+    "new_tasks": 16
+   },
+   "updates": {
+    "tasks": {
+     "precision": 1.0,
+     "recall": 0.846,
+     "f1": 0.917
+    },
+    "fields": {
+     "precision": 1.0,
+     "recall": 0.871,
+     "f1": 0.931
+    },
+    "exact": 22,
+    "expected_tasks": 26,
+    "expected_fields": 31,
+    "wrong_changes": 0,
+    "description_rewords": 0
+   },
+   "reviews": {
+    "scored": 8,
+    "not_completed": 1,
+    "provider_errors_excluded": 0,
+    "mean_steps": 1.29,
+    "questions": 0
+   }
+  },
+  {
+   "repeats": {
+    "agent": {
+     "precision": 1.0,
+     "recall": 0.853,
+     "f1": 0.921,
+     "new_tasks_held_back": 0
+    },
+    "app": {
+     "precision": 1.0,
+     "recall": 0.853,
+     "f1": 0.921,
+     "new_tasks_held_back": 0
+    },
+    "expected": 34,
+    "new_tasks": 16
+   },
+   "updates": {
+    "tasks": {
+     "precision": 1.0,
+     "recall": 0.846,
+     "f1": 0.917
+    },
+    "fields": {
+     "precision": 1.0,
+     "recall": 0.871,
+     "f1": 0.931
+    },
+    "exact": 22,
+    "expected_tasks": 26,
+    "expected_fields": 31,
+    "wrong_changes": 0,
+    "description_rewords": 0
+   },
+   "reviews": {
+    "scored": 8,
+    "not_completed": 1,
+    "provider_errors_excluded": 0,
+    "mean_steps": 1.57,
+    "questions": 1
+   }
+  }
+ ],
  "per_scenario": [
   {
    "id": "finance-01-a",
-   "repeats": "5/5",
+   "repeats_found": 5,
+   "repeats_expected": 15,
    "new_held_back": 0,
-   "updates_exact": "4/4",
+   "updates_exact": 4,
+   "updates_expected": 12,
    "wrong_changes": 0,
-   "failed": false
+   "failed": 2
   },
   {
    "id": "finance-01-b",
-   "repeats": "5/5",
+   "repeats_found": 15,
+   "repeats_expected": 15,
    "new_held_back": 0,
-   "updates_exact": "4/4",
+   "updates_exact": 12,
+   "updates_expected": 12,
    "wrong_changes": 0,
-   "failed": false
+   "failed": 0
   },
   {
    "id": "logistics-02-a",
-   "repeats": "4/4",
+   "repeats_found": 12,
+   "repeats_expected": 12,
    "new_held_back": 0,
-   "updates_exact": "3/3",
+   "updates_exact": 9,
+   "updates_expected": 9,
    "wrong_changes": 0,
-   "failed": false
+   "failed": 0
   },
   {
    "id": "logistics-02-b",
-   "repeats": "4/4",
+   "repeats_found": 12,
+   "repeats_expected": 12,
    "new_held_back": 0,
-   "updates_exact": "3/3",
+   "updates_exact": 9,
+   "updates_expected": 9,
    "wrong_changes": 0,
-   "failed": false
+   "failed": 0
   },
   {
    "id": "security-03-a",
-   "repeats": "4/4",
+   "repeats_found": 12,
+   "repeats_expected": 12,
    "new_held_back": 0,
-   "updates_exact": "3/3",
+   "updates_exact": 9,
+   "updates_expected": 9,
    "wrong_changes": 0,
-   "failed": false
+   "failed": 0
   },
   {
    "id": "security-03-b",
-   "repeats": "4/4",
+   "repeats_found": 12,
+   "repeats_expected": 12,
    "new_held_back": 0,
-   "updates_exact": "3/3",
+   "updates_exact": 9,
+   "updates_expected": 9,
    "wrong_changes": 0,
-   "failed": false
+   "failed": 0
   },
   {
    "id": "data-migration-04-a",
-   "repeats": "4/4",
+   "repeats_found": 12,
+   "repeats_expected": 12,
    "new_held_back": 0,
-   "updates_exact": "3/3",
+   "updates_exact": 9,
+   "updates_expected": 9,
    "wrong_changes": 0,
-   "failed": false
+   "failed": 0
   },
   {
    "id": "data-migration-04-b",
-   "repeats": "4/4",
+   "repeats_found": 12,
+   "repeats_expected": 12,
    "new_held_back": 0,
-   "updates_exact": "3/3",
+   "updates_exact": 9,
+   "updates_expected": 9,
    "wrong_changes": 0,
-   "failed": false
+   "failed": 0
   }
  ]
 }

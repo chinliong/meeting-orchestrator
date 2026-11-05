@@ -1,639 +1,1746 @@
 {
- "note": "Meeting-agent reconciliation reviews; see eval/reconcile_eval.py.",
- "scenarios": [
+ "note": "Meeting-agent reconciliation reviews, one entry per run; see eval/reconcile_eval.py.",
+ "runs": [
   {
-   "id": "finance-01-a",
-   "existing_items": [
-    [
-     0,
-     100
-    ],
-    [
-     1,
-     101
-    ],
-    [
-     2,
-     108
-    ],
-    [
-     3,
-     104
-    ],
-    [
-     4,
-     102
-    ]
-   ],
-   "updates": [
+   "note": "Meeting-agent reconciliation reviews; see eval/reconcile_eval.py.",
+   "scenarios": [
     {
-     "task_id": 100,
-     "before": {
-      "description": "Finish the APAC cost center hierarchy mapping",
-      "owner": "Daniel",
-      "deadline": "2026-06-19",
-      "status": "in_progress"
-     },
-     "after": {
-      "description": "Finish the APAC cost center hierarchy mapping",
-      "owner": "Daniel",
-      "deadline": "2026-06-19",
-      "status": "done"
-     },
-     "evidence": "Daniel: Starting with the hierarchy. The APAC cost center hierarchy mapping is finished — I signed it off on Friday, so that's closed."
+     "id": "finance-01-a",
+     "existing_items": [
+      [
+       0,
+       100
+      ],
+      [
+       1,
+       101
+      ],
+      [
+       2,
+       108
+      ],
+      [
+       3,
+       104
+      ],
+      [
+       4,
+       102
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 100,
+       "before": {
+        "description": "Finish the APAC cost center hierarchy mapping",
+        "owner": "Daniel",
+        "deadline": "2026-06-19",
+        "status": "in_progress"
+       },
+       "after": {
+        "description": "Finish the APAC cost center hierarchy mapping",
+        "owner": "Daniel",
+        "deadline": "2026-06-19",
+        "status": "done"
+       },
+       "evidence": "Daniel: Starting with the hierarchy. The APAC cost center hierarchy mapping is finished — I signed it off on Friday, so that's closed."
+      },
+      {
+       "task_id": 101,
+       "before": {
+        "description": "Send the new cost center codes to Daniel",
+        "owner": "Priya",
+        "deadline": "2026-06-17",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Send the new cost center codes to Daniel",
+        "owner": "Priya",
+        "deadline": "2026-06-17",
+        "status": "done"
+       },
+       "evidence": "Priya: I sent the new cost center codes to Daniel on Wednesday, so that one's done."
+      },
+      {
+       "task_id": 108,
+       "before": {
+        "description": "Fix the MT940 parser config for multi-currency statements",
+        "owner": "Daniel",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "after": {
+        "description": "Fix the MT940 parser config for multi-currency statements",
+        "owner": "Daniel",
+        "deadline": "2026-06-24",
+        "status": "in_progress"
+       },
+       "evidence": "Daniel: I'm still working on the MT940 parser fix for the multi-currency statements. I'll have it finished by 24 June."
+      },
+      {
+       "task_id": 104,
+       "before": {
+        "description": "Clear the eleven duplicate postings from the system",
+        "owner": "Priya",
+        "deadline": "2026-06-25",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Clear the eleven duplicate postings from the system",
+        "owner": "Priya",
+        "deadline": "2026-06-25",
+        "status": "in_progress"
+       },
+       "evidence": "Priya: I've started clearing the duplicate postings — four of the eleven are gone, and I'm still on track for the 25th."
+      }
+     ],
+     "questions": [],
+     "steps": 1,
+     "model": "gemini-3.5-flash"
     },
     {
-     "task_id": 101,
-     "before": {
-      "description": "Send the new cost center codes to Daniel",
-      "owner": "Priya",
-      "deadline": "2026-06-17",
-      "status": "todo"
-     },
-     "after": {
-      "description": "Send the new cost center codes to Daniel",
-      "owner": "Priya",
-      "deadline": "2026-06-17",
-      "status": "done"
-     },
-     "evidence": "Priya: I sent the new cost center codes to Daniel on Wednesday, so that one's done."
+     "id": "finance-01-b",
+     "existing_items": [
+      [
+       0,
+       108
+      ],
+      [
+       1,
+       105
+      ],
+      [
+       2,
+       104
+      ],
+      [
+       3,
+       102
+      ],
+      [
+       6,
+       106
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 108,
+       "before": {
+        "description": "Fix the MT940 parser config for multi-currency statements",
+        "owner": "Daniel",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "after": {
+        "description": "Fix the MT940 parser config for multi-currency statements",
+        "owner": "Priya",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "evidence": "Priya: Yes, I'll take over the MT940 parser fix from Daniel."
+      },
+      {
+       "task_id": 105,
+       "before": {
+        "description": "Send the change request for additional consulting days to Wei Lin",
+        "owner": "Daniel",
+        "deadline": "2026-06-18",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Send the change request for additional consulting days to Wei Lin",
+        "owner": "Daniel",
+        "deadline": "2026-07-02",
+        "status": "todo"
+       },
+       "evidence": "Daniel: Thanks. On the change request: Wei Lin rejected the first one, so I'll send a revised change request for the extra consulting days to Wei Lin by 2 July."
+      },
+      {
+       "task_id": 104,
+       "before": {
+        "description": "Clear the eleven duplicate postings from the system",
+        "owner": "Priya",
+        "deadline": "2026-06-25",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Clear the eleven duplicate postings from the system",
+        "owner": "Priya",
+        "deadline": "2026-06-25",
+        "status": "done"
+       },
+       "evidence": "Priya: All eleven duplicate postings are cleared from the system now."
+      },
+      {
+       "task_id": 102,
+       "before": {
+        "description": "Loop in the banking team for next week's integration session",
+        "owner": "Aisha",
+        "deadline": null,
+        "status": "todo"
+       },
+       "after": {
+        "description": "Loop in the banking team for next week's integration session",
+        "owner": "Aisha",
+        "deadline": null,
+        "status": "done"
+       },
+       "evidence": "Aisha: And I've looped in the banking team — they've confirmed they'll join Thursday's integration session."
+      }
+     ],
+     "questions": [],
+     "steps": 1,
+     "model": "gemini-3.5-flash"
     },
     {
-     "task_id": 108,
-     "before": {
-      "description": "Fix the MT940 parser config for multi-currency statements",
-      "owner": "Daniel",
-      "deadline": null,
-      "status": "in_progress"
-     },
-     "after": {
-      "description": "Fix the MT940 parser config for multi-currency statements",
-      "owner": "Daniel",
-      "deadline": "2026-06-24",
-      "status": "in_progress"
-     },
-     "evidence": "Daniel: I'm still working on the MT940 parser fix for the multi-currency statements. I'll have it finished by 24 June."
+     "id": "logistics-02-a",
+     "existing_items": [
+      [
+       0,
+       100
+      ],
+      [
+       1,
+       101
+      ],
+      [
+       2,
+       103
+      ],
+      [
+       3,
+       106
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 100,
+       "before": {
+        "description": "Chase the vendor for a firm barcode firmware patch date",
+        "owner": "Marcus",
+        "deadline": "2026-06-19",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Chase the vendor for a firm barcode firmware patch date",
+        "owner": "Marcus",
+        "deadline": "2026-06-19",
+        "status": "done"
+       },
+       "evidence": "Marcus: Good news — I chased the vendor and they've given us a firm firmware patch date of 8 July."
+      },
+      {
+       "task_id": 101,
+       "before": {
+        "description": "Draft a one-page risk note on the scanner delay for the steering committee",
+        "owner": "Marcus",
+        "deadline": "2026-06-23",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Draft a one-page risk note on the scanner delay for the steering committee",
+        "owner": "Marcus",
+        "deadline": "2026-06-23",
+        "status": "done"
+       },
+       "evidence": "Marcus: And the risk note on the scanner delay went to the steering committee this morning."
+      },
+      {
+       "task_id": 103,
+       "before": {
+        "description": "Investigate the WM to TMS interface timeout errors",
+        "owner": "Daniel",
+        "deadline": "2026-06-22",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Investigate the WM to TMS interface timeout errors",
+        "owner": "Daniel",
+        "deadline": "2026-06-26",
+        "status": "in_progress"
+       },
+       "evidence": "Daniel: I've started on the WM to TMS interface timeout errors — it looks like a buffer size problem. I'll have a fix by 26 June."
+      }
+     ],
+     "questions": [],
+     "steps": 1,
+     "model": "gemini-3.5-flash"
     },
     {
-     "task_id": 104,
-     "before": {
-      "description": "Clear the eleven duplicate postings from the system",
-      "owner": "Priya",
-      "deadline": "2026-06-25",
-      "status": "todo"
-     },
-     "after": {
-      "description": "Clear the eleven duplicate postings from the system",
-      "owner": "Priya",
-      "deadline": "2026-06-25",
-      "status": "in_progress"
-     },
-     "evidence": "Priya: I've started clearing the duplicate postings — four of the eleven are gone, and I'm still on track for the 25th."
+     "id": "logistics-02-b",
+     "existing_items": [
+      [
+       0,
+       107
+      ],
+      [
+       1,
+       102
+      ],
+      [
+       2,
+       100
+      ],
+      [
+       3,
+       105
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 107,
+       "before": {
+        "description": "Configure the label printer integration",
+        "owner": "Daniel",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "after": {
+        "description": "Configure the label printer integration",
+        "owner": "Marcus",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "evidence": "Aisha: Marcus, can you take the label printer integration while Daniel's away?\n\nMarcus: Yes, I'll pick up the label printer integration from Daniel."
+      },
+      {
+       "task_id": 102,
+       "before": {
+        "description": "Update the cutover runbook to reflect the degraded-mode plan",
+        "owner": "Aisha",
+        "deadline": null,
+        "status": "todo"
+       },
+       "after": {
+        "description": "Update the cutover runbook to reflect the degraded-mode plan",
+        "owner": "Aisha",
+        "deadline": "2026-07-03",
+        "status": "in_progress"
+       },
+       "evidence": "Aisha: I've started updating the cutover runbook with the degraded-mode plan, and I'll finish it by 3 July."
+      },
+      {
+       "task_id": 100,
+       "before": {
+        "description": "Chase the vendor for a firm barcode firmware patch date",
+        "owner": "Marcus",
+        "deadline": "2026-06-19",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Chase the vendor for a firm barcode firmware patch date",
+        "owner": "Marcus",
+        "deadline": "2026-07-02",
+        "status": "todo"
+       },
+       "evidence": "Marcus: I'm chasing them again and I'll have an answer by 2 July."
+      }
+     ],
+     "questions": [],
+     "steps": 2,
+     "model": "gemini-3.5-flash"
+    },
+    {
+     "id": "security-03-a",
+     "existing_items": [
+      [
+       0,
+       100
+      ],
+      [
+       1,
+       102
+      ],
+      [
+       2,
+       101
+      ],
+      [
+       3,
+       103
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 100,
+       "before": {
+        "description": "Circulate the segregation-of-duties conflict report to the team",
+        "owner": "Marcus",
+        "deadline": "2026-06-18",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Circulate the segregation-of-duties conflict report to the team",
+        "owner": "Marcus",
+        "deadline": "2026-06-18",
+        "status": "done"
+       },
+       "evidence": "Marcus: I circulated the segregation-of-duties conflict report to the team on Thursday."
+      },
+      {
+       "task_id": 102,
+       "before": {
+        "description": "Tune the production authorization trace settings to reduce log volume",
+        "owner": null,
+        "deadline": null,
+        "status": "todo"
+       },
+       "after": {
+        "description": "Tune the production authorization trace settings to reduce log volume",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-01",
+        "status": "todo"
+       },
+       "evidence": "Priya: Thanks. The trace settings are still unassigned. I'll take the authorization trace tuning, and I can have it done by 1 July."
+      },
+      {
+       "task_id": 101,
+       "before": {
+        "description": "Prepare the mitigating controls document for the external audit",
+        "owner": "Daniel",
+        "deadline": "2026-06-25",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Prepare the mitigating controls document for the external audit",
+        "owner": "Daniel",
+        "deadline": "2026-06-25",
+        "status": "in_progress"
+       },
+       "evidence": "Daniel: The mitigating controls document is about half written. Still on track for the 25th."
+      }
+     ],
+     "questions": [],
+     "steps": 1,
+     "model": "gemini-3.5-flash"
+    },
+    {
+     "id": "security-03-b",
+     "existing_items": [
+      [
+       0,
+       107
+      ],
+      [
+       1,
+       103
+      ],
+      [
+       2,
+       101
+      ],
+      [
+       3,
+       105
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 107,
+       "before": {
+        "description": "Build out the emergency access management workflow configuration",
+        "owner": "Marcus",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "after": {
+        "description": "Build out the emergency access management workflow configuration",
+        "owner": "Marcus",
+        "deadline": null,
+        "status": "done"
+       },
+       "evidence": "Marcus: The emergency access workflow configuration is finished and tested."
+      },
+      {
+       "task_id": 103,
+       "before": {
+        "description": "Schedule a penetration test with the external vendor",
+        "owner": "Marcus",
+        "deadline": "2026-06-26",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Schedule a penetration test with the external vendor",
+        "owner": "Marcus",
+        "deadline": "2026-07-03",
+        "status": "todo"
+       },
+       "evidence": "Marcus: The vendor can't do the pen test on the 26th, so it's moved. I'll confirm the new penetration test slot by 3 July."
+      },
+      {
+       "task_id": 101,
+       "before": {
+        "description": "Prepare the mitigating controls document for the external audit",
+        "owner": "Daniel",
+        "deadline": "2026-06-25",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Prepare the mitigating controls document for the external audit",
+        "owner": "Priya",
+        "deadline": "2026-06-25",
+        "status": "todo"
+       },
+       "evidence": "Daniel: I'm overloaded with the role fixes this week. Priya, could you take over the mitigating controls document?\n\nPriya: Yes, I'll own the mitigating controls document from here."
+      }
+     ],
+     "questions": [],
+     "steps": 3,
+     "model": "gemini-3.5-flash"
+    },
+    {
+     "id": "data-migration-04-a",
+     "existing_items": [
+      [
+       0,
+       100
+      ],
+      [
+       1,
+       101
+      ],
+      [
+       2,
+       102
+      ],
+      [
+       3,
+       106
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 100,
+       "before": {
+        "description": "Rerun the material master validation against the cleaned data",
+        "owner": "Priya",
+        "deadline": "2026-06-22",
+        "status": "in_progress"
+       },
+       "after": {
+        "description": "Rerun the material master validation against the cleaned data",
+        "owner": "Priya",
+        "deadline": "2026-06-22",
+        "status": "done"
+       },
+       "evidence": "Priya: The material master validation rerun is complete — zero errors against the cleaned data."
+      },
+      {
+       "task_id": 101,
+       "before": {
+        "description": "Finalize the customer master mapping",
+        "owner": "Daniel",
+        "deadline": "2026-06-19",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Finalize the customer master mapping",
+        "owner": "Daniel",
+        "deadline": "2026-06-30",
+        "status": "in_progress"
+       },
+       "evidence": "Daniel: I've started the customer master mapping but it isn't finished; the sales org fields slowed me down. I'll finalize it by 30 June."
+      },
+      {
+       "task_id": 102,
+       "before": {
+        "description": "Request business sign-off for the eighteen-hour extended downtime window",
+        "owner": "Aisha",
+        "deadline": "2026-06-24",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Request business sign-off for the eighteen-hour extended downtime window",
+        "owner": "Aisha",
+        "deadline": "2026-06-24",
+        "status": "done"
+       },
+       "evidence": "Aisha: Business signed off the eighteen-hour downtime window on Monday."
+      }
+     ],
+     "questions": [
+      "Candidate task 4 ('schedule the second mock cutover') and Candidate task 5 ('rerun the customer master validation after the mapping is finalized') are new items from this meeting that do not exist on the board."
+     ],
+     "steps": 1,
+     "model": "gemini-3.5-flash"
+    },
+    {
+     "id": "data-migration-04-b",
+     "existing_items": [
+      [
+       0,
+       103
+      ],
+      [
+       1,
+       106
+      ],
+      [
+       2,
+       101
+      ],
+      [
+       3,
+       104
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 103,
+       "before": {
+        "description": "Prepare the data reconciliation report template for post-load validation",
+        "owner": "Priya",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "after": {
+        "description": "Prepare the data reconciliation report template for post-load validation",
+        "owner": "Priya",
+        "deadline": null,
+        "status": "done"
+       },
+       "evidence": "Priya: The reconciliation report template for post-load validation is done; it's in the shared folder."
+      },
+      {
+       "task_id": 106,
+       "before": {
+        "description": "Write the rollback steps into the cutover runbook",
+        "owner": "Daniel",
+        "deadline": "2026-06-25",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Write the rollback steps into the cutover runbook",
+        "owner": "Marcus",
+        "deadline": "2026-07-07",
+        "status": "todo"
+       },
+       "evidence": "Aisha: Daniel is tied up with the customer master, so Marcus, can you take the rollback steps for the runbook?\n\nMarcus: Yes, I'll write the rollback steps into the cutover runbook by 7 July."
+      },
+      {
+       "task_id": 101,
+       "before": {
+        "description": "Finalize the customer master mapping",
+        "owner": "Daniel",
+        "deadline": "2026-06-19",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Finalize the customer master mapping",
+        "owner": "Daniel",
+        "deadline": "2026-06-19",
+        "status": "done"
+       },
+       "evidence": "Daniel: The customer master mapping was finalized yesterday."
+      }
+     ],
+     "questions": [],
+     "steps": 3,
+     "model": "gemini-3.5-flash"
     }
-   ],
-   "questions": [],
-   "steps": 1,
-   "model": "gemini-3.5-flash"
+   ]
   },
   {
-   "id": "finance-01-b",
-   "existing_items": [
-    [
-     0,
-     108
-    ],
-    [
-     1,
-     105
-    ],
-    [
-     2,
-     104
-    ],
-    [
-     3,
-     102
-    ],
-    [
-     6,
-     106
-    ]
-   ],
-   "updates": [
+   "scenarios": [
     {
-     "task_id": 108,
-     "before": {
-      "description": "Fix the MT940 parser config for multi-currency statements",
-      "owner": "Daniel",
-      "deadline": null,
-      "status": "in_progress"
-     },
-     "after": {
-      "description": "Fix the MT940 parser config for multi-currency statements",
-      "owner": "Priya",
-      "deadline": null,
-      "status": "in_progress"
-     },
-     "evidence": "Priya: Yes, I'll take over the MT940 parser fix from Daniel."
+     "id": "finance-01-a",
+     "existing_items": [],
+     "updates": [],
+     "questions": [],
+     "error": "limit",
+     "error_message": "Review step or time limit reached"
     },
     {
-     "task_id": 105,
-     "before": {
-      "description": "Send the change request for additional consulting days to Wei Lin",
-      "owner": "Daniel",
-      "deadline": "2026-06-18",
-      "status": "todo"
-     },
-     "after": {
-      "description": "Send the change request for additional consulting days to Wei Lin",
-      "owner": "Daniel",
-      "deadline": "2026-07-02",
-      "status": "todo"
-     },
-     "evidence": "Daniel: Thanks. On the change request: Wei Lin rejected the first one, so I'll send a revised change request for the extra consulting days to Wei Lin by 2 July."
+     "id": "finance-01-b",
+     "existing_items": [
+      [
+       0,
+       108
+      ],
+      [
+       1,
+       105
+      ],
+      [
+       2,
+       104
+      ],
+      [
+       3,
+       102
+      ],
+      [
+       6,
+       106
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 108,
+       "before": {
+        "description": "Fix the MT940 parser config for multi-currency statements",
+        "owner": "Daniel",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "after": {
+        "description": "Fix the MT940 parser config for multi-currency statements",
+        "owner": "Priya",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "evidence": "Priya: Yes, I'll take over the MT940 parser fix from Daniel."
+      },
+      {
+       "task_id": 105,
+       "before": {
+        "description": "Send the change request for additional consulting days to Wei Lin",
+        "owner": "Daniel",
+        "deadline": "2026-06-18",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Send the change request for additional consulting days to Wei Lin",
+        "owner": "Daniel",
+        "deadline": "2026-07-02",
+        "status": "todo"
+       },
+       "evidence": "Daniel: Thanks. On the change request: Wei Lin rejected the first one, so I'll send a revised change request for the extra consulting days to Wei Lin by 2 July."
+      },
+      {
+       "task_id": 104,
+       "before": {
+        "description": "Clear the eleven duplicate postings from the system",
+        "owner": "Priya",
+        "deadline": "2026-06-25",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Clear the eleven duplicate postings from the system",
+        "owner": "Priya",
+        "deadline": "2026-06-25",
+        "status": "done"
+       },
+       "evidence": "Priya: All eleven duplicate postings are cleared from the system now."
+      },
+      {
+       "task_id": 102,
+       "before": {
+        "description": "Loop in the banking team for next week's integration session",
+        "owner": "Aisha",
+        "deadline": null,
+        "status": "todo"
+       },
+       "after": {
+        "description": "Loop in the banking team for next week's integration session",
+        "owner": "Aisha",
+        "deadline": null,
+        "status": "done"
+       },
+       "evidence": "Aisha: And I've looped in the banking team — they've confirmed they'll join Thursday's integration session."
+      }
+     ],
+     "questions": [],
+     "steps": 1,
+     "model": "gemini-3.5-flash"
     },
     {
-     "task_id": 104,
-     "before": {
-      "description": "Clear the eleven duplicate postings from the system",
-      "owner": "Priya",
-      "deadline": "2026-06-25",
-      "status": "todo"
-     },
-     "after": {
-      "description": "Clear the eleven duplicate postings from the system",
-      "owner": "Priya",
-      "deadline": "2026-06-25",
-      "status": "done"
-     },
-     "evidence": "Priya: All eleven duplicate postings are cleared from the system now."
+     "id": "logistics-02-a",
+     "existing_items": [
+      [
+       0,
+       100
+      ],
+      [
+       1,
+       101
+      ],
+      [
+       2,
+       103
+      ],
+      [
+       3,
+       106
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 100,
+       "before": {
+        "description": "Chase the vendor for a firm barcode firmware patch date",
+        "owner": "Marcus",
+        "deadline": "2026-06-19",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Chase the vendor for a firm barcode firmware patch date",
+        "owner": "Marcus",
+        "deadline": "2026-06-19",
+        "status": "done"
+       },
+       "evidence": "Marcus: Good news — I chased the vendor and they've given us a firm firmware patch date of 8 July."
+      },
+      {
+       "task_id": 101,
+       "before": {
+        "description": "Draft a one-page risk note on the scanner delay for the steering committee",
+        "owner": "Marcus",
+        "deadline": "2026-06-23",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Draft a one-page risk note on the scanner delay for the steering committee",
+        "owner": "Marcus",
+        "deadline": "2026-06-23",
+        "status": "done"
+       },
+       "evidence": "Marcus: And the risk note on the scanner delay went to the steering committee this morning."
+      },
+      {
+       "task_id": 103,
+       "before": {
+        "description": "Investigate the WM to TMS interface timeout errors",
+        "owner": "Daniel",
+        "deadline": "2026-06-22",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Investigate the WM to TMS interface timeout errors",
+        "owner": "Daniel",
+        "deadline": "2026-06-26",
+        "status": "in_progress"
+       },
+       "evidence": "Daniel: I've started on the WM to TMS interface timeout errors — it looks like a buffer size problem. I'll have a fix by 26 June."
+      }
+     ],
+     "questions": [],
+     "steps": 1,
+     "model": "gemini-3.5-flash"
     },
     {
-     "task_id": 102,
-     "before": {
-      "description": "Loop in the banking team for next week's integration session",
-      "owner": "Aisha",
-      "deadline": null,
-      "status": "todo"
-     },
-     "after": {
-      "description": "Loop in the banking team for next week's integration session",
-      "owner": "Aisha",
-      "deadline": null,
-      "status": "done"
-     },
-     "evidence": "Aisha: And I've looped in the banking team — they've confirmed they'll join Thursday's integration session."
+     "id": "logistics-02-b",
+     "existing_items": [
+      [
+       0,
+       107
+      ],
+      [
+       1,
+       102
+      ],
+      [
+       2,
+       100
+      ],
+      [
+       3,
+       105
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 107,
+       "before": {
+        "description": "Configure the label printer integration",
+        "owner": "Daniel",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "after": {
+        "description": "Configure the label printer integration",
+        "owner": "Marcus",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "evidence": "Aisha: Daniel's on leave next week, so let's sort out cover first. Marcus, can you take the label printer integration while Daniel's away?\n\nMarcus: Yes, I'll pick up the label printer integration from Daniel."
+      },
+      {
+       "task_id": 102,
+       "before": {
+        "description": "Update the cutover runbook to reflect the degraded-mode plan",
+        "owner": "Aisha",
+        "deadline": null,
+        "status": "todo"
+       },
+       "after": {
+        "description": "Update the cutover runbook to reflect the degraded-mode plan",
+        "owner": "Aisha",
+        "deadline": "2026-07-03",
+        "status": "in_progress"
+       },
+       "evidence": "Aisha: Thanks. On my side, I've started updating the cutover runbook with the degraded-mode plan, and I'll finish it by 3 July."
+      },
+      {
+       "task_id": 100,
+       "before": {
+        "description": "Chase the vendor for a firm barcode firmware patch date",
+        "owner": "Marcus",
+        "deadline": "2026-06-19",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Chase the vendor for a firm barcode firmware patch date",
+        "owner": "Marcus",
+        "deadline": "2026-07-02",
+        "status": "todo"
+       },
+       "evidence": "Marcus: The vendor still hasn't given a firm patch date. I'm chasing them again and I'll have an answer by 2 July."
+      }
+     ],
+     "questions": [],
+     "steps": 2,
+     "model": "gemini-3.5-flash"
+    },
+    {
+     "id": "security-03-a",
+     "existing_items": [
+      [
+       0,
+       100
+      ],
+      [
+       1,
+       102
+      ],
+      [
+       2,
+       101
+      ],
+      [
+       3,
+       103
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 100,
+       "before": {
+        "description": "Circulate the segregation-of-duties conflict report to the team",
+        "owner": "Marcus",
+        "deadline": "2026-06-18",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Circulate the segregation-of-duties conflict report to the team",
+        "owner": "Marcus",
+        "deadline": "2026-06-18",
+        "status": "done"
+       },
+       "evidence": "Marcus: I circulated the segregation-of-duties conflict report to the team on Thursday."
+      },
+      {
+       "task_id": 102,
+       "before": {
+        "description": "Tune the production authorization trace settings to reduce log volume",
+        "owner": null,
+        "deadline": null,
+        "status": "todo"
+       },
+       "after": {
+        "description": "Tune the production authorization trace settings to reduce log volume",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-01",
+        "status": "todo"
+       },
+       "evidence": "Priya: Thanks. The trace settings are still unassigned. I'll take the authorization trace tuning, and I can have it done by 1 July."
+      },
+      {
+       "task_id": 101,
+       "before": {
+        "description": "Prepare the mitigating controls document for the external audit",
+        "owner": "Daniel",
+        "deadline": "2026-06-25",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Prepare the mitigating controls document for the external audit",
+        "owner": "Daniel",
+        "deadline": "2026-06-25",
+        "status": "in_progress"
+       },
+       "evidence": "Daniel: The mitigating controls document is about half written. Still on track for the 25th."
+      }
+     ],
+     "questions": [],
+     "steps": 1,
+     "model": "gemini-3.5-flash"
+    },
+    {
+     "id": "security-03-b",
+     "existing_items": [
+      [
+       0,
+       107
+      ],
+      [
+       1,
+       103
+      ],
+      [
+       2,
+       101
+      ],
+      [
+       3,
+       105
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 107,
+       "before": {
+        "description": "Build out the emergency access management workflow configuration",
+        "owner": "Marcus",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "after": {
+        "description": "Build out the emergency access management workflow configuration",
+        "owner": "Marcus",
+        "deadline": null,
+        "status": "done"
+       },
+       "evidence": "Marcus: The emergency access workflow configuration is finished and tested."
+      },
+      {
+       "task_id": 103,
+       "before": {
+        "description": "Schedule a penetration test with the external vendor",
+        "owner": "Marcus",
+        "deadline": "2026-06-26",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Schedule a penetration test with the external vendor",
+        "owner": "Marcus",
+        "deadline": "2026-07-03",
+        "status": "todo"
+       },
+       "evidence": "Marcus: The vendor can't do the pen test on the 26th, so it's moved. I'll confirm the new penetration test slot by 3 July."
+      },
+      {
+       "task_id": 101,
+       "before": {
+        "description": "Prepare the mitigating controls document for the external audit",
+        "owner": "Daniel",
+        "deadline": "2026-06-25",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Prepare the mitigating controls document for the external audit",
+        "owner": "Priya",
+        "deadline": "2026-06-25",
+        "status": "todo"
+       },
+       "evidence": "Priya: Yes, I'll own the mitigating controls document from here."
+      }
+     ],
+     "questions": [],
+     "steps": 2,
+     "model": "gemini-3.5-flash"
+    },
+    {
+     "id": "data-migration-04-a",
+     "existing_items": [
+      [
+       0,
+       100
+      ],
+      [
+       1,
+       101
+      ],
+      [
+       2,
+       102
+      ],
+      [
+       3,
+       106
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 100,
+       "before": {
+        "description": "Rerun the material master validation against the cleaned data",
+        "owner": "Priya",
+        "deadline": "2026-06-22",
+        "status": "in_progress"
+       },
+       "after": {
+        "description": "Rerun the material master validation against the cleaned data",
+        "owner": "Priya",
+        "deadline": "2026-06-22",
+        "status": "done"
+       },
+       "evidence": "Priya: The material master validation rerun is complete — zero errors against the cleaned data."
+      },
+      {
+       "task_id": 101,
+       "before": {
+        "description": "Finalize the customer master mapping",
+        "owner": "Daniel",
+        "deadline": "2026-06-19",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Finalize the customer master mapping",
+        "owner": "Daniel",
+        "deadline": "2026-06-30",
+        "status": "in_progress"
+       },
+       "evidence": "Daniel: I've started the customer master mapping but it isn't finished; the sales org fields slowed me down. I'll finalize it by 30 June."
+      },
+      {
+       "task_id": 102,
+       "before": {
+        "description": "Request business sign-off for the eighteen-hour extended downtime window",
+        "owner": "Aisha",
+        "deadline": "2026-06-24",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Request business sign-off for the eighteen-hour extended downtime window",
+        "owner": "Aisha",
+        "deadline": "2026-06-24",
+        "status": "done"
+       },
+       "evidence": "Aisha: Business signed off the eighteen-hour downtime window on Monday."
+      }
+     ],
+     "questions": [],
+     "steps": 1,
+     "model": "gemini-3.5-flash"
+    },
+    {
+     "id": "data-migration-04-b",
+     "existing_items": [
+      [
+       0,
+       103
+      ],
+      [
+       1,
+       106
+      ],
+      [
+       2,
+       101
+      ],
+      [
+       3,
+       104
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 103,
+       "before": {
+        "description": "Prepare the data reconciliation report template for post-load validation",
+        "owner": "Priya",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "after": {
+        "description": "Prepare the data reconciliation report template for post-load validation",
+        "owner": "Priya",
+        "deadline": null,
+        "status": "done"
+       },
+       "evidence": "Priya: The reconciliation report template for post-load validation is done; it's in the shared folder."
+      },
+      {
+       "task_id": 106,
+       "before": {
+        "description": "Write the rollback steps into the cutover runbook",
+        "owner": "Daniel",
+        "deadline": "2026-06-25",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Write the rollback steps into the cutover runbook",
+        "owner": "Marcus",
+        "deadline": "2026-07-07",
+        "status": "todo"
+       },
+       "evidence": "Aisha: Daniel is tied up with the customer master, so Marcus, can you take the rollback steps for the runbook?\n\nMarcus: Yes, I'll write the rollback steps into the cutover runbook by 7 July."
+      },
+      {
+       "task_id": 101,
+       "before": {
+        "description": "Finalize the customer master mapping",
+        "owner": "Daniel",
+        "deadline": "2026-06-19",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Finalize the customer master mapping",
+        "owner": "Daniel",
+        "deadline": "2026-06-19",
+        "status": "done"
+       },
+       "evidence": "Daniel: The customer master mapping was finalized yesterday."
+      }
+     ],
+     "questions": [],
+     "steps": 1,
+     "model": "gemini-3.5-flash"
     }
-   ],
-   "questions": [],
-   "steps": 1,
-   "model": "gemini-3.5-flash"
+   ]
   },
   {
-   "id": "logistics-02-a",
-   "existing_items": [
-    [
-     0,
-     100
-    ],
-    [
-     1,
-     101
-    ],
-    [
-     2,
-     103
-    ],
-    [
-     3,
-     106
-    ]
-   ],
-   "updates": [
+   "scenarios": [
     {
-     "task_id": 100,
-     "before": {
-      "description": "Chase the vendor for a firm barcode firmware patch date",
-      "owner": "Marcus",
-      "deadline": "2026-06-19",
-      "status": "todo"
-     },
-     "after": {
-      "description": "Chase the vendor for a firm barcode firmware patch date",
-      "owner": "Marcus",
-      "deadline": "2026-06-19",
-      "status": "done"
-     },
-     "evidence": "Marcus: Good news — I chased the vendor and they've given us a firm firmware patch date of 8 July."
+     "id": "finance-01-a",
+     "existing_items": [],
+     "updates": [],
+     "questions": [],
+     "error": "limit",
+     "error_message": "Review step or time limit reached"
     },
     {
-     "task_id": 101,
-     "before": {
-      "description": "Draft a one-page risk note on the scanner delay for the steering committee",
-      "owner": "Marcus",
-      "deadline": "2026-06-23",
-      "status": "todo"
-     },
-     "after": {
-      "description": "Draft a one-page risk note on the scanner delay for the steering committee",
-      "owner": "Marcus",
-      "deadline": "2026-06-23",
-      "status": "done"
-     },
-     "evidence": "Marcus: And the risk note on the scanner delay went to the steering committee this morning."
+     "id": "finance-01-b",
+     "existing_items": [
+      [
+       0,
+       108
+      ],
+      [
+       1,
+       105
+      ],
+      [
+       2,
+       104
+      ],
+      [
+       3,
+       102
+      ],
+      [
+       6,
+       106
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 108,
+       "before": {
+        "description": "Fix the MT940 parser config for multi-currency statements",
+        "owner": "Daniel",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "after": {
+        "description": "Fix the MT940 parser config for multi-currency statements",
+        "owner": "Priya",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "evidence": "Priya: Yes, I'll take over the MT940 parser fix from Daniel."
+      },
+      {
+       "task_id": 105,
+       "before": {
+        "description": "Send the change request for additional consulting days to Wei Lin",
+        "owner": "Daniel",
+        "deadline": "2026-06-18",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Send the change request for additional consulting days to Wei Lin",
+        "owner": "Daniel",
+        "deadline": "2026-07-02",
+        "status": "todo"
+       },
+       "evidence": "Daniel: Thanks. On the change request: Wei Lin rejected the first one, so I'll send a revised change request for the extra consulting days to Wei Lin by 2 July."
+      },
+      {
+       "task_id": 104,
+       "before": {
+        "description": "Clear the eleven duplicate postings from the system",
+        "owner": "Priya",
+        "deadline": "2026-06-25",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Clear the eleven duplicate postings from the system",
+        "owner": "Priya",
+        "deadline": "2026-06-25",
+        "status": "done"
+       },
+       "evidence": "Priya: All eleven duplicate postings are cleared from the system now."
+      },
+      {
+       "task_id": 102,
+       "before": {
+        "description": "Loop in the banking team for next week's integration session",
+        "owner": "Aisha",
+        "deadline": null,
+        "status": "todo"
+       },
+       "after": {
+        "description": "Loop in the banking team for next week's integration session",
+        "owner": "Aisha",
+        "deadline": null,
+        "status": "done"
+       },
+       "evidence": "Aisha: And I've looped in the banking team — they've confirmed they'll join Thursday's integration session."
+      }
+     ],
+     "questions": [],
+     "steps": 1,
+     "model": "gemini-3.5-flash"
     },
     {
-     "task_id": 103,
-     "before": {
-      "description": "Investigate the WM to TMS interface timeout errors",
-      "owner": "Daniel",
-      "deadline": "2026-06-22",
-      "status": "todo"
-     },
-     "after": {
-      "description": "Investigate the WM to TMS interface timeout errors",
-      "owner": "Daniel",
-      "deadline": "2026-06-26",
-      "status": "in_progress"
-     },
-     "evidence": "Daniel: I've started on the WM to TMS interface timeout errors — it looks like a buffer size problem. I'll have a fix by 26 June."
+     "id": "logistics-02-a",
+     "existing_items": [
+      [
+       0,
+       100
+      ],
+      [
+       1,
+       101
+      ],
+      [
+       2,
+       103
+      ],
+      [
+       3,
+       106
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 100,
+       "before": {
+        "description": "Chase the vendor for a firm barcode firmware patch date",
+        "owner": "Marcus",
+        "deadline": "2026-06-19",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Chase the vendor for a firm barcode firmware patch date",
+        "owner": "Marcus",
+        "deadline": "2026-06-19",
+        "status": "done"
+       },
+       "evidence": "Marcus: Good news — I chased the vendor and they've given us a firm firmware patch date of 8 July."
+      },
+      {
+       "task_id": 101,
+       "before": {
+        "description": "Draft a one-page risk note on the scanner delay for the steering committee",
+        "owner": "Marcus",
+        "deadline": "2026-06-23",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Draft a one-page risk note on the scanner delay for the steering committee",
+        "owner": "Marcus",
+        "deadline": "2026-06-23",
+        "status": "done"
+       },
+       "evidence": "Marcus: And the risk note on the scanner delay went to the steering committee this morning."
+      },
+      {
+       "task_id": 103,
+       "before": {
+        "description": "Investigate the WM to TMS interface timeout errors",
+        "owner": "Daniel",
+        "deadline": "2026-06-22",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Investigate the WM to TMS interface timeout errors",
+        "owner": "Daniel",
+        "deadline": "2026-06-26",
+        "status": "in_progress"
+       },
+       "evidence": "Daniel: I've started on the WM to TMS interface timeout errors — it looks like a buffer size problem. I'll have a fix by 26 June."
+      }
+     ],
+     "questions": [],
+     "steps": 1,
+     "model": "gemini-3.5-flash"
+    },
+    {
+     "id": "logistics-02-b",
+     "existing_items": [
+      [
+       0,
+       107
+      ],
+      [
+       1,
+       102
+      ],
+      [
+       2,
+       100
+      ],
+      [
+       3,
+       105
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 107,
+       "before": {
+        "description": "Configure the label printer integration",
+        "owner": "Daniel",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "after": {
+        "description": "Configure the label printer integration",
+        "owner": "Marcus",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "evidence": "Aisha: Daniel's on leave next week, so let's sort out cover first. Marcus, can you take the label printer integration while Daniel's away?\n\nMarcus: Yes, I'll pick up the label printer integration from Daniel."
+      },
+      {
+       "task_id": 102,
+       "before": {
+        "description": "Update the cutover runbook to reflect the degraded-mode plan",
+        "owner": "Aisha",
+        "deadline": null,
+        "status": "todo"
+       },
+       "after": {
+        "description": "Update the cutover runbook to reflect the degraded-mode plan",
+        "owner": "Aisha",
+        "deadline": "2026-07-03",
+        "status": "in_progress"
+       },
+       "evidence": "Aisha: Thanks. On my side, I've started updating the cutover runbook with the degraded-mode plan, and I'll finish it by 3 July."
+      },
+      {
+       "task_id": 100,
+       "before": {
+        "description": "Chase the vendor for a firm barcode firmware patch date",
+        "owner": "Marcus",
+        "deadline": "2026-06-19",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Chase the vendor for a firm barcode firmware patch date",
+        "owner": "Marcus",
+        "deadline": "2026-07-02",
+        "status": "todo"
+       },
+       "evidence": "Marcus: The vendor still hasn't given a firm patch date. I'm chasing them again and I'll have an answer by 2 July."
+      }
+     ],
+     "questions": [
+      "Candidate item 5 ('investigate the TMS freight cost calculation errors') mentions TMS freight cost calculation errors, whereas existing task #103 covers 'Investigate the WM to TMS interface timeout errors'. Please confirm if task #103 should be updated or if a new task should be created for freight cost calculation errors."
+     ],
+     "steps": 2,
+     "model": "gemini-3.5-flash"
+    },
+    {
+     "id": "security-03-a",
+     "existing_items": [
+      [
+       0,
+       100
+      ],
+      [
+       1,
+       102
+      ],
+      [
+       2,
+       101
+      ],
+      [
+       3,
+       103
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 100,
+       "before": {
+        "description": "Circulate the segregation-of-duties conflict report to the team",
+        "owner": "Marcus",
+        "deadline": "2026-06-18",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Circulate the segregation-of-duties conflict report to the team",
+        "owner": "Marcus",
+        "deadline": "2026-06-18",
+        "status": "done"
+       },
+       "evidence": "Marcus: I circulated the segregation-of-duties conflict report to the team on Thursday."
+      },
+      {
+       "task_id": 102,
+       "before": {
+        "description": "Tune the production authorization trace settings to reduce log volume",
+        "owner": null,
+        "deadline": null,
+        "status": "todo"
+       },
+       "after": {
+        "description": "Tune the production authorization trace settings to reduce log volume",
+        "owner": "Priya Nair",
+        "deadline": "2026-07-01",
+        "status": "todo"
+       },
+       "evidence": "Priya: Thanks. The trace settings are still unassigned. I'll take the authorization trace tuning, and I can have it done by 1 July."
+      },
+      {
+       "task_id": 101,
+       "before": {
+        "description": "Prepare the mitigating controls document for the external audit",
+        "owner": "Daniel",
+        "deadline": "2026-06-25",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Prepare the mitigating controls document for the external audit",
+        "owner": "Daniel",
+        "deadline": "2026-06-25",
+        "status": "in_progress"
+       },
+       "evidence": "Daniel: The mitigating controls document is about half written. Still on track for the 25th."
+      }
+     ],
+     "questions": [],
+     "steps": 1,
+     "model": "gemini-3.5-flash"
+    },
+    {
+     "id": "security-03-b",
+     "existing_items": [
+      [
+       0,
+       107
+      ],
+      [
+       1,
+       103
+      ],
+      [
+       2,
+       101
+      ],
+      [
+       3,
+       105
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 107,
+       "before": {
+        "description": "Build out the emergency access management workflow configuration",
+        "owner": "Marcus",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "after": {
+        "description": "Build out the emergency access management workflow configuration",
+        "owner": "Marcus",
+        "deadline": null,
+        "status": "done"
+       },
+       "evidence": "Marcus: The emergency access workflow configuration is finished and tested."
+      },
+      {
+       "task_id": 103,
+       "before": {
+        "description": "Schedule a penetration test with the external vendor",
+        "owner": "Marcus",
+        "deadline": "2026-06-26",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Schedule a penetration test with the external vendor",
+        "owner": "Marcus",
+        "deadline": "2026-07-03",
+        "status": "todo"
+       },
+       "evidence": "Marcus: The vendor can't do the pen test on the 26th, so it's moved. I'll confirm the new penetration test slot by 3 July."
+      },
+      {
+       "task_id": 101,
+       "before": {
+        "description": "Prepare the mitigating controls document for the external audit",
+        "owner": "Daniel",
+        "deadline": "2026-06-25",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Prepare the mitigating controls document for the external audit",
+        "owner": "Priya",
+        "deadline": "2026-06-25",
+        "status": "todo"
+       },
+       "evidence": "Priya: Yes, I'll own the mitigating controls document from here."
+      }
+     ],
+     "questions": [],
+     "steps": 2,
+     "model": "gemini-3.5-flash"
+    },
+    {
+     "id": "data-migration-04-a",
+     "existing_items": [
+      [
+       0,
+       100
+      ],
+      [
+       1,
+       101
+      ],
+      [
+       2,
+       102
+      ],
+      [
+       3,
+       106
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 100,
+       "before": {
+        "description": "Rerun the material master validation against the cleaned data",
+        "owner": "Priya",
+        "deadline": "2026-06-22",
+        "status": "in_progress"
+       },
+       "after": {
+        "description": "Rerun the material master validation against the cleaned data",
+        "owner": "Priya",
+        "deadline": "2026-06-22",
+        "status": "done"
+       },
+       "evidence": "Priya: The material master validation rerun is complete — zero errors against the cleaned data."
+      },
+      {
+       "task_id": 101,
+       "before": {
+        "description": "Finalize the customer master mapping",
+        "owner": "Daniel",
+        "deadline": "2026-06-19",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Finalize the customer master mapping",
+        "owner": "Daniel",
+        "deadline": "2026-06-30",
+        "status": "in_progress"
+       },
+       "evidence": "Daniel: I've started the customer master mapping but it isn't finished; the sales org fields slowed me down. I'll finalize it by 30 June."
+      },
+      {
+       "task_id": 102,
+       "before": {
+        "description": "Request business sign-off for the eighteen-hour extended downtime window",
+        "owner": "Aisha",
+        "deadline": "2026-06-24",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Request business sign-off for the eighteen-hour extended downtime window",
+        "owner": "Aisha",
+        "deadline": "2026-06-24",
+        "status": "done"
+       },
+       "evidence": "Aisha: Business signed off the eighteen-hour downtime window on Monday."
+      }
+     ],
+     "questions": [],
+     "steps": 1,
+     "model": "gemini-3.5-flash"
+    },
+    {
+     "id": "data-migration-04-b",
+     "existing_items": [
+      [
+       0,
+       103
+      ],
+      [
+       1,
+       106
+      ],
+      [
+       2,
+       101
+      ],
+      [
+       3,
+       104
+      ]
+     ],
+     "updates": [
+      {
+       "task_id": 103,
+       "before": {
+        "description": "Prepare the data reconciliation report template for post-load validation",
+        "owner": "Priya",
+        "deadline": null,
+        "status": "in_progress"
+       },
+       "after": {
+        "description": "Prepare the data reconciliation report template for post-load validation",
+        "owner": "Priya",
+        "deadline": null,
+        "status": "done"
+       },
+       "evidence": "Priya: The reconciliation report template for post-load validation is done; it's in the shared folder."
+      },
+      {
+       "task_id": 106,
+       "before": {
+        "description": "Write the rollback steps into the cutover runbook",
+        "owner": "Daniel",
+        "deadline": "2026-06-25",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Write the rollback steps into the cutover runbook",
+        "owner": "Marcus",
+        "deadline": "2026-07-07",
+        "status": "todo"
+       },
+       "evidence": "Aisha: Daniel is tied up with the customer master, so Marcus, can you take the rollback steps for the runbook?\n\nMarcus: Yes, I'll write the rollback steps into the cutover runbook by 7 July."
+      },
+      {
+       "task_id": 101,
+       "before": {
+        "description": "Finalize the customer master mapping",
+        "owner": "Daniel",
+        "deadline": "2026-06-19",
+        "status": "todo"
+       },
+       "after": {
+        "description": "Finalize the customer master mapping",
+        "owner": "Daniel",
+        "deadline": "2026-06-19",
+        "status": "done"
+       },
+       "evidence": "Daniel: The customer master mapping was finalized yesterday."
+      }
+     ],
+     "questions": [],
+     "steps": 3,
+     "model": "gemini-3.5-flash"
     }
-   ],
-   "questions": [],
-   "steps": 1,
-   "model": "gemini-3.5-flash"
-  },
-  {
-   "id": "logistics-02-b",
-   "existing_items": [
-    [
-     0,
-     107
-    ],
-    [
-     1,
-     102
-    ],
-    [
-     2,
-     100
-    ],
-    [
-     3,
-     105
-    ]
-   ],
-   "updates": [
-    {
-     "task_id": 107,
-     "before": {
-      "description": "Configure the label printer integration",
-      "owner": "Daniel",
-      "deadline": null,
-      "status": "in_progress"
-     },
-     "after": {
-      "description": "Configure the label printer integration",
-      "owner": "Marcus",
-      "deadline": null,
-      "status": "in_progress"
-     },
-     "evidence": "Aisha: Marcus, can you take the label printer integration while Daniel's away?\n\nMarcus: Yes, I'll pick up the label printer integration from Daniel."
-    },
-    {
-     "task_id": 102,
-     "before": {
-      "description": "Update the cutover runbook to reflect the degraded-mode plan",
-      "owner": "Aisha",
-      "deadline": null,
-      "status": "todo"
-     },
-     "after": {
-      "description": "Update the cutover runbook to reflect the degraded-mode plan",
-      "owner": "Aisha",
-      "deadline": "2026-07-03",
-      "status": "in_progress"
-     },
-     "evidence": "Aisha: I've started updating the cutover runbook with the degraded-mode plan, and I'll finish it by 3 July."
-    },
-    {
-     "task_id": 100,
-     "before": {
-      "description": "Chase the vendor for a firm barcode firmware patch date",
-      "owner": "Marcus",
-      "deadline": "2026-06-19",
-      "status": "todo"
-     },
-     "after": {
-      "description": "Chase the vendor for a firm barcode firmware patch date",
-      "owner": "Marcus",
-      "deadline": "2026-07-02",
-      "status": "todo"
-     },
-     "evidence": "Marcus: I'm chasing them again and I'll have an answer by 2 July."
-    }
-   ],
-   "questions": [],
-   "steps": 2,
-   "model": "gemini-3.5-flash"
-  },
-  {
-   "id": "security-03-a",
-   "existing_items": [
-    [
-     0,
-     100
-    ],
-    [
-     1,
-     102
-    ],
-    [
-     2,
-     101
-    ],
-    [
-     3,
-     103
-    ]
-   ],
-   "updates": [
-    {
-     "task_id": 100,
-     "before": {
-      "description": "Circulate the segregation-of-duties conflict report to the team",
-      "owner": "Marcus",
-      "deadline": "2026-06-18",
-      "status": "todo"
-     },
-     "after": {
-      "description": "Circulate the segregation-of-duties conflict report to the team",
-      "owner": "Marcus",
-      "deadline": "2026-06-18",
-      "status": "done"
-     },
-     "evidence": "Marcus: I circulated the segregation-of-duties conflict report to the team on Thursday."
-    },
-    {
-     "task_id": 102,
-     "before": {
-      "description": "Tune the production authorization trace settings to reduce log volume",
-      "owner": null,
-      "deadline": null,
-      "status": "todo"
-     },
-     "after": {
-      "description": "Tune the production authorization trace settings to reduce log volume",
-      "owner": "Priya Nair",
-      "deadline": "2026-07-01",
-      "status": "todo"
-     },
-     "evidence": "Priya: Thanks. The trace settings are still unassigned. I'll take the authorization trace tuning, and I can have it done by 1 July."
-    },
-    {
-     "task_id": 101,
-     "before": {
-      "description": "Prepare the mitigating controls document for the external audit",
-      "owner": "Daniel",
-      "deadline": "2026-06-25",
-      "status": "todo"
-     },
-     "after": {
-      "description": "Prepare the mitigating controls document for the external audit",
-      "owner": "Daniel",
-      "deadline": "2026-06-25",
-      "status": "in_progress"
-     },
-     "evidence": "Daniel: The mitigating controls document is about half written. Still on track for the 25th."
-    }
-   ],
-   "questions": [],
-   "steps": 1,
-   "model": "gemini-3.5-flash"
-  },
-  {
-   "id": "security-03-b",
-   "existing_items": [
-    [
-     0,
-     107
-    ],
-    [
-     1,
-     103
-    ],
-    [
-     2,
-     101
-    ],
-    [
-     3,
-     105
-    ]
-   ],
-   "updates": [
-    {
-     "task_id": 107,
-     "before": {
-      "description": "Build out the emergency access management workflow configuration",
-      "owner": "Marcus",
-      "deadline": null,
-      "status": "in_progress"
-     },
-     "after": {
-      "description": "Build out the emergency access management workflow configuration",
-      "owner": "Marcus",
-      "deadline": null,
-      "status": "done"
-     },
-     "evidence": "Marcus: The emergency access workflow configuration is finished and tested."
-    },
-    {
-     "task_id": 103,
-     "before": {
-      "description": "Schedule a penetration test with the external vendor",
-      "owner": "Marcus",
-      "deadline": "2026-06-26",
-      "status": "todo"
-     },
-     "after": {
-      "description": "Schedule a penetration test with the external vendor",
-      "owner": "Marcus",
-      "deadline": "2026-07-03",
-      "status": "todo"
-     },
-     "evidence": "Marcus: The vendor can't do the pen test on the 26th, so it's moved. I'll confirm the new penetration test slot by 3 July."
-    },
-    {
-     "task_id": 101,
-     "before": {
-      "description": "Prepare the mitigating controls document for the external audit",
-      "owner": "Daniel",
-      "deadline": "2026-06-25",
-      "status": "todo"
-     },
-     "after": {
-      "description": "Prepare the mitigating controls document for the external audit",
-      "owner": "Priya",
-      "deadline": "2026-06-25",
-      "status": "todo"
-     },
-     "evidence": "Daniel: I'm overloaded with the role fixes this week. Priya, could you take over the mitigating controls document?\n\nPriya: Yes, I'll own the mitigating controls document from here."
-    }
-   ],
-   "questions": [],
-   "steps": 3,
-   "model": "gemini-3.5-flash"
-  },
-  {
-   "id": "data-migration-04-a",
-   "existing_items": [
-    [
-     0,
-     100
-    ],
-    [
-     1,
-     101
-    ],
-    [
-     2,
-     102
-    ],
-    [
-     3,
-     106
-    ]
-   ],
-   "updates": [
-    {
-     "task_id": 100,
-     "before": {
-      "description": "Rerun the material master validation against the cleaned data",
-      "owner": "Priya",
-      "deadline": "2026-06-22",
-      "status": "in_progress"
-     },
-     "after": {
-      "description": "Rerun the material master validation against the cleaned data",
-      "owner": "Priya",
-      "deadline": "2026-06-22",
-      "status": "done"
-     },
-     "evidence": "Priya: The material master validation rerun is complete — zero errors against the cleaned data."
-    },
-    {
-     "task_id": 101,
-     "before": {
-      "description": "Finalize the customer master mapping",
-      "owner": "Daniel",
-      "deadline": "2026-06-19",
-      "status": "todo"
-     },
-     "after": {
-      "description": "Finalize the customer master mapping",
-      "owner": "Daniel",
-      "deadline": "2026-06-30",
-      "status": "in_progress"
-     },
-     "evidence": "Daniel: I've started the customer master mapping but it isn't finished; the sales org fields slowed me down. I'll finalize it by 30 June."
-    },
-    {
-     "task_id": 102,
-     "before": {
-      "description": "Request business sign-off for the eighteen-hour extended downtime window",
-      "owner": "Aisha",
-      "deadline": "2026-06-24",
-      "status": "todo"
-     },
-     "after": {
-      "description": "Request business sign-off for the eighteen-hour extended downtime window",
-      "owner": "Aisha",
-      "deadline": "2026-06-24",
-      "status": "done"
-     },
-     "evidence": "Aisha: Business signed off the eighteen-hour downtime window on Monday."
-    }
-   ],
-   "questions": [
-    "Candidate task 4 ('schedule the second mock cutover') and Candidate task 5 ('rerun the customer master validation after the mapping is finalized') are new items from this meeting that do not exist on the board."
-   ],
-   "steps": 1,
-   "model": "gemini-3.5-flash"
-  },
-  {
-   "id": "data-migration-04-b",
-   "existing_items": [
-    [
-     0,
-     103
-    ],
-    [
-     1,
-     106
-    ],
-    [
-     2,
-     101
-    ],
-    [
-     3,
-     104
-    ]
-   ],
-   "updates": [
-    {
-     "task_id": 103,
-     "before": {
-      "description": "Prepare the data reconciliation report template for post-load validation",
-      "owner": "Priya",
-      "deadline": null,
-      "status": "in_progress"
-     },
-     "after": {
-      "description": "Prepare the data reconciliation report template for post-load validation",
-      "owner": "Priya",
-      "deadline": null,
-      "status": "done"
-     },
-     "evidence": "Priya: The reconciliation report template for post-load validation is done; it's in the shared folder."
-    },
-    {
-     "task_id": 106,
-     "before": {
-      "description": "Write the rollback steps into the cutover runbook",
-      "owner": "Daniel",
-      "deadline": "2026-06-25",
-      "status": "todo"
-     },
-     "after": {
-      "description": "Write the rollback steps into the cutover runbook",
-      "owner": "Marcus",
-      "deadline": "2026-07-07",
-      "status": "todo"
-     },
-     "evidence": "Aisha: Daniel is tied up with the customer master, so Marcus, can you take the rollback steps for the runbook?\n\nMarcus: Yes, I'll write the rollback steps into the cutover runbook by 7 July."
-    },
-    {
-     "task_id": 101,
-     "before": {
-      "description": "Finalize the customer master mapping",
-      "owner": "Daniel",
-      "deadline": "2026-06-19",
-      "status": "todo"
-     },
-     "after": {
-      "description": "Finalize the customer master mapping",
-      "owner": "Daniel",
-      "deadline": "2026-06-19",
-      "status": "done"
-     },
-     "evidence": "Daniel: The customer master mapping was finalized yesterday."
-    }
-   ],
-   "questions": [],
-   "steps": 3,
-   "model": "gemini-3.5-flash"
+   ]
   }
  ]
 }

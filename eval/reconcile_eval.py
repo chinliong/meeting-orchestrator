@@ -21,13 +21,13 @@ What is scored:
   against the answer key. A change the key does not expect is a wrong change. Owners are compared
   by first name, as in the parser evaluation, so "Priya Nair" and "Priya" are the same person.
   Rewording a description is reported but not scored, as the answer key does not fix a wording.
-* A review that cannot be finished within the agent's limits shows the user an error and
-  suggests nothing, so it scores as nothing found.
+* A review that cannot be finished within the agent's limits shows the user an error and saves
+  nothing (the import is refused, to be tried again), so it scores as nothing found.
 
 Usage (from the repo root, with the backend virtualenv active):
 
     python -m eval.reconcile_eval --simulate        # free: a stand-in model that answers from the key
-    python -m eval.reconcile_eval --run             # calls Gemini: one review per scenario, 1-6 calls each
+    python -m eval.reconcile_eval --run --runs 2    # calls Gemini: adds 2 runs, one review per scenario each
     python -m eval.reconcile_eval --write-report    # free: rewrites docs/agent-evaluation.md
 
 The results are Part 2 of docs/agent-evaluation.md, after the extraction test that decided the
@@ -116,6 +116,7 @@ def review_one(scenario: dict) -> dict:
 
 
 def run(save_to: Path) -> dict:
+    """One more run of every scenario, added to the saved runs."""
     scenarios = load_scenarios()
     blocks = []
     for s in scenarios:
@@ -124,7 +125,11 @@ def run(save_to: Path) -> dict:
         print(f"  {s['id']:22} {len(b['existing_items'])} repeats, {len(b['updates'])} updates, "
               f"{len(b['questions'])} questions{note}", flush=True)
         blocks.append(b)
-    out = {"note": "Meeting-agent reconciliation reviews; see eval/reconcile_eval.py.", "scenarios": blocks}
+    saved = json.loads(save_to.read_text()) if save_to.exists() else {}
+    out = {"note": "Meeting-agent reconciliation reviews, one entry per run; see eval/reconcile_eval.py.",
+           "runs": runs_of(saved) if saved else []}
+    out["runs"].append({"scenarios": blocks})
+    # Saved after every run, so an interrupted batch keeps what it already paid for.
     save_to.write_text(json.dumps(out, indent=1, ensure_ascii=False) + "\n")
     return out
 
@@ -170,18 +175,28 @@ def f1(p, r):
     return round(2 * p * r / (p + r), 3) if p and r else (0.0 if p is not None and r is not None else None)
 
 
-def score(predictions: dict, scenarios: list[dict] | None = None) -> dict:
-    scenarios = scenarios or load_scenarios()
-    by_id = {b["id"]: b for b in predictions["scenarios"]}
-    t = {k: 0 for k in ("rep_expected", "rep_predicted", "rep_correct", "rep_new_held", "app_predicted", "app_correct",
-                        "app_new_held", "upd_expected", "upd_predicted", "upd_correct_task", "upd_exact",
-                        "fld_expected", "fld_predicted", "fld_correct", "wrong_changes", "description_rewords",
-                        "reviews", "failed", "api_errors", "steps", "questions")}
+COUNTS = ("rep_expected", "rep_predicted", "rep_correct", "rep_new_held", "app_predicted", "app_correct",
+          "app_new_held", "upd_expected", "upd_predicted", "upd_correct_task", "upd_exact",
+          "fld_expected", "fld_predicted", "fld_correct", "wrong_changes", "description_rewords",
+          "reviews", "failed", "api_errors", "steps", "questions")
+
+
+def runs_of(predictions: dict) -> list[dict]:
+    """The saved runs; a file from before runs were kept holds one run directly."""
+    return predictions["runs"] if "runs" in predictions else [predictions]
+
+
+def tally(run: dict, scenarios: list[dict]) -> tuple[dict, list[dict]]:
+    """Counts for one run, and its per-scenario outcomes."""
+    by_id = {b["id"]: b for b in run["scenarios"]}
+    t = {k: 0 for k in COUNTS}
     per = []
     for s in scenarios:
         b = by_id.get(s["id"], {"existing_items": [], "updates": [], "questions": [], "error": "missing"})
-        if b.get("error") == "api":
+        if b.get("error") == "api":  # never answered: excluded, so it counts for nothing either way
             t["api_errors"] += 1
+            per.append({"id": s["id"], "repeats_found": 0, "repeats_expected": 0, "new_held_back": 0,
+                        "updates_exact": 0, "updates_expected": 0, "wrong_changes": 0, "failed": False})
             continue
         t["reviews"] += 1
         t["failed"] += b.get("error") in ("limit", "missing")
@@ -191,11 +206,12 @@ def score(predictions: dict, scenarios: list[dict] | None = None) -> dict:
         new = set(s["expected"]["new_candidates"])
         gold_pairs = {(c, TASK_ID_BASE + i) for c, i in s["expected"]["existing"]}
         pairs = {tuple(p) for p in b["existing_items"]}
-        # The app also holds back a new task whose wording nearly matches one on the board.
+        # The app also holds back a new task whose wording nearly matches one on the board. A review
+        # that did not finish stops the whole import in the app, so nothing is held back then either.
         app_pairs = set(pairs)
         marked = {c for c, _ in pairs}
         for c, cand in enumerate(s["candidates"]):
-            if c not in marked:
+            if c not in marked and not b.get("error"):
                 match = agent.likely_duplicate(cand["description"], board["tasks"])
                 if match:
                     app_pairs.add((c, match["id"]))
@@ -226,15 +242,19 @@ def score(predictions: dict, scenarios: list[dict] | None = None) -> dict:
             t["wrong_changes"] += len(changed) - right
             exact += changed.keys() == gold.keys() and right == len(gold)
         t["upd_exact"] += exact
-        per.append({"id": s["id"], "repeats": f"{len(pairs & gold_pairs)}/{len(gold_pairs)}",
+        per.append({"id": s["id"], "repeats_found": len(pairs & gold_pairs), "repeats_expected": len(gold_pairs),
                     "new_held_back": sum(c in new for c, _ in pairs),
-                    "updates_exact": f"{exact}/{len(gold_updates)}",
+                    "updates_exact": exact, "updates_expected": len(gold_updates),
                     "wrong_changes": sum(1 for u in b["updates"] for f in FIELDS
                                          if u["after"][f] != u["before"][f]
                                          and not (f in gold_updates.get(u["task_id"], {})
                                                   and same_value(f, u["after"][f], gold_updates[u["task_id"]][f]))),
                     "failed": b.get("error") in ("limit", "missing")})
 
+    return t, per
+
+
+def metrics(t: dict, scenarios: list[dict], runs: int) -> dict:
     rp, rr = ratio(t["rep_correct"], t["rep_predicted"]), ratio(t["rep_correct"], t["rep_expected"])
     ap, ar = ratio(t["app_correct"], t["app_predicted"]), ratio(t["app_correct"], t["rep_expected"])
     up, ur = ratio(t["upd_correct_task"], t["upd_predicted"]), ratio(t["upd_correct_task"], t["upd_expected"])
@@ -242,17 +262,38 @@ def score(predictions: dict, scenarios: list[dict] | None = None) -> dict:
     return {
         "repeats": {"agent": {"precision": rp, "recall": rr, "f1": f1(rp, rr), "new_tasks_held_back": t["rep_new_held"]},
                     "app": {"precision": ap, "recall": ar, "f1": f1(ap, ar), "new_tasks_held_back": t["app_new_held"]},
-                    "expected": t["rep_expected"], "new_tasks": sum(len(s["expected"]["new_candidates"]) for s in scenarios)},
+                    "expected": t["rep_expected"] // max(1, runs),
+                    "new_tasks": sum(len(s["expected"]["new_candidates"]) for s in scenarios)},
         "updates": {"tasks": {"precision": up, "recall": ur, "f1": f1(up, ur)},
                     "fields": {"precision": fp, "recall": fr, "f1": f1(fp, fr)},
                     "exact": t["upd_exact"], "expected_tasks": t["upd_expected"], "expected_fields": t["fld_expected"],
                     "wrong_changes": t["wrong_changes"], "description_rewords": t["description_rewords"]},
         "reviews": {"scored": t["reviews"], "not_completed": t["failed"], "provider_errors_excluded": t["api_errors"],
                     "mean_steps": round(t["steps"] / max(1, t["reviews"] - t["failed"]), 2),
-                    "questions": t["questions"],
-                    "model": next((b.get("model") for b in predictions["scenarios"] if b.get("model")), None)},
-        "per_scenario": per,
+                    "questions": t["questions"]},
     }
+
+
+def score(predictions: dict, scenarios: list[dict] | None = None) -> dict:
+    """Totals over every saved run (each review counted once), each run's own figures, and each
+    scenario's outcomes summed over the runs."""
+    scenarios = scenarios or load_scenarios()
+    runs = runs_of(predictions)
+    tallies = [tally(r, scenarios) for r in runs]
+    total = {k: sum(t[k] for t, _ in tallies) for k in COUNTS}
+    out = metrics(total, scenarios, len(runs))
+    out["runs"] = len(runs)
+    out["per_run"] = [metrics(t, scenarios, 1) for t, _ in tallies]
+    out["reviews"]["model"] = next((b.get("model") for r in runs for b in r["scenarios"] if b.get("model")), None)
+    out["per_scenario"] = []
+    for i, s in enumerate(scenarios):
+        rows = [per[i] for _, per in tallies]
+        out["per_scenario"].append({
+            "id": s["id"], **{k: sum(r[k] for r in rows) for k in
+                              ("repeats_found", "repeats_expected", "new_held_back", "updates_exact",
+                               "updates_expected", "wrong_changes")},
+            "failed": sum(bool(r["failed"]) for r in rows)})
+    return out
 
 
 def pct(x) -> str:
@@ -261,7 +302,8 @@ def pct(x) -> str:
 
 def render_section(r: dict) -> list[str]:
     """Part 2 of docs/agent-evaluation.md."""
-    rep, upd, rev = r["repeats"], r["updates"], r["reviews"]
+    rep, upd, rev, n = r["repeats"], r["updates"], r["reviews"], r["runs"]
+    runs_word = "one run" if n == 1 else f"{n} runs"
     return [
         "## Part 2. How well does the agent reconcile a follow-up meeting with the board?",
         "",
@@ -269,7 +311,8 @@ def render_section(r: dict) -> list[str]:
         "scenarios in `data/reconciliation-scenarios/` continues one of the short test meetings: the board",
         "holds that meeting's annotated tasks, and a follow-up meeting is reviewed against it. The agent",
         "receives the follow-up's tasks from the answer key, so this scores reconciliation alone: which",
-        "tasks are already on the board, and which existing tasks change.",
+        f"tasks are already on the board, and which existing tasks change. Every scenario was reviewed in {runs_word};",
+        "the tables total all reviews.",
         "",
         f"### Repeated tasks ({rep['expected']} of the extracted tasks repeat a board task; {rep['new_tasks']} are new)",
         "",
@@ -280,7 +323,8 @@ def render_section(r: dict) -> list[str]:
         "",
         "A task held back is not lost: it waits under Changes as a possible duplicate, one tick to add.",
         "",
-        f"### Updates to existing tasks ({upd['expected_tasks']} expected, changing {upd['expected_fields']} owner, deadline or status values)",
+        f"### Updates to existing tasks ({upd['expected_tasks'] // n} expected per run, changing "
+        f"{upd['expected_fields'] // n} owner, deadline or status values)",
         "",
         "| | Precision | Recall | F1 |",
         "|---|---|---|---|",
@@ -290,12 +334,20 @@ def render_section(r: dict) -> list[str]:
         f"Suggestions exactly as expected: {upd['exact']} of {upd['expected_tasks']}. Changes the key does not expect: "
         f"{upd['wrong_changes']}. Descriptions reworded (not scored): {upd['description_rewords']}.",
         "",
-        "### Per scenario",
+        "### Each run",
         "",
-        "| Scenario | Repeats found | New tasks held back | Updates exactly right | Unexpected changes |",
-        "|---|---|---|---|---|",
-        *[f"| {p['id']}{' (not completed)' if p['failed'] else ''} | {p['repeats']} | {p['new_held_back']} | "
-          f"{p['updates_exact']} | {p['wrong_changes']} |" for p in r["per_scenario"]],
+        "| Run | Repeats F1 | New tasks held back | Updates exactly right | Values F1 | Unexpected changes | Not completed |",
+        "|---|---|---|---|---|---|---|",
+        *[f"| {i} | {pct(x['repeats']['agent']['f1'])} | {x['repeats']['agent']['new_tasks_held_back']} | "
+          f"{x['updates']['exact']}/{x['updates']['expected_tasks']} | {pct(x['updates']['fields']['f1'])} | "
+          f"{x['updates']['wrong_changes']} | {x['reviews']['not_completed']} |" for i, x in enumerate(r["per_run"], 1)],
+        "",
+        "### Per scenario (summed over the runs)",
+        "",
+        "| Scenario | Repeats found | New tasks held back | Updates exactly right | Unexpected changes | Not completed |",
+        "|---|---|---|---|---|---|",
+        *[f"| {p['id']} | {p['repeats_found']}/{p['repeats_expected']} | {p['new_held_back']} | "
+          f"{p['updates_exact']}/{p['updates_expected']} | {p['wrong_changes']} | {p['failed']} |" for p in r["per_scenario"]],
         "",
         f"Reviews: {rev['scored']}; not completed within limits: {rev['not_completed']}; provider errors excluded: "
         f"{rev['provider_errors_excluded']}; model calls per review: {rev['mean_steps']}; questions asked: "
@@ -303,7 +355,7 @@ def render_section(r: dict) -> list[str]:
         "",
         "### Reading Part 2",
         "",
-        "One run of eight scenarios with one annotator. The follow-up meetings and their answer key were",
+        f"{runs_word.capitalize()} of eight scenarios with one annotator. The follow-up meetings and their answer key were",
         "written for this test after the agent was built, drafted with an AI assistant (Claude) and",
         "reviewed by the author; each change in them is stated plainly, so real meetings are harder. Each",
         "changed owner, deadline or status is a value; a suggestion is exactly right when it changes the",
@@ -316,7 +368,8 @@ def render_section(r: dict) -> list[str]:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--run", action="store_true", help="review every scenario with the agent (calls Gemini)")
+    ap.add_argument("--run", action="store_true", help="add runs of every scenario (calls Gemini)")
+    ap.add_argument("--runs", type=int, default=1)
     ap.add_argument("--simulate", action="store_true", help="free: a stand-in model answers from the key")
     ap.add_argument("--write-report", action="store_true")
     args = ap.parse_args()
@@ -326,7 +379,9 @@ def main() -> None:
         print(json.dumps({k: r[k] for k in ("repeats", "updates", "reviews")}, indent=1))
         return
     if args.run:
-        run(PREDICTIONS)
+        for i in range(args.runs):
+            print(f"--- reconciliation run {i + 1}/{args.runs} ---", flush=True)
+            run(PREDICTIONS)
     if not PREDICTIONS.exists():
         raise SystemExit("No saved run. Use --run (calls Gemini) or --simulate (free).")
     r = score(json.loads(PREDICTIONS.read_text()))

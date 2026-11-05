@@ -130,7 +130,8 @@ again and access rules. Limits that remain:
   every change needs approval.
 - Reconciliation was measured on eight follow-up meetings written for the test, where each change
   is stated plainly ([agent-evaluation.md](agent-evaluation.md), Part 2); real meetings
-  are messier.
+  are messier. Every review that finished was correct, but 2 of 24 ran out of steps; the import
+  then shows an error, saves nothing, and has to be tried again.
 - Two people with the same first name in one meeting can confuse the owner check.
 
 The endpoints are listed in [api-spec.md](api-spec.md#meeting-assistant).

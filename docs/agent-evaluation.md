@@ -66,44 +66,53 @@ From `eval/reconcile_predictions.json` (`python -m eval.reconcile_eval`). Each o
 scenarios in `data/reconciliation-scenarios/` continues one of the short test meetings: the board
 holds that meeting's annotated tasks, and a follow-up meeting is reviewed against it. The agent
 receives the follow-up's tasks from the answer key, so this scores reconciliation alone: which
-tasks are already on the board, and which existing tasks change.
+tasks are already on the board, and which existing tasks change. Every scenario was reviewed in 3 runs;
+the tables total all reviews.
 
 ### Repeated tasks (34 of the extracted tasks repeat a board task; 16 are new)
 
 | | Precision | Recall | F1 | New tasks held back |
 |---|---|---|---|---|
-| Agent | 1.000 | 1.000 | 1.000 | 0 |
-| App (agent and wording check) | 1.000 | 1.000 | 1.000 | 0 |
+| Agent | 1.000 | 0.902 | 0.948 | 0 |
+| App (agent and wording check) | 1.000 | 0.902 | 0.948 | 0 |
 
 A task held back is not lost: it waits under Changes as a possible duplicate, one tick to add.
 
-### Updates to existing tasks (26 expected, changing 31 owner, deadline or status values)
+### Updates to existing tasks (26 expected per run, changing 31 owner, deadline or status values)
 
 | | Precision | Recall | F1 |
 |---|---|---|---|
-| Tasks changed | 1.000 | 1.000 | 1.000 |
-| Values changed | 1.000 | 1.000 | 1.000 |
+| Tasks changed | 1.000 | 0.897 | 0.946 |
+| Values changed | 1.000 | 0.914 | 0.955 |
 
-Suggestions exactly as expected: 26 of 26. Changes the key does not expect: 0. Descriptions reworded (not scored): 0.
+Suggestions exactly as expected: 70 of 78. Changes the key does not expect: 0. Descriptions reworded (not scored): 0.
 
-### Per scenario
+### Each run
 
-| Scenario | Repeats found | New tasks held back | Updates exactly right | Unexpected changes |
-|---|---|---|---|---|
-| finance-01-a | 5/5 | 0 | 4/4 | 0 |
-| finance-01-b | 5/5 | 0 | 4/4 | 0 |
-| logistics-02-a | 4/4 | 0 | 3/3 | 0 |
-| logistics-02-b | 4/4 | 0 | 3/3 | 0 |
-| security-03-a | 4/4 | 0 | 3/3 | 0 |
-| security-03-b | 4/4 | 0 | 3/3 | 0 |
-| data-migration-04-a | 4/4 | 0 | 3/3 | 0 |
-| data-migration-04-b | 4/4 | 0 | 3/3 | 0 |
+| Run | Repeats F1 | New tasks held back | Updates exactly right | Values F1 | Unexpected changes | Not completed |
+|---|---|---|---|---|---|---|
+| 1 | 1.000 | 0 | 26/26 | 1.000 | 0 | 0 |
+| 2 | 0.921 | 0 | 22/26 | 0.931 | 0 | 1 |
+| 3 | 0.921 | 0 | 22/26 | 0.931 | 0 | 1 |
 
-Reviews: 8; not completed within limits: 0; provider errors excluded: 0; model calls per review: 1.62; questions asked: 1. Model: gemini-3.5-flash.
+### Per scenario (summed over the runs)
+
+| Scenario | Repeats found | New tasks held back | Updates exactly right | Unexpected changes | Not completed |
+|---|---|---|---|---|---|
+| finance-01-a | 5/15 | 0 | 4/12 | 0 | 2 |
+| finance-01-b | 15/15 | 0 | 12/12 | 0 | 0 |
+| logistics-02-a | 12/12 | 0 | 9/9 | 0 | 0 |
+| logistics-02-b | 12/12 | 0 | 9/9 | 0 | 0 |
+| security-03-a | 12/12 | 0 | 9/9 | 0 | 0 |
+| security-03-b | 12/12 | 0 | 9/9 | 0 | 0 |
+| data-migration-04-a | 12/12 | 0 | 9/9 | 0 | 0 |
+| data-migration-04-b | 12/12 | 0 | 9/9 | 0 | 0 |
+
+Reviews: 24; not completed within limits: 2; provider errors excluded: 0; model calls per review: 1.5; questions asked: 2. Model: gemini-3.5-flash.
 
 ### Reading Part 2
 
-One run of eight scenarios with one annotator. The follow-up meetings and their answer key were
+3 runs of eight scenarios with one annotator. The follow-up meetings and their answer key were
 written for this test after the agent was built, drafted with an AI assistant (Claude) and
 reviewed by the author; each change in them is stated plainly, so real meetings are harder. Each
 changed owner, deadline or status is a value; a suggestion is exactly right when it changes the

@@ -44,7 +44,11 @@ def test_a_wrong_value_and_a_missed_update_are_scored():
     assert r["updates"]["exact"] == 24
 
 
-def test_a_review_that_could_not_finish_finds_nothing_and_a_provider_error_is_excluded():
+def test_runs_are_totalled_and_a_failed_or_unanswered_review_is_handled():
+    preds = {"runs": [perfect(), perfect()]}
+    r = score(preds)
+    assert r["runs"] == 2 and r["updates"]["exact"] == 52 and r["repeats"]["expected"] == 34
+    assert [x["updates"]["exact"] for x in r["per_run"]] == [26, 26]
     preds = perfect()
     preds["scenarios"][0] = {"id": preds["scenarios"][0]["id"], "existing_items": [], "updates": [],
                              "questions": [], "error": "limit"}
