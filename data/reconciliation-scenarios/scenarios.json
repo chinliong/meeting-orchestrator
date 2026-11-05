@@ -1,0 +1,777 @@
+[
+ {
+  "id": "finance-01-a",
+  "base_transcript": "finance-workshop-01.txt",
+  "title": "SAP FI/CO Finance Workshop #5",
+  "meeting_date": "2026-06-22",
+  "transcript_file": "finance-01-a.txt",
+  "candidates": [
+   {
+    "description": "finish the APAC cost center hierarchy mapping",
+    "owner": "Daniel",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "send the new cost center codes to Daniel",
+    "owner": "Priya",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "fix the MT940 parser config for multi-currency statements",
+    "owner": "Daniel",
+    "deadline": "2026-06-24",
+    "status": "in_progress"
+   },
+   {
+    "description": "clear the eleven duplicate postings from the system",
+    "owner": "Priya",
+    "deadline": "2026-06-25",
+    "status": "in_progress"
+   },
+   {
+    "description": "loop in the banking team for the integration session",
+    "owner": "Aisha",
+    "deadline": null,
+    "status": "todo"
+   },
+   {
+    "description": "book the training room for the dress rehearsal",
+    "owner": "Priya",
+    "deadline": "2026-06-24",
+    "status": "todo"
+   },
+   {
+    "description": "send the updated cost center codes to the APAC controllers",
+    "owner": "Priya",
+    "deadline": "2026-06-24",
+    "status": "todo"
+   }
+  ],
+  "expected": {
+   "existing": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     2,
+     8
+    ],
+    [
+     3,
+     4
+    ],
+    [
+     4,
+     2
+    ]
+   ],
+   "new_candidates": [
+    5,
+    6
+   ],
+   "updates": [
+    {
+     "task": 0,
+     "changes": {
+      "status": "done"
+     },
+     "quote": "The APAC cost center hierarchy mapping is finished — I signed it off on Friday, so that's closed."
+    },
+    {
+     "task": 1,
+     "changes": {
+      "status": "done"
+     },
+     "quote": "I sent the new cost center codes to Daniel on Wednesday, so that one's done."
+    },
+    {
+     "task": 8,
+     "changes": {
+      "deadline": "2026-06-24"
+     },
+     "quote": "I'm still working on the MT940 parser fix for the multi-currency statements. I'll have it finished by 24 June."
+    },
+    {
+     "task": 4,
+     "changes": {
+      "status": "in_progress"
+     },
+     "quote": "I've started clearing the duplicate postings — four of the eleven are gone, and I'm still on track for the 25th."
+    }
+   ]
+  }
+ },
+ {
+  "id": "finance-01-b",
+  "base_transcript": "finance-workshop-01.txt",
+  "title": "SAP FI/CO Finance Workshop #6",
+  "meeting_date": "2026-06-29",
+  "transcript_file": "finance-01-b.txt",
+  "candidates": [
+   {
+    "description": "fix the MT940 parser config for multi-currency statements",
+    "owner": "Priya",
+    "deadline": null,
+    "status": "in_progress"
+   },
+   {
+    "description": "send the revised change request for additional consulting days to Wei Lin",
+    "owner": "Daniel",
+    "deadline": "2026-07-02",
+    "status": "todo"
+   },
+   {
+    "description": "clear the eleven duplicate postings from the system",
+    "owner": "Priya",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "loop in the banking team for the integration session",
+    "owner": "Aisha",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "get written confirmation of the MT940 statement format from the bank",
+    "owner": "Aisha",
+    "deadline": "2026-07-01",
+    "status": "todo"
+   },
+   {
+    "description": "clear the duplicate vendor master records",
+    "owner": "Priya",
+    "deadline": "2026-07-03",
+    "status": "todo"
+   },
+   {
+    "description": "complete the EMEA cost center mapping",
+    "owner": "Daniel",
+    "deadline": null,
+    "status": "done"
+   }
+  ],
+  "expected": {
+   "existing": [
+    [
+     0,
+     8
+    ],
+    [
+     1,
+     5
+    ],
+    [
+     2,
+     4
+    ],
+    [
+     3,
+     2
+    ],
+    [
+     6,
+     6
+    ]
+   ],
+   "new_candidates": [
+    4,
+    5
+   ],
+   "updates": [
+    {
+     "task": 8,
+     "changes": {
+      "owner": "Priya"
+     },
+     "quote": "Yes, I'll take over the MT940 parser fix from Daniel."
+    },
+    {
+     "task": 5,
+     "changes": {
+      "deadline": "2026-07-02"
+     },
+     "quote": "Wei Lin rejected the first one, so I'll send a revised change request for the extra consulting days to Wei Lin by 2 July."
+    },
+    {
+     "task": 4,
+     "changes": {
+      "status": "done"
+     },
+     "quote": "All eleven duplicate postings are cleared from the system now."
+    },
+    {
+     "task": 2,
+     "changes": {
+      "status": "done"
+     },
+     "quote": "And I've looped in the banking team — they've confirmed they'll join Thursday's integration session."
+    }
+   ]
+  }
+ },
+ {
+  "id": "logistics-02-a",
+  "base_transcript": "logistics-workshop-02.txt",
+  "title": "SAP MM/WM Logistics Integration Sync #2",
+  "meeting_date": "2026-06-23",
+  "transcript_file": "logistics-02-a.txt",
+  "candidates": [
+   {
+    "description": "chase the vendor for a firm barcode firmware patch date",
+    "owner": "Marcus",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "draft a one-page risk note on the scanner delay for the steering committee",
+    "owner": "Marcus",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "investigate the WM to TMS interface timeout errors",
+    "owner": "Daniel",
+    "deadline": "2026-06-26",
+    "status": "in_progress"
+   },
+   {
+    "description": "rebuild the test environment for degraded-mode manual entry",
+    "owner": "Marcus",
+    "deadline": null,
+    "status": "in_progress"
+   },
+   {
+    "description": "train the warehouse supervisors on degraded-mode manual entry",
+    "owner": "Aisha",
+    "deadline": "2026-07-03",
+    "status": "todo"
+   },
+   {
+    "description": "test the patched firmware on the handheld scanners",
+    "owner": "Marcus",
+    "deadline": "2026-07-10",
+    "status": "todo"
+   }
+  ],
+  "expected": {
+   "existing": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     3,
+     6
+    ]
+   ],
+   "new_candidates": [
+    4,
+    5
+   ],
+   "updates": [
+    {
+     "task": 0,
+     "changes": {
+      "status": "done"
+     },
+     "quote": "Good news — I chased the vendor and they've given us a firm firmware patch date of 8 July."
+    },
+    {
+     "task": 1,
+     "changes": {
+      "status": "done"
+     },
+     "quote": "And the risk note on the scanner delay went to the steering committee this morning."
+    },
+    {
+     "task": 3,
+     "changes": {
+      "status": "in_progress",
+      "deadline": "2026-06-26"
+     },
+     "quote": "I've started on the WM to TMS interface timeout errors — it looks like a buffer size problem. I'll have a fix by 26 June."
+    }
+   ]
+  }
+ },
+ {
+  "id": "logistics-02-b",
+  "base_transcript": "logistics-workshop-02.txt",
+  "title": "SAP MM/WM Logistics Integration Sync #3",
+  "meeting_date": "2026-06-30",
+  "transcript_file": "logistics-02-b.txt",
+  "candidates": [
+   {
+    "description": "configure the label printer integration",
+    "owner": "Marcus",
+    "deadline": null,
+    "status": "in_progress"
+   },
+   {
+    "description": "update the cutover runbook to reflect the degraded-mode plan",
+    "owner": "Aisha",
+    "deadline": "2026-07-03",
+    "status": "in_progress"
+   },
+   {
+    "description": "chase the vendor for a firm barcode firmware patch date",
+    "owner": "Marcus",
+    "deadline": "2026-07-02",
+    "status": "todo"
+   },
+   {
+    "description": "complete the goods movement type mapping",
+    "owner": "Daniel",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "arrange a loaner supply of scanners from the vendor",
+    "owner": "Marcus",
+    "deadline": "2026-07-07",
+    "status": "todo"
+   },
+   {
+    "description": "investigate the TMS freight cost calculation errors",
+    "owner": "Daniel",
+    "deadline": "2026-07-10",
+    "status": "todo"
+   }
+  ],
+  "expected": {
+   "existing": [
+    [
+     0,
+     7
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     5
+    ]
+   ],
+   "new_candidates": [
+    4,
+    5
+   ],
+   "updates": [
+    {
+     "task": 7,
+     "changes": {
+      "owner": "Marcus"
+     },
+     "quote": "Yes, I'll pick up the label printer integration from Daniel."
+    },
+    {
+     "task": 2,
+     "changes": {
+      "status": "in_progress",
+      "deadline": "2026-07-03"
+     },
+     "quote": "I've started updating the cutover runbook with the degraded-mode plan, and I'll finish it by 3 July."
+    },
+    {
+     "task": 0,
+     "changes": {
+      "deadline": "2026-07-02"
+     },
+     "quote": "The vendor still hasn't given a firm patch date. I'm chasing them again and I'll have an answer by 2 July."
+    }
+   ]
+  }
+ },
+ {
+  "id": "security-03-a",
+  "base_transcript": "security-workshop-03.txt",
+  "title": "SAP Security & Authorizations Review #3",
+  "meeting_date": "2026-06-24",
+  "transcript_file": "security-03-a.txt",
+  "candidates": [
+   {
+    "description": "circulate the segregation-of-duties conflict report to the team",
+    "owner": "Marcus",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "tune the production authorization trace settings to reduce log volume",
+    "owner": "Priya",
+    "deadline": "2026-07-01",
+    "status": "todo"
+   },
+   {
+    "description": "prepare the mitigating controls document for the external audit",
+    "owner": "Daniel",
+    "deadline": "2026-06-25",
+    "status": "in_progress"
+   },
+   {
+    "description": "schedule a penetration test with the external vendor",
+    "owner": "Marcus",
+    "deadline": "2026-06-26",
+    "status": "todo"
+   },
+   {
+    "description": "review the firefighter ID usage logs every week",
+    "owner": "Priya",
+    "deadline": null,
+    "status": "todo"
+   },
+   {
+    "description": "circulate the composite role design document to the auditors",
+    "owner": "Daniel",
+    "deadline": "2026-06-30",
+    "status": "todo"
+   }
+  ],
+  "expected": {
+   "existing": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     2,
+     1
+    ],
+    [
+     3,
+     3
+    ]
+   ],
+   "new_candidates": [
+    4,
+    5
+   ],
+   "updates": [
+    {
+     "task": 0,
+     "changes": {
+      "status": "done"
+     },
+     "quote": "I circulated the segregation-of-duties conflict report to the team on Thursday."
+    },
+    {
+     "task": 2,
+     "changes": {
+      "owner": "Priya",
+      "deadline": "2026-07-01"
+     },
+     "quote": "I'll take the authorization trace tuning, and I can have it done by 1 July."
+    },
+    {
+     "task": 1,
+     "changes": {
+      "status": "in_progress"
+     },
+     "quote": "The mitigating controls document is about half written. Still on track for the 25th."
+    }
+   ]
+  }
+ },
+ {
+  "id": "security-03-b",
+  "base_transcript": "security-workshop-03.txt",
+  "title": "SAP Security & Authorizations Review #4",
+  "meeting_date": "2026-07-01",
+  "transcript_file": "security-03-b.txt",
+  "candidates": [
+   {
+    "description": "build out the emergency access management workflow configuration",
+    "owner": "Marcus",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "schedule a penetration test with the external vendor",
+    "owner": "Marcus",
+    "deadline": "2026-07-03",
+    "status": "todo"
+   },
+   {
+    "description": "prepare the mitigating controls document for the external audit",
+    "owner": "Priya",
+    "deadline": null,
+    "status": "todo"
+   },
+   {
+    "description": "build and unit-test the twelve finance composite roles",
+    "owner": "Daniel",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "remove the 37 unused legacy user accounts",
+    "owner": "Priya",
+    "deadline": "2026-07-08",
+    "status": "todo"
+   },
+   {
+    "description": "brief the audit committee on the segregation-of-duties findings",
+    "owner": "Marcus",
+    "deadline": "2026-07-07",
+    "status": "todo"
+   }
+  ],
+  "expected": {
+   "existing": [
+    [
+     0,
+     7
+    ],
+    [
+     1,
+     3
+    ],
+    [
+     2,
+     1
+    ],
+    [
+     3,
+     5
+    ]
+   ],
+   "new_candidates": [
+    4,
+    5
+   ],
+   "updates": [
+    {
+     "task": 7,
+     "changes": {
+      "status": "done"
+     },
+     "quote": "The emergency access workflow configuration is finished and tested."
+    },
+    {
+     "task": 3,
+     "changes": {
+      "deadline": "2026-07-03"
+     },
+     "quote": "The vendor can't do the pen test on the 26th, so it's moved. I'll confirm the new penetration test slot by 3 July."
+    },
+    {
+     "task": 1,
+     "changes": {
+      "owner": "Priya"
+     },
+     "quote": "Yes, I'll own the mitigating controls document from here."
+    }
+   ]
+  }
+ },
+ {
+  "id": "data-migration-04-a",
+  "base_transcript": "data-migration-workshop-04.txt",
+  "title": "SAP Data Migration Cutover Planning #2",
+  "meeting_date": "2026-06-25",
+  "transcript_file": "data-migration-04-a.txt",
+  "candidates": [
+   {
+    "description": "rerun the material master validation against the cleaned data",
+    "owner": "Priya",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "finalize the customer master mapping",
+    "owner": "Daniel",
+    "deadline": "2026-06-30",
+    "status": "in_progress"
+   },
+   {
+    "description": "request business sign-off for the eighteen-hour extended downtime window",
+    "owner": "Aisha",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "write the rollback steps into the cutover runbook",
+    "owner": "Daniel",
+    "deadline": "2026-06-25",
+    "status": "todo"
+   },
+   {
+    "description": "schedule the second mock cutover",
+    "owner": "Aisha",
+    "deadline": "2026-07-02",
+    "status": "todo"
+   },
+   {
+    "description": "rerun the customer master validation after the mapping is finalized",
+    "owner": "Priya",
+    "deadline": "2026-07-02",
+    "status": "todo"
+   }
+  ],
+  "expected": {
+   "existing": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     2,
+     2
+    ],
+    [
+     3,
+     6
+    ]
+   ],
+   "new_candidates": [
+    4,
+    5
+   ],
+   "updates": [
+    {
+     "task": 0,
+     "changes": {
+      "status": "done"
+     },
+     "quote": "The material master validation rerun is complete — zero errors against the cleaned data."
+    },
+    {
+     "task": 1,
+     "changes": {
+      "status": "in_progress",
+      "deadline": "2026-06-30"
+     },
+     "quote": "I've started the customer master mapping but it isn't finished; the sales org fields slowed me down. I'll finalize it by 30 June."
+    },
+    {
+     "task": 2,
+     "changes": {
+      "status": "done"
+     },
+     "quote": "Business signed off the eighteen-hour downtime window on Monday."
+    }
+   ]
+  }
+ },
+ {
+  "id": "data-migration-04-b",
+  "base_transcript": "data-migration-workshop-04.txt",
+  "title": "SAP Data Migration Cutover Planning #3",
+  "meeting_date": "2026-07-02",
+  "transcript_file": "data-migration-04-b.txt",
+  "candidates": [
+   {
+    "description": "prepare the data reconciliation report template for post-load validation",
+    "owner": "Priya",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "write the rollback steps into the cutover runbook",
+    "owner": "Marcus",
+    "deadline": "2026-07-07",
+    "status": "todo"
+   },
+   {
+    "description": "finalize the customer master mapping",
+    "owner": "Daniel",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "run the timed trial load at production volumes",
+    "owner": "Marcus",
+    "deadline": null,
+    "status": "done"
+   },
+   {
+    "description": "order additional storage for the production load",
+    "owner": "Marcus",
+    "deadline": "2026-07-06",
+    "status": "todo"
+   },
+   {
+    "description": "prepare the data migration sign-off report for the steering committee",
+    "owner": "Aisha",
+    "deadline": "2026-07-09",
+    "status": "todo"
+   }
+  ],
+  "expected": {
+   "existing": [
+    [
+     0,
+     3
+    ],
+    [
+     1,
+     6
+    ],
+    [
+     2,
+     1
+    ],
+    [
+     3,
+     4
+    ]
+   ],
+   "new_candidates": [
+    4,
+    5
+   ],
+   "updates": [
+    {
+     "task": 3,
+     "changes": {
+      "status": "done"
+     },
+     "quote": "The reconciliation report template for post-load validation is done; it's in the shared folder."
+    },
+    {
+     "task": 6,
+     "changes": {
+      "owner": "Marcus",
+      "deadline": "2026-07-07"
+     },
+     "quote": "Yes, I'll write the rollback steps into the cutover runbook by 7 July."
+    },
+    {
+     "task": 1,
+     "changes": {
+      "status": "done"
+     },
+     "quote": "The customer master mapping was finalized yesterday."
+    }
+   ]
+  }
+ }
+]

@@ -1,0 +1,34 @@
+================================================================
+Meeting: SAP FI/CO Finance Workshop #5
+Date: 2026-06-22
+Duration: ~15 min
+Attendees: Aisha Rahman (Finance Lead), Daniel Tan (SAP FICO Consultant), Priya Nair (Controller)
+================================================================
+
+Aisha: Morning, everyone. Quick one today: status on last week's items, then the dress rehearsal logistics.
+
+Daniel: Starting with the hierarchy. The APAC cost center hierarchy mapping is finished — I signed it off on Friday, so that's closed.
+
+Aisha: Great. Priya, the codes?
+
+Priya: I sent the new cost center codes to Daniel on Wednesday, so that one's done.
+
+Daniel: Confirmed, I got them. That's what unblocked APAC.
+
+Aisha: And the MT940 problem?
+
+Daniel: I'm still working on the MT940 parser fix for the multi-currency statements. I'll have it finished by 24 June.
+
+Aisha: Okay. Priya, the duplicate postings?
+
+Priya: I've started clearing the duplicate postings — four of the eleven are gone, and I'm still on track for the 25th.
+
+Aisha: Good. On my side, I still haven't reached the banking team for the integration session. It's still on my list.
+
+Priya: While I think of it, I'll send the updated cost center codes to the APAC controllers by Wednesday so their reports line up.
+
+Aisha: Perfect. The dress rehearsal is on 1 July and we need a room.
+
+Priya: I'll book the training room for the dress rehearsal by Wednesday.
+
+Aisha: That's everything. Thanks, all.

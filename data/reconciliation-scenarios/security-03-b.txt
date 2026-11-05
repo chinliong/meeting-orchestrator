@@ -1,0 +1,24 @@
+================================================================
+Meeting: SAP Security & Authorizations Review #4
+Date: 2026-07-01
+Duration: ~15 min
+Attendees: Priya Nair (Security Lead), Marcus Wong (Basis), Daniel Tan (SAP Consultant)
+================================================================
+
+Priya: Let's go through the open items.
+
+Marcus: The emergency access workflow configuration is finished and tested.
+
+Marcus: The vendor can't do the pen test on the 26th, so it's moved. I'll confirm the new penetration test slot by 3 July.
+
+Daniel: I'm overloaded with the role fixes this week. Priya, could you take over the mitigating controls document?
+
+Priya: Yes, I'll own the mitigating controls document from here.
+
+Daniel: The twelve finance composite roles are still built and tested, nothing new there.
+
+Priya: From the access review, I'll remove the 37 unused legacy user accounts by 8 July.
+
+Marcus: I'll brief the audit committee on the segregation-of-duties findings by 7 July.
+
+Priya: Thanks, both.

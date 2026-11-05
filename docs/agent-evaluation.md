@@ -45,7 +45,7 @@ board to be filled first. The app therefore keeps the parser for extraction: eve
 come from the parser, with their confidence scores, and the agent is not called on an empty board.
 On a board that already has tasks, the agent receives the parser's tasks as candidates, marks those
 already on the board so they are not added twice, and proposes changes to existing tasks for the
-user to approve. That reconciliation step has no answer key yet, so it is not scored here.
+user to approve. That reconciliation step is scored separately, in reconciliation-evaluation.md.
 
 ## Reading this
 

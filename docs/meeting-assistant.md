@@ -10,7 +10,8 @@ The meeting assistant does two things on a board:
   when you ask for them.
 
 It runs on Gemini (`GEMINI_MODEL`, `GEMINI_API_KEY`). Why extraction stays with the parser is in
-[agent-evaluation.md](agent-evaluation.md).
+[agent-evaluation.md](agent-evaluation.md); how well the assistant reconciles a follow-up meeting
+with the board is measured in [reconciliation-evaluation.md](reconciliation-evaluation.md).
 
 ## Using it
 
@@ -127,8 +128,9 @@ again and access rules. Limits that remain:
 
 - An exact quote proves the line exists, not that the suggestion reads it correctly; that is why
   every change needs approval.
-- Matching a follow-up's tasks to existing ones has no answer key yet, so it is not measured
-  ([agent-evaluation.md](agent-evaluation.md) measures extraction only).
+- Reconciliation was measured on eight follow-up meetings written for the test, where each change
+  is stated plainly ([reconciliation-evaluation.md](reconciliation-evaluation.md)); real meetings
+  are messier.
 - Two people with the same first name in one meeting can confuse the owner check.
 
 The endpoints are listed in [api-spec.md](api-spec.md#meeting-assistant).

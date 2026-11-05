@@ -1,0 +1,22 @@
+================================================================
+Meeting: SAP MM/WM Logistics Integration Sync #3
+Date: 2026-06-30
+Duration: ~15 min
+Attendees: Marcus Wong (Warehouse Ops), Daniel Tan (SAP Consultant), Aisha Rahman (PM, dial-in)
+================================================================
+
+Aisha: Daniel's on leave next week, so let's sort out cover first. Marcus, can you take the label printer integration while Daniel's away?
+
+Marcus: Yes, I'll pick up the label printer integration from Daniel.
+
+Aisha: Thanks. On my side, I've started updating the cutover runbook with the degraded-mode plan, and I'll finish it by 3 July.
+
+Marcus: The vendor still hasn't given a firm patch date. I'm chasing them again and I'll have an answer by 2 July.
+
+Daniel: Just confirming the goods movement type mapping is complete — no change there.
+
+Marcus: As a fallback, I'll arrange a loaner supply of scanners from the vendor by 7 July.
+
+Daniel: When I'm back, I'll investigate the TMS freight cost calculation errors by 10 July.
+
+Aisha: Good. Thanks, everyone.

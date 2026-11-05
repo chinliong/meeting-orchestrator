@@ -12,8 +12,9 @@ A **meeting assistant** adds a floating chat for project questions and task-chan
 and reconciles each new meeting with the board: the parser still extracts the meeting's tasks, and
 the assistant keeps those already on the board from being added twice and proposes changes to
 existing tasks for approval. It is on in the deployed app (`render.yaml`) and off by default
-locally. See [the assistant guide](docs/meeting-assistant.md) and its
-[evaluation](docs/agent-evaluation.md). To try it on an isolated sample database, run
+locally. See [the assistant guide](docs/meeting-assistant.md), why the parser still extracts the
+tasks ([evaluation](docs/agent-evaluation.md)), and how well the assistant reconciles a follow-up
+meeting with the board ([evaluation](docs/reconciliation-evaluation.md)). To try it on an isolated sample database, run
 `backend/.venv/bin/python scripts/agent_preview.py` from the repository root.
 
 To use the assistant with your regular development accounts and boards, set

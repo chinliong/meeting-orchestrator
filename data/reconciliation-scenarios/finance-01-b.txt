@@ -1,0 +1,30 @@
+================================================================
+Meeting: SAP FI/CO Finance Workshop #6
+Date: 2026-06-29
+Duration: ~15 min
+Attendees: Aisha Rahman (Finance Lead), Daniel Tan (SAP FICO Consultant), Priya Nair (Controller)
+================================================================
+
+Aisha: Let's go through the open items. Daniel, you're moving to the payroll project from Wednesday, so we need a handover.
+
+Daniel: Right. The MT940 parser fix is the main one.
+
+Aisha: Priya, can you take that over?
+
+Priya: Yes, I'll take over the MT940 parser fix from Daniel.
+
+Daniel: Thanks. On the change request: Wei Lin rejected the first one, so I'll send a revised change request for the extra consulting days to Wei Lin by 2 July.
+
+Aisha: Fine. Priya, the postings?
+
+Priya: All eleven duplicate postings are cleared from the system now.
+
+Aisha: And I've looped in the banking team — they've confirmed they'll join Thursday's integration session.
+
+Daniel: For the record, the EMEA cost center mapping is done and signed off, nothing new there.
+
+Aisha: I'll get written confirmation of the MT940 statement format from the bank by 1 July.
+
+Priya: One more thing: I found duplicates in the vendor master as well. I'll clear the duplicate vendor master records by 3 July.
+
+Aisha: Good. Thanks, Daniel, and good luck on payroll.

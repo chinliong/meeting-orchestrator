@@ -1,0 +1,22 @@
+================================================================
+Meeting: SAP Security & Authorizations Review #3
+Date: 2026-06-24
+Duration: ~15 min
+Attendees: Priya Nair (Security Lead), Marcus Wong (Basis), Daniel Tan (SAP Consultant)
+================================================================
+
+Priya: Quick status round. Marcus, the conflict report?
+
+Marcus: I circulated the segregation-of-duties conflict report to the team on Thursday.
+
+Priya: Thanks. The trace settings are still unassigned. I'll take the authorization trace tuning, and I can have it done by 1 July.
+
+Daniel: The mitigating controls document is about half written. Still on track for the 25th.
+
+Marcus: Penetration test scheduling is still on my list for the 26th.
+
+Priya: I'll review the firefighter ID usage logs every week from now on.
+
+Daniel: And I'll circulate the composite role design document to the auditors by 30 June.
+
+Priya: Good, that's everything.

@@ -1,0 +1,24 @@
+================================================================
+Meeting: SAP Data Migration Cutover Planning #3
+Date: 2026-07-02
+Duration: ~15 min
+Attendees: Aisha Rahman (PM), Daniel Tan (SAP Consultant), Priya Nair (Data Lead), Marcus Wong (Basis)
+================================================================
+
+Aisha: Status round, please.
+
+Priya: The reconciliation report template for post-load validation is done; it's in the shared folder.
+
+Aisha: Daniel is tied up with the customer master, so Marcus, can you take the rollback steps for the runbook?
+
+Marcus: Yes, I'll write the rollback steps into the cutover runbook by 7 July.
+
+Daniel: The customer master mapping was finalized yesterday.
+
+Marcus: The timed trial load at production volumes is done, as reported last time.
+
+Marcus: The production load needs more space, so I'll order additional storage by 6 July.
+
+Aisha: I'll prepare the data migration sign-off report for the steering committee by 9 July.
+
+Aisha: Thanks, everyone.

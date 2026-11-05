@@ -1,0 +1,109 @@
+{
+ "repeats": {
+  "agent": {
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0,
+   "new_tasks_held_back": 0
+  },
+  "app": {
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0,
+   "new_tasks_held_back": 0
+  },
+  "expected": 34,
+  "new_tasks": 16
+ },
+ "updates": {
+  "tasks": {
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "fields": {
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "exact": 26,
+  "expected_tasks": 26,
+  "expected_fields": 31,
+  "wrong_changes": 0,
+  "description_rewords": 0
+ },
+ "reviews": {
+  "scored": 8,
+  "not_completed": 0,
+  "provider_errors_excluded": 0,
+  "mean_steps": 1.62,
+  "questions": 1,
+  "model": "gemini-3.5-flash"
+ },
+ "per_scenario": [
+  {
+   "id": "finance-01-a",
+   "repeats": "5/5",
+   "new_held_back": 0,
+   "updates_exact": "4/4",
+   "wrong_changes": 0,
+   "failed": false
+  },
+  {
+   "id": "finance-01-b",
+   "repeats": "5/5",
+   "new_held_back": 0,
+   "updates_exact": "4/4",
+   "wrong_changes": 0,
+   "failed": false
+  },
+  {
+   "id": "logistics-02-a",
+   "repeats": "4/4",
+   "new_held_back": 0,
+   "updates_exact": "3/3",
+   "wrong_changes": 0,
+   "failed": false
+  },
+  {
+   "id": "logistics-02-b",
+   "repeats": "4/4",
+   "new_held_back": 0,
+   "updates_exact": "3/3",
+   "wrong_changes": 0,
+   "failed": false
+  },
+  {
+   "id": "security-03-a",
+   "repeats": "4/4",
+   "new_held_back": 0,
+   "updates_exact": "3/3",
+   "wrong_changes": 0,
+   "failed": false
+  },
+  {
+   "id": "security-03-b",
+   "repeats": "4/4",
+   "new_held_back": 0,
+   "updates_exact": "3/3",
+   "wrong_changes": 0,
+   "failed": false
+  },
+  {
+   "id": "data-migration-04-a",
+   "repeats": "4/4",
+   "new_held_back": 0,
+   "updates_exact": "3/3",
+   "wrong_changes": 0,
+   "failed": false
+  },
+  {
+   "id": "data-migration-04-b",
+   "repeats": "4/4",
+   "new_held_back": 0,
+   "updates_exact": "3/3",
+   "wrong_changes": 0,
+   "failed": false
+  }
+ ]
+}

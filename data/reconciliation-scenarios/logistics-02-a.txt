@@ -1,0 +1,26 @@
+================================================================
+Meeting: SAP MM/WM Logistics Integration Sync #2
+Date: 2026-06-23
+Duration: ~15 min
+Attendees: Marcus Wong (Warehouse Ops), Daniel Tan (SAP Consultant), Aisha Rahman (PM, dial-in)
+================================================================
+
+Aisha: Let's start with the scanners.
+
+Marcus: Good news — I chased the vendor and they've given us a firm firmware patch date of 8 July.
+
+Marcus: And the risk note on the scanner delay went to the steering committee this morning.
+
+Aisha: Thanks. Daniel, the interface?
+
+Daniel: I've started on the WM to TMS interface timeout errors — it looks like a buffer size problem. I'll have a fix by 26 June.
+
+Aisha: And the degraded-mode test environment?
+
+Marcus: The degraded-mode test environment is still being rebuilt, same as last week.
+
+Aisha: Since we'll run degraded mode for a while, I'll train the warehouse supervisors on degraded-mode manual entry by 3 July.
+
+Marcus: Once the patch arrives, I'll test the patched firmware on the handheld scanners by 10 July.
+
+Aisha: Good. That's it for today.

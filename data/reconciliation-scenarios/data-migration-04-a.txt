@@ -1,0 +1,22 @@
+================================================================
+Meeting: SAP Data Migration Cutover Planning #2
+Date: 2026-06-25
+Duration: ~15 min
+Attendees: Aisha Rahman (PM), Daniel Tan (SAP Consultant), Priya Nair (Data Lead), Marcus Wong (Basis)
+================================================================
+
+Aisha: Let's run through the cutover items.
+
+Priya: The material master validation rerun is complete — zero errors against the cleaned data.
+
+Daniel: I've started the customer master mapping but it isn't finished; the sales org fields slowed me down. I'll finalize it by 30 June.
+
+Aisha: Business signed off the eighteen-hour downtime window on Monday.
+
+Daniel: Writing the rollback steps into the runbook is still due today, as planned.
+
+Aisha: I'll schedule the second mock cutover and send the invite by 2 July.
+
+Priya: Once Daniel finalizes the mapping, I'll rerun the customer master validation by 2 July.
+
+Aisha: Great, thanks.
