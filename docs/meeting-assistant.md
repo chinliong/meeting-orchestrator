@@ -15,12 +15,14 @@ It runs on Gemini (`GEMINI_MODEL`, `GEMINI_API_KEY`). Why extraction stays with 
 ## Using it
 
 **Adding a meeting.** Use the **New meeting** card as usual (paste a transcript or upload a
-recording). The meeting and its new tasks are saved straight away. On an empty board that is all
-that happens. On a board with tasks, any suggestions open in a review:
+recording). The meeting and its new tasks are saved straight away. On an empty board the
+assistant is not called. On a board with tasks, any suggestions open in a review:
 
 - **Suggested changes** to existing tasks are selected; deselect any you don't want.
-- **Possible duplicates** (collapsed) are extracted tasks the assistant matched to ones already on
-  the board. They are not selected; select any that are really new to add them.
+- **Possible duplicates** (collapsed) are extracted tasks that match one already on the board, or
+  repeat another task from the same meeting almost word for word. They are not added or selected;
+  select any that are really new to add them. When a meeting has only these, they wait under
+  **Changes**.
 - **Apply N** applies what is selected and dismisses the rest. With nothing selected it reads
   **Dismiss all**. **Not now** keeps everything waiting under **Changes**.
 

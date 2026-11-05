@@ -150,10 +150,6 @@ export const api = {
     }, 1),
   getRecordingAssistantResult: (projectId: number, meetingId: number, token: string) =>
     request<AssistantImportResult>(`/projects/${projectId}/agent/recordings/${meetingId}/result`, { headers: { "X-Workspace-Token": token } }),
-  createAgentReview: (projectId: number, input: AgentReviewInput, token: string) =>
-    request<AgentReview>(`/projects/${projectId}/agent/reviews`, {
-      method: "POST", body: JSON.stringify(input), headers: { "X-Workspace-Token": token },
-    }, 1),
   applyAgentReview: (projectId: number, id: string, proposalIds: number[], token: string) =>
     request<AgentReview>(`/projects/${projectId}/agent/reviews/${id}/apply`, {
       method: "POST", body: JSON.stringify({ proposal_ids: proposalIds }), headers: { "X-Workspace-Token": token },

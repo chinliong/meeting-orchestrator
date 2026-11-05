@@ -14,9 +14,21 @@ def _not_null(value):
     return value
 
 
+def _not_blank(value):
+    """A name or task description is trimmed, and must not be empty (the app's forms agree)."""
+    if value is None:
+        return value
+    value = value.strip()
+    if not value:
+        raise ValueError("cannot be blank")
+    return value
+
+
 class ProjectCreate(BaseModel):
     name: str
     description: str = ""
+
+    _named = field_validator("name")(_not_blank)
 
 
 class ProjectUpdate(BaseModel):
@@ -25,6 +37,7 @@ class ProjectUpdate(BaseModel):
     notify_enabled: Optional[bool] = None
 
     _required = field_validator("name", "description", "notify_enabled")(_not_null)
+    _named = field_validator("name")(_not_blank)
 
 
 class ProjectOut(BaseModel):
@@ -154,6 +167,8 @@ class TaskCreate(BaseModel):
     deadline: Optional[date] = None
     status: TaskStatus = TaskStatus.TODO
 
+    _described = field_validator("description")(_not_blank)
+
 
 class TaskUpdate(BaseModel):
     description: Optional[str] = None
@@ -163,6 +178,7 @@ class TaskUpdate(BaseModel):
 
     # owner and deadline may be cleared with null; a task always has a description and status.
     _required = field_validator("description", "status")(_not_null)
+    _described = field_validator("description")(_not_blank)
 
 
 class SubtaskSnapshot(BaseModel):

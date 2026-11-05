@@ -709,6 +709,15 @@ def test_create_task_unknown_project(client):
     assert resp.status_code == 404
 
 
+def test_blank_task_descriptions_and_board_names_are_refused(client, project):
+    assert client.post("/api/v1/tasks", json={"project_id": project["id"], "description": "   "}).status_code == 422
+    task = client.post("/api/v1/tasks", json={"project_id": project["id"], "description": "  Draft the agenda "}).json()
+    assert task["description"] == "Draft the agenda"
+    assert client.patch(f"/api/v1/tasks/{task['id']}", json={"description": ""}).status_code == 422
+    assert client.post("/api/v1/projects", json={"name": " "}).status_code == 422
+    assert client.patch(f"/api/v1/projects/{project['id']}", json={"name": ""}).status_code == 422
+
+
 def test_rename_meeting_updates_task_titles(client, project, stub_parser):
     meeting = client.post(
         "/api/v1/transcripts",

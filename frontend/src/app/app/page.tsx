@@ -701,10 +701,15 @@ export default function DashboardPage() {
       }
     };
     if (process.env.NEXT_PUBLIC_MEETING_AGENT_PREVIEW === "true" && selectedProject) {
+      const scope = assistantScope;
       const result = await withDuplicateCheck(checkDuplicate => api.parseWithAssistant(projectId, {
-        title: title.trim() || `Meeting ${meetingDate}`, meeting_date: meetingDate,
+        // The same fallback title the server gives a regular import ("Meeting · Nov 05, 2026").
+        title: title.trim() || `Meeting · ${new Date(`${meetingDate}T00:00:00`).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" })}`,
+        meeting_date: meetingDate,
         transcript: transcriptText, instructions: "", check_duplicate: checkDuplicate,
       }, workspaceTokenFor(selectedProject)));
+      // Saved on the board it was added to; if another board is open now, leave this one alone.
+      if (assistantScopeRef.current !== scope) return;
       if (result.saved_review) handleAssistantChanged(result.saved_review, "apply");
       setMeetingsKey(k => k + 1);
       setLatestMeetingId(result.meeting_id);

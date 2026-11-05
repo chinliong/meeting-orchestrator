@@ -481,7 +481,10 @@ def finish_meeting_import(db, review, *, recording_id=None):
         else:
             match = agent_llm.likely_duplicate(proposal["after"]["description"], current)
             if match:
-                questions.append(f'“{proposal["after"]["description"]}” is a possible duplicate of “{match["description"]}” and was not added.')
+                # Held back like the assistant's matches, so a wrong match is still one tick to add.
+                possible.append({**proposal, "possible_duplicate": True,
+                                 "reason": f"Possible duplicate of “{match['description']}”.",
+                                 "duplicate_of": {"id": match.get("id"), "description": match["description"]}})
             else:
                 creates.append(proposal)
                 current.append({"description": proposal["after"]["description"]})
@@ -711,7 +714,8 @@ def undo_review(project_id: int, review_id: str, user: Optional[User] = Depends(
         if meeting is None:
             conflict(db, "The saved meeting was removed. These changes can no longer be undone.")
         source = json.loads(review.input_json)
-        if (meeting.title != source["title"] or meeting.transcript_text != source["transcript"]
+        # A renamed meeting can still be removed: the new title is not work that would be lost.
+        if (meeting.transcript_text != source["transcript"]
                 or not meeting.meeting_date or meeting.meeting_date.isoformat() != source["meeting_date"]):
             conflict(db, "The saved meeting changed. Undo would remove newer work.")
         db.delete(meeting)  # Cascades only to tasks created by this review.

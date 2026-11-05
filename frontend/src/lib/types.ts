@@ -173,7 +173,8 @@ export interface AgentProposal {
   confidence?: number | null;
   // A task the assistant matched to one already on the board; unticked unless the user adds it.
   possible_duplicate?: boolean;
-  duplicate_of?: { id: number; description: string };
+  // id is null when the match is another task from the same meeting.
+  duplicate_of?: { id: number | null; description: string };
 }
 
 export type AgentMutation = "apply" | "undo" | "refresh";

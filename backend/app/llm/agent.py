@@ -67,7 +67,6 @@ FIELDS = {
     "status": {"type": "string", "enum": ["todo", "in_progress", "done"]},
 }
 TOOLS = [
-    _tool("read_board", "Read all current tasks and source meeting dates in this project.", {}, []),
     _tool("read_meeting", "Read an earlier project meeting from the board's meeting index for context.",
           {"meeting_id": {"type": "integer"}}, ["meeting_id"]),
     _tool("finish_review", "Submit evidence-backed suggestions for human review; makes no changes.", {

@@ -260,18 +260,27 @@ def test_duplicate_transcript_not_imported_again(client, project, task, enabled,
     assert create(client, project).status_code == 409
 
 
-def test_undo_update_only_review_protects_renamed_meeting(client, project, task, enabled, monkeypatch, db_session):
+def test_undo_update_only_review_protects_changed_meeting(client, project, task, enabled, monkeypatch, db_session):
     fake_model(monkeypatch, plan_for(task.id))
     review = create(client, project).json()
     applied = client.post(route(project, review, "/apply"), json={"proposal_ids": [0]}).json()
     meeting = db_session.get(Meeting, applied["receipt"]["meeting_id"])
-    meeting.title = "Renamed after review"
+    meeting.meeting_date = date(2026, 11, 3)
     db_session.commit()
     response = client.post(route(project, review, "/undo"))
     assert response.status_code == 409
     db_session.refresh(task)
     assert task.status == TaskStatus.DONE  # The earlier restoration in the transaction rolled back.
     assert db_session.get(AgentReview, review["id"]).status == "applied"
+
+
+def test_renamed_meeting_can_still_be_removed(client, project, enabled, db_session):
+    imported = client.post(f"/api/v1/projects/{project['id']}/agent/parse", json=INPUT).json()
+    meeting_id = imported["meeting_id"]
+    assert client.patch(f"/api/v1/transcripts/{meeting_id}", json={"title": "Renamed"}).status_code == 200
+    response = client.post(f"/api/v1/projects/{project['id']}/agent/reviews/{imported['saved_review']['id']}/undo")
+    assert response.status_code == 200 and response.json()["status"] == "undone"
+    assert db_session.get(Meeting, meeting_id) is None
 
 
 def test_read_tools_are_scoped_and_unknown_tools_cannot_execute(monkeypatch):
@@ -473,13 +482,13 @@ def test_transport_leaves_room_for_complete_tool_output(monkeypatch, model, thin
         def __enter__(self): return self
         def __exit__(self, *args): return False
         def read(self):
-            return json.dumps({"candidates": [{"finishReason": "STOP", "content": call("read_board")}]}).encode()
+            return json.dumps({"candidates": [{"finishReason": "STOP", "content": call("read_meeting")}]}).encode()
     def urlopen(request, timeout):
         captured.update(json.loads(request.data))
         return Response()
     monkeypatch.setattr(agent.urllib.request, "urlopen", urlopen)
-    content = agent.model_turn([], ["read_board"], model, 90)
-    assert content["parts"][0]["functionCall"]["name"] == "read_board"
+    content = agent.model_turn([], ["read_meeting"], model, 90)
+    assert content["parts"][0]["functionCall"]["name"] == "read_meeting"
     assert captured["generationConfig"]["maxOutputTokens"] >= 16384
     assert captured["generationConfig"].get("thinkingConfig") == thinking
 
@@ -547,7 +556,7 @@ def test_parse_withholds_changed_target_but_saves_meeting_and_new_tasks(client, 
     assert db_session.query(AgentReview).filter_by(status="draft").count() == 0
 
 
-def test_parse_suppresses_duplicate_added_during_model_call(client, project, task, enabled, monkeypatch, db_session):
+def test_parse_holds_back_duplicate_added_during_model_call(client, project, task, enabled, monkeypatch, db_session):
     fake_model(monkeypatch, plan_for(task.id))
     def mutate():
         db_session.add(Task(project_id=project["id"], description="Write release notes"))
@@ -556,9 +565,27 @@ def test_parse_suppresses_duplicate_added_during_model_call(client, project, tas
     response = parse_with_assistant(client, project)
     assert response.status_code == 201, response.text
     assert response.json()["new_task_count"] == 0
-    assert response.json()["questions"]
     assert db_session.query(Meeting).count() == 1
     assert db_session.query(Task).count() == 2
+    # Not lost: it waits under Changes as a possible duplicate, one tick to add.
+    held = [p for p in response.json()["review"]["proposals"] if p.get("possible_duplicate")]
+    assert [(p["after"]["description"], p["duplicate_of"]["description"]) for p in held] == [
+        ("Write the release notes", "Write release notes")]
+
+
+def test_near_identical_tasks_in_one_meeting_keep_the_second_as_a_possible_duplicate(client, project, enabled, monkeypatch, db_session):
+    twice = CANDIDATES + [dict(CANDIDATES[0], description="Write the release notes.")]
+    monkeypatch.setattr(agent_api, "extract_candidates", lambda payload: copy.deepcopy(twice))
+    response = parse_with_assistant(client, project)
+    assert response.status_code == 201, response.text
+    assert response.json()["new_task_count"] == 1
+    held = response.json()["review"]["proposals"]
+    assert [(p["possible_duplicate"], p["duplicate_of"]) for p in held] == [
+        (True, {"id": None, "description": "Write the release notes"})]
+    applied = client.post(f"/api/v1/projects/{project['id']}/agent/reviews/{response.json()['review']['id']}/apply",
+                          json={"proposal_ids": [held[0]["id"]]})
+    assert applied.status_code == 200, applied.text
+    assert db_session.query(Task).filter_by(meeting_id=response.json()["meeting_id"]).count() == 2
 
 
 def test_updates_remain_actionable_after_unrelated_edits_and_undo_preserves_children(client, project, task, enabled, monkeypatch, db_session):
@@ -801,7 +828,7 @@ def test_provider_finish_reason_is_recoverable_only_for_malformed_tools(monkeypa
             return json.dumps({"candidates": [{"finishReason": reason, "content": {"parts": [{"text": "PRIVATE PROVIDER OUTPUT"}]}}]}).encode()
     monkeypatch.setattr(agent.urllib.request, "urlopen", lambda *a, **k: Response())
     with pytest.raises(agent.gemini.GeminiError) as caught:
-        agent.model_turn([], ["read_board"], "existing-flash-model", 90)
+        agent.model_turn([], ["read_meeting"], "existing-flash-model", 90)
     assert isinstance(caught.value, agent.RecoverableModelError) is recoverable
     assert "PRIVATE PROVIDER OUTPUT" not in str(caught.value)
 

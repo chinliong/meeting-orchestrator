@@ -169,12 +169,13 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
   const backToList = () => { setReview(null); setFromList(false); setError(null); void loadHistory(); };
 
   const expired = !!review && new Date(review.expires_at || "9999-12-31").getTime() < Date.now();
-  const editable = review?.status === "draft" && !expired && (!review.stale || !!review.unavailable_proposal_ids);
+  const sourceUnavailable = review?.stale_reason?.startsWith("The source meeting");
+  // Nothing can be applied once the source meeting is gone, possible duplicates included.
+  const editable = review?.status === "draft" && !expired && !sourceUnavailable && (!review.stale || !!review.unavailable_proposal_ids);
   const mode = review?.mode ?? "meeting";
   const isDraft = review?.status === "draft";
   // Once saved, show only what was actually applied.
   const shown = review ? (review.receipt ? review.proposals.filter(p => review.receipt!.proposal_ids.includes(p.id)) : review.proposals) : [];
-  const sourceUnavailable = review?.stale_reason?.startsWith("The source meeting");
   const changes = shown.filter(p => !(isDraft && p.possible_duplicate));
   const duplicates = isDraft ? shown.filter(p => p.possible_duplicate) : [];
   const eligible = changes.filter(p => !review?.unavailable_proposal_ids?.includes(p.id));
@@ -247,13 +248,13 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
                 <h3 className="font-semibold text-amber-950">Needs your input</h3>
                 <ul className="mt-2 list-disc space-y-2 pl-5 text-sm leading-relaxed text-amber-900">{review.questions.map((q, i) => <li key={i}>{q}</li>)}</ul>
               </section>}
-              <div className="flex items-center justify-between gap-3">
+              {(changes.length > 0 || duplicates.length === 0) && <div className="flex items-center justify-between gap-3">
                 <h3 className="font-semibold text-slate-900">{plural(changes.length, "change")}</h3>
                 {editable && eligible.length > 1 && <button className="text-sm font-medium text-brand-900 underline underline-offset-4" disabled={!!busy}
                   onClick={() => { const all = eligible.every(p => selected.includes(p.id)); const ids = new Set(eligible.map(p => p.id));
                     setSelected(all ? selected.filter(id => !ids.has(id)) : [...selected.filter(id => !ids.has(id)), ...ids]); }}>
                   {eligible.every(p => selected.includes(p.id)) ? "Clear selection" : "Select all"}</button>}
-              </div>
+              </div>}
               {changes.length === 0 && duplicates.length === 0 && <p className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600">{review.questions.length ? "No changes are ready to apply." : "Your tasks are already up to date."}</p>}
               {changes.map(p => <article key={p.id} className={`rounded-xl border bg-white p-4 sm:p-5 ${editable && selected.includes(p.id) ? "border-brand-500 ring-1 ring-brand-500" : "border-slate-200"}`}>
                 <label className="flex items-start gap-3">

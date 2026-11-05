@@ -60,7 +60,7 @@ clarifications and explaining capabilities. Do not reveal hidden reasoning or ch
 """
 
 TOOLS = [
-    agent.TOOLS[0], agent.TOOLS[1],
+    agent.TOOLS[0],  # read_meeting
     agent._tool("query_tasks", "Filter current tasks and calculate exact counts. Filters combine with AND.", {
         "owner": {"type": "string", "description": "Owner's exact name as stored on the board, case-insensitive. Empty means everyone."},
         "status": {"type": "string", "enum": ["any", "open", "todo", "in_progress", "done"]},
@@ -72,7 +72,7 @@ TOOLS = [
             "kind": {"type": "string", "enum": ["task", "meeting"]},
             "id": {"type": "integer"}, "quote": {"type": "string"},
         }, "required": ["kind", "id", "quote"]}},
-        "proposals": agent.TOOLS[2]["input_schema"]["properties"]["proposals"],
+        "proposals": agent.TOOLS[1]["input_schema"]["properties"]["proposals"],
         "questions": {"type": "array", "items": {"type": "string"}},
         "next_action": {"type": "string", "enum": ["none", "review_meeting"]},
     }, ["answer", "references", "proposals", "questions", "next_action"]),
