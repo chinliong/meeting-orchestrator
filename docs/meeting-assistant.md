@@ -131,7 +131,9 @@ again and access rules. Limits that remain:
 - Reconciliation was measured on eight follow-up meetings written for the test, where each change
   is stated plainly ([agent-evaluation.md](agent-evaluation.md), Part 2); real meetings
   are messier. Every review that finished was correct, but 2 of 24 ran out of steps; the import
-  then shows an error, saves nothing, and has to be tried again.
+  then shows an error, saves nothing, and has to be tried again. The cause, a rejection that did not
+  say which quote was wrong, has since been fixed (a rejection now names each misquote and the
+  closest transcript sentence); those runs predate the fix.
 - Two people with the same first name in one meeting can confuse the owner check.
 
 The endpoints are listed in [api-spec.md](api-spec.md#meeting-assistant).

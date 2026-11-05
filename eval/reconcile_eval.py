@@ -363,6 +363,12 @@ def render_section(r: dict) -> list[str]:
         "Every suggestion still needs the user's approval in the app, so a wrong one costs a dismissal,",
         "not a wrong board.",
         "",
+        "The reviews that did not finish ran out of steps after a misquote: the rejection said a quote was",
+        "not exact without saying which, so the agent kept rewriting the right ones. Since these runs, a",
+        "rejection names each misquoted quote and the closest transcript sentence to copy",
+        "(`backend/app/llm/agent.py`); replaying a logged failure through it identifies the misquote in",
+        "every attempt. The runs here predate that change.",
+        "",
     ]
 
 
