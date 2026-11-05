@@ -113,6 +113,13 @@ export default function ProjectAssistant({ project, onChanged, onOpenTask, onOpe
   const token = workspaceTokenFor(project);
 
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  // On a phone the chat covers the board, so the board behind it does not scroll.
+  useEffect(() => {
+    if (!open || !window.matchMedia("(max-width: 639px)").matches) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = previous; };
+  }, [open]);
   useEffect(() => {
     if (open) { wasOpened.current = true; setUnread(false); input.current?.focus({ preventScroll: true }); }
     else if (wasOpened.current) launcher.current?.focus({ preventScroll: true });
@@ -188,7 +195,8 @@ export default function ProjectAssistant({ project, onChanged, onOpenTask, onOpe
     </div>}
 
     {open && <section id="project-assistant" role="dialog" aria-labelledby="assistant-title"
-      className="fixed bottom-[88px] right-3 z-40 flex h-[min(620px,calc(100dvh-108px))] w-[calc(100vw-24px)] max-w-[400px] flex-col overflow-clip rounded-2xl border border-slate-200 bg-white shadow-ink sm:bottom-[96px] sm:right-6 lg:bottom-6 lg:right-4 lg:top-20 lg:h-auto lg:w-[360px] lg:shadow-card"
+      // Full screen on a phone, as a chat app is; a panel beside the board from sm up.
+      className="fixed inset-0 z-50 flex h-[100dvh] w-full flex-col overflow-clip bg-white sm:inset-auto sm:bottom-[96px] sm:right-6 sm:z-40 sm:h-[min(620px,calc(100dvh-108px))] sm:w-[calc(100vw-24px)] sm:max-w-[400px] sm:rounded-2xl sm:border sm:border-slate-200 sm:shadow-ink lg:bottom-6 lg:right-4 lg:top-20 lg:h-auto lg:w-[360px] lg:shadow-card"
       onKeyDown={e => {
         if (e.key === "Escape") { e.stopPropagation(); closeChat(); }
       }}>
