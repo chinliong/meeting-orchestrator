@@ -43,10 +43,11 @@ export default function PendingTaskUpdates({ project, refreshKey, boardTasks, on
 
   useEffect(() => {
     if (!expanded) return;
-    const close = (event: PointerEvent) => { if (!container.current?.contains(event.target as Node)) setExpanded(false); };
+    // mousedown, as the board's other menus use: on a phone it fires for a tap, not when a scroll starts.
+    const close = (event: MouseEvent) => { if (!container.current?.contains(event.target as Node)) setExpanded(false); };
     const escape = (event: KeyboardEvent) => { if (event.key === "Escape") { event.stopPropagation(); setExpanded(false); trigger.current?.focus(); } };
-    window.addEventListener("pointerdown", close); window.addEventListener("keydown", escape);
-    return () => { window.removeEventListener("pointerdown", close); window.removeEventListener("keydown", escape); };
+    window.addEventListener("mousedown", close); window.addEventListener("keydown", escape);
+    return () => { window.removeEventListener("mousedown", close); window.removeEventListener("keydown", escape); };
   }, [expanded]);
 
   async function review(id: string) {

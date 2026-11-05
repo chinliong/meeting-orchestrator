@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { Task } from "@/lib/types";
 import { avatarColor, initials, isOverdue } from "@/lib/format";
@@ -36,6 +36,17 @@ function startOfMonth(d: Date): Date {
 export default function CalendarView({ tasks, canEdit, onEditTask, onDeleteTask, onReschedule }: Props) {
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [dragOver, setDragOver] = useState<string | null>(null); // ISO day, or "tray"
+  // Dragging with a finger: the browser's drag and drop needs a mouse, so on a touch screen a task
+  // is picked up by pressing and holding it, then follows the finger (see the effect below).
+  const [touchDrag, setTouchDrag] = useState<{ task: Task; x: number; y: number } | null>(null);
+  const held = useRef<Task | null>(null);
+  const reschedule = useRef(onReschedule);
+  reschedule.current = onReschedule;
+  const press = useRef<{ timer: number; x: number; y: number } | null>(null);
+  const finger = useRef({ x: 0, y: 0 });
+  const scroller = useRef<HTMLDivElement>(null);
+  const [touchScreen, setTouchScreen] = useState(false);
+  useEffect(() => setTouchScreen(window.matchMedia("(hover: none)").matches), []);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerYear, setPickerYear] = useState(() => new Date().getFullYear());
 
@@ -84,13 +95,102 @@ export default function CalendarView({ tasks, canEdit, onEditTask, onDeleteTask,
     if (id) onReschedule(id, target);
   };
 
-  const Chip = ({ task, faded }: { task: Task; faded?: boolean }) => {
+  const cancelPress = () => {
+    if (press.current) window.clearTimeout(press.current.timer);
+    press.current = null;
+  };
+
+  // Pressing and holding a task for a moment picks it up; moving first is a scroll, not a drag.
+  const onTouchStart = (e: React.TouchEvent, task: Task) => {
+    if (!canEdit || e.touches.length !== 1) return;
+    const { clientX: x, clientY: y } = e.touches[0];
+    cancelPress();
+    press.current = {
+      x,
+      y,
+      timer: window.setTimeout(() => {
+        press.current = null;
+        finger.current = { x, y };
+        held.current = task;
+        setTouchDrag({ task, x, y });
+        navigator.vibrate?.(15);
+      }, 350),
+    };
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    if (press.current && Math.hypot(t.clientX - press.current.x, t.clientY - press.current.y) > 8) cancelPress();
+  };
+
+  // While a task is held: it follows the finger, the day under it is highlighted, the page does not
+  // scroll, and holding near an edge scrolls the calendar (sideways) or the page (up and down).
+  const dragging = touchDrag !== null;
+  useEffect(() => {
+    if (!dragging) return;
+    const target = (x: number, y: number) =>
+      (document.elementFromPoint(x, y) as HTMLElement | null)?.closest<HTMLElement>("[data-day]")?.dataset.day ?? null;
+    const onMove = (e: TouchEvent) => {
+      e.preventDefault();
+      const t = e.touches[0];
+      finger.current = { x: t.clientX, y: t.clientY };
+      setTouchDrag((cur) => (cur ? { ...cur, x: t.clientX, y: t.clientY } : cur));
+      setDragOver(target(t.clientX, t.clientY));
+    };
+    const onEnd = (e: TouchEvent) => {
+      e.preventDefault(); // no click afterwards, which would open the task
+      const t = e.changedTouches[0];
+      const day = target(t.clientX, t.clientY);
+      const task = held.current;
+      held.current = null;
+      if (task && day) {
+        const deadline = day === "tray" ? null : day;
+        if (deadline !== task.deadline) reschedule.current(task.id, deadline);
+      }
+      setTouchDrag(null);
+      setDragOver(null);
+    };
+    const onCancel = () => {
+      held.current = null;
+      setTouchDrag(null);
+      setDragOver(null);
+    };
+    const edgeScroll = window.setInterval(() => {
+      const { x, y } = finger.current;
+      const box = scroller.current?.getBoundingClientRect();
+      if (box && scroller.current && y >= box.top && y <= box.bottom) {
+        if (x > window.innerWidth - 40) scroller.current.scrollLeft += 8;
+        else if (x < 40) scroller.current.scrollLeft -= 8;
+      }
+      // Up when the finger reaches the sticky header, down near the bottom of the screen.
+      const top = document.querySelector("header")?.getBoundingClientRect().bottom ?? 0;
+      if (y > window.innerHeight - 60) window.scrollBy(0, 10);
+      else if (y < top + 24) window.scrollBy(0, -10);
+    }, 16);
+    document.addEventListener("touchmove", onMove, { passive: false });
+    document.addEventListener("touchend", onEnd, { passive: false });
+    document.addEventListener("touchcancel", onCancel);
+    return () => {
+      window.clearInterval(edgeScroll);
+      document.removeEventListener("touchmove", onMove);
+      document.removeEventListener("touchend", onEnd);
+      document.removeEventListener("touchcancel", onCancel);
+    };
+  }, [dragging]);
+
+  // Called as a function, not used as a component: a component declared in here would be a new
+  // type on every render, so each chip would be replaced while a finger is dragging it.
+  const chip = (task: Task, faded?: boolean) => {
     const overdue = task.deadline && task.status !== "done" && isOverdue(task.deadline);
     return (
       <div
-        draggable={canEdit}
+        key={task.id}
+        draggable={canEdit && !touchScreen}
         onDragStart={(e) => onDragStart(e, task)}
-        className={`group/chip relative flex w-full items-center gap-1 rounded px-1.5 py-1 text-[11px] font-medium transition ${
+        onTouchStart={(e) => onTouchStart(e, task)}
+        onTouchMove={onTouchMove}
+        onTouchEnd={cancelPress}
+        onContextMenu={(e) => canEdit && touchScreen && e.preventDefault()}
+        className={`group/chip relative flex w-full select-none items-center gap-1 rounded px-1.5 py-1 text-[11px] font-medium transition [-webkit-touch-callout:none] ${touchDrag?.task.id === task.id ? "opacity-40" : ""} ${
           overdue ? "bg-rose-50 text-rose-700" : "bg-slate-100 text-slate-700"
         } ${canEdit ? "cursor-grab active:cursor-grabbing" : ""} ${faded ? "opacity-60" : ""}`}
       >
@@ -256,7 +356,7 @@ export default function CalendarView({ tasks, canEdit, onEditTask, onDeleteTask,
       </div>
 
       {/* Grid — horizontally scrollable on narrow screens so cells stay legible. */}
-      <div className="overflow-x-auto">
+      <div ref={scroller} className="overflow-x-auto">
         <div className="min-w-[680px]">
           <div className="grid grid-cols-7 border-b border-slate-200">
             {WEEKDAYS.map((d) => (
@@ -276,6 +376,7 @@ export default function CalendarView({ tasks, canEdit, onEditTask, onDeleteTask,
               return (
                 <div
                   key={iso}
+                  data-day={iso}
                   onDragOver={(e) => {
                     e.preventDefault();
                     if (canEdit) setDragOver(iso);
@@ -283,8 +384,9 @@ export default function CalendarView({ tasks, canEdit, onEditTask, onDeleteTask,
                   onDragLeave={() => setDragOver((cur) => (cur === iso ? null : cur))}
                   onDrop={(e) => onDrop(e, iso)}
                   className={`min-h-[104px] border-b border-r border-slate-100 p-1.5 transition-colors ${
-                    inMonth ? "bg-white" : "bg-slate-50/60"
-                  } ${isDrop ? "bg-slate-200/70" : ""}`}
+                    // One background at a time: alongside bg-white, the drop highlight would not show.
+                    isDrop ? "bg-slate-200/70" : inMonth ? "bg-white" : "bg-slate-50/60"
+                  }`}
                 >
                   <div className="mb-1 flex justify-end">
                     <span
@@ -300,9 +402,7 @@ export default function CalendarView({ tasks, canEdit, onEditTask, onDeleteTask,
                     </span>
                   </div>
                   <div className="space-y-1">
-                    {dayTasks.slice(0, 3).map((task) => (
-                      <Chip key={task.id} task={task} faded={!inMonth} />
-                    ))}
+                    {dayTasks.slice(0, 3).map((task) => chip(task, !inMonth))}
                     {dayTasks.length > 3 && (
                       <div className="px-1 text-[10px] font-medium text-slate-400">
                         +{dayTasks.length - 3} more
@@ -326,6 +426,7 @@ export default function CalendarView({ tasks, canEdit, onEditTask, onDeleteTask,
           }}
           onDragLeave={() => setDragOver((cur) => (cur === "tray" ? null : cur))}
           onDrop={(e) => onDrop(e, null)}
+          data-day="tray"
           className={`rounded-xl border border-dashed p-3 transition-colors ${
             dragOver === "tray" ? "border-slate-400 bg-slate-200/70" : "border-slate-200 bg-white/60"
           }`}
@@ -335,7 +436,9 @@ export default function CalendarView({ tasks, canEdit, onEditTask, onDeleteTask,
             {canEdit && (
               <span className="font-normal text-slate-400">
                 {" "}
-                — drag a task here to clear its deadline, or onto a day to schedule it
+                {touchScreen
+                  ? "— press and hold a task, then drag it here to clear its deadline or onto a day to schedule it"
+                  : "— drag a task here to clear its deadline, or onto a day to schedule it"}
               </span>
             )}
           </p>
@@ -343,11 +446,22 @@ export default function CalendarView({ tasks, canEdit, onEditTask, onDeleteTask,
             <div className="flex flex-wrap gap-1.5">
               {unscheduled.map((task) => (
                 <div key={task.id} className="w-48">
-                  <Chip task={task} />
+                  {chip(task)}
                 </div>
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* The held task, following the finger. */}
+      {touchDrag && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed z-50 max-w-[200px] truncate rounded-md bg-ink px-2.5 py-1.5 text-xs font-medium text-white shadow-lg"
+          style={{ left: touchDrag.x - 24, top: touchDrag.y - 44 }}
+        >
+          {touchDrag.task.description}
         </div>
       )}
     </div>
