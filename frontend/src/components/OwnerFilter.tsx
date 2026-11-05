@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { usePhonePanel } from "@/hooks/usePhonePanel";
+
 import { avatarColor, initials } from "@/lib/format";
 
 interface Props {
@@ -17,12 +19,13 @@ interface Props {
  * The owner filter as a dropdown beside the Meeting filter, so the Filter row stays on one line
  * however many people a board has. Several owners can be ticked at once, and the list stays open
  * while ticking; "All owners" clears the choice. Each owner is listed with their avatar and task
- * count. On a phone the list opens as a sheet along the bottom of the screen, as the Meeting filter
- * does.
+ * count. On a phone the list opens below the button across the screen's width, as the Meeting
+ * filter does.
  */
 export default function OwnerFilter({ owners, counts, selected, onChange }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const panel = usePhonePanel(open, ref);
 
   // Close on an outside click or Escape.
   useEffect(() => {
@@ -81,15 +84,13 @@ export default function OwnerFilter({ owners, counts, selected, onChange }: Prop
       </button>
 
       {open && (
-        <>
-          {/* On a phone, a dimmed backdrop marks the sheet as a panel and closes it when tapped. */}
-          <div aria-hidden="true" className="fixed inset-0 z-50 bg-slate-900/30 sm:hidden" onClick={() => setOpen(false)} />
-          {/* On a phone the list opens as a sheet along the bottom of the screen; from sm up it is a dropdown. */}
+        // Opens directly below the button; on a phone it spans the screen (usePhonePanel).
         <div
           role="listbox"
           aria-label="Filter by owner"
           aria-multiselectable="true"
-          className="fixed inset-x-4 bottom-4 z-50 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:mt-2 sm:w-64 sm:rounded-xl sm:shadow-lg"
+          className="absolute left-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg sm:w-64"
+          style={panel}
         >
           <button
             type="button"
@@ -152,7 +153,6 @@ export default function OwnerFilter({ owners, counts, selected, onChange }: Prop
             })}
           </ul>
         </div>
-        </>
       )}
     </div>
   );

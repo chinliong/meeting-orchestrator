@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { isOverdue } from "@/lib/format";
 import type { Task } from "@/lib/types";
@@ -63,27 +64,19 @@ function toCsv(tasks: Task[], columns: typeof COLUMNS, names?: Map<number, strin
  * "Export" beside Share: opens a small panel to choose which tasks (the ones shown, or all of the
  * board's when a filter is on) and which columns, then downloads them as a CSV file that opens in
  * Excel, Numbers or Google Sheets. Built in the browser from the tasks already loaded, so it needs
- * nothing from the server. On a phone the panel opens as a sheet along the bottom of the screen.
+ * nothing from the server. It opens as a dialog in the middle of the screen, as Share does.
  */
 export default function ExportButton({ tasks, allTasks, fileLabel, projectNames }: Props) {
   const [open, setOpen] = useState(false);
   const [scope, setScope] = useState<"shown" | "all">("shown");
   const [off, setOff] = useState<Set<ColumnKey>>(new Set());
-  const ref = useRef<HTMLDivElement>(null);
 
-  // Close on an outside click or Escape.
+  // Close on Escape; a click outside the dialog lands on its backdrop, which closes it too.
   useEffect(() => {
     if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
+    return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
   const filtered = tasks.length < allTasks.length;
@@ -120,7 +113,7 @@ export default function ExportButton({ tasks, allTasks, fileLabel, projectNames 
   const plural = (n: number) => `${n} task${n === 1 ? "" : "s"}`;
 
   return (
-    <div ref={ref} className="relative">
+    <>
       <button
         type="button"
         onClick={() => {
@@ -141,13 +134,19 @@ export default function ExportButton({ tasks, allTasks, fileLabel, projectNames 
         Export
       </button>
 
-      {open && (
-        <div
-          role="dialog"
-          aria-label="Export to spreadsheet"
-          className="fixed inset-x-4 bottom-4 z-40 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-2xl sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:mt-1.5 sm:w-80 sm:rounded-xl sm:shadow-lg"
-        >
-          <p className="font-display text-sm font-bold text-slate-900">Export to spreadsheet</p>
+      {open && createPortal(
+        // Rendered at the page's top level, laid out as the Share dialog is.
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onMouseDown={() => setOpen(false)}>
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" aria-hidden="true" />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Export to spreadsheet"
+            className="relative w-full max-w-md animate-fade-in rounded-2xl bg-white p-6 text-left shadow-xl"
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+          <h2 className="font-display text-lg font-bold tracking-tight text-slate-900">Export to spreadsheet</h2>
+          <p className="mt-1 text-sm text-slate-500">A CSV file that opens in Excel, Numbers or Google Sheets.</p>
 
           {filtered && (
             <fieldset className="mt-3">
@@ -174,7 +173,7 @@ export default function ExportButton({ tasks, allTasks, fileLabel, projectNames 
             </fieldset>
           )}
 
-          <fieldset className="mt-3">
+          <fieldset className="mt-4">
             <legend className="text-xs font-medium uppercase tracking-wide text-slate-400">Columns</legend>
             <div className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-1.5">
               {available.map((c) => (
@@ -195,19 +194,30 @@ export default function ExportButton({ tasks, allTasks, fileLabel, projectNames 
             </div>
           </fieldset>
 
-          <button
-            type="button"
-            onClick={download}
-            disabled={chosen.length === 0}
-            className="mt-4 w-full rounded-lg bg-ink px-3 py-2 text-sm font-medium text-white transition hover:bg-ink-700 disabled:opacity-50"
-          >
-            Download {plural(chosen.length)}
-          </button>
-          <p className="mt-1.5 truncate text-center text-xs text-slate-400" title={fileName}>
+          <p className="mt-5 truncate text-xs text-slate-400" title={fileName}>
             {fileName}
           </p>
-        </div>
+          <div className="mt-3 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={download}
+              disabled={chosen.length === 0}
+              className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-ink-700 disabled:opacity-50"
+            >
+              Download {plural(chosen.length)}
+            </button>
+          </div>
+          </div>
+        </div>,
+        document.body
       )}
-    </div>
+    </>
   );
 }
