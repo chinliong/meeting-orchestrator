@@ -709,6 +709,12 @@ def test_create_task_unknown_project(client):
     assert resp.status_code == 404
 
 
+@pytest.mark.parametrize("email", ["not-an-email", "a@b", "a b@example.com", "@example.com"])
+def test_signup_refuses_an_address_that_cannot_receive_email(client, email):
+    response = client.post("/api/v1/auth/signup", json={"email": email, "password": "longenough"})
+    assert response.status_code == 400 and response.json()["detail"] == "Enter a valid email address."
+
+
 def test_blank_task_descriptions_and_board_names_are_refused(client, project):
     assert client.post("/api/v1/tasks", json={"project_id": project["id"], "description": "   "}).status_code == 422
     task = client.post("/api/v1/tasks", json={"project_id": project["id"], "description": "  Draft the agenda "}).json()

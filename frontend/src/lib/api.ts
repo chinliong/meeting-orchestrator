@@ -320,7 +320,8 @@ export const api = {
     document.body.appendChild(a);
     a.click();
     a.remove();
-    URL.revokeObjectURL(url);
+    // Released a moment later: revoking at once can cancel the download in some browsers.
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   },
 
   // --- transcripts ---

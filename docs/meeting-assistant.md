@@ -73,7 +73,7 @@ Chat works the same way, with a task filter tool for exact counts.
 | Model calls per review or chat message | 6, within 3 minutes (90 seconds per call) |
 | Suggestions per review | 30 |
 | Board size | 200 tasks |
-| Transcript length | 60,000 characters |
+| Transcript length | 60,000 characters when pasted. Recordings may be longer; on a board with tasks, the transcript and board together must fit in 160,000 characters |
 | Meetings it can read | Each task's source meeting plus the 30 most recent |
 | Chat history sent | The last 12 messages |
 | Chat suggestions | Expire after an hour; meeting suggestions do not expire |

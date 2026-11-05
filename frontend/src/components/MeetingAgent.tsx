@@ -181,7 +181,9 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
   const eligible = changes.filter(p => !review?.unavailable_proposal_ids?.includes(p.id));
   const appliedCount = review?.receipt?.proposal_ids.length ?? 0;
   const statusLine = !review ? "" : isDraft
-    ? (mode === "meeting_updates" ? "The meeting and its new tasks are already saved. Review the suggested changes." : "Deselect anything you don’t want.")
+    ? (mode === "meeting_updates"
+      ? `The meeting and its new tasks are already saved. Review the ${changes.length ? "suggested changes" : "possible duplicates"}.`
+      : "Deselect anything you don’t want.")
     : review.status === "dismissed" ? "These suggested changes were dismissed. Nothing on the board changed."
     : review.status === "applied"
       ? (mode === "meeting" ? `Added this meeting and ${plural(appliedCount, "new task")}.` : `Applied ${plural(appliedCount, "change")}.`)
@@ -205,7 +207,7 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-wider text-brand-700">{review ? KIND[mode] : project.name}</p>
               <h2 id="agent-title" className="mt-1 font-display text-xl font-bold text-slate-900">
-                {!review ? "Recent changes" : isDraft ? "Suggested changes" : review.input.title}
+                {!review ? "Recent changes" : isDraft ? "Suggested changes" : (review.title ?? review.input.title)}
               </h2>
             </div>
             <button aria-label="Close" disabled={!!busy} onClick={close} className={SECONDARY}>Close</button>
@@ -234,7 +236,7 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
               {fromList && <button disabled={!!busy} onClick={backToList} className="text-sm font-medium text-brand-900 hover:underline">← All recent changes</button>}
               <section className="rounded-xl border border-slate-200 bg-white p-5">
                 <div className="flex flex-wrap items-center gap-2">
-                  {isDraft && <h3 className="font-semibold text-slate-900">{review.input.title}</h3>}
+                  {isDraft && <h3 className="font-semibold text-slate-900">{(review.title ?? review.input.title)}</h3>}
                   <span className="text-xs text-slate-500">{when(review.created_at)}</span>
                   <StatusLabel status={review.status} mode={mode} />
                 </div>
@@ -294,7 +296,7 @@ export default function MeetingAgent({ project, onChanged, launch, onClose, onRe
           {review && <footer className="shrink-0 border-t border-slate-200 bg-white px-5 py-4 sm:px-7">
             {confirmRemoval ? <div role="group" aria-labelledby="remove-meeting-label">
               <p id="remove-meeting-label" className="text-sm font-semibold text-ink">Remove this meeting and {plural(appliedCount, "task")}?</p>
-              <p className="mt-1 text-xs leading-relaxed text-slate-500">This removes “{review.input.title}” and the tasks it added from your board. Viewing recent changes does not require removing anything.</p>
+              <p className="mt-1 text-xs leading-relaxed text-slate-500">This removes “{(review.title ?? review.input.title)}” and the tasks it added from your board. Viewing recent changes does not require removing anything.</p>
               <div className="mt-3 flex flex-wrap justify-end gap-2">
                 <button ref={cancelRemoval} className={SECONDARY} disabled={!!busy} onClick={() => setConfirmRemoval(false)}>Keep meeting</button>
                 <button className="rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50" disabled={!!busy} onClick={() => void perform("undo")}>{busy === "undo" ? "Removing…" : "Remove meeting & tasks"}</button>

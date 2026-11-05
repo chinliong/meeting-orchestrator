@@ -149,7 +149,11 @@ export default function SubtaskList({
     try {
       await api.deleteSubtask(id);
       // Undo re-creates it (with a fresh id, appended) — close enough for a checklist item.
-      if (removed) pushReverse("delete subtask", () => api.createSubtask(taskId, removed.title));
+      // A ticked item comes back ticked.
+      if (removed) pushReverse("delete subtask", async () => {
+        const restored = await api.createSubtask(taskId, removed.title);
+        if (removed.done) await api.updateSubtask(restored.id, { done: true });
+      });
     } catch (err) {
       // Put it back in its place, keeping whatever else changed meanwhile.
       if (removed) {

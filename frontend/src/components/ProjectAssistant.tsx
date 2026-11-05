@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import SuggestedChanges from "@/components/SuggestedChanges";
 import { api } from "@/lib/api";
+import { formatMeetingDate } from "@/lib/format";
 import { workspaceTokenFor } from "@/lib/session";
 import type { AgentMutation, AgentReview, AssistantAnswer, AssistantMessage, AssistantSource, Project } from "@/lib/types";
 
@@ -68,7 +69,7 @@ function SourceCard({ source, index, onOpen }: { source: AssistantSource; index:
     <button onClick={onOpen} className="flex w-full items-start gap-2 text-left hover:text-brand">
       <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-brand-50 text-[10px] font-semibold text-brand">{index + 1}</span>
       <span className="min-w-0"><span className="block font-medium leading-relaxed">{source.title}</span>
-        <span className="mt-1 block text-[11px] text-slate-400">{source.kind === "task" ? [source.owner || "Unassigned", status, source.deadline ? `Due ${source.deadline}` : null].filter(Boolean).join(" · ") : "Meeting"}</span>
+        <span className="mt-1 block text-[11px] text-slate-400">{source.kind === "task" ? [source.owner || "Unassigned", status, source.deadline ? `Due ${formatMeetingDate(source.deadline, true)}` : null].filter(Boolean).join(" · ") : "Meeting"}</span>
       </span><span className="ml-auto text-slate-400" aria-hidden="true">→</span>
     </button>
     <details className="mt-2 text-[11px] leading-relaxed text-slate-500"><summary className="cursor-pointer hover:text-brand">Evidence</summary><blockquote className="mt-2 border-l-2 border-brand-100 pl-2">“{source.quote}”</blockquote></details>

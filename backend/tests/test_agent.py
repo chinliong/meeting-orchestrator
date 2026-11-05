@@ -283,6 +283,14 @@ def test_renamed_meeting_can_still_be_removed(client, project, enabled, db_sessi
     assert db_session.get(Meeting, meeting_id) is None
 
 
+def test_recent_changes_show_a_meeting_under_its_current_title(client, project, enabled):
+    base = f"/api/v1/projects/{project['id']}/agent"
+    imported = client.post(f"{base}/parse", json=INPUT).json()
+    client.patch(f"/api/v1/transcripts/{imported['meeting_id']}", json={"title": "Renamed"})
+    assert [h["title"] for h in client.get(f"{base}/reviews?view=history").json()] == ["Renamed"]
+    assert client.get(f"{base}/reviews/{imported['saved_review']['id']}").json()["title"] == "Renamed"
+
+
 def test_read_tools_are_scoped_and_unknown_tools_cannot_execute(monkeypatch):
     turns = iter([call("read_board"), call("read_meeting", {"meeting_id": 99}),
                   call("delete_project", {"project_id": 1}),
@@ -1025,6 +1033,43 @@ def test_recording_deleted_during_review_leaves_no_tasks_or_reviews(client, proj
     assert db_session.query(Task).count() == 0
     assert db_session.query(AgentReview).count() == 0
     assert recording and all(not p.exists() for p in recording)
+
+
+def test_long_recording_is_not_held_to_the_pasted_text_limit(client, project, task, enabled, recording, monkeypatch, db_session):
+    from app.api import transcripts
+    long_text = TRANSCRIPT + " Alex: More discussion." * 3000  # well over 60,000 characters
+    monkeypatch.setattr(transcripts.transcription, "transcribe_file", lambda path: long_text)
+    fake_model(monkeypatch, plan_for(task.id))
+    meeting_id = upload_recording(client, project).json()["id"]
+    meeting = db_session.get(Meeting, meeting_id)
+    db_session.refresh(meeting)
+    assert len(meeting.transcript_text) > 60000
+    assert meeting.status == MeetingStatus.COMPLETE, meeting.error_message
+
+
+def test_recording_too_long_for_the_board_says_so(client, project, task, enabled, recording, monkeypatch, db_session):
+    from app.api import transcripts
+    monkeypatch.setattr(transcripts.transcription, "transcribe_file", lambda path: TRANSCRIPT + " x" * 90000)
+    fake_model(monkeypatch, plan_for(task.id))
+    meeting = db_session.get(Meeting, upload_recording(client, project).json()["id"])
+    db_session.refresh(meeting)
+    assert meeting.status == MeetingStatus.FAILED
+    assert "too long" in meeting.error_message  # not the general "try again" message
+    assert db_session.query(Task).count() == 1
+
+
+@pytest.mark.parametrize("assistant", [True, False])
+def test_silent_recording_fails_clearly_without_a_model_call(client, project, enabled, recording, monkeypatch, db_session, assistant):
+    from app.api import transcripts
+    monkeypatch.setattr(transcripts.transcription, "transcribe_file", lambda path: "  ")
+    monkeypatch.setattr(agent_api, "extract_candidates", lambda payload: pytest.fail("no model call"))
+    path = (f"/api/v1/projects/{project['id']}/agent/recordings" if assistant else "/api/v1/transcripts/audio")
+    data = {"title": "Silent"} if assistant else {"title": "Silent", "project_id": str(project["id"])}
+    response = client.post(path, data=data, files={"file": ("call.wav", b"recorded audio", "audio/wav")})
+    meeting = db_session.get(Meeting, response.json()["id"])
+    db_session.refresh(meeting)
+    assert meeting.status == MeetingStatus.FAILED
+    assert meeting.error_message == transcripts.NO_SPEECH
 
 
 def test_assistant_recording_rejects_disabled_feature_and_missing_key_before_upload(client, project, enabled, recording, monkeypatch, db_session):

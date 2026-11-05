@@ -56,6 +56,8 @@ _UPLOAD_CHUNK = 1024 * 1024
 
 # Shown on a meeting whose task extraction failed (a model outage, an unreadable reply).
 EXTRACTION_FAILED = "The AI couldn't read this transcript just now. Please try again in a moment."
+# Shown on a recording whose transcription came back empty.
+NO_SPEECH = "No speech was found in this recording."
 
 
 def _meeting_title(title: str, on: date) -> str:
@@ -207,6 +209,12 @@ def _transcribe_and_extract(meeting_id: int, path: str, use_assistant: bool = Fa
         # while transcribing, stop before paying for an extraction nobody will see.
         if db.query(Meeting.id).filter(Meeting.id == meeting_id).first() is None:
             return
+        if not text.strip():
+            # A silent or music-only recording: nothing to extract, so no model call is made.
+            meeting.status = MeetingStatus.FAILED
+            meeting.error_message = NO_SPEECH
+            db.commit()
+            return
         meeting.transcript_text = text
         db.commit()
         if use_assistant:
@@ -216,14 +224,17 @@ def _transcribe_and_extract(meeting_id: int, path: str, use_assistant: bool = Fa
                 parse_recording_with_assistant(db, meeting)
             except (StaleDataError, ObjectDeletedError, IntegrityError):
                 raise
-            except Exception:
+            except Exception as exc:
                 db.rollback()
                 log.exception("assistant extraction failed for recording %s", meeting_id)
                 meeting = db.get(Meeting, meeting_id)
                 if meeting is None:
                     return
                 meeting.status = MeetingStatus.FAILED
-                meeting.error_message = EXTRACTION_FAILED
+                # A refusal that retrying cannot fix (a board over the size limit, say) is shown
+                # as it is; anything else is the general "try again" message.
+                meeting.error_message = (exc.detail if isinstance(exc, HTTPException) and 400 <= exc.status_code < 500
+                                         and isinstance(exc.detail, str) else EXTRACTION_FAILED)
                 db.commit()
                 return
         else:

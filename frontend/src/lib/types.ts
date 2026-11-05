@@ -207,6 +207,8 @@ export interface AgentReview {
   receipt: { proposal_ids: number[]; meeting_id: number | null; applied_at: string; reopened_as?: string } | null;
   /** On a review reopened after an undo: the changes chosen the first time. */
   preselected?: number[];
+  /** The meeting's current title (it may have been renamed since), else the one it was added with. */
+  title?: string;
 }
 
 export interface AgentReviewListItem {

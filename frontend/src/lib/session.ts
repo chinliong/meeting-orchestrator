@@ -8,12 +8,13 @@ const AUTH_KEY = "mo.auth";
 const MODE_KEY = "mo.mode"; // "guest" once a guest session is chosen
 const GUEST_WS_KEY = "mo.guestWorkspaces";
 
+// Storage can be unavailable (site data blocked, some private windows) or full, and then every
+// access throws. The app still works for that visit, it just remembers nothing.
 function read<T>(key: string): T | null {
   if (typeof window === "undefined") return null;
-  const raw = window.localStorage.getItem(key);
-  if (!raw) return null;
   try {
-    return JSON.parse(raw) as T;
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : null;
   } catch {
     return null;
   }
@@ -21,13 +22,26 @@ function read<T>(key: string): T | null {
 
 function write(key: string, value: unknown) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(key, JSON.stringify(value));
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* not saved; see above */
+  }
+}
+
+function remove(key: string) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(key);
+  } catch {
+    /* nothing stored to remove */
+  }
 }
 
 // --- account ---
 export const loadAuth = () => read<AuthResponse>(AUTH_KEY);
 export const saveAuth = (auth: AuthResponse) => write(AUTH_KEY, auth);
-export const clearAuth = () => window.localStorage.removeItem(AUTH_KEY);
+export const clearAuth = () => remove(AUTH_KEY);
 
 /** Refresh just the user portion of stored auth (e.g. after changing notification settings). */
 export function updateStoredUser(user: User) {
@@ -38,7 +52,7 @@ export function updateStoredUser(user: User) {
 // --- guest mode flag ---
 export const isGuestChosen = () => read<string>(MODE_KEY) === "guest";
 export const setGuestChosen = () => write(MODE_KEY, "guest");
-export const clearGuestChosen = () => window.localStorage.removeItem(MODE_KEY);
+export const clearGuestChosen = () => remove(MODE_KEY);
 
 // --- guest's reachable boards ---
 export const loadGuestWorkspaces = (): Project[] => read<Project[]>(GUEST_WS_KEY) ?? [];
@@ -61,7 +75,7 @@ export function removeGuestWorkspace(id: number): Project[] {
   return next;
 }
 
-export const clearGuestWorkspaces = () => window.localStorage.removeItem(GUEST_WS_KEY);
+export const clearGuestWorkspaces = () => remove(GUEST_WS_KEY);
 
 // --- boards other people shared with a signed-in user ---
 // A signed-in user's own boards come from the server, but a board someone shared with them is

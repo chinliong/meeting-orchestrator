@@ -10,7 +10,7 @@ from datetime import date, datetime, timedelta
 from typing import Literal, Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, Header, HTTPException, Request, UploadFile
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, object_session
 
 from app.api.transcripts import EXTRACTION_FAILED, accept_audio, write_summary
 from app.auth import get_optional_user, project_access_level, require_project_edit, require_project_view
@@ -108,6 +108,14 @@ def review_expired(review):
     return json.loads(review.plan_json).get("mode") != "meeting_updates" and review.expires_at < datetime.utcnow()
 
 
+def meeting_title(db, plan, receipt, recorded):
+    """The meeting's title now, so a meeting renamed since its import is listed under its new name."""
+    mode = plan.get("mode", "meeting")
+    meeting_id = (receipt or {}).get("meeting_id") if mode == "meeting" else plan.get("source_meeting_id")
+    meeting = db.get(Meeting, meeting_id) if meeting_id is not None else None
+    return meeting.title if meeting is not None else recorded
+
+
 def output(review, db=None):
     plan = json.loads(review.plan_json)
     reason, unavailable = stale_details(db, review.project_id, plan, json.loads(review.input_json)) if db is not None and review.status == "draft" else (None, [])
@@ -116,7 +124,18 @@ def output(review, db=None):
             "created_at": review.created_at.isoformat() + "Z",
             "expires_at": None if plan.get("mode") == "meeting_updates" else review.expires_at.isoformat() + "Z",
             "input": json.loads(review.input_json), **json.loads(review.plan_json),
-            "receipt": json.loads(review.receipt_json) if review.receipt_json else None}
+            "receipt": json.loads(review.receipt_json) if review.receipt_json else None,
+            "title": review_title(review)}
+
+
+def review_title(review):
+    source = json.loads(review.input_json)
+    plan = json.loads(review.plan_json)
+    if plan.get("mode") == "chat":
+        return source["title"]
+    session = object_session(review)
+    receipt = json.loads(review.receipt_json) if review.receipt_json else None
+    return meeting_title(session, plan, receipt, source["title"]) if session is not None else source["title"]
 
 
 def load_review(db, project_id, review_id, user, token):
@@ -222,7 +241,8 @@ def list_reviews(project_id: int, view: Literal["all", "pending", "history"] = "
         receipt = json.loads(r.receipt_json) if r.receipt_json else None
         mode = plan.get("mode", "meeting")
         # Chat changes share one generic title; name the first changed task instead.
-        title = proposals[0]["after"]["description"] if mode == "chat" and proposals else json.loads(r.input_json)["title"]
+        title = (proposals[0]["after"]["description"] if mode == "chat" and proposals
+                 else meeting_title(db, plan, receipt, json.loads(r.input_json)["title"]))
         reason, _ = stale_details(db, project_id, plan, json.loads(r.input_json), tasks) if view == "pending" else (None, [])
         duplicates = sum(1 for p in proposals if p.get("possible_duplicate"))
         items.append({"stale": bool(reason), "stale_reason": reason, "id": r.id, "mode": mode, "title": title, "status": r.status,
@@ -325,6 +345,12 @@ def run_meeting_review(db, project, payload):
         log.warning("agent review failed: %s", exc)
         raise HTTPException(502, "The assistant couldn’t finish reviewing this meeting. Nothing was changed. Please try again.") from exc
     return tasks, with_candidates(plan, candidates, tasks)
+
+
+def stored_input(source):
+    """A meeting's review input from the server's own record, which was checked when it was made."""
+    return ReviewInput.model_construct(**{"instructions": "", "check_duplicate": True, **source,
+                                          "meeting_date": date.fromisoformat(source["meeting_date"])})
 
 
 def store_meeting_review(db, project_id, payload, tasks, plan):
@@ -509,8 +535,8 @@ def finish_meeting_import(db, review, *, recording_id=None):
         db.refresh(pending)
     notes = list(plan["questions"])
     if possible:
-        notes.append(f"{len(possible)} possible {'duplicate was' if len(possible) == 1 else 'duplicates were'} not added. "
-                     "Review them under Changes.")
+        notes.append("1 possible duplicate was not added. Review it under Changes." if len(possible) == 1 else
+                     f"{len(possible)} possible duplicates were not added. Review them under Changes.")
     return {"meeting_id": imported["receipt"]["meeting_id"], "new_task_count": len(creates), "saved_review": imported,
             "review": output(pending) if pending else None, "questions": notes}
 
@@ -518,8 +544,11 @@ def finish_meeting_import(db, review, *, recording_id=None):
 def parse_recording_with_assistant(db, meeting):
     """Called only by an upload job that was authorized when the recording was accepted."""
     meeting_id, project_id = meeting.id, meeting.project_id
-    payload = ReviewInput(title=meeting.title, meeting_date=meeting.meeting_date,
-                          transcript=meeting.transcript_text, check_duplicate=False)
+    # Built without the pasted-text limits: the transcript is the server's own transcription, and
+    # a recording over an hour long runs past the 60,000 characters a paste may have. The
+    # assistant's context check still refuses one too long to compare with the board.
+    payload = stored_input({"title": meeting.title, "meeting_date": meeting.meeting_date.isoformat(),
+                            "transcript": meeting.transcript_text, "check_duplicate": False})
     project = db.get(Project, project_id)
     tasks, plan = run_meeting_review(db, project, payload)
     # The board may have been deleted during the model call. Do not leave orphaned reviews.
@@ -589,7 +618,7 @@ def refresh_review(request: Request, project_id: int, review_id: str,
     db.rollback()
     try:
         if mode == "meeting_updates":
-            payload = ReviewInput.model_validate(source)
+            payload = stored_input(source)
             fresh = agent_llm.run_review(payload, board, meetings)
             # Refreshing a saved meeting never reimports work or changes additional tasks.
             fresh["proposals"] = [p for p in fresh["proposals"] if p["kind"] == "update" and p["task_id"] in allowed_ids]

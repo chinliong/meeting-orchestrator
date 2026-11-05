@@ -1,4 +1,5 @@
 import logging
+import re
 import secrets
 from datetime import datetime, timedelta, timezone
 
@@ -30,6 +31,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 RESET_CODE_TTL = timedelta(minutes=15)
 RESET_MAX_ATTEMPTS = 5
 MIN_PASSWORD_LENGTH = 8
+# Something@something.something, with no spaces.
+EMAIL_SHAPE = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s]+")
 
 
 def _check_new_password(password: str) -> None:
@@ -59,6 +62,10 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)):
     email = payload.email.strip().lower()
     if not email or not payload.password:
         raise HTTPException(status_code=400, detail="Email and password are required")
+    # A light check, as the sign-up form makes: an address that cannot receive a reset code
+    # would lock the account out the first time its password is forgotten.
+    if not EMAIL_SHAPE.fullmatch(email):
+        raise HTTPException(status_code=400, detail="Enter a valid email address.")
     _check_new_password(payload.password)
     if db.query(User).filter(User.email == email).first() is not None:
         raise HTTPException(status_code=409, detail="An account with this email already exists")

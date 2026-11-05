@@ -112,7 +112,8 @@ export default function ExportButton({ tasks, allTasks, fileLabel, projectNames 
     a.href = url;
     a.download = fileName;
     a.click();
-    URL.revokeObjectURL(url);
+    // Released a moment later: revoking at once can cancel the download in some browsers.
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
     setOpen(false);
   };
 

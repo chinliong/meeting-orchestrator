@@ -43,7 +43,8 @@ rather than what its environment variables were set to. Never returns a key.
 Body `{ "email": "string", "password": "string", "claim_tokens": ["edit_token", ...] }`.
 `claim_tokens` is optional, the edit tokens of guest boards to adopt into the new account.
 Returns `201` `{ "token": "<jwt>", "user": { "id", "email", "created_at", "notify_email", "notify_days_before" } }`.
-`409` if the email already exists; `400` if the password is shorter than 8 characters.
+`409` if the email already exists; `400` if the password is shorter than 8 characters, or if the
+email is not of the form `name@domain.tld` (`Enter a valid email address.`).
 
 New passwords (signup, change and reset) must be at least 8 characters, with the message
 `Password must be at least 8 characters.` Sign-in does not check the length, so accounts created
@@ -120,7 +121,7 @@ reach their boards by share link.
 
 ### `POST /projects`
 Body `{ "name": "string", "description": "string (optional)" }` → `201` project object. Owned by
-the signed-in user, or unowned (guest) if anonymous.
+the signed-in user, or unowned (guest) if anonymous. The name is trimmed; a blank one is `422`.
 
 ### `GET /projects/by-token/{token}`
 Resolves a share link to its board at the level the token grants (`edit` or `view`). `404` if the
@@ -130,7 +131,7 @@ token matches nothing.
 Returns one board. Requires view access; `403` without it, `404` if the board does not exist.
 
 ### `PATCH /projects/{project_id}`
-Update `name` / `description` / `notify_enabled`. Requires edit access; changing `notify_enabled`
+Update `name` / `description` / `notify_enabled` (a blank `name` is `422`). Requires edit access; changing `notify_enabled`
 is owner-only (`403` for an edit-link holder), because the board's reminders go to its owner
 alone. Returns the project; `404`/`403` as above.
 
@@ -226,7 +227,8 @@ optional; omitted means today), `file` (the upload).
 
 Returns at once with the meeting in `processing` status and no tasks. Transcription and
 extraction then run in the background, followed by the summary as for a pasted transcript, and the
-client polls `GET /transcripts/{meeting_id}` until the status is `complete` or `failed`.
+client polls `GET /transcripts/{meeting_id}` until the status is `complete` or `failed`. A
+recording with no speech fails with "No speech was found in this recording." and no model call.
 
 Background jobs run inside the web process, so a server restart stops any that are running. Three
 minutes after startup the server marks meetings from before it started that are still `pending` or
@@ -288,11 +290,11 @@ otherwise).
 ### `POST /tasks`
 Add a task by hand. Body `{ "project_id", "description", "owner?", "deadline?", "status?" }` →
 `201` task object. Requires edit access. Manually-added tasks have no `meeting_id` and
-`confidence` defaults to `1.0`.
+`confidence` defaults to `1.0`. The description is trimmed; a blank one is `422`.
 
 ### `PATCH /tasks/{task_id}`
 Update any of `description`, `owner`, `deadline`, `status`. Requires edit access to the task's
-board. Returns the updated task; `404` if not found.
+board. Returns the updated task; `404` if not found; `422` for a blank `description`.
 
 ### `DELETE /tasks/{task_id}`
 Removes the task. Requires edit access. `404` if not found. Returns `200` with a snapshot of what

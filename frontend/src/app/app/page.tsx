@@ -26,7 +26,7 @@ import { EmptyProjects, LoadingScreen } from "@/components/BoardPlaceholders";
 import { useMeetingSummaries } from "@/hooks/useMeetingSummaries";
 import { useUndoHistory } from "@/hooks/useUndoHistory";
 import { ApiError, api, setAuthToken, setSessionExpiredHandler, setWorkspaceToken } from "@/lib/api";
-import { formatAddedAt } from "@/lib/format";
+import { formatAddedAt, formatMeetingDate } from "@/lib/format";
 import {
   clearAuth,
   clearGuestChosen,
@@ -536,8 +536,7 @@ export default function DashboardPage() {
     }
     if (sortByDeadline) {
       result = [...result].sort((a, b) => {
-        if (!a.deadline) return 1;
-        if (!b.deadline) return -1;
+        if (!a.deadline || !b.deadline) return a.deadline ? -1 : b.deadline ? 1 : 0; // undated last
         return a.deadline.localeCompare(b.deadline);
       });
     }
@@ -652,7 +651,13 @@ export default function DashboardPage() {
   };
 
   const handleRenameMeeting = async (meetingId: number, title: string) => {
-    const updated = await api.updateMeeting(meetingId, title);
+    let updated: Meeting;
+    try {
+      updated = await api.updateMeeting(meetingId, title);
+    } catch (err) {
+      setLoadError((err as Error).message); // the card keeps its title field open to try again
+      throw err;
+    }
     setMeetingsKey((k) => k + 1);
     setTasks((prev) =>
       prev.map((t) => (t.meeting_id === meetingId ? { ...t, meeting_title: updated.title } : t))
@@ -704,7 +709,7 @@ export default function DashboardPage() {
       const scope = assistantScope;
       const result = await withDuplicateCheck(checkDuplicate => api.parseWithAssistant(projectId, {
         // The same fallback title the server gives a regular import ("Meeting · Nov 05, 2026").
-        title: title.trim() || `Meeting · ${new Date(`${meetingDate}T00:00:00`).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" })}`,
+        title: title.trim() || `Meeting · ${formatMeetingDate(meetingDate)}`,
         meeting_date: meetingDate,
         transcript: transcriptText, instructions: "", check_duplicate: checkDuplicate,
       }, workspaceTokenFor(selectedProject)));

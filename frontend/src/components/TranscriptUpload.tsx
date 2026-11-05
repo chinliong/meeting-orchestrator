@@ -105,6 +105,7 @@ export default function TranscriptUpload({ onSubmitText, onSubmitAudio, assistan
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Meeting title (optional)"
+            maxLength={200}
             className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-[14.5px] text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-brand focus:bg-white/10 focus:ring-2 focus:ring-brand/30"
           />
           <label className="flex w-full items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 transition focus-within:border-brand focus-within:bg-white/10 focus-within:ring-2 focus-within:ring-brand/30">

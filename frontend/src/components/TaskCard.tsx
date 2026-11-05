@@ -66,6 +66,8 @@ export default function TaskCard({
     try {
       await onRenameMeeting(task.meeting_id, next);
       setRenaming(false);
+    } catch {
+      /* the board says why; the field stays open to try again */
     } finally {
       setSavingTitle(false);
     }
