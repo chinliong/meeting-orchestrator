@@ -125,3 +125,7 @@ not exact without saying which, so the agent kept rewriting the right ones. Sinc
 rejection names each misquoted quote and the closest transcript sentence to copy
 (`backend/app/llm/agent.py`); replaying a logged failure through it identifies the misquote in
 every attempt. The runs here predate that change.
+
+### After the fix
+
+`finance-01-a`, the follow-up whose reviews did not finish, was reviewed 5 more times after the change (`eval/reconcile_confirm.json`): 5 of 5 completed, with repeats found 25/25, updates exactly right 20/20, 0 unexpected changes and 0 new tasks held back; model calls per completed review: 2, 2, 1, 1, 2.

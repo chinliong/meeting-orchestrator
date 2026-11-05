@@ -1,0 +1,476 @@
+{
+ "note": "Re-runs after the misquote fix (backend/app/llm/agent.py: misquotes); see eval/reconcile_eval.py.",
+ "scenario": "finance-01-a",
+ "reviews": [
+  {
+   "id": "finance-01-a",
+   "existing_items": [
+    [
+     0,
+     100
+    ],
+    [
+     1,
+     101
+    ],
+    [
+     2,
+     108
+    ],
+    [
+     3,
+     104
+    ],
+    [
+     4,
+     102
+    ]
+   ],
+   "updates": [
+    {
+     "task_id": 100,
+     "before": {
+      "description": "Finish the APAC cost center hierarchy mapping",
+      "owner": "Daniel",
+      "deadline": "2026-06-19",
+      "status": "in_progress"
+     },
+     "after": {
+      "description": "Finish the APAC cost center hierarchy mapping",
+      "owner": "Daniel",
+      "deadline": "2026-06-19",
+      "status": "done"
+     },
+     "evidence": "Daniel: The APAC cost center hierarchy mapping is finished — I signed it off on Friday, so that's closed."
+    },
+    {
+     "task_id": 101,
+     "before": {
+      "description": "Send the new cost center codes to Daniel",
+      "owner": "Priya",
+      "deadline": "2026-06-17",
+      "status": "todo"
+     },
+     "after": {
+      "description": "Send the new cost center codes to Daniel",
+      "owner": "Priya",
+      "deadline": "2026-06-17",
+      "status": "done"
+     },
+     "evidence": "Priya: I sent the new cost center codes to Daniel on Wednesday, so that one's done."
+    },
+    {
+     "task_id": 108,
+     "before": {
+      "description": "Fix the MT940 parser config for multi-currency statements",
+      "owner": "Daniel",
+      "deadline": null,
+      "status": "in_progress"
+     },
+     "after": {
+      "description": "Fix the MT940 parser config for multi-currency statements",
+      "owner": "Daniel",
+      "deadline": "2026-06-24",
+      "status": "in_progress"
+     },
+     "evidence": "Daniel: I'm still working on the MT940 parser fix for the multi-currency statements. I'll have it finished by 24 June."
+    },
+    {
+     "task_id": 104,
+     "before": {
+      "description": "Clear the eleven duplicate postings from the system",
+      "owner": "Priya",
+      "deadline": "2026-06-25",
+      "status": "todo"
+     },
+     "after": {
+      "description": "Clear the eleven duplicate postings from the system",
+      "owner": "Priya",
+      "deadline": "2026-06-25",
+      "status": "in_progress"
+     },
+     "evidence": "Priya: I've started clearing the duplicate postings — four of the eleven are gone, and I'm still on track for the 25th."
+    }
+   ],
+   "questions": [],
+   "steps": 2,
+   "model": "gemini-3.5-flash"
+  },
+  {
+   "id": "finance-01-a",
+   "existing_items": [
+    [
+     0,
+     100
+    ],
+    [
+     1,
+     101
+    ],
+    [
+     2,
+     108
+    ],
+    [
+     3,
+     104
+    ],
+    [
+     4,
+     102
+    ]
+   ],
+   "updates": [
+    {
+     "task_id": 100,
+     "before": {
+      "description": "Finish the APAC cost center hierarchy mapping",
+      "owner": "Daniel",
+      "deadline": "2026-06-19",
+      "status": "in_progress"
+     },
+     "after": {
+      "description": "Finish the APAC cost center hierarchy mapping",
+      "owner": "Daniel",
+      "deadline": "2026-06-19",
+      "status": "done"
+     },
+     "evidence": "Daniel: The APAC cost center hierarchy mapping is finished — I signed it off on Friday, so that's closed."
+    },
+    {
+     "task_id": 101,
+     "before": {
+      "description": "Send the new cost center codes to Daniel",
+      "owner": "Priya",
+      "deadline": "2026-06-17",
+      "status": "todo"
+     },
+     "after": {
+      "description": "Send the new cost center codes to Daniel",
+      "owner": "Priya",
+      "deadline": "2026-06-17",
+      "status": "done"
+     },
+     "evidence": "Priya: I sent the new cost center codes to Daniel on Wednesday, so that one's done."
+    },
+    {
+     "task_id": 108,
+     "before": {
+      "description": "Fix the MT940 parser config for multi-currency statements",
+      "owner": "Daniel",
+      "deadline": null,
+      "status": "in_progress"
+     },
+     "after": {
+      "description": "Fix the MT940 parser config for multi-currency statements",
+      "owner": "Daniel",
+      "deadline": "2026-06-24",
+      "status": "in_progress"
+     },
+     "evidence": "Daniel: I'm still working on the MT940 parser fix for the multi-currency statements. I'll have it finished by 24 June."
+    },
+    {
+     "task_id": 104,
+     "before": {
+      "description": "Clear the eleven duplicate postings from the system",
+      "owner": "Priya",
+      "deadline": "2026-06-25",
+      "status": "todo"
+     },
+     "after": {
+      "description": "Clear the eleven duplicate postings from the system",
+      "owner": "Priya",
+      "deadline": "2026-06-25",
+      "status": "in_progress"
+     },
+     "evidence": "Priya: I've started clearing the duplicate postings — four of the eleven are gone, and I'm still on track for the 25th."
+    }
+   ],
+   "questions": [],
+   "steps": 2,
+   "model": "gemini-3.5-flash"
+  },
+  {
+   "id": "finance-01-a",
+   "existing_items": [
+    [
+     0,
+     100
+    ],
+    [
+     1,
+     101
+    ],
+    [
+     2,
+     108
+    ],
+    [
+     3,
+     104
+    ],
+    [
+     4,
+     102
+    ]
+   ],
+   "updates": [
+    {
+     "task_id": 100,
+     "before": {
+      "description": "Finish the APAC cost center hierarchy mapping",
+      "owner": "Daniel",
+      "deadline": "2026-06-19",
+      "status": "in_progress"
+     },
+     "after": {
+      "description": "Finish the APAC cost center hierarchy mapping",
+      "owner": "Daniel",
+      "deadline": "2026-06-19",
+      "status": "done"
+     },
+     "evidence": "Daniel: Starting with the hierarchy. The APAC cost center hierarchy mapping is finished — I signed it off on Friday, so that's closed."
+    },
+    {
+     "task_id": 101,
+     "before": {
+      "description": "Send the new cost center codes to Daniel",
+      "owner": "Priya",
+      "deadline": "2026-06-17",
+      "status": "todo"
+     },
+     "after": {
+      "description": "Send the new cost center codes to Daniel",
+      "owner": "Priya",
+      "deadline": "2026-06-17",
+      "status": "done"
+     },
+     "evidence": "Priya: I sent the new cost center codes to Daniel on Wednesday, so that one's done."
+    },
+    {
+     "task_id": 108,
+     "before": {
+      "description": "Fix the MT940 parser config for multi-currency statements",
+      "owner": "Daniel",
+      "deadline": null,
+      "status": "in_progress"
+     },
+     "after": {
+      "description": "Fix the MT940 parser config for multi-currency statements",
+      "owner": "Daniel",
+      "deadline": "2026-06-24",
+      "status": "in_progress"
+     },
+     "evidence": "Daniel: I'm still working on the MT940 parser fix for the multi-currency statements. I'll have it finished by 24 June."
+    },
+    {
+     "task_id": 104,
+     "before": {
+      "description": "Clear the eleven duplicate postings from the system",
+      "owner": "Priya",
+      "deadline": "2026-06-25",
+      "status": "todo"
+     },
+     "after": {
+      "description": "Clear the eleven duplicate postings from the system",
+      "owner": "Priya",
+      "deadline": "2026-06-25",
+      "status": "in_progress"
+     },
+     "evidence": "Priya: I've started clearing the duplicate postings — four of the eleven are gone, and I'm still on track for the 25th."
+    }
+   ],
+   "questions": [],
+   "steps": 1,
+   "model": "gemini-3.5-flash"
+  },
+  {
+   "id": "finance-01-a",
+   "existing_items": [
+    [
+     0,
+     100
+    ],
+    [
+     1,
+     101
+    ],
+    [
+     2,
+     108
+    ],
+    [
+     3,
+     104
+    ],
+    [
+     4,
+     102
+    ]
+   ],
+   "updates": [
+    {
+     "task_id": 100,
+     "before": {
+      "description": "Finish the APAC cost center hierarchy mapping",
+      "owner": "Daniel",
+      "deadline": "2026-06-19",
+      "status": "in_progress"
+     },
+     "after": {
+      "description": "Finish the APAC cost center hierarchy mapping",
+      "owner": "Daniel",
+      "deadline": "2026-06-19",
+      "status": "done"
+     },
+     "evidence": "Daniel: Starting with the hierarchy. The APAC cost center hierarchy mapping is finished — I signed it off on Friday, so that's closed."
+    },
+    {
+     "task_id": 101,
+     "before": {
+      "description": "Send the new cost center codes to Daniel",
+      "owner": "Priya",
+      "deadline": "2026-06-17",
+      "status": "todo"
+     },
+     "after": {
+      "description": "Send the new cost center codes to Daniel",
+      "owner": "Priya",
+      "deadline": "2026-06-17",
+      "status": "done"
+     },
+     "evidence": "Priya: I sent the new cost center codes to Daniel on Wednesday, so that one's done."
+    },
+    {
+     "task_id": 108,
+     "before": {
+      "description": "Fix the MT940 parser config for multi-currency statements",
+      "owner": "Daniel",
+      "deadline": null,
+      "status": "in_progress"
+     },
+     "after": {
+      "description": "Fix the MT940 parser config for multi-currency statements",
+      "owner": "Daniel",
+      "deadline": "2026-06-24",
+      "status": "in_progress"
+     },
+     "evidence": "Daniel: I'm still working on the MT940 parser fix for the multi-currency statements. I'll have it finished by 24 June."
+    },
+    {
+     "task_id": 104,
+     "before": {
+      "description": "Clear the eleven duplicate postings from the system",
+      "owner": "Priya",
+      "deadline": "2026-06-25",
+      "status": "todo"
+     },
+     "after": {
+      "description": "Clear the eleven duplicate postings from the system",
+      "owner": "Priya",
+      "deadline": "2026-06-25",
+      "status": "in_progress"
+     },
+     "evidence": "Priya: I've started clearing the duplicate postings — four of the eleven are gone, and I'm still on track for the 25th."
+    }
+   ],
+   "questions": [],
+   "steps": 1,
+   "model": "gemini-3.5-flash"
+  },
+  {
+   "id": "finance-01-a",
+   "existing_items": [
+    [
+     0,
+     100
+    ],
+    [
+     1,
+     101
+    ],
+    [
+     2,
+     108
+    ],
+    [
+     3,
+     104
+    ],
+    [
+     4,
+     102
+    ]
+   ],
+   "updates": [
+    {
+     "task_id": 100,
+     "before": {
+      "description": "Finish the APAC cost center hierarchy mapping",
+      "owner": "Daniel",
+      "deadline": "2026-06-19",
+      "status": "in_progress"
+     },
+     "after": {
+      "description": "Finish the APAC cost center hierarchy mapping",
+      "owner": "Daniel",
+      "deadline": "2026-06-19",
+      "status": "done"
+     },
+     "evidence": "Daniel: The APAC cost center hierarchy mapping is finished — I signed it off on Friday, so that's closed."
+    },
+    {
+     "task_id": 101,
+     "before": {
+      "description": "Send the new cost center codes to Daniel",
+      "owner": "Priya",
+      "deadline": "2026-06-17",
+      "status": "todo"
+     },
+     "after": {
+      "description": "Send the new cost center codes to Daniel",
+      "owner": "Priya",
+      "deadline": "2026-06-17",
+      "status": "done"
+     },
+     "evidence": "Priya: I sent the new cost center codes to Daniel on Wednesday, so that one's done."
+    },
+    {
+     "task_id": 108,
+     "before": {
+      "description": "Fix the MT940 parser config for multi-currency statements",
+      "owner": "Daniel",
+      "deadline": null,
+      "status": "in_progress"
+     },
+     "after": {
+      "description": "Fix the MT940 parser config for multi-currency statements",
+      "owner": "Daniel",
+      "deadline": "2026-06-24",
+      "status": "in_progress"
+     },
+     "evidence": "Daniel: I'm still working on the MT940 parser fix for the multi-currency statements. I'll have it finished by 24 June."
+    },
+    {
+     "task_id": 104,
+     "before": {
+      "description": "Clear the eleven duplicate postings from the system",
+      "owner": "Priya",
+      "deadline": "2026-06-25",
+      "status": "todo"
+     },
+     "after": {
+      "description": "Clear the eleven duplicate postings from the system",
+      "owner": "Priya",
+      "deadline": "2026-06-25",
+      "status": "in_progress"
+     },
+     "evidence": "Priya: I've started clearing the duplicate postings — four of the eleven are gone, and I'm still on track for the 25th."
+    }
+   ],
+   "questions": [],
+   "steps": 2,
+   "model": "gemini-3.5-flash"
+  }
+ ]
+}

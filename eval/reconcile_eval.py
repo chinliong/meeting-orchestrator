@@ -51,6 +51,8 @@ BASE_TRANSCRIPTS = REPO_ROOT / "data" / "synthetic-transcripts"
 BASE_ANNOTATIONS = REPO_ROOT / "data" / "annotated-test-set" / "annotations.json"
 PREDICTIONS = REPO_ROOT / "eval" / "reconcile_predictions.json"
 RESULTS_JSON = REPO_ROOT / "eval" / "reconcile_results.json"
+# Re-runs of the follow-up whose reviews did not finish, made after the misquote fix.
+CONFIRM = REPO_ROOT / "eval" / "reconcile_confirm.json"
 FIELDS = ("owner", "deadline", "status")
 TASK_ID_BASE = 100  # board task i has id 100 + i
 SOURCE_MEETING_ID = 1
@@ -132,6 +134,35 @@ def run(save_to: Path) -> dict:
     # Saved after every run, so an interrupted batch keeps what it already paid for.
     save_to.write_text(json.dumps(out, indent=1, ensure_ascii=False) + "\n")
     return out
+
+
+def confirm(scenario_id: str, times: int) -> dict:
+    """Review one scenario `times` more times, saved apart from the main runs."""
+    s = next(x for x in load_scenarios() if x["id"] == scenario_id)
+    saved = json.loads(CONFIRM.read_text()) if CONFIRM.exists() else {
+        "note": "Re-runs after the misquote fix (backend/app/llm/agent.py: misquotes); see eval/reconcile_eval.py.",
+        "scenario": scenario_id, "reviews": []}
+    for i in range(times):
+        b = review_one(s)
+        print(f"  re-run {i + 1}/{times}: {b.get('error') or 'completed'}, {len(b['existing_items'])} repeats, "
+              f"{len(b['updates'])} updates, {b.get('steps', '-')} calls", flush=True)
+        saved["reviews"].append(b)
+        CONFIRM.write_text(json.dumps(saved, indent=1, ensure_ascii=False) + "\n")
+    return saved
+
+
+def confirm_summary() -> dict | None:
+    if not CONFIRM.exists():
+        return None
+    saved = json.loads(CONFIRM.read_text())
+    s = next(x for x in load_scenarios() if x["id"] == saved["scenario"])
+    r = score({"runs": [{"scenarios": [b]} for b in saved["reviews"]]}, [s])
+    done = [b for b in saved["reviews"] if not b.get("error")]
+    return {"scenario": s["id"], "reviews": len(saved["reviews"]), "completed": len(done),
+            "repeats": f"{sum(p['repeats_found'] for p in r['per_scenario'])}/{sum(p['repeats_expected'] for p in r['per_scenario'])}",
+            "updates_exact": f"{r['updates']['exact']}/{r['updates']['expected_tasks']}",
+            "wrong_changes": r["updates"]["wrong_changes"], "new_held_back": r["repeats"]["agent"]["new_tasks_held_back"],
+            "calls": [b.get("steps") for b in done]}
 
 
 def oracle_turn(scenario: dict):
@@ -369,6 +400,15 @@ def render_section(r: dict) -> list[str]:
         "(`backend/app/llm/agent.py`); replaying a logged failure through it identifies the misquote in",
         "every attempt. The runs here predate that change.",
         "",
+        *(lambda c: [] if c is None else [
+            "### After the fix",
+            "",
+            f"`{c['scenario']}`, the follow-up whose reviews did not finish, was reviewed {c['reviews']} more times "
+            f"after the change (`eval/reconcile_confirm.json`): {c['completed']} of {c['reviews']} completed, with "
+            f"repeats found {c['repeats']}, updates exactly right {c['updates_exact']}, {c['wrong_changes']} "
+            f"unexpected changes and {c['new_held_back']} new tasks held back; model calls per completed review: "
+            f"{', '.join(str(n) for n in c['calls'])}.",
+            ""])(confirm_summary()),
     ]
 
 
@@ -376,6 +416,8 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--run", action="store_true", help="add runs of every scenario (calls Gemini)")
     ap.add_argument("--runs", type=int, default=1)
+    ap.add_argument("--confirm", metavar="SCENARIO", help="re-run one scenario after a fix (calls Gemini)")
+    ap.add_argument("--times", type=int, default=5)
     ap.add_argument("--simulate", action="store_true", help="free: a stand-in model answers from the key")
     ap.add_argument("--write-report", action="store_true")
     args = ap.parse_args()
@@ -384,6 +426,8 @@ def main() -> None:
         r = score(preds)
         print(json.dumps({k: r[k] for k in ("repeats", "updates", "reviews")}, indent=1))
         return
+    if args.confirm:
+        confirm(args.confirm, args.times)
     if args.run:
         for i in range(args.runs):
             print(f"--- reconciliation run {i + 1}/{args.runs} ---", flush=True)
