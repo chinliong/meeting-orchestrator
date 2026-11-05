@@ -14,17 +14,17 @@ def pick(pg, label):
     """Show one meeting (or All meetings): clear any earlier choice first, since ticking adds to it."""
     if label != "All meetings" and "All meetings" not in mbtn(pg).inner_text():
         mbtn(pg).click(); time.sleep(0.3)
-        pg.locator(f"{FILTER} div.z-40 button", has_text="All meetings").first.click(); time.sleep(0.4)
+        pg.locator(f"{FILTER} div.z-50.bottom-4 button", has_text="All meetings").first.click(); time.sleep(0.4)
     mbtn(pg).click(); time.sleep(0.3)
-    pg.locator(f"{FILTER} div.z-40 button", has_text=label).first.click(); time.sleep(0.4)
-    if pg.locator(f"{FILTER} div.z-40").count():  # the list stays open after ticking a meeting
+    pg.locator(f"{FILTER} div.z-50.bottom-4 button", has_text=label).first.click(); time.sleep(0.4)
+    if pg.locator(f"{FILTER} div.z-50.bottom-4").count():  # the list stays open after ticking a meeting
         pg.keyboard.press("Escape")
     time.sleep(0.4)
 def tick(pg, labels):
     """Tick several meetings at once."""
     mbtn(pg).click(); time.sleep(0.3)
     for label in labels:
-        pg.locator(f"{FILTER} div.z-40 li", has_text=label).locator("button[role=checkbox]").click(); time.sleep(0.3)
+        pg.locator(f"{FILTER} div.z-50.bottom-4 li", has_text=label).locator("button[role=checkbox]").click(); time.sleep(0.3)
     pg.keyboard.press("Escape"); time.sleep(0.5)
 def card(pg): return pg.locator("section[aria-label^='Summary of']")
 def card_text(pg): return card(pg).inner_text() if card(pg).count() else ""
@@ -132,7 +132,7 @@ with sync_playwright() as p:
     # Deleting the meeting whose card is showing removes the card.
     pick(pg, "Flaky")
     mbtn(pg).click(); time.sleep(0.3)
-    pg.locator(f"{FILTER} div.z-40 li", has_text="Flaky").locator("[aria-label^='Delete meeting']").click()
+    pg.locator(f"{FILTER} div.z-50.bottom-4 li", has_text="Flaky").locator("[aria-label^='Delete meeting']").click()
     pg.get_by_role("button", name="Delete meeting").click()
     check("deleting that meeting removes its tasks, and the remaining only meeting's summary shows",
           wait(lambda: cards(pg) == 2 and "The team met for Steering" in card_text(pg), 8))

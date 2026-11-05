@@ -81,12 +81,15 @@ export default function OwnerFilter({ owners, counts, selected, onChange }: Prop
       </button>
 
       {open && (
-        // On a phone the list opens as a sheet along the bottom of the screen; from sm up it is a dropdown.
+        <>
+          {/* On a phone, a dimmed backdrop marks the sheet as a panel and closes it when tapped. */}
+          <div aria-hidden="true" className="fixed inset-0 z-50 bg-slate-900/30 sm:hidden" onClick={() => setOpen(false)} />
+          {/* On a phone the list opens as a sheet along the bottom of the screen; from sm up it is a dropdown. */}
         <div
           role="listbox"
           aria-label="Filter by owner"
           aria-multiselectable="true"
-          className="fixed inset-x-4 bottom-4 z-40 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:mt-2 sm:w-64 sm:rounded-xl sm:shadow-lg"
+          className="fixed inset-x-4 bottom-4 z-50 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:mt-2 sm:w-64 sm:rounded-xl sm:shadow-lg"
         >
           <button
             type="button"
@@ -149,6 +152,7 @@ export default function OwnerFilter({ owners, counts, selected, onChange }: Prop
             })}
           </ul>
         </div>
+        </>
       )}
     </div>
   );

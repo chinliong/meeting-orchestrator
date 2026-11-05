@@ -89,9 +89,12 @@ export default function MeetingFilter({ meetings, selectedMeetingIds, onChange, 
       </button>
 
       {open && (
-        // On a phone the list opens as a sheet along the bottom of the screen, so it always fits
-        // wherever the button has wrapped to; from sm up it is an ordinary dropdown.
-        <div className="fixed inset-x-4 bottom-4 z-40 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:mt-2 sm:w-80 sm:rounded-xl sm:shadow-lg">
+        <>
+          {/* On a phone, a dimmed backdrop marks the sheet as a panel and closes it when tapped. */}
+          <div aria-hidden="true" className="fixed inset-0 z-50 bg-slate-900/30 sm:hidden" onClick={() => setOpen(false)} />
+          {/* On a phone the list opens as a sheet along the bottom of the screen, so it always fits
+              wherever the button has wrapped to; from sm up it is an ordinary dropdown. */}
+        <div className="fixed inset-x-4 bottom-4 z-50 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:mt-2 sm:w-80 sm:rounded-xl sm:shadow-lg">
           <button
             type="button"
             onClick={() => {
@@ -183,6 +186,7 @@ export default function MeetingFilter({ meetings, selectedMeetingIds, onChange, 
             })}
           </ul>
         </div>
+        </>
       )}
     </div>
   );
