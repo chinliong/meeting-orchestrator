@@ -122,7 +122,7 @@ flowchart LR
   - `/projects/{id}/agent/...` (meeting assistant, when `ENABLE_MEETING_AGENT=true`): import a
     meeting against the board, where the parser extracts the tasks and the assistant marks those
     already on the board and proposes changes to existing tasks for approval; chat; and apply,
-    refresh and undo of reviewed changes. See [agent-preview.md](agent-preview.md).
+    refresh and undo of reviewed changes. See [meeting-assistant.md](meeting-assistant.md).
   - `PATCH /auth/notifications` (set deadline-reminder preferences), `POST /auth/notifications/test`
     (send a one-off preview digest).
   - `GET /health`: liveness, plus the extraction model the deployment will actually use and

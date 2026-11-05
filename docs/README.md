@@ -6,7 +6,7 @@
 |---|---|
 | [architecture.md](architecture.md) | How the frontend, backend, database and external services fit together, and the data model |
 | [api-spec.md](api-spec.md) | Every API endpoint, with its request and response |
-| [agent-preview.md](agent-preview.md) | Run and evaluate the isolated local Gemini project assistant and meeting reviews |
+| [meeting-assistant.md](meeting-assistant.md) | What the meeting assistant does, how it works, its limits, and how to turn it on |
 
 ## Evaluation
 

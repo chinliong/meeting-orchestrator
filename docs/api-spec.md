@@ -360,7 +360,7 @@ Mounted only when `ENABLE_MEETING_AGENT=true` (otherwise `404`); all paths are u
 `/projects/{project_id}/agent`. Chat needs view access, everything else edit access. A meeting's
 tasks are extracted by the parser above; the assistant reconciles them with the board and proposes
 changes to existing tasks, which are applied only when the user approves them. Behaviour, limits
-and validation are described in [agent-preview.md](agent-preview.md).
+and validation are described in [meeting-assistant.md](meeting-assistant.md).
 
 | Method and path | Purpose |
 |---|---|
