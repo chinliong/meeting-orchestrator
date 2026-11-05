@@ -234,12 +234,20 @@ def test_invalid_model_output_never_reaches_board(client, project, task, enabled
 def test_correction_can_recover_invalid_evidence(client, project, task, enabled, monkeypatch):
     good = plan_for(task.id)
     bad = copy.deepcopy(good)
-    bad["proposals"][0]["evidence"] = "An invented quote that must be corrected."
+    # A near-quote: the rejection names it and gives the transcript text to copy, so the model fixes
+    # the quote that is wrong rather than rewriting the ones that are right.
+    bad["proposals"][0]["evidence"] = "The landing page design is now finished and signed off."
+    # A dash or other character written as a JSON escape still counts as the character.
+    good["proposals"][0]["evidence"] = "The landing page design is now finished\\u0020and approved."
     responses = iter([call("finish_review", bad), call("finish_review", good)])
-    monkeypatch.setattr(agent, "model_turn", lambda *a: next(responses))
+    sent = []
+    monkeypatch.setattr(agent, "model_turn", lambda contents, *a: (sent.append(copy.deepcopy(contents)), next(responses))[1])
     response = create(client, project)
     assert response.status_code == 201
     assert response.json()["steps"] == 2
+    rejection = json.dumps(sent[1][-1])
+    assert "the change to task" in rejection and "The landing page design is now finished and approved." in rejection
+    assert response.json()["proposals"][0]["evidence"].endswith("is now finished and approved.")
 
 
 def test_earlier_meeting_cannot_roll_back_newer_work(client, project, task, enabled, monkeypatch, db_session):

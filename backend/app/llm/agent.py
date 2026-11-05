@@ -6,6 +6,7 @@ The existing extraction, summary and subtask calls are deliberately unchanged.
 """
 from __future__ import annotations
 
+import difflib
 import json
 import os
 import re
@@ -148,6 +149,42 @@ def with_speaker(evidence, transcript):
     return f"{turn.group(1)}: {evidence}"
 
 
+def unescaped(evidence: str, transcript: str) -> str:
+    """A quote with characters written as JSON escapes ("\\u2014" for a dash) read as the characters."""
+    if evidence in transcript or "\\u" not in evidence:
+        return evidence
+    return re.sub(r"\\u([0-9a-fA-F]{4})", lambda m: chr(int(m.group(1), 16)), evidence)
+
+
+def closest_sentence(evidence: str, transcript: str) -> str | None:
+    """The transcript sentence nearest a quote that is not in it, for the model to copy exactly."""
+    unlabelled = lambda text: SPEAKER_LINE.sub("", text, count=1).strip()
+    sentences = [unlabelled(s) for line in transcript.splitlines() if line.strip()
+                 for s in re.split(r"(?<=[.!?])\s+", line.strip())]
+    match = difflib.get_close_matches(unlabelled(evidence), [s for s in sentences if len(s) > 10], n=1, cutoff=0.6)
+    return match[0] if match else None
+
+
+def misquotes(proposals: list[dict], transcript: str) -> str | None:
+    """Every quote that is not in the transcript, each with the nearest sentence that is.
+
+    An exact quote is what proves a change rests on the meeting, so the check is not loosened. But a
+    rejection that does not say which quote failed leaves the model to guess, and it can spend its
+    whole budget rewriting the quotes that were right while keeping the one that was not.
+    """
+    lines = []
+    for p in proposals:
+        if p["evidence"] in transcript:
+            continue
+        target = f"the change to task {p['task_id']}" if p["kind"] == "update" else "the new task"
+        near = closest_sentence(p["evidence"], transcript)
+        lines.append(f'- {target}: "{p["evidence"][:200]}"' +
+                     (f' Closest transcript text, to copy exactly: "{near}"' if near else " No similar text was found."))
+    if not lines:
+        return None
+    return "Evidence must be an exact excerpt from the new transcript. Not found:\n" + "\n".join(lines)
+
+
 def model_turn(contents: list, allowed: list[str], model: str, timeout: float,
                *, system_prompt: str = SYSTEM, tools=None) -> dict:
     """Preserve the complete returned content, including Gemini thought signatures.
@@ -207,9 +244,12 @@ def validate_plan(raw: dict, transcript: str, tasks: list[dict], meeting_date: s
     created = set()
     accepted = []
     questions = list(plan["questions"])
+    for p in plan["proposals"]:
+        p["evidence"] = unescaped(p["evidence"], transcript)
+    problem = misquotes(plan["proposals"], transcript)
+    if problem:
+        raise ValueError(problem)
     for index, p in enumerate(plan["proposals"]):
-        if p["evidence"] not in transcript:
-            raise ValueError("Evidence must be an exact excerpt from the new transcript.")
         # Before the owner check, so "I'll do it" counts as naming the speaker.
         if label_speakers:
             p["evidence"] = with_speaker(p["evidence"], transcript)
