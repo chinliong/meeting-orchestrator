@@ -1,5 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  // Hover styles only where a pointer can hover: on a phone a tap would otherwise leave them stuck on
+  // (a delete button staying red after it was touched, say).
+  future: { hoverOnlyWhenSupported: true },
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {

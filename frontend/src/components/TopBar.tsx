@@ -30,7 +30,7 @@ export default function TopBar({
   scope,
 }: Props) {
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
       {/* Two stacked full-width rows on mobile; a single justified row from sm up. */}
       <div className="mx-auto flex max-w-screen-2xl flex-col gap-3 px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-6">
         {/* Brand, with the account controls pinned to the right on mobile. */}

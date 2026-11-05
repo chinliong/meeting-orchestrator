@@ -1029,7 +1029,8 @@ export default function DashboardPage() {
         onOpenAccount={() => setShowAccount(true)}
       />
 
-      <main className={`mx-auto max-w-screen-2xl px-4 py-6 sm:px-6 ${assistantOpen && !searchAllProjects ? "lg:mr-[384px]" : ""}`}>
+      {/* Bottom padding keeps the last cards clear of the floating assistant button. */}
+      <main className={`mx-auto max-w-screen-2xl px-4 pb-24 pt-6 sm:px-6 ${assistantOpen && !searchAllProjects ? "lg:mr-[384px]" : ""}`}>
         {loadError && (
           <div
             role="alert"
