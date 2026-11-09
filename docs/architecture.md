@@ -42,9 +42,9 @@ flowchart LR
 
     subgraph API[FastAPI backend]
         direction TB
-        R[API routers<br/>auth, projects, transcripts, tasks,<br/>subtasks, attachments]
+        R[API routers<br/>auth, projects, transcripts, tasks,<br/>subtasks, attachments, agent]
         AC[Access control<br/>owner JWT or workspace token]
-        L[LLM module<br/>parser, subtask generator,<br/>meeting summary]
+        L[LLM module<br/>parser, subtask generator,<br/>meeting summary, meeting assistant]
         W[Transcription module]
     end
 
@@ -155,6 +155,11 @@ flowchart LR
     covered by the evaluation and is labelled as AI-written in the app.
   - **Gemini client** (`app/llm/gemini.py`): the forced function call plus the JSON-Schema to
     OpenAPI translation the LLM modules share, so each tool schema is defined once.
+  - **Meeting assistant** (`app/llm/agent.py`, `app/llm/assistant.py`): a bounded Gemini tool
+    loop (at most 6 calls) that reconciles a new meeting's extracted tasks with the board, and the
+    board chat. It has read tools and a proposal tool only; the API validates each proposal (an
+    exact transcript quote, a real task, a named owner), stores it in `agent_reviews`, and applies
+    it only on approval. See [meeting-assistant.md](meeting-assistant.md).
   - **Transcription module** (`app/llm/transcription.py`): optional and lazily imported. Uploads
     are transcribed by Deepgram Nova-3, the most accurate service measured in
     [asr-evaluation.md](asr-evaluation.md). It is hosted, so nothing loads into memory and the core
@@ -172,14 +177,43 @@ flowchart LR
   `pool_recycle`) because serverless Postgres (Neon) drops idle connections; without it, the first
   request after the free backend wakes from sleep fails with "SSL connection has been closed
   unexpectedly"; pre-ping validates and reconnects transparently instead.
-- **LLM provider:** Gemini Flash for extraction, subtask generation and meeting summaries, structured output
-  through a forced function call. The tool schema is defined once and translated into Gemini's
+- **LLM provider:** Gemini Flash for extraction, subtask generation, meeting summaries and the
+  meeting assistant. Extraction, subtasks and summaries take structured output through a forced
+  function call; the assistant calls read tools and submits its proposals through one. The tool schema is defined once and translated into Gemini's
   OpenAPI subset (`app/llm/gemini.py`); the translation raises on anything it does not recognise
   rather than dropping it silently, so a schema change cannot weaken the contract unnoticed.
 - **Why Gemini:** on extraction it is never significantly behind Claude Sonnet on F1 on either
   the short development set or the long held-out set, it is more precise on both, and it costs a
   tenth of Sonnet's input price (`docs/evaluation-report.md`). Subtask quality is indistinguishable between the two on both
   sets (p = 0.652 and p = 1.0), so there the reason is cost and keeping one provider.
+
+## Deployment
+
+```mermaid
+flowchart LR
+    B[Browser] -->|loads the app| S[Render Static Site<br/>Next.js static export, CDN]
+    B -->|API calls, HTTPS + JSON| W[Render Web Service<br/>FastAPI in Docker]
+    W --> P[(Neon PostgreSQL)]
+    W --> G[Gemini API]
+    W --> D[Deepgram API]
+    W --> E[Brevo email API]
+    X[External scheduler] -->|daily reminders, keep-alive| W
+    GH[GitHub: CI on every push] -.->|deploys master| S
+    GH -.->|deploys master| W
+```
+
+- **Frontend:** a Render Static Site. Next.js exports plain HTML, JS and CSS (`output: "export"`),
+  served from Render's CDN: free, no server, no cold start. The API address is built in at build
+  time (`NEXT_PUBLIC_API_BASE`).
+- **Backend:** a Render Web Service on the free plan, running the `python:3.11-slim` Docker image
+  with ffmpeg. It sleeps when idle; a scheduler pinging `/health` keeps it awake.
+- **Database:** PostgreSQL on Neon, outside Render, so it is not subject to Render's free-database
+  expiry.
+- **Locally:** `next dev` on port 3000, `uvicorn --reload` on port 8000 and a SQLite file, or
+  `docker compose up` for both.
+- Both services are defined in [render.yaml](../render.yaml); the steps are in the README's
+  [deploy section](../README.md#deploy-to-render--external-postgres). GitHub Actions runs the
+  tests, lint, type check and browser suites on every push, with the model mocked.
 
 ## Access model
 
@@ -339,8 +373,10 @@ unusable.
 ## Reliability notes
 
 - Rate limits (`app/ratelimit.py`, `slowapi`): the endpoints that call a paid model API (parse,
-  audio upload, summary, subtask generation) and the sign-in and password-reset endpoints are
-  limited per visitor, with counts held in memory for the single instance. Over a limit they return
+  audio upload, summary, subtask generation, and the meeting assistant's imports and chat) and the
+  sign-in and password-reset endpoints are limited per visitor, with counts held in memory for the
+  single instance. The model endpoints also share one allowance of AI calls (30 an hour by
+  default); an assistant request reserves its maximum number of calls from it up front. Over a limit they return
   `429` with a message the frontend shows as it is. On Render the visitor's address comes from
   Cloudflare's `CF-Connecting-IP` header; `X-Forwarded-For` is not trusted, since Render appends to it.
 - LLM/API failures during parsing are caught and recorded on the meeting (`status = failed`,
